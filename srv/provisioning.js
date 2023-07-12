@@ -136,7 +136,7 @@ module.exports = (service) => {
   });
 
   /**
-   *
+   * creates a new resource group in the ai core instance with the id of the zone
    * @param {*} resourceGroupId: the zoneId of the subscriber (subscribedZoneId)
    * @returns response of creation
    */
@@ -159,7 +159,9 @@ module.exports = (service) => {
   };
 
   /**
+   * deletes the resource group in the ai core instance with the id of the zone
    * @param {*} resourceGroupId
+   * @returns response of deletion
    */
   const deleteResourceGroup = async (resourceGroupId) => {
     try {
@@ -172,6 +174,10 @@ module.exports = (service) => {
     }
   };
 
+  /**
+   * fetches all resource groups from the ai core instance
+   * @returns response of fetching all resource groups
+   */
   const getResourceGroups = async () => {
     try {
       const response =
