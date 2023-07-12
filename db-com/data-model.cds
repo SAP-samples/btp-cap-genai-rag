@@ -1,10 +1,10 @@
+using { cuid } from '@sap/cds/common';
 
 using {
-      cuid,
-      Country,
-      Currency,
-      Language
-} from '@sap/cds/common';
+    sap.common.Languages as Languages,
+    sap.common.Currencies as Currencies,
+    sap.common.Countries as Countries
+} from '@sap/cds-common-content';
 
 context susaas.common {
     entity Shared : cuid {
@@ -12,18 +12,13 @@ context susaas.common {
     };
 }
 
+@cds.persistence.skip: false
+extend Languages {}
 
-@cds.persistence.exists
-entity Languages {
-    Language : Language
-};
 
-@cds.persistence.exists
-entity Currencies {
-    Currency : Currency
-};
+@cds.persistence.skip: false
+extend Currencies {}
 
-@cds.persistence.exists
-entity Countries {
-    Country : Country
-};
+
+@cds.persistence.skip: false
+extend Countries {}
