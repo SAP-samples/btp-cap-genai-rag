@@ -1,0 +1,213 @@
+{
+    "$schema": "https://raw.githubusercontent.com/SAP-samples/btp-setup-automator/main/libs/btpsa-usecase.json",
+    "aboutThisUseCase": {
+        "name": "Develop a multitenant Software as a Service app in SAP BTP, Cloud Foundry Environment - Basic Scope",
+        "description": "Free Tier usecase file for provider and initial consumer subaccount including a SaaS subscription",
+        "author": "martin.frick@sap.com",
+        "testStatus": "tested successfully",
+        "usageStatus": "READY TO BE USED",
+        "relatedLinks": [
+            "https://github.com/SAP-samples/btp-cf-cap-multitenant-susaas/tree/basic"
+        ]
+    },
+    "services": [
+        {
+            "name": "cloudfoundry",
+            "plan": "free",
+            "category": "ENVIRONMENT"
+        },
+        {
+            "name": "xsuaa",
+            "plan": "application",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "credstore",
+            "plan": "free",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "saas-registry",
+            "plan": "application",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "service-manager",
+            "plan": "container",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "application-logs",
+            "plan": "lite",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "hana-cloud",
+            "plan": "hana-free",
+            "category": "SERVICE",
+            "repeatstatusrequest": 60,
+            "repeatstatustimeout": 3600,
+            "instancename": "hana-cloud",
+            "parameters": {
+                "data": {
+                    "edition": "cloud",
+                    "memory": 30,
+                    "serviceStopped": false,
+                    "storage": 120,
+                    "systempassword": "<your-HANA-Cloud-password>",
+                    "vcpu": 2,
+                    "versionIndicator": "",
+                    "whitelistIPs": [
+                        "0.0.0.0/0"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "hana",
+            "plan": "hdi-shared",
+            "category": "SERVICE",
+            "entitleonly": true,
+            "requiredServices": [
+                "hana-cloud"
+            ]
+        },
+        {
+            "name": "destination",
+            "plan": "lite",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "html5-apps-repo",
+            "plan": "app-host",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "html5-apps-repo",
+            "plan": "app-runtime",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "autoscaler",
+            "plan": "standard",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "alert-notification",
+            "plan": "free",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "cis",
+            "plan": "central",
+            "category": "SERVICE",
+            "entitleonly": true
+        },
+        {
+            "name": "xsuaa",
+            "plan": "broker",
+            "category": "SERVICE",
+            "entitleonly": true
+        }        
+    ],
+    "executeAfterAccountSetup": [
+        {
+            "description": "Get the tutorial code",
+            "command": "rm -rf /home/user/tutorial && git clone https://github.com/SAP-samples/btp-cf-cap-multitenant-susaas.git -b basic  /home/user/tutorial && cd /home/user/tutorial/ "
+        },
+        {
+            "description": "Create a private mtaext file copy",
+            "command": "cp ./tutorial/configs/deployment/free-tier.mtaext ./tutorial/configs/deployment/free-tier-private.mtaext"
+        },
+        {
+            "description": "Initialize Broker and update the mtaext file",
+            "command": "cd ./tutorial/broker/ && npm i && CREDENTIALS=$(npm run init) && echo \"${CREDENTIALS}\" && HASH=$(echo \"${CREDENTIALS}\" | grep -o 'sha256.*') &&  sed -i 's~<paste your hash credentials here>~'\"$HASH\"'~g' ../configs/deployment/free-tier-private.mtaext && BR_PASSWORD=$(echo \"${CREDENTIALS}\" | awk '/Plaintext password:/{getline; print}') && echo $BR_PASSWORD > brokerpass.txt"
+        },
+        {
+            "description": "Building multi target application assets",
+            "command": "cd ./tutorial && npm install && mbt build -e ./configs/deployment/free-tier-private.mtaext"
+        },
+        {
+            "description": "Deploy app",
+            "command": "cd ./tutorial && cf deploy ./mta_archives/susaas_0.0.1.mtar -f"
+        },
+        {
+            "description":"Initializing credstore",
+            "command":" cd ./tutorial && sh configs/automator/init-cred-store.sh"
+        },
+        {
+            "description": "Create the consumer usecase file",
+            "command": "rm /home/user/usecases/released/discoverycenter/4064-cap-saas-cf/usecase_consumer.json -f && SPACE=$(jq -r '.\"cfspacename\"' /home/user/log/metadata_log.json) && ORG=$(jq -r '.\"org\"' /home/user/log/metadata_log.json) && sed -e \"s~<provider-space>~$SPACE~g\" -e \"s~<provider-org>~$ORG~g\" \"/home/user/usecases/released/discoverycenter/4064-cap-saas-cf/usecase_consumer_tmpl.json\" >> \"/home/user/usecases/released/discoverycenter/4064-cap-saas-cf/usecase_consumer.json\""
+        },
+        {
+            "description": "Create the consumer subscription",
+            "command": "GLOBALACCOUNT=$(jq -r '.\"globalaccount\"' /home/user/log/metadata_log.json) && MYEMAIL=$(jq -r '.\"myemail\"' /home/user/log/metadata_log.json) && SUBACCOUNT=$(jq -r '.\"subaccount\"' /home/user/log/metadata_log.json) && SUBACCOUNTID=$(jq -r '.\"subaccountid\"' /home/user/log/metadata_log.json)  && ./btpsa -parameterfile 'usecases/released/discoverycenter/4064-cap-saas-cf/parameters.json' -usecasefile 'usecases/released/discoverycenter/4064-cap-saas-cf/usecase_consumer.json' -globalaccount $GLOBALACCOUNT -myemail $MYEMAIL -subaccountname $CONSUMER_SUBACCOUNT_NAME -customAppProviderSubaccountId $SUBACCOUNTID"
+        }
+    ],
+    "executeToPruneUseCase": [
+        {
+            "description": "Undeploy the SaaS application",
+            "command": "cf undeploy susaas --delete-service-brokers --delete-service-keys --delete-services -f"
+        }
+    ],
+    "assignrolecollections": [
+        {
+            "name": "Subaccount Administrator",
+            "type": "account",
+            "level": "sub account",
+            "assignedUserGroupsFromParameterFile": [
+                "admins"
+            ]
+        },
+        {
+            "name": "Subaccount Service Administrator",
+            "type": "account",
+            "level": "sub account",
+            "assignedUserGroupsFromParameterFile": [
+                "admins"
+            ]
+        },
+        {
+            "name": "SpaceManager",
+            "type": "cloudfoundry",
+            "level": "space",
+            "assignedUserGroupsFromParameterFile": [
+                "admins"
+            ]
+        },
+        {
+            "name": "SpaceDeveloper",
+            "type": "cloudfoundry",
+            "level": "space",
+            "assignedUserGroupsFromParameterFile": [
+                "developers"
+            ]
+        },
+        {
+            "name": "SpaceAuditor",
+            "type": "cloudfoundry",
+            "level": "space",
+            "assignedUserGroupsFromParameterFile": [
+                "auditors"
+            ]
+        },
+        {
+            "name": "OrgManager",
+            "type": "cloudfoundry",
+            "level": "org",
+            "assignedUserGroupsFromParameterFile": [
+                "admins"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,57 @@
+{
+    "$schema": "https://raw.githubusercontent.com/SAP-samples/btp-setup-automator/main/libs/btpsa-parameters.json",
+    "region": "us10",
+    "loginmethod": "sso",
+    "subaccountname": "SusaaS-Provider",
+    "cfspacename": "dev",
+    "envvariables": {
+      "CONSUMER_SUBACCOUNT_NAME": "<susaas-consumer-subaccount-name>",
+      "BTP_ADMIN_USER": "<btp-global-admin-user-email>",
+      "BTP_ADMIN_PASSWORD": "<btp-global-admin-user-password>"
+    },
+    "myusergroups": [
+      {
+        "name": "admins",
+        "members": [
+          "<admin-email-address-01>",
+          "<admin-email-address-02>"
+        ]
+      },
+      {
+        "name": "developers",
+        "members": [
+          "<developer-email-address-01>",
+          "<developer-email-address-02>"
+        ]
+      },
+      {
+        "name": "auditors",
+        "members": [
+          "<auditor-email-address-01>",
+          "<auditor-email-address-02>"
+        ]
+      },
+      {
+        "name": "SusaaS_Admins",
+        "members": [
+          "<susaas-consumer-admin-email-address-01>",
+          "<susaas-consumer-admin-email-address-02>"
+        ]
+      },
+      {
+        "name": "SusaaS_Members",
+        "members": [
+          "<susaas-consumer-member-email-address-01>",
+          "<susaas-consumer-member-email-address-02>"
+        ]
+      },
+      {
+        "name": "SusaaS_Extensions",
+        "members": [
+          "<susaas-consumer-extension-dev-email-address-01>",
+          "<susaas-consumer-extension-dev-email-address-02>"
+        ]
+      }
+    ]
+  }
+  

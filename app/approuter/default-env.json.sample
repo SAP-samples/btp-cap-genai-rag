@@ -1,0 +1,14 @@
+{
+    "VCAP_SERVICES": {},
+    "VCAP_APPLICATION": {},
+    "TENANT_HOST_PATTERN": "^(.*).localhost",
+    "destinations": [{
+        "name":"susaas-srv-api", 
+        "url": "http://localhost:4004",
+        "forwardAuthToken": true
+    },
+    {
+        "name": "ui5",
+        "url": "https://ui5.sap.com/1.108.4"
+    }]
+}

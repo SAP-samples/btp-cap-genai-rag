@@ -1,0 +1,67 @@
+{
+    "role": {
+        "name": "COM_EXTERNAL_ACCESS",
+        "object_privileges": [
+            { 
+                "name":"SUSAAS_COMMON_SHARED", 
+                "type":"TABLE", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"SAP_COMMON_COUNTRIES", 
+                "type":"TABLE", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"SAP_COMMON_COUNTRIES_TEXTS", 
+                "type":"TABLE", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"LOCALIZED_SAP_COMMON_COUNTRIES", 
+                "type":"VIEW", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"SAP_COMMON_CURRENCIES", 
+                "type":"TABLE", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"SAP_COMMON_CURRENCIES_TEXTS", 
+                "type":"TABLE", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"LOCALIZED_SAP_COMMON_CURRENCIES", 
+                "type":"VIEW", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"SAP_COMMON_LANGUAGES", 
+                "type":"TABLE", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"SAP_COMMON_LANGUAGES_TEXTS", 
+                "type":"TABLE", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            },
+            { 
+                "name":"LOCALIZED_SAP_COMMON_LANGUAGES", 
+                "type":"VIEW", 
+                "privileges":[ "SELECT" ], 
+                "privileges_with_grant_option":[] 
+            }
+        ]
+    }
+}

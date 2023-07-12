@@ -1,0 +1,19 @@
+{
+  "name": "broker",
+  "version": "1.0.0",
+  "description": "Service Broker Application ( @sap/sbf )",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "start-broker",
+    "init": "npx gen-catalog-ids && npx hash-broker-password -b"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sap/sbf": "^6.5"
+  },
+  "engines": {
+    "node": ">=16.x"
+  }
+}

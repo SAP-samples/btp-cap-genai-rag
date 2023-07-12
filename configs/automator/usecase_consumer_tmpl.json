@@ -1,0 +1,66 @@
+{
+    "$schema": "https://raw.githubusercontent.com/SAP-samples/btp-setup-automator/main/libs/btpsa-usecase.json",
+    "aboutThisUseCase": {
+        "name": "Develop a multitenant Software as a Service app in SAP BTP, Cloud Foundry Environment",
+        "description": "Template usecase file for initial consumer subaccount and SaaS subscription created by SAP BTP Automator",
+        "author": "martin.frick@sap.com",
+        "testStatus": "tested successfully",
+        "usageStatus": "READY TO BE USED",
+        "relatedLinks": [
+            "https://github.com/SAP-samples/btp-cf-cap-multitenant-susaas/"
+        ]
+    },
+    "services": [
+        {
+            "name": "susaas-<provider-space>-<provider-org>",
+            "category": "APPLICATION",
+            "plan": "default",
+            "targetenvironment": "sapbtp",
+            "customerDeveloped": true,
+            "requiredrolecollections": [
+                {
+                    "name": "Susaas Administrator (<provider-space>)",
+                    "assignedUserGroupsFromParameterFile": [
+                      "SusaaS_Admins"
+                    ]
+                },
+                {
+                    "name": "Susaas Member (<provider-space>)",
+                    "assignedUserGroupsFromParameterFile": [
+                      "SusaaS_Members"
+                    ]
+                },
+                {
+                    "name": "Susaas Extension Developer (<provider-space>)",
+                    "assignedUserGroupsFromParameterFile": [
+                      "SusaaS_Extensions"
+                    ]
+                }
+            ]
+        }
+    ],
+    "executeAfterAccountSetup": [
+        {
+            "description": "Create SusaaS API Service Instance and Service Binding",
+            "command": "GLOBALACCOUNT=$(jq -r '.\"globalaccount\"' /home/user/log/metadata_log.json) && SUBACCOUNTID=$(jq -r '.\"subaccountid\"' /home/user/log/metadata_log.json) && btp create services/instance --subaccount $SUBACCOUNTID --offering-name 'Sustainable SaaS API' --name susaas-api-<provider-space> --plan-name default && btp create services/binding --subaccount $SUBACCOUNTID --instance-name susaas-api-<provider-space> --name default "            
+        }
+    ],
+    "assignrolecollections": [
+        {
+            "name": "Subaccount Administrator",
+            "type": "account",
+            "level": "sub account",
+            "assignedUserGroupsFromParameterFile": [
+                "admins"
+            ]
+        },
+        {
+            "name": "Subaccount Service Administrator",
+            "type": "account",
+            "level": "sub account",
+            "assignedUserGroupsFromParameterFile": [
+                "admins"
+            ]
+        }
+    ]
+}

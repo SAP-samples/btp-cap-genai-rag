@@ -1,0 +1,62 @@
+{
+    "SUSAAS_COMMON_SHARED": {
+        "target": {
+            "object": "SUSAAS_COMMON_SHARED",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "SAP_COMMON_COUNTRIES": {
+        "target": {
+            "object": "SAP_COMMON_COUNTRIES",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "SAP_COMMON_COUNTRIES_TEXTS": {
+        "target": {
+            "object": "SAP_COMMON_COUNTRIES_TEXTS",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "LOCALIZED_SAP_COMMON_COUNTRIES": {
+        "target": {
+            "object": "LOCALIZED_SAP_COMMON_COUNTRIES",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "SAP_COMMON_CURRENCIES" : {
+        "target": {
+            "object": "SAP_COMMON_CURRENCIES",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "SAP_COMMON_CURRENCIES_TEXTS" : {
+        "target": {
+            "object": "SAP_COMMON_CURRENCIES_TEXTS",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "LOCALIZED_SAP_COMMON_CURRENCIES": {
+        "target": {
+            "object": "LOCALIZED_SAP_COMMON_CURRENCIES",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "SAP_COMMON_LANGUAGES" : {
+        "target": {
+            "object": "SAP_COMMON_LANGUAGES",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "SAP_COMMON_LANGUAGES_TEXTS" : {
+        "target": {
+            "object": "SAP_COMMON_LANGUAGES_TEXTS",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    },
+    "LOCALIZED_SAP_COMMON_LANGUAGES": {
+        "target": {
+            "object": "LOCALIZED_SAP_COMMON_LANGUAGES",
+            "schema.configure": "susaas-com-hdi-container/schema"
+        }
+    }
+}

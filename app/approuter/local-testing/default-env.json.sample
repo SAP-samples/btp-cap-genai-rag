@@ -1,0 +1,11 @@
+{
+    "destinations": [{
+        "name":"susaas-srv-api", 
+        "url": "http://localhost:4004"
+    },
+    {
+        "name": "ui5",
+        "url": "https://ui5.sap.com/1.108.4"
+    }],
+    "VCAP_SERVICES": {}
+}
