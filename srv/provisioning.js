@@ -128,12 +128,10 @@ module.exports = (service) => {
     try {
       const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsCreate({
         resourceGroupId: resourceGroupId,
-        // subscriber relevant labels could be worthful for future use cases
-        labels: [],
       }).execute( { selectionStrategy: destinationSelectionStrategies.alwaysProvider, destinationName: AI_CORE_DESTINATION });
       return response.data;
     } catch (e) {
-      console.log(e);
+      console.log(e.message);
     }
   };
 
@@ -149,7 +147,7 @@ module.exports = (service) => {
       ).execute({ selectionStrategy: destinationSelectionStrategies.alwaysProvider, destinationName: AI_CORE_DESTINATION });
       return response.data;
     } catch (e) {
-      console.log(e);
+      console.log(e.message);
     }
   };
 
