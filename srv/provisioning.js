@@ -2,7 +2,13 @@ const cds = require("@sap/cds");
 const xsenv = require("@sap/xsenv");
 const AlertNotification = require("./utils/alertNotification");
 const Automator = require("./utils/automator");
+<<<<<<< Updated upstream
 const { DestinationSelectionStrategies } = require("@sap-cloud-sdk/connectivity");
+=======
+const destinationSelectionStrategies =
+  require("@sap-cloud-sdk/connectivity").DestinationSelectionStrategies;
+
+>>>>>>> Stashed changes
 const { ResourceGroupApi } = require("./vendor/AI_CORE_API");
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
@@ -11,7 +17,11 @@ module.exports = (service) => {
   service.on("UPDATE", "tenant", async (req, next) => {
     console.log("Subscription data:", JSON.stringify(req.data));
 
-    const { subscribedSubdomain: subdomain, subscribedTenantId: tenant, subscribedZoneId: zone } = req.data;
+    const {
+      subscribedSubdomain: subdomain,
+      subscribedTenantId: tenant,
+      subscribedZoneId: zone,
+    } = req.data;
     const tenantURL = `https://${subdomain}${process.env.tenantSeparator}${process.env.appDomain}`;
 
     await next();
@@ -53,7 +63,8 @@ module.exports = (service) => {
   service.on("DELETE", "tenant", async (req, next) => {
     console.log("Unsubscribe Data: ", JSON.stringify(req.data));
 
-    const { subscribedSubdomain: subdomain, subscribedTenantId: tenant } = req.data;
+    const { subscribedSubdomain: subdomain, subscribedTenantId: tenant } =
+      req.data;
 
     await next();
 
@@ -109,7 +120,7 @@ module.exports = (service) => {
 
     const services = xsenv.getServices({
       html5Runtime: { tag: "html5-apps-repo-rt" },
-      destination: { tag: "destination" }
+      destination: { tag: "destination" },
     });
 
     dependencies.push({ xsappname: services.html5Runtime.uaa.xsappname });
@@ -129,11 +140,11 @@ module.exports = (service) => {
       const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsCreate({
         resourceGroupId: resourceGroupId,
       })
-      .skipCsrfTokenFetching()
-      .execute( { 
-        selectionStrategy: DestinationSelectionStrategies.alwaysProvider, 
-        destinationName: AI_CORE_DESTINATION 
-      });
+        .skipCsrfTokenFetching()
+        .execute({
+          selectionStrategy: destinationSelectionStrategies.alwaysProvider,
+          destinationName: AI_CORE_DESTINATION,
+        });
       return response.data;
     } catch (e) {
       console.log(e.message);
@@ -150,11 +161,11 @@ module.exports = (service) => {
       const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsDelete(
         resourceGroupId
       )
-      .skipCsrfTokenFetching()
-      .execute({ 
-        selectionStrategy: DestinationSelectionStrategies.alwaysProvider, 
-        destinationName: AI_CORE_DESTINATION 
-      });
+        .skipCsrfTokenFetching()
+        .execute({
+          selectionStrategy: destinationSelectionStrategies.alwaysProvider,
+          destinationName: AI_CORE_DESTINATION,
+        });
       return response.data;
     } catch (e) {
       console.log(e.message);
@@ -167,12 +178,11 @@ module.exports = (service) => {
    */
   const getResourceGroups = async () => {
     try {
-      const response =
-        await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll()
+      const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll()
         .skipCsrfTokenFetching()
         .execute({
-          selectionStrategy: DestinationSelectionStrategies.alwaysProvider,
-          destinationName: AI_CORE_DESTINATION
+          destinationName: AI_CORE_DESTINATION,
+          selectionStrategy: destinationSelectionStrategies.alwaysProvider,
         });
       return response.data;
     } catch (e) {
