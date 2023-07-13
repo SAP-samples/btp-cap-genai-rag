@@ -2,9 +2,9 @@ const cds = require("@sap/cds");
 const xsenv = require("@sap/xsenv");
 const AlertNotification = require("./utils/alertNotification");
 const Automator = require("./utils/automator");
-const destinationSelectionStrategies = require("@sap-cloud-sdk/connectivity").DestinationSelectionStrategies;
-
+const { DestinationSelectionStrategies } = require("@sap-cloud-sdk/connectivity");
 const { ResourceGroupApi } = require("./vendor/AI_CORE_API");
+
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
 
 module.exports = (service) => {
@@ -14,18 +14,20 @@ module.exports = (service) => {
     const { subscribedSubdomain: subdomain, subscribedTenantId: tenant, subscribedZoneId: zone } = req.data;
     const tenantURL = `https://${subdomain}${process.env.tenantSeparator}${process.env.appDomain}`;
 
-    const resourceGroups = await getResourceGroups();
-    console.log(JSON.stringify(resourceGroups));
-
     await next();
 
     // Trigger tenant broker deployment on background
-    cds.spawn({ tenant: tenant, subdomain: subdomain }, async (tx) => {
+    cds.spawn({ tenant: tenant }, async (tx) => {
       try {
         let automator = new Automator();
         await automator.deployTenantArtifacts(tenant, subdomain);
-
-        await createResourceGroup(zone);
+        
+        // Create AI Core Resource Group for tenant
+        await createResourceGroup(tenant);
+        console.log(`Resource Group ${tenant} created successfully.`);
+        let resourceGroups = await getResourceGroups();
+        console.log("Resource Groups: " + JSON.stringify(resourceGroups));
+        
         console.log("Success: Onboarding completed!");
       } catch (error) {
         const alertNotification = new AlertNotification();
@@ -34,17 +36,14 @@ module.exports = (service) => {
         alertNotification.sendEvent({
           type: "GENERIC",
           data: {
-            subject:
-              "Error: Automation skipped because of error during subscription",
+            subject: "Error: Automation skipped because of error during subscription",
             body: JSON.stringify(error.message),
             eventType: "alert.app.generic",
             severity: "FATAL",
             category: "ALERT",
           },
         });
-        console.error(
-          "Error: Automation skipped because of error during subscription"
-        );
+        console.error( "Error: Automation skipped because of error during subscription");
         console.error(`Error: ${error.message}`);
       }
     });
@@ -62,7 +61,12 @@ module.exports = (service) => {
       let automator = new Automator();
       await automator.undeployTenantArtifacts(tenant, subdomain);
 
-      await deleteResourceGroup(zone);
+      // Delete AI Core Resource Group for tenant
+      await deleteResourceGroup(tenant);
+      console.log(`Resource Group ${tenant} deleted successfully.`);
+      let resourceGroups = await getResourceGroups();
+      console.log("Resource Groups: " + JSON.stringify(resourceGroups));
+
       console.log("Success: Unsubscription completed!");
     } catch (error) {
       const alertNotification = new AlertNotification();
@@ -72,8 +76,7 @@ module.exports = (service) => {
         ? alertNotification.sendEvent({
             type: "GENERIC",
             data: {
-              subject:
-                "Error: Automation skipped because of error during unsubscription!",
+              subject: "Error: Automation skipped because of error during unsubscription!",
               body: JSON.stringify(error.message),
               eventType: "alert.app.generic",
               severity: "FATAL",
@@ -82,9 +85,7 @@ module.exports = (service) => {
           })
         : "";
 
-      console.error(
-        "Error: Automation skipped because of error during unsubscription"
-      );
+      console.error("Error: Automation skipped because of error during unsubscription");
       console.error(`Error: ${error.message}`);
     }
     return tenant;
@@ -115,7 +116,6 @@ module.exports = (service) => {
     dependencies.push({ xsappname: services.destination.xsappname });
 
     console.log("SaaS Dependencies:", JSON.stringify(dependencies));
-
     return dependencies;
   });
 
@@ -128,7 +128,12 @@ module.exports = (service) => {
     try {
       const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsCreate({
         resourceGroupId: resourceGroupId,
-      }).execute( { selectionStrategy: destinationSelectionStrategies.alwaysProvider, destinationName: AI_CORE_DESTINATION });
+      })
+      .skipCsrfTokenFetching()
+      .execute( { 
+        selectionStrategy: DestinationSelectionStrategies.alwaysProvider, 
+        destinationName: AI_CORE_DESTINATION 
+      });
       return response.data;
     } catch (e) {
       console.log(e.message);
@@ -144,7 +149,12 @@ module.exports = (service) => {
     try {
       const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsDelete(
         resourceGroupId
-      ).execute({ selectionStrategy: destinationSelectionStrategies.alwaysProvider, destinationName: AI_CORE_DESTINATION });
+      )
+      .skipCsrfTokenFetching()
+      .execute({ 
+        selectionStrategy: DestinationSelectionStrategies.alwaysProvider, 
+        destinationName: AI_CORE_DESTINATION 
+      });
       return response.data;
     } catch (e) {
       console.log(e.message);
@@ -158,9 +168,11 @@ module.exports = (service) => {
   const getResourceGroups = async () => {
     try {
       const response =
-        await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll().execute({
-          destinationName: AI_CORE_DESTINATION,
-          selectionStrategy: destinationSelectionStrategies.alwaysProvider
+        await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll()
+        .skipCsrfTokenFetching()
+        .execute({
+          selectionStrategy: DestinationSelectionStrategies.alwaysProvider,
+          destinationName: AI_CORE_DESTINATION
         });
       return response.data;
     } catch (e) {
