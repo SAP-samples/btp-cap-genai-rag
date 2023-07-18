@@ -12,9 +12,6 @@ modules:
         }
 
 resources:
-  - name: susaas-alert-notification
-    parameters:
-      service-plan: standard
   - name: susaas-credstore
     parameters:
       service-plan: trial

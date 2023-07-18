@@ -17,7 +17,6 @@ class TenantAutomator {
     async deployTenantArtifacts(subscribingSubaccountId, subscribingSubdomain) {
         try {
             await this.initialize(subscribingSubaccountId);
-            await this.createSampleDestination(subscribingSubdomain, `SUSAAS_S4HANA_CLOUD`)
 
             // Don't create route in case of '.' used as tenant separator - wildcard route used!
             process.env.tenantSeparator !== '.' ? await this.createRoute(subscribingSubdomain) : null;
@@ -34,7 +33,6 @@ class TenantAutomator {
     async undeployTenantArtifacts(unsubscribingSubaccountId, unsubscribingSubdomain) {
         try {
             await this.initialize(unsubscribingSubaccountId);
-            await this.deleteSampleDestination(unsubscribingSubdomain, `SUSAAS_S4HANA_CLOUD`);
 
             // Don't delete route in case of '.' used as tenant separator - wildcard route used!
             process.env.tenantSeparator !== '.' ? await this.deleteRoute(unsubscribingSubdomain) : null;
@@ -156,35 +154,6 @@ class TenantAutomator {
             console.log(`Service Broker ${process.env.brokerName} deleted`);
         } catch (error) {
             console.error(`Error: Service Broker can not be deleted`);
-            console.error(`Error: ${error.message}`);
-        }
-    }
-
-    async createSampleDestination(subscribedSubdomain, name) {
-        try {
-            var destConfig = [{
-                "Name": name,
-                "Type": "HTTP",
-                "URL": "https://sandbox.api.sap.com",
-                "Authentication": "NoAuthentication",
-                "Description": "SusaaS S/4HANA Cloud",
-                "ProxyType": "Internet",
-                "HTML5.DynamicDestination": "true"
-            }];
-            await this.destination.subscriberCreate(subscribedSubdomain, destConfig)
-            console.log(`Sample destination ${name} is created in tenant subaccount`);
-        } catch (error) {
-            console.log("Error: Sample destination can not be created in tenant subaccount")
-            console.error(`Error: ${error.message}`);
-        }
-    }
-    
-    async deleteSampleDestination(unsubscribingSubdomain, name) {
-        try {
-            await this.destination.subscriberDelete(unsubscribingSubdomain, name)
-            console.log(`Sample destination ${name} is deleted from tenant subaccount`);
-        } catch (error) {
-            console.log(`Error: Sample destination ${name} can not be deleted from tenant subaccount`);
             console.error(`Error: ${error.message}`);
         }
     }

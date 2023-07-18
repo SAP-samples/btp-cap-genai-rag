@@ -1,7 +1,6 @@
 const cds = require('@sap/cds');
 const log = require('cf-nodejs-logging-support');
 log.setLoggingLevel('info');
-log.registerCustomFields(["country", "amount"]);
 
 module.exports = cds.service.impl(async function () {
 

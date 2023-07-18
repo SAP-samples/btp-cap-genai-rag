@@ -27,22 +27,6 @@ class ApiService extends cds.ApplicationService {
       }
     });
   
-  
-    this.on("bulkUpdateProducts", async (req) => {
-      try {
-        let upload = req.data.products;
-  
-        upload.forEach(async(product) => {
-          await UPDATE (Products, product.ID) .with (product)
-        });
-  
-        return "Records successfully updated!" 
-  
-        } catch(error){
-          return req.error(404,`Error occured during upload": ${error}`)
-        }
-    });
-  
     // ensure to call super.init()
     await super.init() 
   }

@@ -40,19 +40,6 @@ module.exports = (service) => {
         
         console.log("Success: Onboarding completed!");
       } catch (error) {
-        const alertNotification = new AlertNotification();
-
-        // Send generic alert using Alert Notification
-        alertNotification.sendEvent({
-          type: "GENERIC",
-          data: {
-            subject: "Error: Automation skipped because of error during subscription",
-            body: JSON.stringify(error.message),
-            eventType: "alert.app.generic",
-            severity: "FATAL",
-            category: "ALERT",
-          },
-        });
         console.error( "Error: Automation skipped because of error during subscription");
         console.error(`Error: ${error.message}`);
       }
@@ -80,22 +67,6 @@ module.exports = (service) => {
 
       console.log("Success: Unsubscription completed!");
     } catch (error) {
-      const alertNotification = new AlertNotification();
-
-      // Send generic alert using Alert Notification if service binding exists
-      alertNotification.bindingExists
-        ? alertNotification.sendEvent({
-            type: "GENERIC",
-            data: {
-              subject: "Error: Automation skipped because of error during unsubscription!",
-              body: JSON.stringify(error.message),
-              eventType: "alert.app.generic",
-              severity: "FATAL",
-              category: "ALERT",
-            },
-          })
-        : "";
-
       console.error("Error: Automation skipped because of error during unsubscription");
       console.error(`Error: ${error.message}`);
     }

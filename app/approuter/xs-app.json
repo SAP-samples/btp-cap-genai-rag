@@ -6,28 +6,6 @@
     },
     "routes": [
       {
-        "source": "^/index.html$",
-        "localDir": "resources",
-        "authenticationType": "xsuaa"
-      },
-      {
-        "source": "^/appconfig/(.*)$",
-        "localDir": "resources",
-        "authenticationType": "xsuaa"
-      },
-      {
-        "source": "^/resources/(.*)$",
-        "authenticationType": "none",
-        "preferLocal": true,
-        "destination": "ui5"
-      },
-      {
-        "source": "^/test-resources/(.*)$",
-        "authenticationType": "none",
-        "preferLocal": true,
-        "destination": "ui5"
-      },
-      {
         "source": "^/user-api(.*)",
         "target": "$1",
         "service": "sap-approuter-userapi",

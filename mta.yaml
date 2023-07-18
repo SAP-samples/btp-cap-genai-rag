@@ -52,37 +52,37 @@ modules:
 
 
   # --------------------- WEBAPP DEPLOYER ----------------------
-  - name: susaas-app-deployer
+  # - name: susaas-app-deployer
   # ------------------------------------------------------------
-    type: com.sap.application.content
-    path: .
-    requires:
-      - name: susaas-html5-repo-host
-        parameters:
-          content-target: true
-    build-parameters:
-      build-result: app-build
-      requires:
-      - name: sapsusaasuidemo
-        target-path: app-build/
-        artifacts:
-          - sapsusaasuidemo.zip
+  #  type: com.sap.application.content
+  #  path: .
+  #  requires:
+  #    - name: susaas-html5-repo-host
+  #      parameters:
+  #        content-target: true
+  #  build-parameters:
+  #    build-result: app-build
+  #    requires:
+  #    - name: sapsusaasuidemo
+  #      target-path: app-build/
+  #      artifacts:
+  #        - sapsusaasuidemo.zip
 
 
   # --------------------- UI MODULES ----------------------------
   #
   # ------------------------------------------------------------
-  - name: sapsusaasuidemo
-    type: html5
-    path: app/sapsusaasuidemo
-    build-parameters:
-      build-result: dist
-      builder: custom
-      ignore: [ 'node_modules/',  'default-env.json', 'manifest*.yml' ]
-      commands:
-      - npm ci
-      - npm run build:cf
-      supported-platforms: []
+  # - name: sapsusaasuidemo
+  #   type: html5
+  #   path: app/sapsusaasuidemo
+  #   build-parameters:
+  #     build-result: dist
+  #     builder: custom
+  #     ignore: [ 'node_modules/',  'default-env.json', 'manifest*.yml' ]
+  #     commands:
+  #     - npm ci
+  #     - npm run build:cf
+  #     supported-platforms: []
     
 
   # --------------------- SERVER MODULE ------------------------
@@ -117,14 +117,12 @@ modules:
                 - encrypt
                 - list
       - name: susaas-logging
-      - name: susaas-aicore
       - name: susaas-registry
       - name: susaas-service-manager
       - name: susaas-service-manager-admin
       - name: susaas-destination
       - name: susaas-cis-central
       - name: susaas-html5-repo-runtime
-      - name: susaas-alert-notification
       - name: susaas-api-sb-srv
       - name: susaas-approuter
       - name: susaas-autoscaler
@@ -336,7 +334,7 @@ resources:
       service-name: ${space}-susaas-logging
       service-plan: lite
 
-  # ---------------- CORE AI SERVICE ---------------
+  # ---------------- CORE AI SERVICE ---------------------------
   - name: susaas-aicore
   # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
@@ -421,16 +419,6 @@ resources:
       service: autoscaler
       service-name: ${space}-susaas-autoscaler
       service-plan: standard
-
-  # ----------------- ALERT NOTIFICATION  ---------------------------- 
-  - name: susaas-alert-notification
-  # ------------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: alert-notification
-      service-name: ${space}-susaas-alert-notification
-      service-plan: free
-      path: ./configs/alert-notif.json
 
   # ----------------- CLOUD MANAGEMENT SERVICE - CENTRAL -------------
   - name: susaas-cis-central

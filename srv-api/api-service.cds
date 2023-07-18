@@ -10,7 +10,6 @@ service ApiService  {
      // Sample entities for CREATE, READ, UPDATE, DELETE
      entity Products as select * from db.Products;
 
-     
      // Sample actions for bulk DELETE and consecutive INSERT
      action bulkInsertProducts( products : many Products ) returns String;
 
