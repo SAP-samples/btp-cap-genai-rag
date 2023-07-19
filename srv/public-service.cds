@@ -1,7 +1,11 @@
 using {susaas.db as db} from '../db/data-model';
 
-service PublicService @(path : '/catalog/PublicService') {
+@path: '/catalog/PublicService'
+service PublicService {
   entity Products as projection on db.Products excluding {
-    createdAt,createdBy,modifiedAt,modifiedBy
+    createdAt,
+    createdBy,
+    modifiedAt,
+    modifiedBy
   }
 };
