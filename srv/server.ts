@@ -2,6 +2,7 @@ import cds from "@sap/cds";
 import express from "express";
 import cors from "cors";
 import cov2ap from "@sap/cds-odata-v2-adapter-proxy";
+import tenantProvisioning from "./provisioning";
 const cdsSwagger = require("cds-swagger-ui-express");
 
 cds.on("bootstrap", (app: express.Application) => {
@@ -15,11 +16,9 @@ cds.on("served", async () => {
 
     // Add provisioning logic if only multitenancy is there
     if (provisioning) {
-        let tenantProvisioning = require("./provisioning");
+        console.log("Provisioning service is available, serving multitenancy!");
         provisioning.prepend(tenantProvisioning);
     } else {
         console.log("There is no service, therefore does not serve multitenancy!");
     }
 });
-
-module.exports = cds.server;

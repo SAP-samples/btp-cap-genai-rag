@@ -64,7 +64,7 @@
         "build:cds": "cds build --production",
         "cleanup:ts": "npx rimraf gen/srv/srv/**/*.ts",
         "build": "mbt build -p=cf -t=./mta_archives --mtar=saas-genai.mtar",
-        "deploy": "npm run build && cf deploy mta_archives/saas-genai.mtar",
+        "deploy": "npm run build && cf deploy mta_archives/saas-genai.mtar -e configs/deployment/tfe-private.mtaext",
         "cds2types": "cd srv && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },
     "eslintConfig": {
