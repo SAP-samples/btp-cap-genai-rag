@@ -15,6 +15,7 @@ connection.properties
 *-private.http
 *-private.json
 *-private.mtaext
+*-private.yaml
 *.db
 *.mtar
 *.mta
