@@ -4,7 +4,7 @@ import { Request } from "@sap/cds/apis/services";
 import { DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 import xsenv from "@sap/xsenv";
 import { ResourceGroupApi } from "./vendor/AI_CORE_API";
-const Automator = require("./utils/automator");
+import Automator from "./utils/automator";
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
 
@@ -27,7 +27,7 @@ export class TenantPersistenceService extends Service {
         await next();
 
         // Trigger tenant broker deployment on background
-        cds.spawn({ tenant: tenant }, async (tx) => {
+        cds.spawn({ tenant: tenant }, async (_tx) => {
             try {
                 let automator = new Automator();
                 await automator.deployTenantArtifacts(tenant, subdomain);
