@@ -87,7 +87,7 @@ abstract class Provisioning {
     };
 
     private getDependencies = async (_req: Request, next: Function) => {
-        const dependencies: Array<{ xsappname: string }> = await next();
+        const dependencies: Array<any> = await next() || [];
         const services = xsenv.getServices({
             html5Runtime: { tag: "html5-apps-repo-rt" },
             destination: { tag: "destination" }
