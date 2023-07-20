@@ -183,4 +183,4 @@ class CloudManagementCentral{
     }
 }
 
-export default CloudManagementCentral
+module.exports = CloudManagementCentral

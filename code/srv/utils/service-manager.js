@@ -220,4 +220,4 @@ class ServiceManager {
     }
 }
 
-export default ServiceManager;
+module.exports = ServiceManager;

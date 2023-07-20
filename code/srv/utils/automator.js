@@ -198,9 +198,9 @@ class Kyma extends TenantAutomator {
 
 class CloudFoundry extends TenantAutomator {
 
-    constructor(tenant, subdomain){
+    constructor(tenant, subdomain, custdomain){
         try{
-            super(tenant, subdomain);
+            super(tenant, subdomain, custdomain);
 
             const { getAppEnv } = cfenv;
             const appEnv = getAppEnv();
@@ -300,4 +300,4 @@ class CloudFoundry extends TenantAutomator {
 
 }
 
-export default (process.env.VCAP_APPLICATION ? CloudFoundry : Kyma)
+module.exports = process.env.VCAP_APPLICATION ? CloudFoundry : Kyma

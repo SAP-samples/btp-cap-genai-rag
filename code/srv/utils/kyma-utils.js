@@ -131,4 +131,4 @@ class KymaUtils {
     }
 }
 
-export default KymaUtils
+module.exports = KymaUtils
