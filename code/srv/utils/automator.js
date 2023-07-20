@@ -309,8 +309,4 @@ class CloudFoundry extends TenantAutomator {
     }
 }
 
-<<<<<<< HEAD
-export default process.env.VCAP_APPLICATION ? CloudFoundry : Kyma;
-=======
-module.exports = process.env.VCAP_APPLICATION ? CloudFoundry : Kyma
->>>>>>> 24a41f5b68f8aa3d6a047f4ebe50fc49761e1641
+module.exports = process.env.VCAP_APPLICATION ? CloudFoundry : Kyma;

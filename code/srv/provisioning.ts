@@ -19,11 +19,11 @@ abstract class Provisioning {
     private subscribe = async (req: Request, next: Function) => {
         console.log("Subscription data:", JSON.stringify(req.data));
 
-        const { subscribedSubdomain: subdomain, subscribedTenantId: tenant, subscriptionParams: params } = req.data;
+        const { subscriptionAppName : appName, subscribedSubdomain: subdomain, subscribedTenantId: tenant, subscriptionParams: params = {} } = req.data;
 
         console.log("Subscription Params: " + params);
 
-        const { custSubdomain: custdomain = null } = params || {};
+        const { custSubdomain: custdomain = null } = params;
         const tenantURL = this.getTenantUrl(subdomain, custdomain);
 
         await next();
@@ -33,12 +33,10 @@ abstract class Provisioning {
             await automator.deployTenantArtifacts();
 
             // Create AI Core Resource Group for tenant
-            const resourceGroupCreationResponse = await createResourceGroup(tenant);
+            const resourceGroupCreationResponse = await createResourceGroup(`${appName}-${tenant}`);
             console.log(
-                `Resource Group ${resourceGroupCreationResponse?.resourceGroupId} on tenant ${resourceGroupCreationResponse?.tenantId} in zone ${resourceGroupCreationResponse?.zoneId} has been created successfully.`
+                `Resource Group ${resourceGroupCreationResponse?.resourceGroupId} for tenant ${resourceGroupCreationResponse?.tenantId} has been created successfully.`
             );
-            const resourceGroups = await getResourceGroups();
-            console.log(`Resource Groups: ${JSON.stringify(resourceGroups)}`);
 
             console.log("Success: Onboarding completed!");
         } catch (error: any) {
@@ -52,7 +50,7 @@ abstract class Provisioning {
     private unsubscribe = async (req: Request, next: Function) => {
         console.log("Unsubscribe Data: ", JSON.stringify(req.data));
 
-        const { subscribedSubdomain: subdomain, subscribedTenantId: tenant } = req.data;
+        const { subscriptionAppName : appName, subscribedSubdomain: subdomain, subscribedTenantId: tenant } = req.data;
 
         await next();
 
@@ -61,10 +59,8 @@ abstract class Provisioning {
             await automator.undeployTenantArtifacts();
 
             // Delete AI Core Resource Group for tenant
-            await deleteResourceGroup(tenant);
-            console.log(`Resource Group ${tenant} deleted successfully.`);
-            let resourceGroups = await getResourceGroups();
-            console.log("Resource Groups: " + JSON.stringify(resourceGroups));
+            await deleteResourceGroup(`${appName}-${tenant}`);
+            console.log(`Resource Group ${appName}-${tenant} deleted successfully.`);
 
             console.log("Success: Unsubscription completed!");
         } catch (error: any) {
@@ -87,14 +83,11 @@ abstract class Provisioning {
     };
 
     private getDependencies = async (_req: Request, next: Function) => {
-        const dependencies: Array<any> = await next() || [];
+        const initialDependencies: Array<any> = await next() || [];
         const services = xsenv.getServices({
-            html5Runtime: { tag: "html5-apps-repo-rt" },
             destination: { tag: "destination" }
         });
-        dependencies.concat([
-            // @ts-ignore
-            { xsappname: services.html5Runtime.uaa.xsappname },
+        const dependencies = initialDependencies.concat([
             // @ts-ignore
             { xsappname: services.destination.xsappname }
         ]);

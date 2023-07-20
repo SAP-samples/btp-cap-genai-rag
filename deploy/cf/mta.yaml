@@ -30,6 +30,7 @@ modules:
       builder: npm
       ignore: [ '.DS_Store', 'node_modules/', 'default-env.json', 'manifest*.yml' ]
     parameters:
+      api-name: aisaas-api-${space}
       app-name: aisaas-${space}
       disk-quota: 256MB
       memory: 128MB
@@ -48,6 +49,7 @@ modules:
         properties:
            app-url: ${default-url}
            application: ${app-name}
+           api: ${api-name}
            tenant-separator: ${tenant-separator}
            app-domain: ${app-domain}
 
@@ -140,12 +142,12 @@ modules:
       disk-quota: 512MB
     properties:
       SBF_ENABLE_AUDITLOG: false
-      SBF_CATALOG_FILE: ./config/sbf-catalog.json
+      SBF_CATALOG_FILE: ./catalog.json
       SBF_SERVICE_CONFIG:
           AI SaaS API:
             extend_credentials:
               shared:
-                apiUrl: ~{srv-url}
+                apiUrl: ~{aisaas-api-srv-api/srv-url}
             extend_xssecurity:
               per_plan:
                 trial: 
@@ -158,8 +160,9 @@ modules:
                   authorities: 
                   - $XSMASTERAPPNAME.plan_premium
             extend_catalog:
+              name : ~{aisaas-api-uaa/xsuaa-app}
               metadata:
-                  displayName : AI SaaS API ${space}
+                displayName : AI SaaS API ${space}
     requires:
       - name: aisaas-api-uaa
       - name: aisaas-api-srv-api
@@ -196,16 +199,15 @@ resources:
   - name: aisaas-uaa
   # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
-    requires:
-      - name: aisaas-approuter
     properties:
+      xsuaa-app: ${xsuaa-app}
       XSAPPNAME: ${xsuaa-app}
     parameters:
       service: xsuaa
       service-name: ${space}-aisaas-uaa
       service-plan: application
       path: ./config/xs-security.json
-      xsuaa-app: ~{aisaas-approuter/application}
+      xsuaa-app: aisaas-${space}-${org}
       config:
         xsappname: ${xsuaa-app}
         role-collections:
@@ -252,8 +254,8 @@ resources:
       service-name: ${space}-aisaas-registry
       service-plan: application
       config:
-        xsappname: ~{aisaas-uaa/XSAPPNAME}
-        appName: ~{aisaas-approuter/application}-${org}
+        xsappname: ~{aisaas-uaa/xsuaa-app}
+        appName: ~{aisaas-uaa/xsuaa-app}
         displayName: AI SaaS ${space}
         description: AI SaaS Application
         category: SaaS Multitenant Apps
@@ -386,7 +388,7 @@ resources:
       service: xsuaa
       service-name: ${space}-aisaas-api-uaa
       service-plan: broker
-      xsuaa-app: aisaas-api-${space}
+      xsuaa-app: aisaas-api-${space}-${org}
       config:
         xsappname: ${xsuaa-app}
     properties:
