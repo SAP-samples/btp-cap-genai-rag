@@ -90,4 +90,4 @@ class Destination {
 }
 
 
-module.exports = Destination 
+export default Destination 

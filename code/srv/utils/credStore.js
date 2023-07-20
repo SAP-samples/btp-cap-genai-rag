@@ -78,4 +78,4 @@ class CredStore {
     }
 }
 
-module.exports = CredStore;
+export default CredStore;

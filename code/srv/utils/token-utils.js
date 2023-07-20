@@ -30,4 +30,4 @@ class TokenUtils {
     }
 }
 
-module.exports = TokenUtils
+export default TokenUtils

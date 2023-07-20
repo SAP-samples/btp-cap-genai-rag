@@ -169,4 +169,4 @@ class CfUtils {
     }
 }
 
-module.exports = CfUtils
+export default CfUtils
