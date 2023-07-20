@@ -9,13 +9,11 @@ import Automator from "./utils/automator";
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
 
 abstract class Provisioning {
-    public service = (service: any) => {
-        console.log("INITIALIZING SUBSCRIPTION SERVICE");
+    public register = (service: any) => {
         service.on("UPDATE", "tenant", this.subscribe);
         service.on("DELETE", "tenant", this.unsubscribe);
         service.on("upgradeTenant", this.upgradeTenant);
         service.on("dependencies", this.getDependencies);
-        console.log("INITIALIZED SUBSCRIPTION SERVICE");
     };
 
     private subscribe = async (req: Request, next: Function) => {
@@ -128,7 +126,8 @@ class CloudFoundry extends Provisioning {
     };
 }
 
-export default process.env.VCAP_APPLICATION ? CloudFoundry : Kyma;
+const handleTenantSubscription = process.env.VCAP_APPLICATION ? new CloudFoundry().register : new Kyma().register;
+export { handleTenantSubscription };
 
 /**
  * creates a new resource group in the ai core instance with the id of the zone
