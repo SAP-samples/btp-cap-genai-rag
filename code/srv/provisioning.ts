@@ -3,10 +3,20 @@ import xsenv from "@sap/xsenv";
 import { Request } from "@sap/cds/apis/services";
 import { DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 
-import { ResourceGroupApi } from "./vendor/AI_CORE_API";
+import { ConfigurationApi, ConfigurationBaseData, DeploymentApi, ResourceGroupApi } from "./vendor/AI_CORE_API";
 import Automator from "./utils/automator";
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
+
+const SCENARIO_ID = "my-azure-openai-scenario";
+const CONFIGURATION_NAME = "my-azure-openai-configuration";
+const EXECUTABLE_ID = "my-azure-openai-proxy";
+const VERSION_ID = "1.0";
+
+interface AICoreApiHeaders extends Record<string, string> {
+    "Content-Type": string;
+    "AI-Resource-Group": string;
+}
 
 abstract class Provisioning {
     public register = (service: any) => {
@@ -19,7 +29,12 @@ abstract class Provisioning {
     private subscribe = async (req: Request, next: Function) => {
         console.log("Subscription data:", JSON.stringify(req.data));
 
-        const { subscriptionAppName : appName, subscribedSubdomain: subdomain, subscribedTenantId: tenant, subscriptionParams: params = {} } = req.data;
+        const {
+            subscriptionAppName: appName,
+            subscribedSubdomain: subdomain,
+            subscribedTenantId: tenant,
+            subscriptionParams: params = {}
+        } = req.data;
 
         console.log("Subscription Params: " + params);
 
@@ -33,12 +48,28 @@ abstract class Provisioning {
             await automator.deployTenantArtifacts();
 
             // Create AI Core Resource Group for tenant
-            const resourceGroupCreationResponse = await createResourceGroup(`${appName}-${tenant}`);
+            const resourceGroupId = `${tenant}-${appName}`;
+            const resourceGroupCreationResponse = await createResourceGroup(resourceGroupId);
             console.log(
                 `Resource Group ${resourceGroupCreationResponse?.resourceGroupId} for tenant ${resourceGroupCreationResponse?.tenantId} has been created successfully.`
             );
 
-            console.log("Success: Onboarding completed!");
+            const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+            const responseConfigurationCreation = await createConfiguration(
+                {
+                    name: CONFIGURATION_NAME,
+                    executableId: EXECUTABLE_ID,
+                    scenarioId: SCENARIO_ID,
+                    versionId: VERSION_ID
+                },
+                headers
+            );
+            if (responseConfigurationCreation.id) {
+                await createDeployment(responseConfigurationCreation.id, headers);
+                console.log("Success: Onboarding completed!");
+            } else {
+                console.log("Failed: Error during onboarding - Configuration not created well!");
+            }
         } catch (error: any) {
             console.error("Error: Automation skipped because of error during subscription");
             console.error(`Error: ${error.message}`);
@@ -50,7 +81,7 @@ abstract class Provisioning {
     private unsubscribe = async (req: Request, next: Function) => {
         console.log("Unsubscribe Data: ", JSON.stringify(req.data));
 
-        const { subscriptionAppName : appName, subscribedSubdomain: subdomain, subscribedTenantId: tenant } = req.data;
+        const { subscriptionAppName: appName, subscribedSubdomain: subdomain, subscribedTenantId: tenant } = req.data;
 
         await next();
 
@@ -59,8 +90,9 @@ abstract class Provisioning {
             await automator.undeployTenantArtifacts();
 
             // Delete AI Core Resource Group for tenant
-            await deleteResourceGroup(`${appName}-${tenant}`);
-            console.log(`Resource Group ${appName}-${tenant} deleted successfully.`);
+            const resourceGroupId = `${tenant}-${appName}`;
+            const response = await deleteResourceGroup(resourceGroupId);
+            console.log(`Resource Group ${resourceGroupId} deleted successfully.`, response);
 
             console.log("Success: Unsubscription completed!");
         } catch (error: any) {
@@ -83,7 +115,7 @@ abstract class Provisioning {
     };
 
     private getDependencies = async (_req: Request, next: Function) => {
-        const initialDependencies: Array<any> = await next() || [];
+        const initialDependencies: Array<any> = (await next()) || [];
         const services = xsenv.getServices({
             destination: { tag: "destination" }
         });
@@ -129,6 +161,7 @@ export { handleTenantSubscription };
  */
 const createResourceGroup = async (resourceGroupId: string) => {
     try {
+        // CREATE RESOURCE GROUP
         const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsCreate({
             resourceGroupId: resourceGroupId
         })
@@ -137,7 +170,6 @@ const createResourceGroup = async (resourceGroupId: string) => {
                 selectionStrategy: DestinationSelectionStrategies.alwaysProvider,
                 destinationName: AI_CORE_DESTINATION
             });
-        //@ts-ignore
         return response;
     } catch (e: any) {
         console.log(e.message);
@@ -177,4 +209,47 @@ const getResourceGroups = async () => {
     } catch (e: any) {
         console.log(e.message);
     }
+};
+
+/**
+ * CREATE CONFIGURATION IN RESOURCE GROUP
+ * @param configurationId
+ * @param headers
+ */
+const createConfiguration = async (configuration: ConfigurationBaseData, headers: AICoreApiHeaders) => {
+    //{ id: '2363ebb7-1649-4de1-aa4d-bddec257c100', message: 'Configuration created' }
+    const responseConfigurationCreation = await ConfigurationApi.configurationCreate({
+        ...configuration,
+        parameterBindings: [
+            {
+                key: "azureDeploymentURL",
+                value: "https://paa-gpt-01.openai.azure.com/openai/deployments/BTP-AUDIT-LOG/chat/completions?api-version=2023-05-15"
+            }
+        ]
+    })
+        .skipCsrfTokenFetching()
+        .addCustomHeaders(headers)
+        .execute({ destinationName: AI_CORE_DESTINATION });
+    return responseConfigurationCreation;
+};
+
+const createDeployment = async (configurationId: string, headers: AICoreApiHeaders) => {
+    const responseDeploymentCreation = await DeploymentApi.deploymentCreate({
+        configurationId: configurationId
+    })
+        .skipCsrfTokenFetching()
+        .addCustomHeaders(headers)
+        .execute({ destinationName: AI_CORE_DESTINATION });
+    console.log("Deployment creation response:", responseDeploymentCreation);
+
+    const responseDeploymentQuery = await DeploymentApi.deploymentQuery({
+        scenarioId: SCENARIO_ID,
+        //    status: "RUNNING",
+        $top: 1
+    })
+        .skipCsrfTokenFetching()
+        .addCustomHeaders(headers)
+        .execute({ destinationName: AI_CORE_DESTINATION });
+    console.log("Deployment query resp:", responseDeploymentQuery);
+    return responseDeploymentCreation;
 };
