@@ -9,7 +9,6 @@ export class PublicService extends ApplicationService {
     }
 
     private userInfo = (req: Request) => {
-        
         let results = {
             user: req.user.id,
             locale: req.locale,

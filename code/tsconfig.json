@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "lib": ["es2017", "dom"],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "allowJs": true,
+        "strict": true,
+        "strictNullChecks": false,
+        "strictPropertyInitialization": false,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "outDir": "./gen"
+    },
+    "exclude": ["./node_modules/**/*", "./router/**/*", "./broker/**/*"]
+}

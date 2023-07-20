@@ -3,8 +3,8 @@ import xsenv from "@sap/xsenv";
 import { Request } from "@sap/cds/apis/services";
 import { DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 
-const { ResourceGroupApi } = require("./vendor/AI_CORE_API");
-const Automator = require('./utils/automator');
+import { ResourceGroupApi } from "./vendor/AI_CORE_API";
+import Automator from "./utils/automator";
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
 
@@ -16,28 +16,24 @@ abstract class Provisioning {
         service.on("upgradeTenant", this.upgradeTenant);
         service.on("dependencies", this.getDependencies);
         console.log("INITIALIZED SUBSCRIPTION SERVICE");
-    }
+    };
 
     private subscribe = async (req: Request, next: Function) => {
         console.log("Subscription data:", JSON.stringify(req.data));
-    
-        const { 
-            subscribedSubdomain: subdomain, 
-            subscribedTenantId : tenant, 
-            subscriptionParams : params
-        }  = req.data;
+
+        const { subscribedSubdomain: subdomain, subscribedTenantId: tenant, subscriptionParams: params } = req.data;
 
         console.log("Subscription Params: " + params);
-        
-        const { custSubdomain : custdomain = null } = params || {};
+
+        const { custSubdomain: custdomain = null } = params || {};
         const tenantURL = this.getTenantUrl(subdomain, custdomain);
-    
+
         await next();
-    
+
         try {
             let automator = new Automator(tenant, subdomain, custdomain);
             await automator.deployTenantArtifacts();
-    
+
             // Create AI Core Resource Group for tenant
             const resourceGroupCreationResponse = await createResourceGroup(tenant);
             console.log(
@@ -45,7 +41,7 @@ abstract class Provisioning {
             );
             const resourceGroups = await getResourceGroups();
             console.log(`Resource Groups: ${JSON.stringify(resourceGroups)}`);
-    
+
             console.log("Success: Onboarding completed!");
         } catch (error: any) {
             console.error("Error: Automation skipped because of error during subscription");
@@ -53,25 +49,25 @@ abstract class Provisioning {
         }
 
         return tenantURL;
-    }
+    };
 
     private unsubscribe = async (req: Request, next: Function) => {
         console.log("Unsubscribe Data: ", JSON.stringify(req.data));
-    
+
         const { subscribedSubdomain: subdomain, subscribedTenantId: tenant } = req.data;
-    
+
         await next();
-    
+
         try {
             let automator = new Automator(tenant, subdomain);
             await automator.undeployTenantArtifacts();
-    
+
             // Delete AI Core Resource Group for tenant
             await deleteResourceGroup(tenant);
             console.log(`Resource Group ${tenant} deleted successfully.`);
             let resourceGroups = await getResourceGroups();
             console.log("Resource Groups: " + JSON.stringify(resourceGroups));
-    
+
             console.log("Success: Unsubscription completed!");
         } catch (error: any) {
             console.error("Error: Automation skipped because of error during unsubscription");
@@ -79,7 +75,7 @@ abstract class Provisioning {
         }
         return tenant;
     };
-    
+
     private upgradeTenant = async (req: Request, next: Function) => {
         await next();
         const { instanceData, deploymentOptions } = cds.context.http?.req?.body || {};
@@ -104,30 +100,32 @@ abstract class Provisioning {
             // @ts-ignore
             { xsappname: services.destination.xsappname }
         ]);
-    
+
         console.log("SaaS Dependencies:", JSON.stringify(dependencies));
         return dependencies;
     };
 
-    protected abstract getTenantUrl (subdomain : String, custdomain? : String) : string;
-    
+    protected abstract getTenantUrl(subdomain: String, custdomain?: String): string;
 }
 
 class Kyma extends Provisioning {
-    protected getTenantUrl = (subdomain : String, custdomain : String) => {
-        if(custdomain && custdomain !== '') { 
-            console.log(`Custom subdomain - ${custdomain} - used for tenant Url!`)
-            return "https:\/\/" + `${custdomain}.${process.env["CLUSTER_DOMAIN"]}`
-        }else{
-            return "https:\/\/" + `${subdomain}-${process.env["ROUTER_NAME"]}-${process.env["KYMA_NAMESPACE"]}.${process.env["CLUSTER_DOMAIN"]}`;
+    protected getTenantUrl = (subdomain: String, custdomain: String) => {
+        if (custdomain && custdomain !== "") {
+            console.log(`Custom subdomain - ${custdomain} - used for tenant Url!`);
+            return "https://" + `${custdomain}.${process.env["CLUSTER_DOMAIN"]}`;
+        } else {
+            return (
+                "https://" +
+                `${subdomain}-${process.env["ROUTER_NAME"]}-${process.env["KYMA_NAMESPACE"]}.${process.env["CLUSTER_DOMAIN"]}`
+            );
         }
-    }
+    };
 }
 
 class CloudFoundry extends Provisioning {
-    protected getTenantUrl = (subdomain : String) => {
+    protected getTenantUrl = (subdomain: String) => {
         return `https://${subdomain}${process.env.tenantSeparator}${process.env.appDomain}`;
-    }
+    };
 }
 
 export default process.env.VCAP_APPLICATION ? CloudFoundry : Kyma;
