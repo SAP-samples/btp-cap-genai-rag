@@ -1,0 +1,136 @@
+{
+    "requires": {
+        " ---------------------": "---",
+        "--- MTXs Settings ----": "---",
+        "--------------------- ": "---",
+        "multitenancy": true,
+        "toggles": true,
+        "extensibility": true,
+        "cds.xt.ExtensibilityService": {
+            "element-prefix": [
+                "x_"
+            ],
+            "extension-allowlist": [
+                {
+                    "for": [
+                        "*"
+                    ]
+                }
+            ]
+        },
+        "[development]": {
+            "multitenancy": false,
+            "extensibility": false,
+            "toggles": false
+        },
+        "[local-with-mtx]": {
+            "multitenancy": true,
+            "extensibility": true,
+            "toggles": true
+        },
+        " ---------------------------": "---",
+        "--- Shared HDI Container ---": "---",
+        "--------------------------- ": "---",
+        "[production]": {
+            "hana": {
+                "kind": "hana-cloud",
+                "vcap": {
+                    "name": "hana",
+                    "tags": [
+                        "hana"
+                    ],
+                    "plan": "hdi-shared",
+                    "label": "hana"
+                }
+            }
+        },
+        "------------------ ": "---",
+        "--- DB Settings ---": "---",
+        " ------------------": "---",
+        "db": {
+            "kind": "hana-cloud",
+            "vcap": {
+                "label": "service-manager",
+                "plan": "container"
+            },
+            "pool": {
+                "acquireTimeoutMillis": 10000,
+                "min": 0,
+                "max": 100,
+                "fifo": true
+            },
+            "[development]": {
+                "kind": "sql"
+            },
+            "[local-with-mtx]": {
+                "kind": "sql-mt",
+                "beta": {
+                    "sqlMigration": "true"
+                }
+            }
+        },
+        "-------------------- ": "---",
+        "--- Auth Settings ---": "---",
+        " --------------------": "---",
+        "auth": {
+            "kind": "xsuaa",
+            "[development]": {
+                "kind": "mock",
+                "users": {
+                    "alice": {
+                        "roles": [
+                            "Admin",
+                            "Member"
+                        ]
+                    },
+                    "carol": {
+                        "roles": [
+                            "Member"
+                        ]
+                    }
+                }
+            },
+            "[local-with-mtx]": {
+                "kind": "mock",
+                "users": {
+                    "alice": {
+                        "tenant": "t1",
+                        "roles": [
+                            "Admin",
+                            "cds.Subscriber",
+                            "cds.ExtensionDeveloper"
+                        ]
+                    },
+                    "carol": {
+                        "tenant": "t1",
+                        "roles": [
+                            "Member"
+                        ]
+                    },
+                    "bob": {
+                        "tenant": "t1-ext",
+                        "roles": [
+                            "Admin",
+                            "cds.Subscriber",
+                            "cds.ExtensionDeveloper"
+                        ]
+                    }
+                }
+            }
+        },
+        "---------------------- ": "---",
+        "--- Model Settings ----": "---",
+        " ----------------------": "---",
+        "db-ext": {
+            "model": "db/sqlite",
+            "[production]": {
+                "model": "db/hana"
+            }
+        },
+        "csv": {
+            "[csv]": {
+                "model": "test"
+            }
+        }
+    }
+}

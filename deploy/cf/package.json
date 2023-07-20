@@ -1,0 +1,19 @@
+{
+  "name": "aisaas",
+  "version": "0.0.1",
+  "repository": "https://github.com/sap-samples/btp-cap-multitenant-ai",
+  "license": "Apache License 2.0",
+  "description": "AI SaaS",
+  "scripts": {
+    "---BUILD---": "",
+    "build": "npm run build:deps && npm run build:cds && npm run build:ts && npm run cleanup:ts",
+    "build:ts": "tsc -p ../../code/srv && tsc -p ../../code/api",
+    "build:cds": "cds build -in ../../code --production",
+    "build:deps": "npm i --include=dev --prefix=../../code",
+    "cleanup:ts": "npx rimraf ../../code/gen/**/**/*.ts && npx rimraf ../../code/gen/**/**/tsconfig.json",
+    "---DEPLOY---": "",
+    "build:mbt": "mbt build -p=cf -t=./mta_archives --mtar=saas-genai.mtar",
+    "deploy": "cf deploy mta_archives/saas-genai.mtar -e ./mtaext/free-tier.mtaext",
+    "deploy:private": "cf deploy mta_archives/saas-genai.mtar -e ./mtaext/tfe-private.mtaext"
+  }
+}

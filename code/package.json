@@ -1,0 +1,165 @@
+{
+    "name": "aisaas",
+    "version": "0.0.1",
+    "repository": "https://github.com/SAP-samples/btp-cap-multitenant-ai",
+    "license": "Apache-2.0",
+    "description": "AI SaaS",
+    "engines": {
+        "node": "^18.x"
+    },
+    "dependencies": {
+        "@sap-cloud-sdk/connectivity": "^3.2.0",
+        "@sap-cloud-sdk/http-client": "^3.2.0",
+        "@sap-cloud-sdk/openapi-generator": "^3.2.0",
+        "@sap-cloud-sdk/openapi": "^3.2.0",
+        "@sap/audit-logging": "^5",
+        "@sap/cds": "6.8.3",
+        "@sap/cds-mtxs": "1.8.3",
+        "@sap/cds-odata-v2-adapter-proxy": "^1",
+        "@sap/xsenv": "^3.4.0",
+        "@sap/xssec": "^3.2.17",
+        "@kubernetes/client-node": "^0.18.1",
+        "axios": "^0.27.2",
+        "cds-swagger-ui-express": "^0.5.0",
+        "cf-nodejs-logging-support": "^6",
+        "cfenv": "^1",
+        "cors": "^2.8.5",
+        "hdb": "^0.19.5",
+        "express": "^4",
+        "node-fetch": "^2.6.7",
+        "node-jose": "^2.1",
+        "passport": "^0.6.0"
+    },
+    "devDependencies": {
+        "@cap-js/sqlite": "^0.1.0",
+        "@sap/approuter": "^14.1.1",
+        "@sap/cds-common-content": "1.0.1",
+        "@sap/html5-app-deployer": "^5.0.0",
+        "@sap/html5-repo-mock": "^2.1.1",
+        "@sap/sbf": "^6.5.2",
+        "@sap/ux-specification": "^1.96.4",
+        "@types/cors": "^2.8.13",
+        "@types/express": "^4.17.17",
+        "@types/sap__xsenv": "^3.3.0",
+        "@types/node": "^20.4.2",
+        "chai": "^4.3.7",
+        "chai-as-promised": "^7.1.1",
+        "chai-subset": "^1.6.0",
+        "jest": "^29.0.1",
+        "mbt": "^1.2.18",
+        "rimraf": "^5.0.1",
+        "shx": "^0.3.4",
+        "sqlite3": "^5.1.6",
+        "ui5-task-zipper": "^0.5.1"
+    },
+    "scripts": {
+        "start": "cds run --production",
+        "dev-start": "cds run",
+        "dev-start-mtx": "cds run --profile local-with-mtx",
+        "api-start-local": "cds serve srv-api/ db --with srv-api/api-service.js",
+        "api-start-hybrid": "cds serve srv-api/ --with srv-api/api-service.js --production",
+        "test": "jest",
+        "deploy:dev": "node node_modules/@sap/hdi-deploy/ --root gen/db",
+        "--BUILD--": "",
+        "build": "npm run build:deps && npm run build:cds && npm run build:ts && npm run cleanup:ts",
+        "build:ts": "tsc -p srv && tsc -p api",
+        "build:cds": "cds build --production",
+        "build:deps": "npm i --include=dev",
+        "cleanup:ts": "npx rimraf ./gen/**/**/*.ts && npx rimraf ./gen/**/**/tsconfig.json",
+        "--TEST--": "",
+        "watch": "cds-ts watch --profile hybrid",
+        "cds2types": "cd srv && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
+    },
+    "eslintConfig": {
+        "extends": "eslint:recommended",
+        "env": {
+            "es2020": true,
+            "node": true,
+            "jest": true,
+            "mocha": true
+        },
+        "globals": {
+            "SELECT": true,
+            "INSERT": true,
+            "UPDATE": true,
+            "DELETE": true,
+            "CREATE": true,
+            "DROP": true,
+            "CDL": true,
+            "CQL": true,
+            "CXL": true,
+            "cds": true
+        },
+        "rules": {
+            "no-console": "off",
+            "require-atomic-updates": "off"
+        }
+    },
+    "prettier": {
+        "arrowParens": "always",
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": false,
+        "trailingComma": "none",
+        "printWidth": 120
+    },
+    "cds": {
+        "features": {
+            "[production]": {
+                "kibana_formatter": true
+            }
+        },
+        "hana": {
+            "deploy-format": "hdbtable"
+        },
+        "build": {
+            "tasks": [
+                {
+                    "for": "hana",
+                    "options": {
+                        "model": [
+                            "db",
+                            "api",
+                            "db/hana",
+                            "@sap/cds-mtxs/srv/bootstrap",
+                            "@sap/cds-mtxs/db/extensions",
+                            "@sap/cds-mtxs/srv/extensibility-service"
+                        ]
+                    }
+                },
+                {
+                    "for": "nodejs",
+                    "src": "srv",
+                    "options": {
+                        "model": [
+                            "srv",
+                            "db",
+                            "db/hana",
+                            "@sap/cds-mtxs/srv/bootstrap",
+                            "@sap/cds-mtxs/db/extensions",
+                            "@sap/cds-mtxs/srv/extensibility-service"
+                        ]
+                    }
+                },
+                {
+                    "for": "nodejs",
+                    "src": "api",
+                    "options": {
+                        "model": "api"
+                    }
+                },
+                {
+                    "for": "mtx",
+                    "src": "srv"
+                },
+                {
+                    "for": "hana",
+                    "src": "db-com",
+                    "options": {
+                        "model": "db-com"
+                    }
+                }
+            ]
+        }
+    }
+}
