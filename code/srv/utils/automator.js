@@ -152,7 +152,7 @@ class TenantAutomator {
 
 
 class Kyma extends TenantAutomator {
-    constructor(tenant, subdomain, custdomain){
+    constructor(tenant, subdomain, custdomain = null){
         try{
             super(tenant, subdomain, custdomain);
             this.serviceBroker = {
@@ -198,7 +198,7 @@ class Kyma extends TenantAutomator {
 
 class CloudFoundry extends TenantAutomator {
 
-    constructor(tenant, subdomain, custdomain){
+    constructor(tenant, subdomain, custdomain = null){
         try{
             super(tenant, subdomain, custdomain);
 
