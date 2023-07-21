@@ -17,6 +17,7 @@ interface AICoreApiHeaders extends Record<string, string> {
     "Content-Type": string;
     "AI-Resource-Group": string;
 }
+const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
 
 abstract class Provisioning {
     public register = (service: any) => {
@@ -54,6 +55,7 @@ abstract class Provisioning {
                 `Resource Group ${resourceGroupCreationResponse?.resourceGroupId} for tenant ${resourceGroupCreationResponse?.tenantId} has been created successfully.`
             );
 
+            await delay(10000);
             const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
             const responseConfigurationCreation = await createConfiguration(
                 {
@@ -65,6 +67,7 @@ abstract class Provisioning {
                 headers
             );
             if (responseConfigurationCreation.id) {
+                await delay(5000);
                 await createDeployment(responseConfigurationCreation.id, headers);
                 console.log("Success: Onboarding completed!");
             } else {
