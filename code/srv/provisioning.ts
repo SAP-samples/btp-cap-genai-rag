@@ -1,13 +1,17 @@
 import cds from "@sap/cds";
 import xsenv from "@sap/xsenv";
+
+import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
+import { decodeJwt } from "@sap-cloud-sdk/connectivity";
+
 import { Request } from "@sap/cds/apis/services";
-import { DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
+import { HttpResponse } from "@sap-cloud-sdk/http-client";
+import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 
 import { ConfigurationApi, ConfigurationBaseData, DeploymentApi, ResourceGroupApi } from "./vendor/AI_CORE_API";
 import Automator from "./utils/automator";
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
-
 const SCENARIO_ID = "my-azure-openai-scenario";
 const CONFIGURATION_NAME = "my-azure-openai-configuration";
 const EXECUTABLE_ID = "my-azure-openai-proxy";
@@ -17,7 +21,14 @@ interface AICoreApiHeaders extends Record<string, string> {
     "Content-Type": string;
     "AI-Resource-Group": string;
 }
+
 const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
+
+const aiCoreDestination = xsenv.filterServices({ label: 'aicore' })[0] ?
+      { destinationName: xsenv.filterServices({ label: 'aicore' })[0].name, serviceBindingTransformFn: aicoreBindingToDestination }
+    : { selectionStrategy: DestinationSelectionStrategies.alwaysProvider, destinationName: AI_CORE_DESTINATION }
+
+console.log(aiCoreDestination);
 
 abstract class Provisioning {
     public register = (service: any) => {
@@ -164,15 +175,12 @@ export { handleTenantSubscription };
  */
 const createResourceGroup = async (resourceGroupId: string) => {
     try {
-        // CREATE RESOURCE GROUP
         const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsCreate({
             resourceGroupId: resourceGroupId
         })
             .skipCsrfTokenFetching()
-            .execute({
-                selectionStrategy: DestinationSelectionStrategies.alwaysProvider,
-                destinationName: AI_CORE_DESTINATION
-            });
+            .execute(aiCoreDestination);
+        //@ts-ignore
         return response;
     } catch (e: any) {
         console.log(e.message);
@@ -188,10 +196,7 @@ const deleteResourceGroup = async (resourceGroupId: string) => {
     try {
         const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsDelete(resourceGroupId)
             .skipCsrfTokenFetching()
-            .execute({
-                selectionStrategy: DestinationSelectionStrategies.alwaysProvider,
-                destinationName: AI_CORE_DESTINATION
-            });
+            .execute(aiCoreDestination);
         return response;
     } catch (e: any) {
         console.log(e.message);
@@ -204,10 +209,7 @@ const deleteResourceGroup = async (resourceGroupId: string) => {
  */
 const getResourceGroups = async () => {
     try {
-        const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll().skipCsrfTokenFetching().execute({
-            destinationName: AI_CORE_DESTINATION,
-            selectionStrategy: DestinationSelectionStrategies.alwaysProvider
-        });
+        const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll().skipCsrfTokenFetching().execute(aiCoreDestination);
         return response.data;
     } catch (e: any) {
         console.log(e.message);
@@ -232,17 +234,18 @@ const createConfiguration = async (configuration: ConfigurationBaseData, headers
     })
         .skipCsrfTokenFetching()
         .addCustomHeaders(headers)
-        .execute({ destinationName: AI_CORE_DESTINATION });
+        .execute(aiCoreDestination);
     return responseConfigurationCreation;
 };
 
 const createDeployment = async (configurationId: string, headers: AICoreApiHeaders) => {
+
     const responseDeploymentCreation = await DeploymentApi.deploymentCreate({
         configurationId: configurationId
     })
         .skipCsrfTokenFetching()
         .addCustomHeaders(headers)
-        .execute({ destinationName: AI_CORE_DESTINATION });
+        .execute(aiCoreDestination);
     console.log("Deployment creation response:", responseDeploymentCreation);
 
     const responseDeploymentQuery = await DeploymentApi.deploymentQuery({
@@ -252,7 +255,79 @@ const createDeployment = async (configurationId: string, headers: AICoreApiHeade
     })
         .skipCsrfTokenFetching()
         .addCustomHeaders(headers)
-        .execute({ destinationName: AI_CORE_DESTINATION });
+        .execute(aiCoreDestination);
     console.log("Deployment query resp:", responseDeploymentQuery);
     return responseDeploymentCreation;
 };
+
+/**
+ * CREATE DESTINATION FROM AI CORE SERVICE BINDING
+ * @param service
+ * @param options
+ */
+async function aicoreBindingToDestination(
+    service: Service,
+): Promise<Destination> {
+
+    /*
+    // serviceToken function fails due to 403 CSRF error
+    const transformedService = { ...service, credentials: { ...service.credentials } };
+    const token = await serviceToken(transformedService);
+    */
+
+    const data = new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: service.credentials.clientid,
+        client_secret: service.credentials.clientsecret,
+    });
+
+    const token: HttpResponse = await executeHttpRequest(
+        { url: service.credentials.url + "/oauth/token" },
+        {
+            url: service.credentials.url + "/oauth/token",
+            method: "post",
+            data: data,
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
+        },
+        { fetchCsrfToken: false }
+    );
+
+    return buildClientCredentialsDestination(
+        token.data.access_token,
+        service.credentials.serviceurls.AI_API_URL + '/v2',
+        service.name
+    );
+}
+
+/**
+ * BUILD CLIENT CREDENTIALS FOR DESTINATION
+ * @param token
+ * @param url
+ * @param name
+ */
+function buildClientCredentialsDestination(
+    token: string,
+    url: string,
+    name: string
+): any {
+    const expirationTime = decodeJwt(token).exp;
+    const expiresIn = expirationTime
+        ? Math.floor((expirationTime * 1000 - Date.now()) / 1000).toString(10)
+        : undefined;
+    return {
+        url,
+        name,
+        authentication: 'OAuth2ClientCredentials',
+        authTokens: [
+            {
+                value: token,
+                type: 'bearer',
+                expiresIn,
+                http_header: { key: 'Authorization', value: `Bearer ${token}` },
+                error: null
+            }
+        ]
+    }
+}
