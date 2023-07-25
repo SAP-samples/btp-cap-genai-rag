@@ -86,6 +86,7 @@ modules:
                 - encrypt
                 - list
       - name: aisaas-logging
+      - name: aisaas-aicore
       - name: aisaas-registry
       - name: aisaas-service-manager
       - name: aisaas-service-manager-admin
