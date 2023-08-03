@@ -30,7 +30,7 @@ export class PublicService extends ApplicationService {
 
     private inference = async (req: Request) => {
         const { tenant } = req;
-        const prompt = "";
+        const { prompt } = req.data;
         return aiCore.completion(prompt, tenant);
     };
 }

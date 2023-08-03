@@ -9,5 +9,7 @@ service PublicService {
         modifiedBy
     }
 
-    function inference() returns {};
+    action inference(prompt : String) returns {
+        text : String
+    };
 };
