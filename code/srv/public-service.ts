@@ -1,11 +1,13 @@
 import { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 
+import * as aiCore from "./ai-core-tooling";
 export class PublicService extends ApplicationService {
     async init() {
         await super.init();
 
         this.on("userInfo", this.userInfo);
+        this.on("inference", this.inference);
     }
 
     private userInfo = (req: Request) => {
@@ -24,5 +26,11 @@ export class PublicService extends ApplicationService {
         };
 
         return results;
+    };
+
+    private inference = async (req: Request) => {
+        const { tenant } = req;
+        const prompt = "";
+        return aiCore.completion(prompt, tenant);
     };
 }
