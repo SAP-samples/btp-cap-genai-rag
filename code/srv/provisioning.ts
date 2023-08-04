@@ -5,11 +5,6 @@ import { Request } from "@sap/cds/apis/services";
 import Automator from "./utils/automator";
 import * as aiCore from "./ai-core-tooling";
 
-const SCENARIO_ID = "my-azure-openai-scenario";
-const CONFIGURATION_NAME = "my-azure-openai-configuration";
-const EXECUTABLE_ID = "my-azure-openai-proxy";
-const VERSION_ID = "1.0";
-
 const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
 abstract class Provisioning {
     public register = (service: any) => {
@@ -49,15 +44,7 @@ abstract class Provisioning {
 
             await delay(10000);
             const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-            const responseConfigurationCreation = await aiCore.createConfiguration(
-                {
-                    name: CONFIGURATION_NAME,
-                    executableId: EXECUTABLE_ID,
-                    scenarioId: SCENARIO_ID,
-                    versionId: VERSION_ID
-                },
-                headers
-            );
+            const responseConfigurationCreation = await aiCore.createConfiguration({}, headers);
             if (responseConfigurationCreation.id) {
                 await delay(5000);
                 await aiCore.createDeployment(responseConfigurationCreation.id, headers);

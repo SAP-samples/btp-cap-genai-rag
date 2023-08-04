@@ -15,6 +15,7 @@ export default class BTPAzureOpenAILLM extends LLM {
 
     async _call(prompt: string): Promise<string> {
         const result = await aiCore.completion(prompt, this.tenant);
+        // metering would be possible here
         return result.text;
     }
 }

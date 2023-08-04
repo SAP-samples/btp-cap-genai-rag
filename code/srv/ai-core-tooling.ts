@@ -1,4 +1,3 @@
-import { Request } from "@sap/cds/apis/services";
 import xsenv from "@sap/xsenv";
 import { HttpResponse } from "@sap-cloud-sdk/http-client";
 import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
@@ -13,6 +12,9 @@ interface AICoreApiHeaders extends Record<string, string> {
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
 const SCENARIO_ID = "my-azure-openai-scenario";
+const CONFIGURATION_NAME = "my-azure-openai-configuration";
+const EXECUTABLE_ID = "my-azure-openai-proxy";
+const VERSION_ID = "1.0";
 
 const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
     ? {
@@ -147,6 +149,10 @@ export const getResourceGroups = async () => {
 export const createConfiguration = async (configuration: ConfigurationBaseData, headers: AICoreApiHeaders) => {
     //{ id: '2363ebb7-1649-4de1-aa4d-bddec257c100', message: 'Configuration created' }
     const responseConfigurationCreation = await ConfigurationApi.configurationCreate({
+        name: CONFIGURATION_NAME,
+        executableId: EXECUTABLE_ID,
+        scenarioId: SCENARIO_ID,
+        versionId: VERSION_ID,
         ...configuration,
         parameterBindings: [
             {
