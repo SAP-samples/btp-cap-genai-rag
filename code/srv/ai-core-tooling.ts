@@ -33,34 +33,37 @@ export const completion = async (prompt: string, tenant: string) => {
     // @ts-ignore
     const appName = services?.registry?.appName;
     // Create AI Core Resource Group for tenant
-    const resourceGroupId = `${tenant}-${appName}`; //"043145ac-5713-4eb6-9c60-c5dcc90324f9-aisaas-dev-tfe-saas-ai-dev-srumi98b";
+    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
+        const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
+        const payload: any = {
+            messages: [
+                {
+                    role: "system",
+                    content:
+                        'Assistant is an intelligent chatbot designed to help users answer their tax related questions.\n\nInstructions:\n- Only answer questions related to taxes.\n- If you\'re unsure of an answer, you can say "I don\'t know" or "I\'m not sure" and recommend users go to the IRS website for more information.'
+                },
+                { role: "user", content: prompt }
+            ],
+            max_tokens: 100,
+            temperature: 0.0,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            stop: "null"
+        };
+        const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+        const response: any = await aiCoreService.send({
+            // @ts-ignore
+            query: `POST /inference/deployments/${deploymentId}/v1/predict`,
+            data: payload,
+            headers: headers
+        });
+
+        return { text: response["choices"][0]?.message?.content };
+    } else {
+        return { text: "No deployment found for this tenant" };
     }
-    const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
-    const payload: any = {
-        messages: [
-            {
-                role: "system",
-                content:
-                    'Assistant is an intelligent chatbot designed to help users answer their tax related questions.\n\nInstructions:\n- Only answer questions related to taxes.\n- If you\'re unsure of an answer, you can say "I don\'t know" or "I\'m not sure" and recommend users go to the IRS website for more information.'
-            },
-            { role: "user", content: prompt }
-        ],
-        max_tokens: 100,
-        temperature: 0.0,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-        stop: "null"
-    };
-    const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-    const response: any = await aiCoreService.send({
-        // @ts-ignore
-        query: `POST /inference/deployments/${deploymentId}/v1/predict`,
-        data: payload,
-        headers: headers
-    });
-    return { text: response["choices"][0]?.message?.content };
 };
 
 /**

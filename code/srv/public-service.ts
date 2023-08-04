@@ -1,7 +1,9 @@
 import { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 
-import * as aiCore from "./ai-core-tooling";
+import { PromptTemplate } from "langchain/prompts";
+import BTPAzureOpenAILLM from "./langchain/BTPAzureOpenAILLM";
+import { LLMChain } from "langchain";
 export class PublicService extends ApplicationService {
     async init() {
         await super.init();
@@ -29,8 +31,21 @@ export class PublicService extends ApplicationService {
     };
 
     private inference = async (req: Request) => {
-        const { tenant } = req;
-        const { prompt } = req.data;
-        return aiCore.completion(prompt, tenant);
+        try {
+            const { tenant } = req;
+            const { prompt } = req.data;
+            const llm = new BTPAzureOpenAILLM(tenant);
+
+            const template = `Question: {question}
+            
+            Answer: Let's think step by step.`;
+
+            const promptTemplate = PromptTemplate.fromTemplate(template);
+            const llmChain = new LLMChain({ llm: llm, prompt: promptTemplate });
+            const response = await llmChain.call({ question: prompt });
+            return response;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+        }
     };
 }
