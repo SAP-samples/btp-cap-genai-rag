@@ -5,17 +5,13 @@
         "--------------------- ": "---",
         "[hybrid]": {
             "multitenancy": true,
-            "extensibility": true,
+            "extensibility": false,
             "toggles": true,
             "cds.xt.ExtensibilityService": {
-                "element-prefix": [
-                    "x_"
-                ],
+                "element-prefix": ["x_"],
                 "extension-allowlist": [
                     {
-                        "for": [
-                            "*"
-                        ]
+                        "for": ["*"]
                     }
                 ]
             },
@@ -88,15 +84,10 @@
                 "kind": "mocked",
                 "users": {
                     "alice": {
-                        "roles": [
-                            "Admin",
-                            "Member"
-                        ]
+                        "roles": ["Admin", "Member"]
                     },
                     "carol": {
-                        "roles": [
-                            "Member"
-                        ]
+                        "roles": ["Member"]
                     }
                 }
             }
