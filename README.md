@@ -11,6 +11,23 @@ Repo to be moved to https://github.com/SAP-samples/ prior to TechEd 2023
 ![Current Architecture Draft](./docs/architecture/draft_current_arch.png)
 ![Target Architecture Draft](./docs/architecture/draft_target_arch.png)
 
+## Local testing
+
+cf csk dev-aisaas-uaa dev-aisaas-uaa-key
+cf csk dev-aisaas-aicore dev-aisaas-aicore-key
+cf csk dev-aisaas-credstore dev-aisaas-credstore-key
+cf csk dev-aisaas-registry dev-aisaas-registry-key
+cf csk dev-aisaas-destination dev-aisaas-destination-key
+cf csk dev-aisaas-service-manager dev-aisaas-service-manager-key 
+cf csk dev-aisaas-service-manager-admin dev-aisaas-service-manager-admin-key 
+
+cds bind -2 dev-aisaas-destination,dev-aisaas-uaa --for hybrid --output-file .cdsrc-private.json
+cds bind credstore -2 dev-aisaas-credstore --kind credstore --for hybrid --output-file .cdsrc-private.json
+cds bind saas-registry -2 dev-aisaas-registry --kind saas-registry --for hybrid --output-file .cdsrc-private.json
+cds bind sm-container -2 dev-aisaas-service-manager --kind service-manager --for hybrid --output-file .cdsrc-private.json
+cds bind sm-admin -2 dev-aisaas-service-manager-admin --kind service-manager --for hybrid --output-file .cdsrc-private.json
+
+
 ## How to obtain support
 
 [Create an issue](https://github.com/SAP-samples/btp-cap-multitenant-ai/issues) in this repository if you find a bug or have questions about the content.

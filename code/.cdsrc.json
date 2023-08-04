@@ -3,121 +3,69 @@
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
-        "multitenancy": true,
-        "toggles": true,
-        "extensibility": true,
-        "cds.xt.ExtensibilityService": {
-            "element-prefix": ["x_"],
-            "extension-allowlist": [
-                {
-                    "for": ["*"]
+        "[hybrid]": {
+            "multitenancy": true,
+            "extensibility": true,
+            "toggles": true,
+            "cds.xt.ExtensibilityService": {
+                "element-prefix": [
+                    "x_"
+                ],
+                "extension-allowlist": [
+                    {
+                        "for": [
+                            "*"
+                        ]
+                    }
+                ]
+            },
+            "PROVIDER_AI_CORE_DESTINATION": {
+                "kind": "rest",
+                "credentials": {
+                    "destination": "PROVIDER_AI_CORE_DESTINATION"
                 }
-            ]
-        },
-        "custom-service:dev-aisaas-registry": {
-            "binding": {
-                "type": "cf",
-                "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
-                "org": "tfe-saas-ai-dev-srumi98b",
-                "space": "dev",
-                "instance": "dev-aisaas-registry",
-                "key": "dev-aisaas-registry-key",
-                "resolved": false
-            },
-            "vcap": {
-                "name": "custom-service:dev-aisaas-registry"
             }
-        },
-        "destinations": {
-            "binding": {
-                "type": "cf",
-                "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
-                "org": "tfe-saas-ai-dev-srumi98b",
-                "space": "dev",
-                "instance": "dev-aisaas-destination",
-                "key": "dev-aisaas-destination-key",
-                "resolved": false
-            },
-            "kind": "destinations",
-            "vcap": {
-                "name": "destinations"
-            }
-        },
-        "PROVIDER_AI_CORE_DESTINATION": {
-            "kind": "rest",
-            "credentials": {
-                "destination": "PROVIDER_AI_CORE_DESTINATION"
-            }
-        },
-        "[development]": {
-            "multitenancy": false,
-            "extensibility": false,
-            "toggles": false
         },
         "[local-with-mtx]": {
             "multitenancy": true,
             "extensibility": true,
             "toggles": true
         },
-        " ---------------------------": "---",
-        "--- Shared HDI Container ---": "---",
-        "--------------------------- ": "---",
-        "[production]": {
-            "hana": {
-                "kind": "hana-cloud",
-                "vcap": {
-                    "name": "hana",
-                    "tags": ["hana"],
-                    "plan": "hdi-shared",
-                    "label": "hana"
-                }
-            }
+        "[development]": {
+            "multitenancy": false,
+            "extensibility": false,
+            "toggles": false
         },
         "------------------ ": "---",
         "--- DB Settings ---": "---",
         " ------------------": "---",
         "db": {
-            "kind": "hana-cloud",
-            "vcap": {
-                "label": "service-manager",
-                "plan": "container"
-            },
-            "pool": {
-                "acquireTimeoutMillis": 10000,
-                "min": 0,
-                "max": 100,
-                "fifo": true
-            },
-            "[development]": {
-                "kind": "sql"
+            "[hybrid]": {
+                "kind": "hana",
+                "vcap": {
+                    "label": "service-manager",
+                    "plan": "container"
+                }
             },
             "[local-with-mtx]": {
                 "kind": "sql-mt",
                 "beta": {
                     "sqlMigration": "true"
                 }
+            },
+            "[development]": {
+                "kind": "sql"
             }
         },
         "-------------------- ": "---",
         "--- Auth Settings ---": "---",
         " --------------------": "---",
         "auth": {
-            "kind": "xsuaa",
-            "[development]": {
-                "kind": "mock",
-                "users": {
-                    "alice": {
-                        "roles": ["Admin", "Member"],
-                        "password": "helloworld"
-                    },
-                    "carol": {
-                        "roles": ["Member"],
-                        "password": "helloworld"
-                    }
-                }
+            "[hybrid]": {
+                "kind": "xsuaa"
             },
             "[local-with-mtx]": {
-                "kind": "mock",
+                "kind": "mocked",
                 "users": {
                     "alice": {
                         "tenant": "t1",
@@ -135,20 +83,22 @@
                         "password": "helloworld"
                     }
                 }
-            }
-        },
-        "---------------------- ": "---",
-        "--- Model Settings ----": "---",
-        " ----------------------": "---",
-        "db-ext": {
-            "model": "db/sqlite",
-            "[production]": {
-                "model": "db/hana"
-            }
-        },
-        "csv": {
-            "[csv]": {
-                "model": "test"
+            },
+            "[development]": {
+                "kind": "mocked",
+                "users": {
+                    "alice": {
+                        "roles": [
+                            "Admin",
+                            "Member"
+                        ]
+                    },
+                    "carol": {
+                        "roles": [
+                            "Member"
+                        ]
+                    }
+                }
             }
         }
     }
