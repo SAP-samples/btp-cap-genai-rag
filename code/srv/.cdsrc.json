@@ -15,6 +15,9 @@
                 }
             ]
         },
+        "postgres": {
+            "kind": "postgresql-db"
+        },
         "hana": {
             "kind": "hana-cloud",
             "vcap": {

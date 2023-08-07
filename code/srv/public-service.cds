@@ -12,4 +12,6 @@ service PublicService {
     action inference(prompt : String) returns {
         text : String
     };
+    
+    function pgvalue() returns String;
 };

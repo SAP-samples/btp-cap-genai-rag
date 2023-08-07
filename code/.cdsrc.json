@@ -20,17 +20,40 @@
                 "credentials": {
                     "destination": "PROVIDER_AI_CORE_DESTINATION"
                 }
+            },
+            "postgres": {
+                "kind": "postgresql-db"
             }
         },
         "[local-with-mtx]": {
             "multitenancy": true,
             "extensibility": true,
-            "toggles": true
+            "toggles": true,
+            "postgres": {
+                "kind": "postgres",
+                "credentials": {
+                  "hostname": "localhost",
+                  "port": 5432,
+                  "username": "postgres",
+                  "password": "postgres",
+                  "dbname": "postgres"
+                }
+            }
         },
         "[development]": {
             "multitenancy": false,
             "extensibility": false,
-            "toggles": false
+            "toggles": false,
+            "postgres": {
+              "kind": "postgres",
+              "credentials": {
+                "hostname": "localhost",
+                "port": 5432,
+                "username": "postgres",
+                "password": "postgres",
+                "dbname": "postgres"
+              }
+            }
         },
         "------------------ ": "---",
         "--- DB Settings ---": "---",
