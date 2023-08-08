@@ -36,9 +36,9 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
  * @returns the text completion
  */
 export const completion = async (prompt: string, tenant: string) => {
-    const services = xsenv.getServices({ registry: { label: "saas-registry" } });
+    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name  === "saas-registry")
     // @ts-ignore
-    const appName = services?.registry?.appName;
+    const appName = services?.credentials?.appName;
     // Create AI Core Resource Group for tenant
     const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
@@ -73,12 +73,13 @@ export const completion = async (prompt: string, tenant: string) => {
     }
 };
 
-export const embed = async (texts: Array<string>, tenant: string): Promise<number[][]> => {
-    const services = xsenv.getServices({ registry: { label: "saas-registry" } });
+export const embed = async (texts: Array<string>, tenant: string) => {
+    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name  === "saas-registry")
     // @ts-ignore
     const appName = services?.registry?.appName;
     // Create AI Core Resource Group for tenant
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    // const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = "default";
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);

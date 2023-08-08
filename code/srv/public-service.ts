@@ -145,13 +145,13 @@ export class PublicService extends ApplicationService {
 
 const getVectorStore = async (tenant: string) => {
     const embeddings = new BTPAzureOpenAIEmbedding(tenant);
-    const args = getPostgrsConnectionOptions();
+    const args = getPostgresConnectionOptions(tenant);
     const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
     await typeormVectorStore.ensureTableInDatabase();
     return typeormVectorStore;
 };
 
-const getPostgrsConnectionOptions = (tenant: string = "default") => {
+const getPostgresConnectionOptions = (tenant: string) => {
     // @ts-ignore
     const credentials = cds.env.requires?.postgres?.credentials;
     return {
@@ -169,6 +169,6 @@ const getPostgrsConnectionOptions = (tenant: string = "default") => {
                   }
                 : false
         } as DataSourceOptions,
-        tableName: tenant
+        tableName: tenant ? `"${tenant}"` : "main"
     };
 };
