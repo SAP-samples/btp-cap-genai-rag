@@ -5,6 +5,11 @@ import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "./vendor/AI_CORE_API";
 
+enum Tasks {
+    COMPLETION = "4aa2fc45-cd49-496e-b4a9-9ab8e49df4ab",
+    CHAT = "",
+    EMBEDDING = "90fb13c6-08f0-4e96-9dfb-ea872aa84e26"
+}
 interface AICoreApiHeaders extends Record<string, string> {
     "Content-Type": string;
     "AI-Resource-Group": string;
@@ -64,7 +69,33 @@ export const completion = async (prompt: string, tenant: string) => {
 
         return { text: response["choices"][0]?.message?.content };
     } else {
-        return { text: "No deployment found for this tenant" };
+        return { text: `No deployment found for this tenant (${tenant})` };
+    }
+};
+
+export const embed = async (text: string, tenant: string) => {
+    const services = xsenv.getServices({ registry: { label: "saas-registry" } });
+    // @ts-ignore
+    const appName = services?.registry?.appName;
+    // Create AI Core Resource Group for tenant
+    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
+    if (deploymentId) {
+        const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
+        const payload: any = {
+            input: text
+        };
+        const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+        const response: any = await aiCoreService.send({
+            // @ts-ignore
+            query: `POST /inference/deployments/${deploymentId}/v1/predict`,
+            data: payload,
+            headers: headers
+        });
+
+        return { embedding: response["data"][0]?.embedding };
+    } else {
+        return { embedding: `No deployment found for this tenant (${tenant})` };
     }
 };
 
@@ -72,13 +103,23 @@ export const completion = async (prompt: string, tenant: string) => {
  * get the running deploymentId for the resource group
  * @returns deploymentId
  */
-export const getDeploymentId = async (resourceGroupId: string) => {
+export const getDeploymentId = async (resourceGroupId: string, task: Tasks = Tasks.COMPLETION) => {
     try {
         const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+
+        // TODO: loop through deployments and check for particular configurationName to get "embedding" or "completion" deployment
+        /*
+        const testResp = await DeploymentApi.deploymentQuery({ status: "RUNNING" })
+            .skipCsrfTokenFetching()
+            .addCustomHeaders(headers)
+            .execute({ destinationName: AI_CORE_DESTINATION });
+        console.log("Deployments:", testResp);
+        */
 
         const responseDeploymentQuery = await DeploymentApi.deploymentQuery({
             scenarioId: SCENARIO_ID,
             status: "RUNNING",
+            configurationId: task,
             $top: 1
         })
             .skipCsrfTokenFetching()

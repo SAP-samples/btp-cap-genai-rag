@@ -29,7 +29,9 @@
         "langchain": "^0.0.122",
         "node-fetch": "^2.6.7",
         "node-jose": "^2.1",
-        "passport": "^0.6.0"
+        "passport": "^0.6.0",
+        "pg": "^8.11.2",
+        "typeorm": "^0.3.17"
     },
     "devDependencies": {
         "@cap-js/sqlite": "^0.1.0",

@@ -3,9 +3,15 @@
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
+        "PROVIDER_AI_CORE_DESTINATION": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "PROVIDER_AI_CORE_DESTINATION"
+            }
+        },
         "[hybrid]": {
             "multitenancy": true,
-            "extensibility": false,
+            "extensibility": true,
             "toggles": true,
             "cds.xt.ExtensibilityService": {
                 "element-prefix": ["x_"],
@@ -14,12 +20,6 @@
                         "for": ["*"]
                     }
                 ]
-            },
-            "PROVIDER_AI_CORE_DESTINATION": {
-                "kind": "rest",
-                "credentials": {
-                    "destination": "PROVIDER_AI_CORE_DESTINATION"
-                }
             }
         },
         "[local-with-mtx]": {
