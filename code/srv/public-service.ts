@@ -85,14 +85,14 @@ export class PublicService extends ApplicationService {
                     database: pgCreds?.dbname,
                     password: pgCreds?.password,
                     port: pgCreds?.port,
-                    ssl: pgCreds?.sslcert ? false : {
+                    ssl: pgCreds?.sslcert ? {
                         cert: pgCreds?.sslcert,
                         ca: pgCreds?.sslrootcert
-                    }
+                    } : false
                 } as DataSourceOptions,
                 tableName: VECTOR_DB_TABLE_NAME
             };
-            
+
             const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
             await typeormVectorStore.ensureTableInDatabase();
             await typeormVectorStore.addDocuments(
@@ -124,10 +124,10 @@ export class PublicService extends ApplicationService {
                     database: pgCreds?.dbname,
                     password: pgCreds?.password,
                     port: pgCreds?.port,
-                    ssl: pgCreds?.sslcert ? false : {
+                    ssl: pgCreds?.sslcert ? {
                         cert: pgCreds?.sslcert,
                         ca: pgCreds?.sslrootcert
-                    }
+                    } : false
                 } as DataSourceOptions,
                 tableName: VECTOR_DB_TABLE_NAME
             };
