@@ -73,7 +73,7 @@ export const completion = async (prompt: string, tenant: string) => {
     }
 };
 
-export const embed = async (text: string, tenant: string) => {
+export const embed = async (texts: Array<string>, tenant: string): Promise<number[][]> => {
     const services = xsenv.getServices({ registry: { label: "saas-registry" } });
     // @ts-ignore
     const appName = services?.registry?.appName;
@@ -82,20 +82,26 @@ export const embed = async (text: string, tenant: string) => {
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
-        const payload: any = {
-            input: text
-        };
-        const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-        const response: any = await aiCoreService.send({
-            // @ts-ignore
-            query: `POST /inference/deployments/${deploymentId}/v1/predict`,
-            data: payload,
-            headers: headers
-        });
 
-        return { embedding: response["data"][0]?.embedding };
+        const embeddings = await Promise.all(
+            texts.map(async (text: string) => {
+                const payload: any = {
+                    input: text
+                };
+                const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+                const response: any = await aiCoreService.send({
+                    // @ts-ignore
+                    query: `POST /inference/deployments/${deploymentId}/v1/predict`,
+                    data: payload,
+                    headers: headers
+                });
+
+                return response["data"][0]?.embedding;
+            })
+        );
+        return embeddings;
     } else {
-        return { embedding: `No deployment found for this tenant (${tenant})` };
+        return [];
     }
 };
 

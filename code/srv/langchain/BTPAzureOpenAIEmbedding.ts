@@ -10,10 +10,11 @@ export default class BTPAzureOpenAIEmbedding extends Embeddings {
     }
 
     async embedDocuments(documents: string[]): Promise<number[][]> {
-        return Promise.all(documents.map((doc: string) => this.embedQuery(doc)));
+        const embeddings = await aiCore.embed(documents, this.tenant);
+        return embeddings;
     }
     async embedQuery(text: string): Promise<number[]> {
-        const result = await aiCore.embed(text, this.tenant);
-        return result.embedding;
+        const embeddings = await aiCore.embed([text], this.tenant);
+        return embeddings[0];
     }
 }
