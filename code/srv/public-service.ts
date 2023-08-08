@@ -10,16 +10,6 @@ import { DataSourceOptions } from "typeorm";
 import BTPAzureOpenAILLM from "./langchain/BTPAzureOpenAILLM";
 import BTPAzureOpenAIEmbedding from "./langchain/BTPAzureOpenAIEmbedding";
 
-const VECTOR_DB_TABLE_NAME = "test";
-
-interface DbConfig extends Record<string, string | number> {
-    hostname: string;
-    username: string;
-    dbname: string;
-    password: string;
-    port: number;
-}
-
 export class PublicService extends ApplicationService {
     async init() {
         await super.init();
@@ -73,28 +63,8 @@ export class PublicService extends ApplicationService {
             const { tenant } = req;
             const { texts } = req.data;
 
-            // @ts-ignore
-            const pgCreds = cds.env.requires?.postgres?.credentials;
+            const typeormVectorStore = await getVectorStore(tenant);
 
-            const embeddings = new BTPAzureOpenAIEmbedding(tenant);
-            const args = {
-                postgresConnectionOptions: {
-                    type: "postgres",
-                    host: pgCreds?.hostname,
-                    username: pgCreds?.username,
-                    database: pgCreds?.dbname,
-                    password: pgCreds?.password,
-                    port: pgCreds?.port,
-                    ssl: pgCreds?.sslcert ? {
-                        cert: pgCreds?.sslcert,
-                        ca: pgCreds?.sslrootcert
-                    } : false
-                } as DataSourceOptions,
-                tableName: VECTOR_DB_TABLE_NAME
-            };
-
-            const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
-            await typeormVectorStore.ensureTableInDatabase();
             await typeormVectorStore.addDocuments(
                 texts.map((text: string, index: number) => ({ pageContent: text, metadata: { a: index } }))
             );
@@ -111,29 +81,7 @@ export class PublicService extends ApplicationService {
             const { tenant } = req;
             const { text, k } = req.data;
 
-
-            // @ts-ignore
-            const pgCreds = cds.env.requires?.postgres?.credentials;
-
-            const embeddings = new BTPAzureOpenAIEmbedding(tenant);
-            const args = {
-                postgresConnectionOptions: {
-                    type: "postgres",
-                    host: pgCreds?.hostname,
-                    username: pgCreds?.username,
-                    database: pgCreds?.dbname,
-                    password: pgCreds?.password,
-                    port: pgCreds?.port,
-                    ssl: pgCreds?.sslcert ? {
-                        cert: pgCreds?.sslcert,
-                        ca: pgCreds?.sslrootcert
-                    } : false
-                } as DataSourceOptions,
-                tableName: VECTOR_DB_TABLE_NAME
-            };
-
-            const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
-            await typeormVectorStore.ensureTableInDatabase();
+            const typeormVectorStore = await getVectorStore(tenant);
 
             const result = await typeormVectorStore.similaritySearch(text, k);
             return { result };
@@ -193,3 +141,33 @@ export class PublicService extends ApplicationService {
         }
     };
 }
+
+const getVectorStore = async (tenant: string) => {
+    const embeddings = new BTPAzureOpenAIEmbedding(tenant);
+    const args = getPostgrsConnectionOptions();
+    const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
+    await typeormVectorStore.ensureTableInDatabase();
+    return typeormVectorStore;
+};
+
+const getPostgrsConnectionOptions = (tenant: string = "default") => {
+    // @ts-ignore
+    const credentials = cds.env.requires?.postgres?.credentials;
+    return {
+        postgresConnectionOptions: {
+            type: "postgres",
+            host: credentials?.hostname,
+            username: credentials?.username,
+            database: credentials?.dbname,
+            password: credentials?.password,
+            port: credentials?.port,
+            ssl: credentials?.sslcert
+                ? {
+                      cert: credentials?.sslcert,
+                      ca: credentials?.sslrootcert
+                  }
+                : false
+        } as DataSourceOptions,
+        tableName: tenant
+    };
+};
