@@ -1,4 +1,5 @@
 import { ApplicationService } from "@sap/cds";
+import pg from "pg";
 import { Request } from "@sap/cds/apis/services";
 
 import { PromptTemplate } from "langchain/prompts";
@@ -10,6 +11,15 @@ import BTPAzureOpenAILLM from "./langchain/BTPAzureOpenAILLM";
 import BTPAzureOpenAIEmbedding from "./langchain/BTPAzureOpenAIEmbedding";
 
 const VECTOR_DB_TABLE_NAME = "test";
+
+interface DbConfig extends Record<string, string | number> {
+    hostname: string;
+    username: string;
+    dbname: string;
+    password: string;
+    port: number;
+}
+
 export class PublicService extends ApplicationService {
     async init() {
         await super.init();
@@ -18,6 +28,7 @@ export class PublicService extends ApplicationService {
         this.on("inference", this.inference);
         this.on("embed", this.embed);
         this.on("simSearch", this.simSearch);
+        this.on("pgvalue", this.pgvalue);
     }
 
     private userInfo = (req: Request) => {
@@ -109,6 +120,57 @@ export class PublicService extends ApplicationService {
             return { result };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
+        }
+    };
+
+    private pgvalue = async (req: Request) => {
+        try {
+            // @ts-ignore
+            const postgres: any = cds.env.requires?.postgres?.credentials;
+            postgres ??
+                (() => {
+                    throw Error("PostgreSQL binding details missing");
+                });
+
+            const client = new pg.Client({
+                host: postgres.hostname,
+                database: postgres.dbname,
+                user: postgres.username,
+                password: postgres.password,
+                port: postgres.port,
+                ssl: false
+            });
+
+            await client
+                .connect()
+                .then(() => console.log("Connection Successful"))
+                .catch((err: any) => {
+                    throw err;
+                });
+
+            await queryDatabase()
+                .then(() => req.reply("Query Successful"))
+                .catch((err: any) => {
+                    throw err;
+                });
+
+            async function queryDatabase() {
+                const query = `DROP TABLE IF EXISTS test;
+                    CREATE TABLE test (id serial PRIMARY KEY, name VARCHAR(50));
+                    INSERT INTO test (name) VALUES ('john');
+                    INSERT INTO test (name) VALUES ('doe');`;
+
+                await client
+                    .query(query)
+                    .then(() => {
+                        console.log("Table Created!");
+                        client.end();
+                    })
+                    .catch((err: any) => console.log(err));
+            }
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            req.error("500", "Error: " + error?.message);
         }
     };
 }

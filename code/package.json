@@ -44,6 +44,7 @@
         "@types/cors": "^2.8.13",
         "@types/express": "^4.17.17",
         "@types/node": "^20.4.2",
+        "@types/pg": "^8.10.2",
         "@types/sap__xsenv": "^3.3.0",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
@@ -57,6 +58,8 @@
     },
     "scripts": {
         "start": "cds run --production",
+        "start:pg": "docker compose up -d",
+        "stop:pg": "docker compose stop",
         "dev-start": "cds run",
         "dev-start-mtx": "cds run --profile local-with-mtx",
         "api-start-local": "cds serve srv-api/ db --with srv-api/api-service.js",
@@ -110,6 +113,12 @@
         "features": {
             "[production]": {
                 "kibana_formatter": true
+            },
+            "[development]" : {
+                "emulate_vcap_services": true
+            },
+            "[local-with-mtx]" :{
+                "emulate_vcap_services": true
             }
         },
         "hana": {

@@ -9,21 +9,23 @@ service PublicService {
         modifiedBy
     }
 
-    action inference(prompt : String)            returns {
+    action   inference(prompt : String)            returns {
         text : String
     };
 
-    action embed(texts : array of String)        returns {
+    action   embed(texts : array of String)        returns {
         success : Boolean;
         error : String;
     };
 
-    action simSearch(text : String, k : Integer) returns {
+    action   simSearch(text : String, k : Integer) returns {
         result : array of {
             pageContent : String;
             metadata : {
                 a : Integer
             }
         }
-    }
+    };
+
+    function pgvalue()                             returns String;
 };
