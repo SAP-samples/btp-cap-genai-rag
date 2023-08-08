@@ -1,0 +1,22 @@
+### EMBED
+POST http://localhost:4004/catalog/PublicService/embed
+content-type: application/json
+
+{
+    "texts": [
+    "Couples waltz gracefully across the dance floor, bathed in soft, romantic lighting.",
+    "A blacksmith hammers a piece of glowing metal, sparks flying in all directions.",
+    "The first snow of winter blankets the landscape in a serene, white quietness.",
+    "The aroma of sizzling bacon and fresh coffee fills the kitchen on a lazy morning.",
+    "A scientist makes a groundbreaking discovery, unlocking the mysteries of the universe."
+  ]
+}
+
+### SIMILARITY SEARCH
+POST http://localhost:4004/catalog/PublicService/simSearch
+content-type: application/json
+
+{
+    "text": "At the wedding, the dance floor came alive as the bride and groom swayed in each other's arms.",
+    "k": 2
+}
