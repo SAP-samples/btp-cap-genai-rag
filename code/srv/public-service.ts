@@ -74,16 +74,25 @@ export class PublicService extends ApplicationService {
             const { texts } = req.data;
 
             // @ts-ignore
-            const postgresConnectionOptions = cds.env.requires.postgres;
+            const pgCreds = cds.env.requires?.postgres?.credentials;
 
             const embeddings = new BTPAzureOpenAIEmbedding(tenant);
             const args = {
                 postgresConnectionOptions: {
-                    type: postgresConnectionOptions?.kind,
-                    ...postgresConnectionOptions?.credentials
+                    type: "postgres",
+                    host: pgCreds?.hostname,
+                    username: pgCreds?.username,
+                    database: pgCreds?.dbname,
+                    password: pgCreds?.password,
+                    port: pgCreds?.port,
+                    ssl: pgCreds?.sslcert ? false : {
+                        cert: pgCreds?.sslcert,
+                        ca: pgCreds?.sslrootcert
+                    }
                 } as DataSourceOptions,
                 tableName: VECTOR_DB_TABLE_NAME
             };
+            
             const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
             await typeormVectorStore.ensureTableInDatabase();
             await typeormVectorStore.addDocuments(
@@ -102,17 +111,27 @@ export class PublicService extends ApplicationService {
             const { tenant } = req;
             const { text, k } = req.data;
 
+
             // @ts-ignore
-            const postgresConnectionOptions = cds.env.requires.postgres;
+            const pgCreds = cds.env.requires?.postgres?.credentials;
 
             const embeddings = new BTPAzureOpenAIEmbedding(tenant);
             const args = {
                 postgresConnectionOptions: {
-                    type: postgresConnectionOptions?.kind,
-                    ...postgresConnectionOptions?.credentials
+                    type: "postgres",
+                    host: pgCreds?.hostname,
+                    username: pgCreds?.username,
+                    database: pgCreds?.dbname,
+                    password: pgCreds?.password,
+                    port: pgCreds?.port,
+                    ssl: pgCreds?.sslcert ? false : {
+                        cert: pgCreds?.sslcert,
+                        ca: pgCreds?.sslrootcert
+                    }
                 } as DataSourceOptions,
                 tableName: VECTOR_DB_TABLE_NAME
             };
+
             const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
             await typeormVectorStore.ensureTableInDatabase();
 
