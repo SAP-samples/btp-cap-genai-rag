@@ -87,6 +87,7 @@ export class PublicService extends ApplicationService {
             return { result };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
+            return { result: [] };
         }
     };
 
