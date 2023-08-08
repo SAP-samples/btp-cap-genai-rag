@@ -87,6 +87,7 @@ modules:
                 - list
       - name: aisaas-logging
       - name: aisaas-aicore
+      - name: aisaas-postgresql-db
       - name: aisaas-registry
       - name: aisaas-service-manager
       - name: aisaas-service-manager-admin
@@ -380,6 +381,17 @@ resources:
       service: autoscaler
       service-name: ${space}-aisaas-autoscaler
       service-plan: standard
+
+
+  # ----------------- POSTGRESQL -------------------------------------   
+  - name: aisaas-postgresql-db
+  # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: postgresql-db
+      service-name: ${space}-aisaas-postgresql-db
+      service-plan: free
+
 
   # ----------------- XSUAA - BROKER ---------------------------------
   - name: aisaas-api-uaa

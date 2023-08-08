@@ -18,3 +18,6 @@ resources:
   - name: aisaas-credstore
     parameters:
       service-plan: trial
+  - name: aisaas-postgresql-db
+    parameters:
+      service-plan: trial
