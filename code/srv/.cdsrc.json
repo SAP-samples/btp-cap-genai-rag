@@ -15,6 +15,12 @@
                 }
             ]
         },
+        "PROVIDER_AI_CORE_DESTINATION": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "PROVIDER_AI_CORE_DESTINATION"
+            }
+        },
         "postgres": {
             "kind": "postgresql-db"
         },
