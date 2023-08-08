@@ -94,18 +94,15 @@
                 "users": {
                     "alice": {
                         "tenant": "t1",
-                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"],
-                        "password": "helloworld"
+                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
                     },
                     "carol": {
                         "tenant": "t1",
-                        "roles": ["Member"],
-                        "password": "helloworld"
+                        "roles": ["Member"]
                     },
                     "bob": {
                         "tenant": "t1-ext",
-                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"],
-                        "password": "helloworld"
+                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
                     }
                 }
             },
