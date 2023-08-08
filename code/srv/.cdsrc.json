@@ -1,0 +1,55 @@
+{
+    "requires": {
+        "multitenancy": true,
+        "toggles": true,
+        "extensibility": true,
+        "cds.xt.ExtensibilityService": {
+            "element-prefix": [
+                "x_"
+            ],
+            "extension-allowlist": [
+                {
+                    "for": [
+                        "*"
+                    ]
+                }
+            ]
+        },
+        "PROVIDER_AI_CORE_DESTINATION": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "PROVIDER_AI_CORE_DESTINATION"
+            }
+        },
+        "postgres": {
+            "kind": "postgresql-db"
+        },
+        "hana": {
+            "kind": "hana-cloud",
+            "vcap": {
+                "name": "hana",
+                "tags": [
+                    "hana"
+                ],
+                "plan": "hdi-shared",
+                "label": "hana"
+            }
+        },
+        "db": {
+            "kind": "hana-cloud",
+            "vcap": {
+                "label": "service-manager",
+                "plan": "container"
+            },
+            "pool": {
+                "acquireTimeoutMillis": 10000,
+                "min": 0,
+                "max": 10,
+                "fifo": true
+              }
+        },
+        "auth": {
+            "kind": "xsuaa"
+        }
+    }
+}
