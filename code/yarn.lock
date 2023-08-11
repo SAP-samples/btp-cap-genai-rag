@@ -975,27 +975,19 @@
   resolved "https://registry.npmjs.org/@sap/cds-common-content/-/cds-common-content-1.0.1.tgz"
   integrity sha512-zexqhIKYcmm1sg5/iqYsJw0918E9N6vUukqG5OjAM9tHipLDAOpkCsNGd1ohaQhsVBykGiZfaKn8bhrmXxYDnA==
 
-"@sap/cds-compiler@^3.2.0":
-  version "3.9.4"
-  resolved "https://registry.npmjs.org/@sap/cds-compiler/-/cds-compiler-3.9.4.tgz"
-  integrity sha512-bXZggMC9QcjIxUWdjsuA9FA/cd4qs/Eq2FeFr3tk+1tAvkS8FM162QmcnABoL+FN1K3spkRJoryO3o5tjWjGZw==
-  dependencies:
-    antlr4 "4.9.3"
-
 "@sap/cds-compiler@^4":
   version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@sap/cds-compiler/-/cds-compiler-4.1.2.tgz#df72681bd387d8605c4700fb5a23024919386b41"
+  resolved "https://registry.npmjs.org/@sap/cds-compiler/-/cds-compiler-4.1.2.tgz"
   integrity sha512-W5XYmVCRKXtvDrwBVodA9K8kB717/kxnbzX0n9UrEtjC2PdXl669YpZkrZk2QcKOGS+MSu6O3reRB0G30rS/EQ==
   dependencies:
     antlr4 "4.9.3"
 
-"@sap/cds-dk@>=4.9":
-  version "7.0.2"
-  resolved "https://registry.npmjs.org/@sap/cds-dk/-/cds-dk-7.0.2.tgz"
-  integrity sha512-W2qeaPD4wKzLA6YOqM/shUzKQpbCt7PTrkuwPopIYh3288H/9tBWdt1+9FZ0SOxQB2PxoScodoLVNoShtEWhRQ==
+"@sap/cds-dk@>=4.9", "@sap/cds-dk@^7.1.1":
+  version "7.1.1"
+  resolved "https://registry.npmjs.org/@sap/cds-dk/-/cds-dk-7.1.1.tgz"
+  integrity sha512-GvwGqUX15K0b6kLZugNIqj5vNU+0qgy1IiJY7rHfZSZ8lcnB7nLApvs32evQstwKaapBs5Ao4DG4wUae9JP/aw==
   dependencies:
     "@sap/cds" "^7"
-    "@sap/cds-compiler" "^4"
     "@sap/cds-foss" "^4.0.2"
     "@sap/cds-mtxs" "^1.9.0"
     "@sap/eslint-plugin-cds" "^2.6.0"
@@ -1014,7 +1006,7 @@
 
 "@sap/cds-fiori@^1":
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@sap/cds-fiori/-/cds-fiori-1.0.0.tgz#772d21c87fff78774e80c98dc3b5ada53e275bee"
+  resolved "https://registry.npmjs.org/@sap/cds-fiori/-/cds-fiori-1.0.0.tgz"
   integrity sha512-DCYV5sQwAqWV4nXvtwn4o5Ig070XX68KtFdmX0IEi3IDMtyID4rGDFwEXVKNZMNAA9kdTLN8BBIAvAFna7jVSw==
 
 "@sap/cds-foss@^4", "@sap/cds-foss@^4.0.2":
@@ -1028,15 +1020,14 @@
     xmlbuilder "^15.1.1"
     yaml "^2.2.2"
 
-"@sap/cds-mtxs@1.8.3":
-  version "1.8.3"
-  resolved "https://registry.npmjs.org/@sap/cds-mtxs/-/cds-mtxs-1.8.3.tgz"
-  integrity sha512-s4wyXEgv/dXqN5j71DsC1K8MfBuDELLPd4bjSp1yVQ5rAuy/A69XDC5oMFfdPcPuzHpZwfVaFwsxo4j80gL8Mg==
+"@sap/cds-hana@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/@sap/cds-hana/-/cds-hana-2.0.0.tgz"
+  integrity sha512-YMJbxPeor0L+COROySuWRzE46At7tLRFkT+sMelna99PeGXL6UKcINdEvCtIsDHVOWbceo/IBnGjqv/yx05Rew==
   dependencies:
-    "@sap/hdi-deploy" "^4"
-    axios ">=0.27.2"
+    hdb ">=0.19.0"
 
-"@sap/cds-mtxs@^1.9.0":
+"@sap/cds-mtxs@^1.10.0", "@sap/cds-mtxs@^1.9.0":
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/@sap/cds-mtxs/-/cds-mtxs-1.10.0.tgz#177967a23fb74fc5c6d38a456887f9ad34fc1070"
   integrity sha512-Y8VmcTtEjZntMZV2OIY2ytjVtSUzXRVMtH9LbR3XJsuyNgQraAq8gps759E89ZFQDFMv7yXR1DXkmvKZyZomNw==
@@ -1057,17 +1048,9 @@
     node-fetch "^2.6.9"
     xml2js "^0.4.23"
 
-"@sap/cds@6.8.3":
-  version "6.8.3"
-  resolved "https://registry.npmjs.org/@sap/cds/-/cds-6.8.3.tgz"
-  integrity sha512-6XEp7vHJoubPXW44FW/dMG3z9nl4IzjAYLoWl77NDajB2H1ZWkQmVtm5phDucRKM46geZPa/CYhjWzlKlNxq7g==
-  dependencies:
-    "@sap/cds-compiler" "^3.2.0"
-    "@sap/cds-foss" "^4"
-
-"@sap/cds@>=5.6.0", "@sap/cds@^7":
+"@sap/cds@>=5.6.0", "@sap/cds@^7", "@sap/cds@^7.1.1":
   version "7.1.1"
-  resolved "https://registry.yarnpkg.com/@sap/cds/-/cds-7.1.1.tgz#d8c967b1b04bf4e84d9cdb9fae2cd16cee5b2f3b"
+  resolved "https://registry.npmjs.org/@sap/cds/-/cds-7.1.1.tgz"
   integrity sha512-C3VgWtt/tC3jfEv2OOFlSVw5FY/z0hf+od1kJo4pXQXrdoX9fK7c5NRsMS02QjuM8eOo8JDmuSNBb5EYqOb1Ng==
   dependencies:
     "@sap/cds-compiler" "^4"
@@ -1603,18 +1586,9 @@ agentkeepalive@2.0.5:
   resolved "https://registry.npmjs.org/agentkeepalive/-/agentkeepalive-2.0.5.tgz"
   integrity sha512-dlXxjfkCrcEPmvJju6ypP6/eq1q0l+cu0u10IhKfiwMoy4yH73n0TQ2jMO2H39xbcC3Q4cWUFPkNk1b3GLEklg==
 
-agentkeepalive@^4.1.3:
-  version "4.3.0"
-  resolved "https://registry.npmjs.org/agentkeepalive/-/agentkeepalive-4.3.0.tgz"
-  integrity sha512-7Epl1Blf4Sy37j4v9f9FjICCh4+KAQOyXgHEwlyBiAQLbhKdq/i2QQU3amQalS/wPhdPzDXPL5DMR5bkn+YeWg==
-  dependencies:
-    debug "^4.1.0"
-    depd "^2.0.0"
-    humanize-ms "^1.2.1"
-
-agentkeepalive@^4.2.1:
+agentkeepalive@^4.1.3, agentkeepalive@^4.2.1:
   version "4.5.0"
-  resolved "https://registry.npmjs.org/agentkeepalive/-/agentkeepalive-4.5.0.tgz"
+  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.5.0.tgz#2673ad1389b3c418c5a20c5d7364f93ca04be923"
   integrity sha512-5GG/5IbQQpC9FpkRGsSvZI5QYeSCzlJHdpBQntCsuTOxhKD8lqKhrleg2Yi7yvMIf82Ycmmqln9U8V9qwEiJew==
   dependencies:
     humanize-ms "^1.2.1"
@@ -2875,7 +2849,7 @@ denque@^1.1.0:
   resolved "https://registry.npmjs.org/denque/-/denque-1.5.1.tgz"
   integrity sha512-XwE+iZ4D6ZUB7mfYRMb5wByE8L74HCn30FBN7sWnXksWc1LO1bPDl67pBR9o/kC4z/xSNAwkMYcGgqDV3BE3Hw==
 
-depd@2.0.0, depd@^2.0.0, depd@~2.0.0:
+depd@2.0.0, depd@~2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz"
   integrity sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==
@@ -3846,7 +3820,7 @@ hdb@0.19.3:
   dependencies:
     iconv-lite "^0.4.18"
 
-hdb@^0.19.5:
+hdb@>=0.19.0:
   version "0.19.5"
   resolved "https://registry.npmjs.org/hdb/-/hdb-0.19.5.tgz"
   integrity sha512-/hJNHczPKXbdIRsM9NacPTeRVoMpKoLsD/Hmz04L8Jjdxi0mC96ZSGCJxHbtFDqxcbicLZcfWRD2RZ4zV6eEfA==

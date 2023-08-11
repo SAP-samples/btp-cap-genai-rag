@@ -14,8 +14,10 @@
         "@sap-cloud-sdk/openapi": "^3.2.0",
         "@sap-cloud-sdk/openapi-generator": "^3.2.0",
         "@sap/audit-logging": "^5",
-        "@sap/cds": "6.8.3",
-        "@sap/cds-mtxs": "1.8.3",
+        "@sap/cds": "^7.1.1",
+        "@sap/cds-dk": "^7.1.1",
+        "@sap/cds-hana": "^2.0.0",
+        "@sap/cds-mtxs": "^1.10.0",
         "@sap/cds-odata-v2-adapter-proxy": "^1",
         "@sap/xsenv": "^3.4.0",
         "@sap/xssec": "^3.2.17",
@@ -25,14 +27,12 @@
         "cfenv": "^1",
         "cors": "^2.8.5",
         "express": "^4",
-        "hdb": "^0.19.5",
         "langchain": "^0.0.122",
         "node-fetch": "^2.6.7",
         "node-jose": "^2.1",
         "passport": "^0.6.0",
         "pg": "^8.11.2",
-        "typeorm": "^0.3.17",
-        "@sap/cds-hana": "^2"
+        "typeorm": "^0.3.17"
     },
     "devDependencies": {
         "@cap-js/sqlite": "^0.1.0",
@@ -114,12 +114,6 @@
         "features": {
             "[production]": {
                 "kibana_formatter": true
-            },
-            "[development]": {
-                "emulate_vcap_services": true
-            },
-            "[local-with-mtx]": {
-                "emulate_vcap_services": true
             }
         },
         "hana": {
