@@ -111,14 +111,6 @@
         "printWidth": 120
     },
     "cds": {
-        "features": {
-            "[production]": {
-                "kibana_formatter": true
-            }
-        },
-        "hana": {
-            "deploy-format": "hdbtable"
-        },
         "build": {
             "tasks": [
                 {
