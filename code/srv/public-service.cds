@@ -23,13 +23,17 @@ service PublicService {
         };
     };
 
-    action   addMails(mails : array of String)     returns array of {
-        sentiment : Integer;
-        urgency : Integer;
-        category : String;
-        translation : String;
-        response : String;
-        facts : array of Fact;
+    action   addMails(mails : array of String) returns array of {
+        id : String;
+        mail : String;
+        insights : {
+            sentiment : Integer;
+            urgency : Integer;
+            category : String;
+            translation : String;
+            response : String;
+            facts : array of Fact;
+        } 
     };
 
     type Fact {

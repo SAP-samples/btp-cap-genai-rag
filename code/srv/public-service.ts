@@ -79,7 +79,7 @@ export class PublicService extends ApplicationService {
                     m.body;
                     m.category;
                 });
-            console.log(closestMailsIDs);
+            
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
                 const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
                     ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
@@ -140,25 +140,25 @@ export class PublicService extends ApplicationService {
 
             const mailsInsights = await Promise.all(
                 mails.map(async (mail: string) => {
+                    const id = uuidv4();
                     const model = new BTPAzureOpenAILLM(tenant);
                     const input = await prompt.format({
                         mail
                     });
                     const response = await model.call(input);
                     const insights = await parser.parse(response);
-                    return { mail, insights };
+                    return { mail, insights, id };
                 })
             );
 
             // insert mails with insights
             const insertables = mailsInsights.reduce(
-                (acc: { mails: any[]; facts: any[] }, { mail, insights }: { mail: string; insights: any }) => {
-                    const mailId = uuidv4();
+                (acc: { mails: any[]; facts: any[] }, { mail, insights, id }: { mail: string; insights: any, id: string }) => {
                     return {
                         mails: [
                             ...acc.mails,
                             {
-                                ID: mailId,
+                                ID: id,
                                 subject: "",
                                 body: mail,
                                 sentiment: insights.sentiment,
@@ -171,7 +171,7 @@ export class PublicService extends ApplicationService {
                         facts: [
                             ...acc.facts,
                             ...insights.facts.map((fact: any) => ({
-                                mail_ID: mailId,
+                                mail_ID: id,
                                 fact: fact.fact,
                                 factTitle: fact.factTitle,
                                 value: fact.value
@@ -196,6 +196,7 @@ export class PublicService extends ApplicationService {
                     metadata: { id: mail.ID }
                 }))
             );
+
             return mailsInsights[0];
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -348,8 +349,8 @@ const getPostgresConnectionOptions = (tenant: string) => {
                       cert: credentials?.sslcert,
                       ca: credentials?.sslrootcert
                   }
-                : false
+                : false 
         } as DataSourceOptions,
-        tableName: tenant ? `"${tenant}"` : "main"
+        tableName: tenant ? ( "_" + (tenant.replace(/-/g, ""))) : "main"
     };
 };
