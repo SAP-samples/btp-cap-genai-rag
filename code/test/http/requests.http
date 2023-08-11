@@ -28,6 +28,7 @@ content-type: application/json
 # @name addMails
 POST http://localhost:4004/catalog/PublicService/addMails
 content-type: application/json
+
 {
     "mails": [
         "Dear Adi Pleyer, I am not very happy with the delivery I received from you. The motor is not reaching the desired speed and produces strange sounds. I would like to return the vehicle. Please let me know how I can give it back to you. Best regards, Kay"
