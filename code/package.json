@@ -31,7 +31,8 @@
         "node-jose": "^2.1",
         "passport": "^0.6.0",
         "pg": "^8.11.2",
-        "typeorm": "^0.3.17"
+        "typeorm": "^0.3.17",
+        "@sap/cds-hana": "^2"
     },
     "devDependencies": {
         "@cap-js/sqlite": "^0.1.0",
@@ -114,10 +115,10 @@
             "[production]": {
                 "kibana_formatter": true
             },
-            "[development]" : {
+            "[development]": {
                 "emulate_vcap_services": true
             },
-            "[local-with-mtx]" :{
+            "[local-with-mtx]": {
                 "emulate_vcap_services": true
             }
         },

@@ -3,6 +3,7 @@ import { HttpResponse } from "@sap-cloud-sdk/http-client";
 import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
 import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
+import { CreateChatCompletionRequest, CreateChatCompletionResponse, ChatCompletionRequestMessage } from "openai";
 import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "./vendor/AI_CORE_API";
 
 enum Tasks {
@@ -13,6 +14,11 @@ enum Tasks {
 interface AICoreApiHeaders extends Record<string, string> {
     "Content-Type": string;
     "AI-Resource-Group": string;
+}
+
+interface Message {
+    role: string;
+    content: string;
 }
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
@@ -36,7 +42,7 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
  * @returns the text completion
  */
 export const completion = async (prompt: string, tenant: string) => {
-    const services = xsenv.getServices({ registry: { label: "saas-registry" } });
+    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
     // @ts-ignore
     const appName = services?.registry?.appName;
     // Create AI Core Resource Group for tenant
@@ -45,15 +51,8 @@ export const completion = async (prompt: string, tenant: string) => {
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
         const payload: any = {
-            messages: [
-                {
-                    role: "system",
-                    content:
-                        'Assistant is an intelligent chatbot designed to help users answer their tax related questions.\n\nInstructions:\n- Only answer questions related to taxes.\n- If you\'re unsure of an answer, you can say "I don\'t know" or "I\'m not sure" and recommend users go to the IRS website for more information.'
-                },
-                { role: "user", content: prompt }
-            ],
-            max_tokens: 100,
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 1000,
             temperature: 0.0,
             frequency_penalty: 0,
             presence_penalty: 0,
@@ -73,8 +72,53 @@ export const completion = async (prompt: string, tenant: string) => {
     }
 };
 
+/**
+ * Use the chat completion api from Azure OpenAI services to make a completion call
+ *
+ * @param messages the messages for the chat completion
+ * @param tenant the tenant for which the completion is being made
+ * @returns the text completion
+ */
+export const chatCompletion = async (
+    request: CreateChatCompletionRequest,
+    tenant: string
+): Promise<CreateChatCompletionResponse> => {
+    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
+    // @ts-ignore
+    const appName = services?.registry?.appName;
+    // Create AI Core Resource Group for tenant
+    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const deploymentId = await getDeploymentId(resourceGroupId);
+    if (deploymentId) {
+        const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
+        console.log("messages", request.messages);
+        const payload: any = {
+            messages: request.messages.map((value: ChatCompletionRequestMessage) => ({
+                role: value.role,
+                content: value.content
+            })),
+            max_tokens: 100,
+            temperature: 0.0,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            stop: "null"
+        };
+        const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+        const response: any = await aiCoreService.send({
+            // @ts-ignore
+            query: `POST /inference/deployments/${deploymentId}/v1/predict`,
+            data: request,
+            headers: headers
+        });
+        console.log("response", response);
+        return response;
+    } else {
+        return null;
+    }
+};
+
 export const embed = async (texts: Array<string>, tenant: string): Promise<number[][]> => {
-    const services = xsenv.getServices({ registry: { label: "saas-registry" } });
+    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
     // @ts-ignore
     const appName = services?.registry?.appName;
     // Create AI Core Resource Group for tenant

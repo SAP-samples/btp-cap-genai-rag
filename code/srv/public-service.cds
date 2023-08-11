@@ -2,12 +2,9 @@ using {aisaas.db as db} from '../db/data-model';
 
 @path: '/catalog/PublicService'
 service PublicService {
-    entity Products as projection on db.Products excluding {
-        createdAt,
-        createdBy,
-        modifiedAt,
-        modifiedBy
-    }
+
+    entity Mails as projection on db.Mails;
+    type IMails : db.Mails {};
 
     action   inference(prompt : String)            returns {
         text : String
@@ -17,6 +14,30 @@ service PublicService {
         success : Boolean;
         error : String;
     };
+
+    function getMail(id : UUID)                    returns {
+        mail : IMails;
+        closestMails : array of {
+            similarity : Double;
+            mail : IMails
+        };
+    };
+
+    action   addMails(mails : array of String)     returns array of {
+        sentiment : Integer;
+        urgency : Integer;
+        category : String;
+        translation : String;
+        response : String;
+        facts : array of Fact;
+    };
+
+    type Fact {
+        fact      : String;
+        factTitle : String;
+        value     : String;
+    };
+
 
     action   simSearch(text : String, k : Integer) returns {
         result : array of {

@@ -1,5 +1,11 @@
 {
     "requires": {
+        "PROVIDER_AI_CORE_DESTINATION": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "PROVIDER_AI_CORE_DESTINATION"
+            }
+        },
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
@@ -15,12 +21,6 @@
                     }
                 ]
             },
-            "PROVIDER_AI_CORE_DESTINATION": {
-                "kind": "rest",
-                "credentials": {
-                    "destination": "PROVIDER_AI_CORE_DESTINATION"
-                }
-            },
             "postgres": {
                 "kind": "postgresql-db"
             }
@@ -32,11 +32,11 @@
             "postgres": {
                 "kind": "postgres",
                 "credentials": {
-                  "hostname": "localhost",
-                  "port": 5432,
-                  "username": "postgres",
-                  "password": "postgres",
-                  "dbname": "postgres"
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
                 }
             }
         },
@@ -45,14 +45,14 @@
             "extensibility": false,
             "toggles": false,
             "postgres": {
-              "kind": "postgres",
-              "credentials": {
-                "hostname": "localhost",
-                "port": 5432,
-                "username": "postgres",
-                "password": "postgres",
-                "dbname": "postgres"
-              }
+                "kind": "postgres",
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
+                }
             }
         },
         "------------------ ": "---",
@@ -73,7 +73,7 @@
                 }
             },
             "[development]": {
-                "kind": "sql"
+                "kind": "sqlite"
             }
         },
         "-------------------- ": "---",
