@@ -4,7 +4,6 @@ using {aisaas.db as db} from '../db/data-model';
 service PublicService {
 
     entity Mails as projection on db.Mails;
-    type IMails : db.Mails {};
 
     action   inference(prompt : String)            returns {
         text : String
@@ -16,10 +15,10 @@ service PublicService {
     };
 
     function getMail(id : UUID)                    returns {
-        mail : IMails;
+        mail : db.Mail;
         closestMails : array of {
             similarity : Double;
-            mail : IMails
+            mail : db.Mail
         };
     };
 
@@ -32,16 +31,9 @@ service PublicService {
             category : String;
             translation : String;
             response : String;
-            facts : array of Fact;
+            facts : array of db.Fact;
         } 
     };
-
-    type Fact {
-        fact      : String;
-        factTitle : String;
-        value     : String;
-    };
-
 
     action   simSearch(text : String, k : Integer) returns {
         result : array of {
