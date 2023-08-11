@@ -73,7 +73,11 @@
                 }
             },
             "[development]": {
-                "kind": "sqlite"
+                "kind": "sqlite",
+                "impl": "@cap-js/sqlite",
+                "credentials": {
+                    "url": "db.sqlite"
+                }
             }
         },
         "-------------------- ": "---",
