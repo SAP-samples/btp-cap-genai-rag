@@ -11,8 +11,8 @@
         "--------------------- ": "---",
         "[hybrid]": {
             "multitenancy": true,
-            "extensibility": true,
-            "toggles": true,
+            "extensibility": false,
+            "toggles": false,
             "cds.xt.ExtensibilityService": {
                 "element-prefix": ["x_"],
                 "extension-allowlist": [
@@ -27,8 +27,8 @@
         },
         "[local-with-mtx]": {
             "multitenancy": true,
-            "extensibility": true,
-            "toggles": true,
+            "extensibility": false,
+            "toggles": false,
             "postgres": {
                 "kind": "postgres",
                 "credentials": {

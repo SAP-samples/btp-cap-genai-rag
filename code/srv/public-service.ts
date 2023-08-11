@@ -371,6 +371,6 @@ const getPostgresConnectionOptions = (tenant: string) => {
                   }
                 : false
         } as DataSourceOptions,
-        tableName: tenant ? tenant : "main"
+        tableName: tenant ? `"${tenant}"` : "main"
     };
 };
