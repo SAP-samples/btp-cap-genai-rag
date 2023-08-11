@@ -202,27 +202,6 @@ export class PublicService extends ApplicationService {
         }
     };
 
-    /*
-subject     : String;
-            body        : LargeString;
-            sentiment   : Integer;
-            urgency     : Integer;
-            category    : String;
-            translation : LargeString;
-            response    : LargeString;
-            facts       : Composition of many Facts
-                                on facts.mail = $self;
-      }
-
-      entity Facts {
-            key mail      : Association to Mails;
-            key fact      : String;
-                factTitle : String;
-                value     : String;
-      }
-}
-    */
-
     private userInfo = (req: Request) => {
         let results = {
             user: req.user.id,
