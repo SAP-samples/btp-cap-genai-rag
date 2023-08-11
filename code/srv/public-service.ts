@@ -55,43 +55,44 @@ export class PublicService extends ApplicationService {
     }
 
     private getMail = async (req: Request) => {
-        //try {
-        const { tenant } = req;
-        const { id } = req.data;
-        const { Mails } = this.entities;
-        console.log(id);
-        const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
-            m("*");
-            m.facts;
-        });
-        console.log(mail);
-        const closestMailsIDs = await this.getClosestMails(id, 5, null, tenant);
-        const closestMails = await SELECT.from(Mails)
-            .where({
-                ID: {
-                    in: closestMailsIDs.map(([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id)
-                }
-            })
-            .columns((m: any) => {
-                m.ID;
-                m.subject;
-                m.body;
-                m.category;
+        try {
+            const { tenant } = req;
+            const { id } = req.data;
+            const { Mails } = this.entities;
+            console.log(id);
+            const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
+                m("*");
+                m.facts;
             });
-        console.log(closestMailsIDs);
-        const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
-            const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
-                ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
-            );
-            return { similarity: _distance, mail: mail };
-        });
-        console.log("mail:", mail);
-        console.log("closestMails:", closestMails);
-        return { mail, closestMails: closestMailsWithSimilarity };
-        /*} catch (error: any) {
+            const closestMailsIDs = await this.getClosestMails(id, 5, null, tenant);
+            const closestMails = await SELECT.from(Mails)
+                .where({
+                    ID: {
+                        in: closestMailsIDs.map(
+                            ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
+                        )
+                    }
+                })
+                .columns((m: any) => {
+                    m.ID;
+                    m.subject;
+                    m.body;
+                    m.category;
+                });
+            console.log(closestMailsIDs);
+            const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
+                const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
+                    ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
+                );
+                return { similarity: 1.0 - _distance, mail: mail };
+            });
+            console.log("mail:", mail);
+            console.log("closestMails:", closestMails);
+            return { mail, closestMails: closestMailsWithSimilarity };
+        } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return {};
-        }*/
+        }
     };
 
     async getClosestMails(
