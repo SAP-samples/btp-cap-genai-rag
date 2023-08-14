@@ -1,5 +1,11 @@
 {
     "requires": {
+        "PROVIDER_AI_CORE_DESTINATION": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "PROVIDER_AI_CORE_DESTINATION"
+            }
+        },
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
@@ -15,12 +21,6 @@
                     }
                 ]
             },
-            "PROVIDER_AI_CORE_DESTINATION": {
-                "kind": "rest",
-                "credentials": {
-                    "destination": "PROVIDER_AI_CORE_DESTINATION"
-                }
-            },
             "postgres": {
                 "kind": "postgresql-db"
             }
@@ -32,11 +32,11 @@
             "postgres": {
                 "kind": "postgres",
                 "credentials": {
-                  "hostname": "localhost",
-                  "port": 5432,
-                  "username": "postgres",
-                  "password": "postgres",
-                  "dbname": "postgres"
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
                 }
             }
         },
@@ -45,14 +45,14 @@
             "extensibility": false,
             "toggles": false,
             "postgres": {
-              "kind": "postgres",
-              "credentials": {
-                "hostname": "localhost",
-                "port": 5432,
-                "username": "postgres",
-                "password": "postgres",
-                "dbname": "postgres"
-              }
+                "kind": "postgres",
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
+                }
             }
         },
         "------------------ ": "---",
@@ -60,20 +60,26 @@
         " ------------------": "---",
         "db": {
             "[hybrid]": {
-                "kind": "hana",
+                "kind": "hana-cloud",
                 "vcap": {
                     "label": "service-manager",
                     "plan": "container"
                 }
             },
             "[local-with-mtx]": {
-                "kind": "sql-mt",
+                "impl": "@cap-js/sqlite",
+                "credentials": {
+                    "url": "db.sqlite"
+                },
                 "beta": {
                     "sqlMigration": "true"
                 }
             },
             "[development]": {
-                "kind": "sql"
+                "impl": "@cap-js/sqlite",
+                "credentials": {
+                    "url": "db.sqlite"
+                }
             }
         },
         "-------------------- ": "---",

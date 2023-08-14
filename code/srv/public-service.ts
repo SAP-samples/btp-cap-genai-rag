@@ -1,25 +1,214 @@
 import { ApplicationService } from "@sap/cds";
-import pg from "pg";
 import { Request } from "@sap/cds/apis/services";
-
-import { PromptTemplate } from "langchain/prompts";
-import { LLMChain } from "langchain/chains";
-import { TypeORMVectorStore } from "langchain/vectorstores/typeorm";
+import { v4 as uuidv4 } from "uuid";
+import pg from "pg";
 import { DataSourceOptions } from "typeorm";
+import { z } from "zod";
+import { PromptTemplate } from "langchain/prompts";
+import { StructuredOutputParser } from "langchain/output_parsers";
+import { LLMChain } from "langchain/chains";
+import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 
-import BTPAzureOpenAILLM from "./langchain/BTPAzureOpenAILLM";
-import BTPAzureOpenAIEmbedding from "./langchain/BTPAzureOpenAIEmbedding";
+import * as aiCore from "./tooling/ai-core-tooling";
+import BTPLLM from "./tooling/langchain/BTPLLM";
+import BTPEmbedding from "./tooling/langchain/BTPEmbedding";
+
+const MAIL_INSIGHTS_SCHEMA = z
+    .object({
+        sentiment: z.number().describe("The sentiment of the email: -10 for very bad up to 10 for very good"),
+        urgency: z
+            .number()
+            .describe("Whether the email is urgent or not ranging from 0 for not urgent to 10 for urgent"),
+        category: z.string().describe("Category of the email. It could wheter be 'COMPLAINT' or 'INFORMATION'"),
+        translation: z.string().describe("Translation of the mail into german"),
+        response: z.string().describe("A potential response of the mail acting as customer service"),
+        facts: z
+            .array(
+                z.object({
+                    fact: z.string().optional().describe("key for the fact which should be unique"),
+                    factTitle: z.string().optional().describe("label for the fact which should be unique"),
+                    value: z.string().optional().describe("value or insight of the fact")
+                })
+            )
+            .describe("An array additional of up to 5 key facts found in the email")
+    })
+    .describe("Insights about the email and potential actions as e.g., a potential reply to the incoming email");
 
 export class PublicService extends ApplicationService {
     async init() {
         await super.init();
-
+        this.on("getMails", this.getMails);
+        this.on("getMail", this.getMail);
+        this.on("addMails", this.addMails);
+        this.on("pgvalue", this.pgvalue);
         this.on("userInfo", this.userInfo);
         this.on("inference", this.inference);
         this.on("embed", this.embed);
         this.on("simSearch", this.simSearch);
-        this.on("pgvalue", this.pgvalue);
     }
+
+    private getMails = async (_req: Request) => {
+        try {
+            const { Mails } = this.entities;
+            const mails = await SELECT.from(Mails).columns((m: any) => {
+                m.ID;
+                m.subject;
+                m.body;
+                m.category;
+            });
+            return mails;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return {};
+        }
+    };
+
+    private getMail = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const { id } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
+                m("*");
+                m.facts;
+            });
+            const closestMailsIDs = await this.getClosestMails(id, 5, null, tenant);
+            const closestMails = await SELECT.from(Mails)
+                .where({
+                    ID: {
+                        in: closestMailsIDs.map(
+                            ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
+                        )
+                    }
+                })
+                .columns((m: any) => {
+                    m.ID;
+                    m.subject;
+                    m.body;
+                    m.category;
+                });
+
+            const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
+                const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
+                    ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
+                );
+                return { similarity: 1.0 - _distance, mail: mail };
+            });
+            return { mail, closestMails: closestMailsWithSimilarity };
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return {};
+        }
+    };
+
+    async getClosestMails(
+        id: string,
+        k: number = 5,
+        filter: any = "{}",
+        tenant: string = "main"
+    ): Promise<Array<[TypeORMVectorStoreDocument, number]>> {
+        const typeormVectorStore = await getVectorStore(tenant);
+        const _filter = filter ?? "{}";
+
+        const queryString = `
+        SELECT x.id, x."pageContent", x.metadata, x.embedding <-> focus.embedding as _distance from ${typeormVectorStore.tableName} as x
+        join (SELECT * from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ? $1) as focus
+        on focus.id != x.id
+        WHERE x.metadata @> $2
+        ORDER BY _distance LIMIT $3;
+        `;
+
+        const documents = await typeormVectorStore.appDataSource.query(queryString, [id, _filter, k]);
+        const results: Array<[TypeORMVectorStoreDocument, number]> = [];
+        for (const doc of documents) {
+            if (doc._distance != null && doc.pageContent != null) {
+                const document = new TypeORMVectorStoreDocument(doc);
+                document.id = doc.id;
+                results.push([document, doc._distance]);
+            }
+        }
+        return results;
+    }
+
+    private addMails = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const { mails } = req.data;
+
+            const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_SCHEMA);
+            const formatInstructions = parser.getFormatInstructions();
+
+            const prompt = new PromptTemplate({
+                template: "Give insights about the incoming email.\n{format_instructions}\n{mail}",
+                inputVariables: ["mail"],
+                partialVariables: { format_instructions: formatInstructions }
+            });
+            const model = new BTPLLM(aiCore.completion, "default", {});
+
+            const mailsInsights = await Promise.all(
+                mails.map(async (mail: string) => {
+                    const id = uuidv4();
+                    const input = await prompt.format({
+                        mail
+                    });
+                    const response = await model.call(input);
+                    const insights = await parser.parse(response);
+                    return { mail, insights, id };
+                })
+            );
+
+            // insert mails with insights
+            const insertables = mailsInsights.reduce(
+                (
+                    acc: { mails: any[]; facts: any[] },
+                    { mail, insights, id }: { mail: string; insights: any; id: string }
+                ) => {
+                    return {
+                        mails: [
+                            ...acc.mails,
+                            {
+                                ID: id,
+                                subject: "",
+                                body: mail,
+                                sentiment: insights.sentiment,
+                                urgency: insights.urgency,
+                                category: insights.category,
+                                translation: insights.translation,
+                                response: insights.response
+                            }
+                        ],
+                        facts: [
+                            ...acc.facts,
+                            ...insights.facts.map((fact: any) => ({
+                                mail_ID: id,
+                                fact: fact.fact,
+                                factTitle: fact.factTitle,
+                                value: fact.value
+                            }))
+                        ]
+                    };
+                },
+                { mails: [], facts: [] }
+            );
+            cds.tx(async () => {
+                const { Mails, Facts } = this.entities;
+                await INSERT.into(Mails).entries(insertables.mails);
+                await INSERT.into(Facts).entries(insertables.facts);
+            });
+            // embed mail bodies with IDs
+            const typeormVectorStore = await getVectorStore(tenant);
+            await typeormVectorStore.addDocuments(
+                insertables.mails.map((mail: any) => ({
+                    pageContent: mail.body,
+                    metadata: { id: mail.ID }
+                }))
+            );
+
+            return mailsInsights[0];
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+        }
+    };
 
     private userInfo = (req: Request) => {
         let results = {
@@ -43,7 +232,7 @@ export class PublicService extends ApplicationService {
         try {
             const { tenant } = req;
             const { prompt } = req.data;
-            const llm = new BTPAzureOpenAILLM(tenant);
+            const llm = new BTPLLM(aiCore.completion, tenant, {});
 
             const template = `Question: {question}
             
@@ -144,7 +333,7 @@ export class PublicService extends ApplicationService {
 }
 
 const getVectorStore = async (tenant: string) => {
-    const embeddings = new BTPAzureOpenAIEmbedding(tenant);
+    const embeddings = new BTPEmbedding(aiCore.embed, tenant, {});
     const args = getPostgresConnectionOptions(tenant);
     const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
     await typeormVectorStore.ensureTableInDatabase();
@@ -169,6 +358,7 @@ const getPostgresConnectionOptions = (tenant: string) => {
                   }
                 : false
         } as DataSourceOptions,
-        tableName: tenant ? `"${tenant}"` : "main"
+
+        tableName: tenant ? "_" + tenant.replace(/-/g, "") : "_main"
     };
 };

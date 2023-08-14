@@ -3,7 +3,8 @@ import { HttpResponse } from "@sap-cloud-sdk/http-client";
 import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
 import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
-import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "./vendor/AI_CORE_API";
+import { CreateChatCompletionRequest, CreateChatCompletionResponse, ChatCompletionRequestMessage } from "openai";
+import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "../vendor/AI_CORE_API";
 
 enum Tasks {
     COMPLETION = "4aa2fc45-cd49-496e-b4a9-9ab8e49df4ab",
@@ -35,24 +36,58 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
  * @param tenant the tenant for which the completion is being made
  * @returns the text completion
  */
-export const completion = async (prompt: string, tenant: string) => {
-    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name  === "saas-registry")
-    // @ts-ignore
-    const appName = services?.credentials?.appName;
-    // Create AI Core Resource Group for tenant
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+export const completion = async (prompt: string, tenant: string, LLMParams: {} = {}) => {
+    const appName = getAppName();
+    //const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
         const payload: any = {
-            messages: [
-                {
-                    role: "system",
-                    content:
-                        'Assistant is an intelligent chatbot designed to help users answer their tax related questions.\n\nInstructions:\n- Only answer questions related to taxes.\n- If you\'re unsure of an answer, you can say "I don\'t know" or "I\'m not sure" and recommend users go to the IRS website for more information.'
-                },
-                { role: "user", content: prompt }
-            ],
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 1000,
+            temperature: 0.0,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            stop: "null",
+            ...LLMParams
+        };
+        const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+        const response: any = await aiCoreService.send({
+            // @ts-ignore
+            query: `POST /inference/deployments/${deploymentId}/v1/predict`,
+            data: payload,
+            headers: headers
+        });
+
+        return response["choices"][0]?.message?.content;
+    } else {
+        return `No deployment found for this tenant (${tenant})`;
+    }
+};
+
+/**
+ * Use the chat completion api from Azure OpenAI services to make a completion call
+ *
+ * @param messages the messages for the chat completion
+ * @param tenant the tenant for which the completion is being made
+ * @returns the text completion
+ */
+export const chatCompletion = async (
+    request: CreateChatCompletionRequest,
+    tenant: string
+): Promise<CreateChatCompletionResponse> => {
+    const appName = getAppName();
+    //const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = "default";
+    const deploymentId = await getDeploymentId(resourceGroupId);
+    if (deploymentId) {
+        const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
+        const payload: any = {
+            messages: request.messages.map((value: ChatCompletionRequestMessage) => ({
+                role: value.role,
+                content: value.content
+            })),
             max_tokens: 100,
             temperature: 0.0,
             frequency_penalty: 0,
@@ -63,22 +98,18 @@ export const completion = async (prompt: string, tenant: string) => {
         const response: any = await aiCoreService.send({
             // @ts-ignore
             query: `POST /inference/deployments/${deploymentId}/v1/predict`,
-            data: payload,
+            data: request,
             headers: headers
         });
-
-        return { text: response["choices"][0]?.message?.content };
+        return response;
     } else {
-        return { text: `No deployment found for this tenant (${tenant})` };
+        return null;
     }
 };
 
-export const embed = async (texts: Array<string>, tenant: string) => {
-    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name  === "saas-registry")
-    // @ts-ignore
-    const appName = services?.registry?.appName;
-    // Create AI Core Resource Group for tenant
-    // const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+export const embed = async (texts: Array<string>, tenant: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
+    const appName = getAppName();
+    //const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const resourceGroupId = "default";
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
@@ -87,7 +118,8 @@ export const embed = async (texts: Array<string>, tenant: string) => {
         const embeddings = await Promise.all(
             texts.map(async (text: string) => {
                 const payload: any = {
-                    input: text
+                    input: text,
+                    ...EmbeddingParams
                 };
                 const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
                 const response: any = await aiCoreService.send({
@@ -104,6 +136,13 @@ export const embed = async (texts: Array<string>, tenant: string) => {
     } else {
         return [];
     }
+};
+
+const getAppName = () => {
+    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
+    // @ts-ignore
+    const appName = services?.registry?.appName;
+    return appName;
 };
 
 /**
