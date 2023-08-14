@@ -38,7 +38,8 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
  */
 export const completion = async (prompt: string, tenant: string, LLMParams: {} = {}) => {
     const appName = getAppName();
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    //const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -77,7 +78,8 @@ export const chatCompletion = async (
     tenant: string
 ): Promise<CreateChatCompletionResponse> => {
     const appName = getAppName();
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    //const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -107,7 +109,8 @@ export const chatCompletion = async (
 
 export const embed = async (texts: Array<string>, tenant: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
     const appName = getAppName();
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    //const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = "default";
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);

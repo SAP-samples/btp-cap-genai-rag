@@ -60,20 +60,22 @@
         " ------------------": "---",
         "db": {
             "[hybrid]": {
-                "kind": "hana",
+                "kind": "hana-cloud",
                 "vcap": {
                     "label": "service-manager",
                     "plan": "container"
                 }
             },
             "[local-with-mtx]": {
-                "kind": "sql-mt",
+                "impl": "@cap-js/sqlite",
+                "credentials": {
+                    "url": "db.sqlite"
+                },
                 "beta": {
                     "sqlMigration": "true"
                 }
             },
             "[development]": {
-                "kind": "sqlite",
                 "impl": "@cap-js/sqlite",
                 "credentials": {
                     "url": "db.sqlite"

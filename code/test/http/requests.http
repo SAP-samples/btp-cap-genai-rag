@@ -3,6 +3,7 @@
 # @name embed
 POST http://localhost:4004/catalog/PublicService/embed
 content-type: application/json
+Authorization: Basic alice:
 
 {
     "texts": [
@@ -18,6 +19,7 @@ content-type: application/json
 # @name simSearch
 POST http://localhost:4004/catalog/PublicService/simSearch
 content-type: application/json
+Authorization: Basic alice:
 
 {
     "text": "At the wedding, the dance floor came alive as the bride and groom swayed in each other's arms.",
@@ -28,6 +30,7 @@ content-type: application/json
 # @name addMails
 POST http://localhost:4004/catalog/PublicService/addMails
 content-type: application/json
+Authorization: Basic alice:
 
 {
     "mails": [
@@ -41,4 +44,5 @@ content-type: application/json
 # @name getMail
 GET http://localhost:4004/catalog/PublicService/getMail(id={{id}})
 content-type: application/json
+Authorization: Basic alice:
 
