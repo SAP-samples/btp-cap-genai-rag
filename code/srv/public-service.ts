@@ -358,6 +358,7 @@ const getPostgresConnectionOptions = (tenant: string) => {
                   }
                 : false
         } as DataSourceOptions,
-        tableName: tenant && tenant !== "main" ? "_" + tenant.replace(/-/g, "") : "main"
+
+        tableName: tenant ? "_" + tenant.replace(/-/g, "") : "_main"
     };
 };

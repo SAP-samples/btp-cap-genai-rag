@@ -4,24 +4,16 @@ using {aisaas.db as db} from '../db/data-model';
 service PublicService {
 
     entity Mails as projection on db.Mails;
-    type IMail : db.Mails {};
-    type IFact : db.Facts {};
-
-    type Fact {
-        fact      : String;
-        factTitle : String;
-        value     : String;
-    }
 
     function getMail(id : UUID)                    returns {
-        mail : IMail;
+        mail : db.Mail;
         closestMails : array of {
             similarity : Double;
-            mail : IMail;
+            mail : db.Mail
         };
     };
 
-    function getMails()                            returns array of IMail;
+    function getMails()                            returns array of db.Mail;
 
 
     action   addMails(mails : array of String)     returns array of {
@@ -33,7 +25,7 @@ service PublicService {
             category : String;
             translation : String;
             response : String;
-            facts : array of Fact;
+            facts : array of db.Fact;
         }
     };
 
