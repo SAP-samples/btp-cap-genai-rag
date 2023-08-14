@@ -8,11 +8,13 @@ export default class BTPAzureOpenAIChatLLM extends ChatOpenAI {
     constructor(tenant: string, params: BaseChatModelParams = {}) {
         super({
             ...params,
+            openAIApiKey: "dummy-key"
             // azureOpenAIpi* need to be set since otherwise an error will be thrown
-            azureOpenAIApiKey: "azureOpenAIApiKey",
+            /*azureOpenAIApiKey: "azureOpenAIApiKey",
             azureOpenAIApiDeploymentName: "azureOpenAIApiDeploymentName",
             azureOpenAIApiInstanceName: "azureOpenAIApiInstanceName",
             azureOpenAIApiVersion: "azureOpenAIApiVersion"
+            */
         });
         this.tenant = tenant;
     }

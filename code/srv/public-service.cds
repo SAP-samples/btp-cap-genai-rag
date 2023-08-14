@@ -4,26 +4,27 @@ using {aisaas.db as db} from '../db/data-model';
 service PublicService {
 
     entity Mails as projection on db.Mails;
-    type IMails : db.Mails {};
+    type IMail : db.Mails {};
+    type IFact : db.Facts {};
 
-    action   inference(prompt : String)            returns {
-        text : String
-    };
-
-    action   embed(texts : array of String)        returns {
-        success : Boolean;
-        error : String;
-    };
+    type Fact {
+        fact      : String;
+        factTitle : String;
+        value     : String;
+    }
 
     function getMail(id : UUID)                    returns {
-        mail : IMails;
+        mail : IMail;
         closestMails : array of {
             similarity : Double;
-            mail : IMails
+            mail : IMail;
         };
     };
 
-    action   addMails(mails : array of String) returns array of {
+    function getMails()                            returns array of IMail;
+
+
+    action   addMails(mails : array of String)     returns array of {
         id : String;
         mail : String;
         insights : {
@@ -33,21 +34,23 @@ service PublicService {
             translation : String;
             response : String;
             facts : array of Fact;
-        } 
+        }
     };
 
-    type Fact {
-        fact      : String;
-        factTitle : String;
-        value     : String;
+    action   inference(prompt : String)            returns {
+        text : String;
     };
 
+    action   embed(texts : array of String)        returns {
+        success : Boolean;
+        error : String;
+    };
 
     action   simSearch(text : String, k : Integer) returns {
         result : array of {
             pageContent : String;
             metadata : {
-                a : Integer
+                a : Integer;
             }
         }
     };

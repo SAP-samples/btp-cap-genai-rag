@@ -1,25 +1,17 @@
 import { ApplicationService } from "@sap/cds";
-import pg from "pg";
 import { Request } from "@sap/cds/apis/services";
 import { v4 as uuidv4 } from "uuid";
-
-import {
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    PromptTemplate,
-    SystemMessagePromptTemplate
-} from "langchain/prompts";
+import pg from "pg";
+import { DataSourceOptions } from "typeorm";
+import { z } from "zod";
+import { PromptTemplate } from "langchain/prompts";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { LLMChain } from "langchain/chains";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
-import { z } from "zod";
-import { createStructuredOutputChainFromZod } from "langchain/chains/openai_functions";
-import { DataSourceOptions } from "typeorm";
 
-import BTPAzureOpenAILLM from "./langchain/BTPAzureOpenAILLM";
-import BTPAzureOpenAIChatLLM from "./langchain/BTPAzureOpenAIChatLLM";
-import BTPAzureOpenAIEmbedding from "./langchain/BTPAzureOpenAIEmbedding";
-import { Subject } from "typeorm/persistence/Subject";
+import * as aiCore from "./tooling/ai-core-tooling";
+import BTPLLM from "./tooling/langchain/BTPLLM";
+import BTPEmbedding from "./tooling/langchain/BTPEmbedding";
 
 const MAIL_INSIGHTS_SCHEMA = z
     .object({
@@ -45,21 +37,37 @@ const MAIL_INSIGHTS_SCHEMA = z
 export class PublicService extends ApplicationService {
     async init() {
         await super.init();
+        this.on("getMails", this.getMails);
+        this.on("getMail", this.getMail);
+        this.on("addMails", this.addMails);
+        this.on("pgvalue", this.pgvalue);
         this.on("userInfo", this.userInfo);
         this.on("inference", this.inference);
         this.on("embed", this.embed);
         this.on("simSearch", this.simSearch);
-        this.on("pgvalue", this.pgvalue);
-        this.on("addMails", this.addMails);
-        this.on("getMail", this.getMail);
     }
+
+    private getMails = async (_req: Request) => {
+        try {
+            const { Mails } = this.entities;
+            const mails = await SELECT.from(Mails).columns((m: any) => {
+                m.ID;
+                m.subject;
+                m.body;
+                m.category;
+            });
+            return mails;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return {};
+        }
+    };
 
     private getMail = async (req: Request) => {
         try {
             const { tenant } = req;
             const { id } = req.data;
             const { Mails } = this.entities;
-            console.log(id);
             const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
                 m("*");
                 m.facts;
@@ -79,15 +87,13 @@ export class PublicService extends ApplicationService {
                     m.body;
                     m.category;
                 });
-            
+
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
                 const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
                     ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
                 );
                 return { similarity: 1.0 - _distance, mail: mail };
             });
-            console.log("mail:", mail);
-            console.log("closestMails:", closestMails);
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -137,11 +143,11 @@ export class PublicService extends ApplicationService {
                 inputVariables: ["mail"],
                 partialVariables: { format_instructions: formatInstructions }
             });
+            const model = new BTPLLM(aiCore.completion, "default", {});
 
             const mailsInsights = await Promise.all(
                 mails.map(async (mail: string) => {
                     const id = uuidv4();
-                    const model = new BTPAzureOpenAILLM(tenant);
                     const input = await prompt.format({
                         mail
                     });
@@ -153,7 +159,10 @@ export class PublicService extends ApplicationService {
 
             // insert mails with insights
             const insertables = mailsInsights.reduce(
-                (acc: { mails: any[]; facts: any[] }, { mail, insights, id }: { mail: string; insights: any, id: string }) => {
+                (
+                    acc: { mails: any[]; facts: any[] },
+                    { mail, insights, id }: { mail: string; insights: any; id: string }
+                ) => {
                     return {
                         mails: [
                             ...acc.mails,
@@ -188,8 +197,6 @@ export class PublicService extends ApplicationService {
             });
             // embed mail bodies with IDs
             const typeormVectorStore = await getVectorStore(tenant);
-            console.log(typeormVectorStore.toJSON());
-            console.log(insertables.mails);
             await typeormVectorStore.addDocuments(
                 insertables.mails.map((mail: any) => ({
                     pageContent: mail.body,
@@ -225,7 +232,7 @@ export class PublicService extends ApplicationService {
         try {
             const { tenant } = req;
             const { prompt } = req.data;
-            const llm = new BTPAzureOpenAILLM(tenant);
+            const llm = new BTPLLM(aiCore.completion, tenant, {});
 
             const template = `Question: {question}
             
@@ -326,7 +333,7 @@ export class PublicService extends ApplicationService {
 }
 
 const getVectorStore = async (tenant: string) => {
-    const embeddings = new BTPAzureOpenAIEmbedding(tenant);
+    const embeddings = new BTPEmbedding(aiCore.embed, tenant, {});
     const args = getPostgresConnectionOptions(tenant);
     const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
     await typeormVectorStore.ensureTableInDatabase();
@@ -349,8 +356,8 @@ const getPostgresConnectionOptions = (tenant: string) => {
                       cert: credentials?.sslcert,
                       ca: credentials?.sslrootcert
                   }
-                : false 
+                : false
         } as DataSourceOptions,
-        tableName: tenant ? ( "_" + (tenant.replace(/-/g, ""))) : "main"
+        tableName: tenant && tenant !== "main" ? "_" + tenant.replace(/-/g, "") : "main"
     };
 };

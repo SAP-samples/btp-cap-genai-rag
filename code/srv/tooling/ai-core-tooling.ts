@@ -4,7 +4,7 @@ import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
 import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 import { CreateChatCompletionRequest, CreateChatCompletionResponse, ChatCompletionRequestMessage } from "openai";
-import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "./vendor/AI_CORE_API";
+import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "../vendor/AI_CORE_API";
 
 enum Tasks {
     COMPLETION = "4aa2fc45-cd49-496e-b4a9-9ab8e49df4ab",
@@ -14,11 +14,6 @@ enum Tasks {
 interface AICoreApiHeaders extends Record<string, string> {
     "Content-Type": string;
     "AI-Resource-Group": string;
-}
-
-interface Message {
-    role: string;
-    content: string;
 }
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
@@ -41,12 +36,9 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
  * @param tenant the tenant for which the completion is being made
  * @returns the text completion
  */
-export const completion = async (prompt: string, tenant: string) => {
-    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
-    // @ts-ignore
-    const appName = services?.credentials?.appName;
-    // const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
-    const resourceGroupId = "default";
+export const completion = async (prompt: string, tenant: string, LLMParams: {} = {}) => {
+    const appName = getAppName();
+    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -56,7 +48,8 @@ export const completion = async (prompt: string, tenant: string) => {
             temperature: 0.0,
             frequency_penalty: 0,
             presence_penalty: 0,
-            stop: "null"
+            stop: "null",
+            ...LLMParams
         };
         const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
         const response: any = await aiCoreService.send({
@@ -66,9 +59,9 @@ export const completion = async (prompt: string, tenant: string) => {
             headers: headers
         });
 
-        return { text: response["choices"][0]?.message?.content };
+        return response["choices"][0]?.message?.content;
     } else {
-        return { text: `No deployment found for this tenant (${tenant})` };
+        return `No deployment found for this tenant (${tenant})`;
     }
 };
 
@@ -83,15 +76,11 @@ export const chatCompletion = async (
     request: CreateChatCompletionRequest,
     tenant: string
 ): Promise<CreateChatCompletionResponse> => {
-    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
-    // @ts-ignore
-    const appName = services?.registry?.appName;
-    // const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
-    const resourceGroupId = "default";
+    const appName = getAppName();
+    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
-        console.log("messages", request.messages);
         const payload: any = {
             messages: request.messages.map((value: ChatCompletionRequestMessage) => ({
                 role: value.role,
@@ -110,19 +99,15 @@ export const chatCompletion = async (
             data: request,
             headers: headers
         });
-        console.log("response", response);
         return response;
     } else {
         return null;
     }
 };
 
-export const embed = async (texts: Array<string>, tenant: string): Promise<number[][]> => {
-    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
-    // @ts-ignore
-    const appName = services?.registry?.appName;
-    // const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
-    const resourceGroupId = "default";
+export const embed = async (texts: Array<string>, tenant: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
+    const appName = getAppName();
+    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -130,7 +115,8 @@ export const embed = async (texts: Array<string>, tenant: string): Promise<numbe
         const embeddings = await Promise.all(
             texts.map(async (text: string) => {
                 const payload: any = {
-                    input: text
+                    input: text,
+                    ...EmbeddingParams
                 };
                 const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
                 const response: any = await aiCoreService.send({
@@ -147,6 +133,13 @@ export const embed = async (texts: Array<string>, tenant: string): Promise<numbe
     } else {
         return [];
     }
+};
+
+const getAppName = () => {
+    const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
+    // @ts-ignore
+    const appName = services?.registry?.appName;
+    return appName;
 };
 
 /**
