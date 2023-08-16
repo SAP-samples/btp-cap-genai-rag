@@ -9,9 +9,9 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 import { LLMChain } from "langchain/chains";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 
-import * as aiCore from "./tooling/ai-core-tooling";
-import BTPLLM from "./tooling/langchain/BTPLLM";
-import BTPEmbedding from "./tooling/langchain/BTPEmbedding";
+import * as aiCore from "../common/tooling/ai-core-tooling";
+import BTPLLM from "../common/tooling/langchain/BTPLLM";
+import BTPEmbedding from "../common/tooling/langchain/BTPEmbedding";
 
 const MAIL_INSIGHTS_SCHEMA = z
     .object({
@@ -142,14 +142,18 @@ export class PublicService extends ApplicationService {
 
             // dynamically add custom fields
             // todo: custom fields from database
-            let customFields = [{ key: "abc", isNumber: false, description: "abc description" }];
+            let customFields = [
+                {
+                    key: "location",
+                    isNumber: false,
+                    description: "Extract the geo location for the trip the email is about"
+                }
+            ];
             const zodCustomFields = customFields.reduce(
-                (previousValue: { [key: string]: z.ZodNumber | z.ZodString }, currentValue: CustomField) => {
+                (fields: { [key: string]: z.ZodNumber | z.ZodString }, field: CustomField) => {
                     return {
-                        ...previousValue,
-                        [currentValue.key]: (currentValue.isNumber ? z.number() : z.string()).describe(
-                            currentValue.description
-                        )
+                        ...fields,
+                        [field.key]: (field.isNumber ? z.number() : z.string()).describe(field.description)
                     };
                 },
                 {}

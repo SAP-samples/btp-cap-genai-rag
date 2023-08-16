@@ -5,5 +5,10 @@
         "rootDir": "./",
         "baseUrl": "./"
     },
-    "include": ["./**/*"]
+    "include": ["./**/*"],
+    "references": [
+        {
+            "path": "../common/tsconfig.json"
+        }
+    ]
 }
