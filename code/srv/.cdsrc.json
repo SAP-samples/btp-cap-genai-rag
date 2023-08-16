@@ -60,13 +60,16 @@
         " ------------------": "---",
         "db": {
             "[hybrid]": {
-                "kind": "hana-cloud",
+                "kind": "hana",
+                "impl": "@sap/cds-hana",
+                "deploy-format": "hdbtable",
                 "vcap": {
                     "label": "service-manager",
                     "plan": "container"
                 }
             },
             "[local-with-mtx]": {
+                "kind": "sqlite",
                 "credentials": {
                     "url": "db.sqlite"
                 },
@@ -75,6 +78,7 @@
                 }
             },
             "[development]": {
+                "kind": "sqlite",
                 "credentials": {
                     "url": "db.sqlite"
                 }

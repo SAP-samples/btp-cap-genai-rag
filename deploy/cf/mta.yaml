@@ -293,15 +293,6 @@ resources:
       service: application-logs
       service-name: ${space}-aisaas-logging
       service-plan: lite
-  
-  # ---------------- CORE AI SERVICE ---------------------------
-  - name: aisaas-aicore
-  # ------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: aicore
-      service-name: ${space}-aisaas-aicore
-      service-plan: standard
 
   # ----------------- COMMON DB HDI CONAINER -------------------
   - name: aisaas-com-hdi-container
@@ -375,3 +366,13 @@ resources:
         xsappname: ${xsuaa-app}
     properties:
       xsuaa-app: ${xsuaa-app}
+
+  # ---------------- CORE AI SERVICE ---------------------------
+  - name: aisaas-aicore
+  # ------------------------------------------------------------
+    active: false
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: aicore
+      service-name: ${space}-aisaas-aicore
+      service-plan: standard

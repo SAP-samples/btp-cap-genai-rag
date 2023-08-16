@@ -58,6 +58,8 @@ srv:
       serviceInstanceName: destination
     hana: 
       serviceInstanceName: com-hdi-container
+    # aicore: 
+      # serviceInstanceName: aicore
   image:
     # Provide your Backend Service Docker Image repository
     repository: 
@@ -83,6 +85,7 @@ api:
     # Provide your API Service Docker Image repository
     repository: 
     tag: 
+
   resources:
     limits:
       ephemeral-storage: 1G
@@ -339,11 +342,6 @@ destination:
             HTML5.DynamicDestination: true
             HTML5.ForwardAuthToken: true
 
-# SAP AI Core ("standard" plan)
-ai_core:
-  serviceOfferingName: aicore
-  servicePlanName: standard
-
 # SAP Service Manager ("container" plan)
 # Required by mtxs for automated creation of tenant database containers
 sm_container:
@@ -375,3 +373,8 @@ postgresql_db:
   servicePlanName: free
   parameters:
     engine_version: "13"
+
+# SAP AI Core
+# aicore:
+  # serviceOfferingName: aicore
+  # servicePlanName: free
