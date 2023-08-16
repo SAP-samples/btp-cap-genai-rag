@@ -13,7 +13,6 @@
         "@sap-cloud-sdk/generator": "^3.4.0",
         "@sap-cloud-sdk/http-client": "^3.2.0",
         "@sap-cloud-sdk/openapi": "^3.2.0",
-        "@sap-cloud-sdk/openapi-generator": "^3.2.0",
         "@sap/audit-logging": "^5",
         "@sap/cds": "^7.1.1",
         "@sap/cds-dk": "^7.1.1",
@@ -33,8 +32,7 @@
         "node-jose": "^2.1",
         "passport": "^0.6.0",
         "pg": "^8.11.2",
-        "typeorm": "^0.3.17",
-        "common-tooling": "./common/tooling/ai-core-tooling"
+        "typeorm": "^0.3.17"
     },
     "devDependencies": {
         "@cap-js/sqlite": "^0.1.0",
@@ -71,9 +69,9 @@
         "deploy:dev": "node node_modules/@sap/hdi-deploy/ --root gen/db",
         "--BUILD--": "",
         "build": "npm run build:deps && npm run build:cds && npm run build:ts && npm run cleanup:ts",
-        "build:ts": "tsc -p srv && tsc -p api",
+        "build:ts": "tsc -b srv && tsc -b api",
         "build:cds": "cds build --production",
-        "build:deps": "npm i --include=dev",
+        "build:deps": "npm i",
         "cleanup:ts": "npx rimraf ./gen/**/**/*.ts && npx rimraf ./gen/**/**/tsconfig.json",
         "--TEST--": "",
         "watch": "cds-ts watch --profile hybrid",

@@ -1,3 +1,4 @@
+import cds from "@sap/cds";
 import xsenv from "@sap/xsenv";
 import { HttpResponse } from "@sap-cloud-sdk/http-client";
 import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
