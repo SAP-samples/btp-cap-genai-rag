@@ -8,18 +8,6 @@ parameters:
   autoscalerMinInstance: 1
   autoscalerMaxInstance: 2
 
-build-parameters:
-  before-all:
-    - builder: custom
-      commands:
-        ### Deployment w/o csv sample files ###
-        - npm install --include=dev --prefix=../../code
-        #- npx -p @sap/cds-dk@6.8.3 cds build -in ../../code --profile production
-
-        ### Deployment w/ csv sample files ###
-        #- npm install --include=dev --prefix=../../code
-        #- npx -p @sap/cds-dk cds build --profile production,csv
-
 modules:
   # --------------------- APPROUTER MODULE ---------------------
   - name: aisaas
@@ -41,7 +29,6 @@ modules:
       TENANT_HOST_PATTERN: '^(.*)${tenant-separator}${app-domain}'
     requires:
       - name: aisaas-destination
-      - name: aisaas-html5-repo-runtime
       - name: aisaas-uaa
       - name: aisaas-srv-api
     provides:
@@ -92,7 +79,6 @@ modules:
       - name: aisaas-service-manager
       - name: aisaas-service-manager-admin
       - name: aisaas-destination
-      - name: aisaas-html5-repo-runtime
       - name: aisaas-api-sb-srv
       - name: aisaas-approuter
       - name: aisaas-autoscaler
@@ -145,8 +131,9 @@ modules:
     properties:
       SBF_ENABLE_AUDITLOG: false
       SBF_CATALOG_FILE: ./catalog.json
+      SBF_CATALOG_SUFFIX: ${space}-${org}
       SBF_SERVICE_CONFIG:
-          AI SaaS API:
+          aisaas-api:
             extend_credentials:
               shared:
                 apiUrl: ~{aisaas-api-srv-api/srv-url}
@@ -162,7 +149,6 @@ modules:
                   authorities: 
                   - $XSMASTERAPPNAME.plan_premium
             extend_catalog:
-              name : ~{aisaas-api-uaa/xsuaa-app}
               metadata:
                 displayName : AI SaaS API ${space}
     requires:
@@ -353,25 +339,6 @@ resources:
                 forwardAuthToken: true
               
 
-  # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------  
-  - name: aisaas-html5-repo-host
-  # -----------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service-plan: app-host
-      service-name: ${space}-aisaas-html5-repo-host
-      service: html5-apps-repo
-      config:
-        sizeLimit: 2
-
-  # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
-  - name: aisaas-html5-repo-runtime
-  # ------------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service-plan: app-runtime
-      service-name: ${space}-aisaas-html5-repo-runtime
-      service: html5-apps-repo
 
   # ----------------- AUTOSCALER  ------------------------------------   
   - name: aisaas-autoscaler
@@ -391,6 +358,8 @@ resources:
       service: postgresql-db
       service-name: ${space}-aisaas-postgresql-db
       service-plan: free
+      config:
+        engine_version: "13"
 
 
   # ----------------- XSUAA - BROKER ---------------------------------
