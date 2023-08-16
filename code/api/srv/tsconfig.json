@@ -1,14 +1,14 @@
 {
-    "extends": "../tsconfig.json",
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "../gen/api/srv",
+        "outDir": "../../gen/api/srv",
         "rootDir": "./",
         "baseUrl": "./"
     },
     "include": ["./**/*"],
     "references": [
         {
-            "path": "../common/tsconfig.json"
+            "path": "../../common/tsconfig.json"
         }
     ]
 }

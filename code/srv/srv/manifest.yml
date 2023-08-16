@@ -4,7 +4,7 @@ applications:
     # Backend Service
     # -----------------------------------------------------------------------------------
     - name: aisaas-srv-dev
-      path: ../gen/srv
+      path: ../../gen/srv
       memory: 256M
       buildpacks:
           - nodejs_buildpack
