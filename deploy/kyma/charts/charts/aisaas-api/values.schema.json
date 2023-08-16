@@ -311,9 +311,7 @@
             "$id": "#/properties/apim",
             "type": "object",
             "additionalProperties": false,
-            "required": [
-                "enabled"
-            ],
+            "required": [],
             "properties": {
                 "enabled": {
                     "$id": "#/properties/apim/enabled",
@@ -344,10 +342,7 @@
                     "type": "object",
                     "description": "XSUAA details for authenticating requests coming from SAP API Management",
                     "additionalProperties": false,
-                    "required": [
-                        "host",
-                        "sub"
-                    ],
+                    "required": [],
                     "properties": {
                         "host": {
                             "title": "XSUAA hostname of SAP BTP provider subaccount w/o protocol",

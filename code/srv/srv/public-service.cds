@@ -1,4 +1,4 @@
-using {aisaas.db as db} from '../db/data-model';
+using {aisaas.db as db} from '../../db/data-model';
 
 @path: '/catalog/PublicService'
 service PublicService {

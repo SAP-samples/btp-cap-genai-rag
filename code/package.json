@@ -15,7 +15,6 @@
         "@sap-cloud-sdk/openapi-generator": "^3.2.0",
         "@sap/audit-logging": "^5",
         "@sap/cds": "^7.1.1",
-        "@sap/cds-dk": "^7.1.1",
         "@sap/cds-hana": "^2.0.0",
         "@sap/cds-mtxs": "^1.10.0",
         "@sap/cds-odata-v2-adapter-proxy": "^1",
@@ -35,7 +34,7 @@
         "typeorm": "^0.3.17"
     },
     "devDependencies": {
-        "@cap-js/sqlite": "^0.1.0",
+        "@sap/cds-dk": "^7.1.1",
         "@sap/approuter": "^14.1.1",
         "@sap/cds-common-content": "1.0.1",
         "@sap/html5-app-deployer": "^5.0.0",
@@ -58,23 +57,38 @@
         "ui5-task-zipper": "^0.5.1"
     },
     "scripts": {
-        "start": "cds run --production",
+        "start": "cds-serve",
+        "----------------------": "",
+        "-Local/Hybrid-Testing-": "",
+        "/--------------------/": "",
+        "test": "mocha --timeout 20000",
+        "---API-Service---": "",
+        "api:watch": "cds watch api",
+        "api:mtx": "cds watch api --profile local-with-mtx",
+        "api:hybrid": "(cd api && cds watch --profile hybrid)",
+        "---Backend-Service---": "",
+        "srv:watch": "cds watch srv",
+        "srv:mtx": "cds watch srv --profile local-with-mtx",
+        "srv:hybrid": "(cd srv && cds watch --profile hybrid)",
+        "---Service-Broker---": "",
+        "broker:hybrid": "cds bind --exec npm run broker:run",
+        "broker:run": "(cd broker && cds bind --exec --profile hybrid npm start)",
+        "---Application-Router---": "",
+        "router:hybrid": "cds bind --exec npm run router:run",
+        "router:run": "(cd router && cds bind --exec --profile hybrid node ../node_modules/@sap/approuter/approuter.js)",
+        "---------------------": "",
+        "-----PostgreSQL------": "",
+        "/-------------------/": "",
         "start:pg": "docker compose up -d",
         "stop:pg": "docker compose stop",
-        "dev-start": "cds run",
-        "dev-start-mtx": "cds run --profile local-with-mtx",
-        "api-start-local": "cds serve srv-api/ db --with srv-api/api-service.js",
-        "api-start-hybrid": "cds serve srv-api/ --with srv-api/api-service.js --production",
-        "test": "jest",
-        "deploy:dev": "node node_modules/@sap/hdi-deploy/ --root gen/db",
-        "--BUILD--": "",
+        "--------------------": "",
+        "--------BUILD-------": "",
+        "/------------------/": "",
         "build": "npm run build:deps && npm run build:cds && npm run build:ts && npm run cleanup:ts",
         "build:ts": "tsc -p srv && tsc -p api",
         "build:cds": "cds build --production",
         "build:deps": "npm i --include=dev",
         "cleanup:ts": "npx rimraf ./gen/**/**/*.ts && npx rimraf ./gen/**/**/tsconfig.json",
-        "--TEST--": "",
-        "watch": "cds-ts watch --profile hybrid",
         "cds2types": "cd srv && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },
     "eslintConfig": {
@@ -118,38 +132,37 @@
                     "options": {
                         "model": [
                             "db",
-                            "api",
                             "db/hana",
-                            "@sap/cds-mtxs/srv/bootstrap",
-                            "@sap/cds-mtxs/db/extensions",
-                            "@sap/cds-mtxs/srv/extensibility-service"
+                            "api/srv",
+                            "srv/srv",
+                            "@sap/cds-mtxs/db/extensions"
                         ]
                     }
                 },
                 {
                     "for": "nodejs",
-                    "src": "srv",
+                    "src": "srv/srv",
+                    "dest": "srv",
                     "options": {
                         "model": [
-                            "srv",
-                            "db",
-                            "db/hana",
+                            "srv/srv",
                             "@sap/cds-mtxs/srv/bootstrap",
-                            "@sap/cds-mtxs/db/extensions",
                             "@sap/cds-mtxs/srv/extensibility-service"
                         ]
                     }
                 },
                 {
                     "for": "nodejs",
-                    "src": "api",
+                    "src": "api/srv",
+                    "dest": "api",
                     "options": {
-                        "model": "api"
+                        "model": "api/srv"
                     }
                 },
                 {
                     "for": "mtx",
-                    "src": "srv"
+                    "src": "srv/srv",
+                    "dest": "srv"
                 },
                 {
                     "for": "hana",

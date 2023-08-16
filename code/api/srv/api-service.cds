@@ -1,5 +1,4 @@
-using {aisaas.db, } from '../db/data-model';
-
+using {aisaas.db} from '../../db/data-model';
 
 service ApiService @(
      path    : '/rest/api',

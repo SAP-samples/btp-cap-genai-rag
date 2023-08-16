@@ -1,51 +1,124 @@
 {
     "requires": {
-        "multitenancy": true,
-        "toggles": true,
-        "extensibility": true,
-        "cds.xt.ExtensibilityService": {
-            "element-prefix": [
-                "x_"
-            ],
-            "extension-allowlist": [
-                {
-                    "for": [
-                        "*"
-                    ]
-                }
-            ]
-        },
         "PROVIDER_AI_CORE_DESTINATION": {
             "kind": "rest",
             "credentials": {
                 "destination": "PROVIDER_AI_CORE_DESTINATION"
             }
         },
-        "postgres": {
-            "kind": "postgresql-db"
-        },
-        "hana": {
-            "kind": "hana-cloud",
-            "vcap": {
-                "name": "hana",
-                "tags": [
-                    "hana"
-                ],
-                "plan": "hdi-shared",
-                "label": "hana"
+        " ---------------------": "---",
+        "--- MTXs Settings ----": "---",
+        "--------------------- ": "---",
+        "[hybrid]": {
+            "multitenancy": true,
+            "extensibility": false,
+            "toggles": false,
+            "cds.xt.ExtensibilityService": {
+                "element-prefix": ["x_"],
+                "extension-allowlist": [
+                    {
+                        "for": ["*"]
+                    }
+                ]
+            },
+            "postgres": {
+                "kind": "postgresql-db"
             }
         },
+        "[local-with-mtx]": {
+            "multitenancy": true,
+            "extensibility": false,
+            "toggles": false,
+            "postgres": {
+                "kind": "postgres",
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
+                }
+            }
+        },
+        "[development]": {
+            "multitenancy": false,
+            "extensibility": false,
+            "toggles": false,
+            "postgres": {
+                "kind": "postgres",
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
+                }
+            }
+        },
+        "------------------ ": "---",
+        "--- DB Settings ---": "---",
+        " ------------------": "---",
         "db": {
-            "kind": "hana", 
-            "impl": "@sap/cds-hana",
-            "deploy-format": "hdbtable",
-            "vcap": {
-                "label": "service-manager",
-                "plan": "container"
+            "[hybrid]": {
+                "kind": "hana",
+                "impl": "@sap/cds-hana",
+                "deploy-format": "hdbtable",
+                "vcap": {
+                    "label": "service-manager",
+                    "plan": "container"
+                }
+            },
+            "[local-with-mtx]": {
+                "kind": "sqlite",
+                "credentials": {
+                    "url": "db.sqlite"
+                },
+                "beta": {
+                    "sqlMigration": "true"
+                }
+            },
+            "[development]": {
+                "kind": "sqlite",
+                "credentials": {
+                    "url": "db.sqlite"
+                }
             }
         },
+        "-------------------- ": "---",
+        "--- Auth Settings ---": "---",
+        " --------------------": "---",
         "auth": {
-            "kind": "xsuaa"
+            "[hybrid]": {
+                "kind": "xsuaa"
+            },
+            "[local-with-mtx]": {
+                "kind": "mocked",
+                "users": {
+                    "alice": {
+                        "tenant": "t1",
+                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
+                    },
+                    "carol": {
+                        "tenant": "t1",
+                        "roles": ["Member"]
+                    },
+                    "bob": {
+                        "tenant": "t1-ext",
+                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
+                    }
+                }
+            },
+            "[development]": {
+                "kind": "mocked",
+                "users": {
+                    "alice": {
+                        "roles": ["Admin", "Member"]
+                    },
+                    "carol": {
+                        "roles": ["Member"]
+                    }
+                }
+            }
         }
     }
 }

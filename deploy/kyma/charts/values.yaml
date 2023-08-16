@@ -27,8 +27,8 @@ router:
       serviceInstanceName: destination
   image:
     # Provide your Application Router Docker Image repository
-    repository: <<namespace>>/aisaas-router
-    tag: latest
+    repository: 
+    tag: 
   resources:
     limits:
       ephemeral-storage: 1G
@@ -58,10 +58,12 @@ srv:
       serviceInstanceName: destination
     hana: 
       serviceInstanceName: com-hdi-container
+    # aicore: 
+      # serviceInstanceName: aicore
   image:
     # Provide your Backend Service Docker Image repository
-    repository: <<namespace>>/aisaas-srv
-    tag: latest
+    repository: 
+    tag: 
   resources:
     limits:
       ephemeral-storage: 1G
@@ -79,6 +81,11 @@ api:
       serviceInstanceName: xsuaa-api
     sm-container:
       serviceInstanceName: sm-container
+  image:
+    # Provide your API Service Docker Image repository
+    repository: 
+    tag: 
+
   resources:
     limits:
       ephemeral-storage: 1G
@@ -97,8 +104,8 @@ broker:
       serviceInstanceName: xsuaa-api
   image:
     # Provide your API Service Broker Docker Image repository
-    repository: <<namespace>>/aisaas-broker
-    tag: latest
+    repository: 
+    tag: 
   resources:
     limits:
       ephemeral-storage: 1G
@@ -136,8 +143,8 @@ broker:
 hana_deployer:
   image:
     # Provide your HDI Container Deployer Docker Image repository
-    repository: <<namespace>>/aisaas-db-com
-    tag: latest
+    repository: 
+    tag: 
   bindings:
     hana:
       serviceInstanceName: com-hdi-container
@@ -161,25 +168,106 @@ xsuaa:
     # Role collections names have to be unique in the same subaccount
     # Therefore a unique identifer has to be utilized 
     role-collections:
-      - name: 'AI SaaS Member ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'Susaas Member ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Member Access
         role-template-references: 
           - '$XSAPPNAME.Member'
           - '$XSAPPNAME.Token_Exchange'
-      - name: 'AI SaaS Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'Susaas Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Administrator Access
         role-template-references: 
           - '$XSAPPNAME.Admin'
           - '$XSAPPNAME.SaaSAdmin'
           - '$XSAPPNAME.UserManagementAdmin'
           - '$XSAPPNAME.Token_Exchange'
-      - name: 'AI SaaS Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'Susaas Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Extension Developer Access
         role-template-references: 
           - '$XSAPPNAME.ExtensionDeveloper'
           - '$XSAPPNAME.Token_Exchange'
-  # Rest of the configuration settings (Scopes, Role Templates) in json file
-  config: xs-security.json
+    scopes:
+      - name: "$XSAPPNAME.mtcallback"
+        description: SaaS Provisioning
+        grant-as-authority-to-apps:
+          - "$XSAPPNAME(application,sap-provisioning,tenant-onboarding)"
+      - name: "$XSAPPNAME.mtdeployment"
+        description: SaaS Model Upgrade
+      - name: "$XSAPPNAME.MtxDiagnose"
+        description: SaaS Diagnose
+      - name: uaa.user
+        description: UAA
+      - name: "$XSAPPNAME.Member"
+        description: Member
+      - name: "$XSAPPNAME.Admin"
+        description: Administrator
+      - name: "$XSAPPNAME.cds.ExtensionDeveloper"
+        description: Develop Extensions
+    attributes: []
+    role-templates:
+      - name: Token_Exchange
+        description: UAA Token Exchange
+        scope-references: ["uaa.user"]
+      - name: Member
+        description: Member
+        scope-references: ["$XSAPPNAME.Member"]
+      - name: Admin
+        description: Administrator
+        scope-references:
+        - "$XSAPPNAME.Admin"
+        - xs_authorization.read
+        - xs_authorization.write
+        - xs_user.read
+        - xs_user.write
+        - xs_idp.read
+        - xs_idp.write
+      - name: SaaSAdmin
+        description: SaaS Administrator
+        scope-references:
+        - "$XSAPPNAME.mtcallback"
+        - "$XSAPPNAME.mtdeployment"
+        - "$XSAPPNAME.MtxDiagnose"
+      - name: ExtensionDeveloper
+        description: Extension Developer
+        scope-references: ["$XSAPPNAME.cds.ExtensionDeveloper"]
+      - name: UserManagementAdmin
+        description: Manage authorizations, trusted identity providers, and users.
+        default-role-name: User and Role Administrator
+        scope-references:
+        - xs_authorization.read
+        - xs_authorization.write
+        - xs_user.read
+        - xs_user.write
+        - xs_idp.read
+        - xs_idp.write
+      - name: UserManagementAuditor
+        description: Read-only access for authorizations, trusted identity providers, and users.
+        default-role-name: User and Role Auditor
+        scope-references:
+        - xs_authorization.read
+        - xs_user.read
+        - xs_idp.read
+    foreign-scope-references:
+      - xs_authorization.read
+      - xs_authorization.write
+      - xs_user.read
+      - xs_user.write
+      - xs_idp.read
+      - xs_idp.write
+    authorities:
+      - "$XSAPPNAME.mtcallback"
+      - "$XSAPPNAME.mtdeployment"
+      - "$XSAPPNAME.MtxDiagnose"
+      - "$XSAPPNAME.cds.ExtensionDeveloper"
+      - "$XSAPPNAME.cds.Subscriber"
+      - "$XSAPPNAME.cds.UIFlexDeveloper"
+    oauth2-configuration:
+      token-validity: 900
+      redirect-uris: 
+        - http://*.localhost:5000/**
+        - http://localhost:5000/**
+      credential-types:
+        - binding-secret
+        - x509
 
 
 # SAP XSUAA Instance (for SaaS API)
@@ -246,18 +334,13 @@ destination:
         existing_destinations_policy: update
         destinations:
           # Backend Destination depends on dynamic Release name
-          - Name: srv-api
+          - Name: aisaas-srv-api
             Authentication: NoAuthentication
             ProxyType: Internet
             Type: HTTP
             URL: 'http://{{ include "cap.fullname" (merge (dict "name" "srv" "deployment" .Values.srv ) . ) }}:{{ .Values.srv.port }}'
             HTML5.DynamicDestination: true
             HTML5.ForwardAuthToken: true
-
-# SAP AI Core ("standard" plan)
-ai_core:
-  serviceOfferingName: aicore
-  servicePlanName: standard
 
 # SAP Service Manager ("container" plan)
 # Required by mtxs for automated creation of tenant database containers
@@ -288,3 +371,10 @@ com_hdi_container:
 postgresql_db:
   serviceOfferingName: postgresql-db
   servicePlanName: free
+  parameters:
+    engine_version: "13"
+
+# SAP AI Core
+# aicore:
+  # serviceOfferingName: aicore
+  # servicePlanName: free

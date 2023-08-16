@@ -1,7 +1,7 @@
 {
   "services": [
     {
-      "name": "AI SaaS API",
+      "name": "aisaas-api",
       "description": "API for AI SaaS App",
       "bindable": true,
       "plans": [
