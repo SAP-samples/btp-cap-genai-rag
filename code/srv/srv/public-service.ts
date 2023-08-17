@@ -9,9 +9,9 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 import { LLMChain } from "langchain/chains";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 
-import * as aiCore from "../common/tooling/ai-core-tooling";
-import BTPLLM from "../common/tooling/langchain/BTPLLM";
-import BTPEmbedding from "../common/tooling/langchain/BTPEmbedding";
+import * as aiCore from "../../common/tooling/ai-core-tooling";
+import BTPLLM from "../../common/tooling/langchain/BTPLLM";
+import BTPEmbedding from "../../common/tooling/langchain/BTPEmbedding";
 
 const MAIL_INSIGHTS_SCHEMA = z
     .object({

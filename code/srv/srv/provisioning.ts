@@ -3,7 +3,7 @@ import xsenv from "@sap/xsenv";
 import { Request } from "@sap/cds/apis/services";
 
 import Automator from "./utils/automator";
-import * as aiCore from "../common/tooling/ai-core-tooling";
+import * as aiCore from "../../common/tooling/ai-core-tooling";
 
 const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
 abstract class Provisioning {

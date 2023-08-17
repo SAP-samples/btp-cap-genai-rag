@@ -7,6 +7,12 @@
     "engines": {
         "node": "^18.x"
     },
+    "private": true,
+    "workspaces": [
+        "srv",
+        "api",
+        "common/dist"
+    ],
     "dependencies": {
         "@kubernetes/client-node": "^0.18.1",
         "@sap-cloud-sdk/connectivity": "^3.2.0",
@@ -31,7 +37,8 @@
         "node-jose": "^2.1",
         "passport": "^0.6.0",
         "pg": "^8.11.2",
-        "typeorm": "^0.3.17"
+        "typeorm": "^0.3.17",
+        "ai-core-api-commons": "0.0.1"
     },
     "devDependencies": {
         "@sap/cds-dk": "^7.1.1",
