@@ -7,7 +7,7 @@
   "scripts": {
     "---BUILD---": "",
     "build": "npm run build:cds && npm run build:ts && npm run cleanup:ts1 && npm run cleanup:ts2",
-    "build:ts": "tsc -p ../../code/srv/srv && tsc -p ../../code/api/srv",
+    "build:ts": "tsc -b ../../code/srv/srv && tsc -b ../../code/api/srv",
     "build:cds": "npx -p @sap/cds-dk@7 cds build -in ../../code --profile production",
     "cleanup:ts1": "npx rimraf ../../code/gen/**/**/*.ts && npx rimraf ../../code/gen/**/**/**/*.ts",
     "cleanup:ts2": "npx rimraf ../../code/gen/**/**/**/**/*.ts && npx rimraf ../../code/gen/**/**/tsconfig.json",
