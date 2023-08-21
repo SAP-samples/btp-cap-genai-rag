@@ -8,8 +8,8 @@ Further details will follow soon!
 
 Repo to be moved to https://github.com/SAP-samples/ prior to TechEd 2023
 
-![Current Architecture Draft](./docs/architecture/draft_current_arch.png)
-![Target Architecture Draft](./docs/architecture/draft_target_arch.png)
+![Current Architecture Draft](./docs/architecture/multitenant-current.png)
+![Target Architecture Draft](./docs/architecture/multitenant-target.png)
 
 ## Local testing
 
