@@ -11,7 +11,7 @@ import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vector
 
 import * as aiCore from "./tooling/ai-core-tooling";
 import BTPLLM from "./tooling/langchain/BTPLLM";
-import BTPEmbedding from "../tooling/langchain/BTPEmbedding";
+import BTPEmbedding from "./tooling/langchain/BTPEmbedding";
 
 const MAIL_INSIGHTS_SCHEMA = z
     .object({
