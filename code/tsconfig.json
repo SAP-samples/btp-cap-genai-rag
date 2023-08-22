@@ -15,5 +15,8 @@
         "resolveJsonModule": true,
         "outDir": "./gen"
     },
+    "ts-node": {
+        "swc": true
+    },
     "exclude": ["./node_modules/**/*", "./router/**/*", "./broker/**/*"]
 }
