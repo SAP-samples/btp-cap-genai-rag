@@ -5,10 +5,9 @@ using {
 
 context aisaas.db {
 
-      type Fact : {
-            fact      : String;
-            factTitle : String;
-            value     : String;
+      entity Mails : cuid, managed, Mail {
+            facts : Composition of many Facts
+                          on facts.mail = $self;
       }
 
       type Mail : {
@@ -22,13 +21,20 @@ context aisaas.db {
             facts       : array of Fact;
       }
 
-      entity Mails : cuid, managed, Mail  {
-            facts       : Composition of many Facts
-                                on facts.mail = $self;
+      entity Facts : Fact {
+            key mail : Association to Mails;
+            key fact : String;
       }
 
-      entity Facts : Fact {
-            key mail      : Association to Mails;
-            key fact      : String;
+      type Fact : {
+            fact      : String;
+            factTitle : String;
+            value     : String;
+      }
+
+      entity CustomFields : cuid, managed {
+            title       : String;
+            isNumber    : Boolean;
+            description : String;
       }
 }

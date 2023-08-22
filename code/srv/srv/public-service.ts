@@ -34,6 +34,11 @@ const MAIL_INSIGHTS_SCHEMA = z
     })
     .describe("Insights about the email and potential actions as e.g., a potential reply to the incoming email");
 
+interface CustomField {
+    key: string;
+    isNumber: boolean;
+    description: string;
+}
 export class PublicService extends ApplicationService {
     async init() {
         await super.init();
@@ -135,7 +140,31 @@ export class PublicService extends ApplicationService {
             const { tenant } = req;
             const { mails } = req.data;
 
-            const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_SCHEMA);
+            // dynamically add custom fields
+            // todo: custom fields from database
+            let customFields = [
+                {
+                    key: "location",
+                    isNumber: false,
+                    description: "Extract the geo location for the trip the email is about"
+                }
+            ];
+            const zodCustomFields = customFields.reduce(
+                (fields: { [key: string]: z.ZodNumber | z.ZodString }, field: CustomField) => {
+                    return {
+                        ...fields,
+                        [field.key]: (field.isNumber ? z.number() : z.string()).describe(field.description)
+                    };
+                },
+                {}
+            );
+            let mailInsightsSchemaWithCustomFields = z.union([
+                MAIL_INSIGHTS_SCHEMA,
+                z.object({
+                    customFields: z.object(zodCustomFields)
+                })
+            ]);
+            const parser = StructuredOutputParser.fromZodSchema(mailInsightsSchemaWithCustomFields);
             const formatInstructions = parser.getFormatInstructions();
 
             const prompt = new PromptTemplate({
