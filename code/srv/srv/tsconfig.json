@@ -6,10 +6,5 @@
         "baseUrl": "./"
     },
     "include": ["./**/*"],
-    "exclude": ["../../node_modules/**/*", "./utils/**/*"],
-    "references": [
-        {
-            "path": "../../common/tsconfig.json"
-        }
-    ]
+    "exclude": ["../../node_modules/**/*", "./utils/**/*"]
 }
