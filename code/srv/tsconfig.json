@@ -1,0 +1,10 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../gen/srv/srv",
+        "rootDir": "./srv/",
+        "baseUrl": "./srv/"
+    },
+    "include": ["./**/*"],
+    "exclude": ["../node_modules/**/*", "./srv/utils/**/*"]
+}

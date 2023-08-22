@@ -383,7 +383,8 @@ const getPostgresConnectionOptions = (tenant: string) => {
             ssl: credentials?.sslcert
                 ? {
                       cert: credentials?.sslcert,
-                      ca: credentials?.sslrootcert
+                      ca: credentials?.sslrootcert,
+                      rejectUnauthorized: (credentials?.hostname === '127.0.0.1' ? false : undefined)
                   }
                 : false
         } as DataSourceOptions,

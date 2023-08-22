@@ -1,4 +1,4 @@
-# Develop a CAP-based multitenant Software as a Service application using SAP AI Services in SAP BTP
+# Develop a CAP-based multitenant Software as a Service application using SAP AI Services in SAP BTP using Retrieval Augmented Generation (RAG) architecture
 
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/btp-cap-multitenant-ai)](https://api.reuse.software/info/github.com/SAP-samples/btp-cap-multitenant-ai)
 
@@ -8,8 +8,8 @@ Further details will follow soon!
 
 Repo to be moved to https://github.com/SAP-samples/ prior to TechEd 2023
 
-![Current Architecture Draft](./docs/architecture/draft_current_arch.png)
-![Target Architecture Draft](./docs/architecture/draft_target_arch.png)
+![Current Architecture Draft](./docs/architecture/multitenant-current.png)
+![Target Architecture Draft](./docs/architecture/multitenant-target.png)
 
 ## Local testing
 
