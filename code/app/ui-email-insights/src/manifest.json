@@ -1,0 +1,28 @@
+{
+  "_version": "1.1.0",
+  "sap.app": {
+    "id": "sap.aisaas.ui.email.insights",
+    "type": "application",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "title": "Email Insights",
+    "description": "Email Insights"
+  },
+  "sap.ui": {
+    "technology": "URL",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  }
+}

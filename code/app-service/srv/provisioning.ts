@@ -99,11 +99,14 @@ abstract class Provisioning {
     private getDependencies = async (_req: Request, next: Function) => {
         const initialDependencies: Array<any> = (await next()) || [];
         const services = xsenv.getServices({
-            destination: { tag: "destination" }
+            destination: { tag: "destination" },
+            html5Runtime: { tag: 'html5-apps-repo-rt' }
         });
         const dependencies = initialDependencies.concat([
             // @ts-ignore
-            { xsappname: services.destination.xsappname }
+            { xsappname: services.destination.xsappname },
+            // @ts-ignore
+            { xsappname: services.html5Runtime.uaa.xsappname }
         ]);
 
         console.log("SaaS Dependencies:", JSON.stringify(dependencies));

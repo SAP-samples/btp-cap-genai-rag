@@ -1,4 +1,7 @@
 {
+    "folders": {
+        "db-sqlite": "../db/sqlite"
+    },
     "requires": {
         "PROVIDER_AI_CORE_DESTINATION": {
             "kind": "rest",
@@ -11,16 +14,10 @@
         "--------------------- ": "---",
         "[hybrid]": {
             "multitenancy": true,
-            "extensibility": false,
-            "toggles": false,
-            "cds.xt.ExtensibilityService": {
-                "element-prefix": ["x_"],
-                "extension-allowlist": [
-                    {
-                        "for": ["*"]
-                    }
-                ]
-            },
+            "cds.xt.ExtensibilityService": false,
+            "cds.xt.ModelProviderService": false,
+            "cds.xt.DeploymentService": false,
+            "cds.xt.SaasProvisioningService": false,
             "postgres": {
                 "kind": "postgresql-db"
             }
@@ -42,8 +39,6 @@
         },
         "[development]": {
             "multitenancy": false,
-            "extensibility": false,
-            "toggles": false,
             "postgres": {
                 "kind": "postgres",
                 "credentials": {
@@ -71,7 +66,7 @@
             "[local-with-mtx]": {
                 "kind": "sqlite",
                 "credentials": {
-                    "url": "db.sqlite"
+                    "url": "../db.sqlite"
                 },
                 "beta": {
                     "sqlMigration": "true"
@@ -80,7 +75,7 @@
             "[development]": {
                 "kind": "sqlite",
                 "credentials": {
-                    "url": "db.sqlite"
+                    "url": "../db.sqlite"
                 }
             }
         },
@@ -92,33 +87,11 @@
                 "kind": "xsuaa"
             },
             "[local-with-mtx]": {
-                "kind": "mocked",
-                "users": {
-                    "alice": {
-                        "tenant": "t1",
-                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
-                    },
-                    "carol": {
-                        "tenant": "t1",
-                        "roles": ["Member"]
-                    },
-                    "bob": {
-                        "tenant": "t1-ext",
-                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
-                    }
-                }
+                "kind": "mocked"
             },
             "[development]": {
-                "kind": "mocked",
-                "users": {
-                    "alice": {
-                        "roles": ["Admin", "Member"]
-                    },
-                    "carol": {
-                        "roles": ["Member"]
-                    }
-                }
-            }
+                "kind": "mocked"
+            } 
         }
     }
 }
