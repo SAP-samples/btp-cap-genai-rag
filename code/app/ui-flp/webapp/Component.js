@@ -12,15 +12,13 @@ sap.ui.define([
         init: function () {
             UIComponent.prototype.init.apply(this, arguments);
 
-            this.getModel().getMetaModel().requestObject("/").then( function () {
-                sap.ushell.bootstrap("local").then(function () {
-                    sap.ushell.Container.createRenderer('fiori2', true).then(
-                        function(oRenderer){ 
-                            oRenderer.placeAt("content") 
-                        }
-                    );
-                });
-            }.bind(this));
+            sap.ushell.bootstrap("local").then(function () {
+                sap.ushell.Container.createRenderer('fiori2', true).then(
+                    function(oRenderer){ 
+                        oRenderer.placeAt("content") 
+                    }
+                );
+            });
         }
     });
 });

@@ -72,9 +72,12 @@
                 action: "view",
                 title: "View Insights",
                 navigationMode: "embedded",
+                signature: {
+                  parameters: {},
+                  additionalParameters: "allowed"
+                },
                 resolutionResult: {
                   applicationType: "SAPUI5",
-                  additionalInformation: "SAPUI5.Component=sap.aisaas.ui.email.insights",
                   url: "/sapaisaasuiemailinsights/"
                 }
               },
@@ -83,9 +86,12 @@
                 action: "manage",
                 title: "Manage Settings",
                 navigationMode: "embedded",
+                signature: {
+                  parameters: {},
+                  additionalParameters: "allowed"
+                },
                 resolutionResult: {
                   applicationType: "SAPUI5",
-                  additionalInformation: "SAPUI5.Component=sap.aisaas.ui.email.settings",
                   url: "/sapaisaasuiemailsettings/"
                 }
               }
