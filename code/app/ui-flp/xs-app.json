@@ -5,6 +5,13 @@
   },
   "routes": [
     {
+      "source": "^/catalog/(.*)$",
+      "target": "/catalog/$1",
+      "destination": "susaas-srv-api",
+      "preferLocal": true,
+      "authenticationType": "xsuaa"
+    },
+    {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",

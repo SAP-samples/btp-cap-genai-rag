@@ -1,7 +1,10 @@
 using {aisaas.db as db} from '../../db/data-model';
 
-@path: '/catalog/PublicService'
-service PublicService {
+service PublicService  @(
+     path    : '/catalog/PublicService',
+     protocol: 'odata-v4',
+     impl    : 'srv/public-service'
+) {
 
     entity Mails as projection on db.Mails;
 
