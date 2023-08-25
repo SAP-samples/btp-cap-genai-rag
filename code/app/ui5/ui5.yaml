@@ -1,0 +1,26 @@
+specVersion: "3.0"
+metadata:
+  name: aisaas-ui
+type: application
+framework:
+  name: SAPUI5
+  version: "1.117.1"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.f
+    - name: sap.uxap
+    - name: sap.ui.comp
+    - name: sap.ui.layout
+    - name: sap.ui.unified
+    - name: themelib_sap_horizon
+builder:
+  customTasks:
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+server:
+  customMiddleware:
+    - name: ui5-tooling-transpile-middleware
+      afterMiddleware: compression
+    - name: ui5-middleware-livereload
+      afterMiddleware: compression

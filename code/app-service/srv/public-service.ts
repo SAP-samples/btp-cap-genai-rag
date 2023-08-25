@@ -1,27 +1,54 @@
 import { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 import { v4 as uuidv4 } from "uuid";
-import pg from "pg";
 import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
-import { PromptTemplate } from "langchain/prompts";
+import {
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    PromptTemplate,
+    SystemMessagePromptTemplate
+} from "langchain/prompts";
 import { StructuredOutputParser } from "langchain/output_parsers";
-import { LLMChain } from "langchain/chains";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
+import { getDestination } from "@sap-cloud-sdk/connectivity";
+import { BTPLLMContext } from "@sap/llm-commons";
+import { BTPOpenAIChat } from "@sap/llm-commons/langchain/chat/openai";
+import { BTPOpenAIEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
+import { LLMChain } from "langchain";
 
-import * as aiCore from "./tooling/ai-core-tooling";
-import BTPLLM from "./tooling/langchain/BTPLLM";
-import BTPEmbedding from "./tooling/langchain/BTPEmbedding";
+interface IBaseMail {
+    ID?: string;
+    sender: string;
+    subject: string;
+    body: string;
+}
+
+const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
+
+const DEFAULT_TABLE = "_main";
 
 const MAIL_INSIGHTS_SCHEMA = z
     .object({
+        category: z.string().describe(`Category of the email. It could be one of the following:
+        - Booking Assistance
+        - Cancellation
+        - Problem During Travel
+        - Post-Trip Complaint
+        - General Inquiry
+        - Special Requests
+        `),
         sentiment: z.number().describe("The sentiment of the email: -10 for very bad up to 10 for very good"),
         urgency: z
             .number()
             .describe("Whether the email is urgent or not ranging from 0 for not urgent to 10 for urgent"),
-        category: z.string().describe("Category of the email. It could wheter be 'COMPLAINT' or 'INFORMATION'"),
-        translation: z.string().describe("Translation of the mail into german"),
-        response: z.string().describe("A potential response of the mail acting as customer service"),
+        summary: z.string().describe("Summary of the mail in original language"),
+        translationSubject: z.string().describe("Translation of the mail subject into german"),
+        translationBody: z.string().describe("Translation of the mail body into german"),
+        translationSummary: z.string().describe("Summary of the mail into german"),
+        potentialResponse: z
+            .string()
+            .describe("A potential response of the mail acting as customer service in the source language as email"),
         facts: z
             .array(
                 z.object({
@@ -45,11 +72,9 @@ export class PublicService extends ApplicationService {
         this.on("getMails", this.getMails);
         this.on("getMail", this.getMail);
         this.on("addMails", this.addMails);
-        this.on("pgvalue", this.pgvalue);
+        this.on("recalculateInsights", this.recalculateInsights);
+        this.on("deleteMail", this.deleteMail);
         this.on("userInfo", this.userInfo);
-        this.on("inference", this.inference);
-        this.on("embed", this.embed);
-        this.on("simSearch", this.simSearch);
     }
 
     private getMails = async (_req: Request) => {
@@ -60,6 +85,7 @@ export class PublicService extends ApplicationService {
                 m.subject;
                 m.body;
                 m.category;
+                m.sender;
             });
             return mails;
         } catch (error: any) {
@@ -73,26 +99,26 @@ export class PublicService extends ApplicationService {
             const { tenant } = req;
             const { id } = req.data;
             const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
-                m("*");
-                m.facts;
-            });
-            const closestMailsIDs = await this.getClosestMails(id, 5, null, tenant);
-            const closestMails = await SELECT.from(Mails)
-                .where({
-                    ID: {
-                        in: closestMailsIDs.map(
-                            ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
-                        )
-                    }
-                })
-                .columns((m: any) => {
-                    m.ID;
-                    m.subject;
-                    m.body;
-                    m.category;
-                });
-
+            const mail = await SELECT.one.from(Mails, id);
+            const closestMailsIDs = await getClosestMails(id, 5, {}, tenant);
+            const closestMails =
+                closestMailsIDs.length > 0
+                    ? await SELECT.from(Mails)
+                          .where({
+                              ID: {
+                                  in: closestMailsIDs.map(
+                                      ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
+                                  )
+                              }
+                          })
+                          .columns((m: any) => {
+                              m.ID;
+                              m.subject;
+                              m.body;
+                              m.category;
+                              m.sender;
+                          })
+                    : [];
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
                 const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
                     ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
@@ -106,134 +132,136 @@ export class PublicService extends ApplicationService {
         }
     };
 
-    async getClosestMails(
-        id: string,
-        k: number = 5,
-        filter: any = "{}",
-        tenant: string = "main"
-    ): Promise<Array<[TypeORMVectorStoreDocument, number]>> {
-        const typeormVectorStore = await getVectorStore(tenant);
-        const _filter = filter ?? "{}";
+    private recalculateInsights = async (_req: Request) => {
+        const { Mails } = this.entities;
+        const mails = await SELECT.from(Mails);
+        await this.upsertInsights(mails);
+        return true;
+    };
 
-        const queryString = `
-        SELECT x.id, x."pageContent", x.metadata, x.embedding <-> focus.embedding as _distance from ${typeormVectorStore.tableName} as x
-        join (SELECT * from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ? $1) as focus
-        on focus.id != x.id
-        WHERE x.metadata @> $2
-        ORDER BY _distance LIMIT $3;
-        `;
-
-        const documents = await typeormVectorStore.appDataSource.query(queryString, [id, _filter, k]);
-        const results: Array<[TypeORMVectorStoreDocument, number]> = [];
-        for (const doc of documents) {
-            if (doc._distance != null && doc.pageContent != null) {
-                const document = new TypeORMVectorStoreDocument(doc);
-                document.id = doc.id;
-                results.push([document, doc._distance]);
+    private upsertInsights = async (mails: Array<IBaseMail>) => {
+        // dynamically add custom fields
+        // todo: custom fields from database
+        let customFields = [
+            {
+                key: "location",
+                isNumber: false,
+                description: "Extract the geo location for the trip the email is about"
             }
+        ];
+        const zodCustomFields = customFields.reduce(
+            (fields: { [key: string]: z.ZodNumber | z.ZodString }, field: CustomField) => {
+                return {
+                    ...fields,
+                    [field.key]: z.optional(field.isNumber ? z.number() : z.string()).describe(field.description)
+                };
+            },
+            {}
+        );
+        let mailInsightsSchemaWithCustomFields = MAIL_INSIGHTS_SCHEMA.merge(
+            z.object({
+                customFields: z.object(zodCustomFields)
+            })
+        );
+        const parser = StructuredOutputParser.fromZodSchema(mailInsightsSchemaWithCustomFields);
+        const formatInstructions = parser.getFormatInstructions();
+        await initializeBTPContext();
+        const llm = new BTPOpenAIChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+        const systemPrompt = new PromptTemplate({
+            template: "Give insights about the incoming email.\n{format_instructions}",
+            inputVariables: [],
+            partialVariables: { format_instructions: formatInstructions }
+        });
+        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+        const humanTemplate = "{subject}\n{body}";
+        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
+
+        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+        const chain = new LLMChain({
+            llm: llm,
+            prompt: chatPrompt
+        });
+        console.log("GENERATING INSIGHTS...");
+        const mailsInsights = await Promise.all(
+            mails.map(async (mail: { ID?: string; subject: string; body: string; sender: string }) => {
+                const result = await chain.call({
+                    subject: mail.subject,
+                    body: mail.body
+                });
+                const insights = await parser.parse(result.text);
+                return { mail, insights };
+            })
+        );
+
+        // insert mails with insights
+        console.log("UPDATE MAILS WITH INSIGHTS...");
+        const mailBatch = mailsInsights.reduce(
+            (mails: Array<IBaseMail>, { mail, insights }: { mail: IBaseMail; insights: any }) => {
+                return [
+                    ...mails,
+                    {
+                        ID: mail.ID || uuidv4(),
+                        subject: mail.subject,
+                        body: mail.body,
+                        sender: mail.sender,
+                        category: insights.category,
+                        sentiment: insights.sentiment,
+                        urgency: insights.urgency,
+                        summary: insights.summary,
+                        translationSubject: insights.translationSubject,
+                        translationBody: insights.translationBody,
+                        translationSummary: insights.translationBody,
+                        potentialResponse: insights.potentialResponse
+                        // add facts
+                        // add custom fields
+                    }
+                ];
+            },
+            new Array<IBaseMail>()
+        );
+
+        cds.tx(async () => {
+            const { Mails } = this.entities;
+            await UPSERT.into(Mails).entries(mailBatch);
+        });
+        return mailBatch;
+    };
+
+    private deleteMail = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const { id } = req.data;
+            const { Mails } = this.entities;
+            const response = await DELETE.from(Mails, id);
+            console.log(response);
+            const typeormVectorStore = await getVectorStore(tenant);
+            const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
+
+            const vectorStoreResult = await typeormVectorStore.appDataSource.query(queryString, [id]);
+            console.log(vectorStoreResult);
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
         }
-        return results;
-    }
+    };
 
     private addMails = async (req: Request) => {
         try {
             const { tenant } = req;
             const { mails } = req.data;
-
-            // dynamically add custom fields
-            // todo: custom fields from database
-            let customFields = [
-                {
-                    key: "location",
-                    isNumber: false,
-                    description: "Extract the geo location for the trip the email is about"
-                }
-            ];
-            const zodCustomFields = customFields.reduce(
-                (fields: { [key: string]: z.ZodNumber | z.ZodString }, field: CustomField) => {
-                    return {
-                        ...fields,
-                        [field.key]: (field.isNumber ? z.number() : z.string()).describe(field.description)
-                    };
-                },
-                {}
-            );
-            let mailInsightsSchemaWithCustomFields = z.union([
-                MAIL_INSIGHTS_SCHEMA,
-                z.object({
-                    customFields: z.object(zodCustomFields)
-                })
-            ]);
-            const parser = StructuredOutputParser.fromZodSchema(mailInsightsSchemaWithCustomFields);
-            const formatInstructions = parser.getFormatInstructions();
-
-            const prompt = new PromptTemplate({
-                template: "Give insights about the incoming email.\n{format_instructions}\n{mail}",
-                inputVariables: ["mail"],
-                partialVariables: { format_instructions: formatInstructions }
-            });
-            const model = new BTPLLM(aiCore.completion, "default", {});
-
-            const mailsInsights = await Promise.all(
-                mails.map(async (mail: string) => {
-                    const id = uuidv4();
-                    const input = await prompt.format({
-                        mail
-                    });
-                    const response = await model.call(input);
-                    const insights = await parser.parse(response);
-                    return { mail, insights, id };
-                })
-            );
-
-            // insert mails with insights
-            const insertables = mailsInsights.reduce(
-                (
-                    acc: { mails: any[]; facts: any[] },
-                    { mail, insights, id }: { mail: string; insights: any; id: string }
-                ) => {
-                    return {
-                        mails: [
-                            ...acc.mails,
-                            {
-                                ID: id,
-                                subject: "",
-                                body: mail,
-                                sentiment: insights.sentiment,
-                                urgency: insights.urgency,
-                                category: insights.category,
-                                translation: insights.translation,
-                                response: insights.response
-                            }
-                        ],
-                        facts: [
-                            ...acc.facts,
-                            ...insights.facts.map((fact: any) => ({
-                                mail_ID: id,
-                                fact: fact.fact,
-                                factTitle: fact.factTitle,
-                                value: fact.value
-                            }))
-                        ]
-                    };
-                },
-                { mails: [], facts: [] }
-            );
-            cds.tx(async () => {
-                const { Mails, Facts } = this.entities;
-                await INSERT.into(Mails).entries(insertables.mails);
-                await INSERT.into(Facts).entries(insertables.facts);
-            });
+            const mailBatch = await this.upsertInsights(mails);
             // embed mail bodies with IDs
+            console.log("EMBED MAILS WITH IDs...");
             const typeormVectorStore = await getVectorStore(tenant);
             await typeormVectorStore.addDocuments(
-                insertables.mails.map((mail: any) => ({
+                mailBatch.map((mail: IBaseMail) => ({
                     pageContent: mail.body,
+                    // add category, services, actions to metadata
                     metadata: { id: mail.ID }
                 }))
             );
 
-            return mailsInsights[0];
+            return mailBatch[0];
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
         }
@@ -256,113 +284,13 @@ export class PublicService extends ApplicationService {
 
         return results;
     };
-
-    private inference = async (req: Request) => {
-        try {
-            const { tenant } = req;
-            const { prompt } = req.data;
-            const llm = new BTPLLM(aiCore.completion, tenant, {});
-
-            const template = `Question: {question}
-            
-            Answer: Let's think step by step.`;
-
-            const promptTemplate = PromptTemplate.fromTemplate(template);
-            const llmChain = new LLMChain({ llm: llm, prompt: promptTemplate });
-            const response = await llmChain.call({ question: prompt });
-            return response;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-        }
-    };
-
-    private embed = async (req: Request) => {
-        try {
-            const { tenant } = req;
-            const { texts } = req.data;
-
-            const typeormVectorStore = await getVectorStore(tenant);
-
-            await typeormVectorStore.addDocuments(
-                texts.map((text: string, index: number) => ({ pageContent: text, metadata: { a: index } }))
-            );
-
-            return { success: true, error: "" };
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return { success: false, error: error?.message };
-        }
-    };
-
-    private simSearch = async (req: Request) => {
-        try {
-            const { tenant } = req;
-            const { text, k } = req.data;
-
-            const typeormVectorStore = await getVectorStore(tenant);
-
-            const result = await typeormVectorStore.similaritySearch(text, k);
-            return { result };
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return { result: [] };
-        }
-    };
-
-    private pgvalue = async (req: Request) => {
-        try {
-            // @ts-ignore
-            const postgres: any = cds.env.requires?.postgres?.credentials;
-            postgres ??
-                (() => {
-                    throw Error("PostgreSQL binding details missing");
-                });
-
-            const client = new pg.Client({
-                host: postgres.hostname,
-                database: postgres.dbname,
-                user: postgres.username,
-                password: postgres.password,
-                port: postgres.port,
-                ssl: false
-            });
-
-            await client
-                .connect()
-                .then(() => console.log("Connection Successful"))
-                .catch((err: any) => {
-                    throw err;
-                });
-
-            await queryDatabase()
-                .then(() => req.reply("Query Successful"))
-                .catch((err: any) => {
-                    throw err;
-                });
-
-            async function queryDatabase() {
-                const query = `DROP TABLE IF EXISTS test;
-                    CREATE TABLE test (id serial PRIMARY KEY, name VARCHAR(50));
-                    INSERT INTO test (name) VALUES ('john');
-                    INSERT INTO test (name) VALUES ('doe');`;
-
-                await client
-                    .query(query)
-                    .then(() => {
-                        console.log("Table Created!");
-                        client.end();
-                    })
-                    .catch((err: any) => console.log(err));
-            }
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            req.error("500", "Error: " + error?.message);
-        }
-    };
 }
 
 const getVectorStore = async (tenant: string) => {
-    const embeddings = new BTPEmbedding(aiCore.embed, tenant, {});
+    await initializeBTPContext();
+    const embeddings = new BTPOpenAIEmbedding({
+        deployment_id: "text-embedding-ada-002-v2"
+    });
     const args = getPostgresConnectionOptions(tenant);
     const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
     await typeormVectorStore.ensureTableInDatabase();
@@ -384,11 +312,62 @@ const getPostgresConnectionOptions = (tenant: string) => {
                 ? {
                       cert: credentials?.sslcert,
                       ca: credentials?.sslrootcert,
-                      rejectUnauthorized: (credentials?.hostname === '127.0.0.1' ? false : undefined)
+                      rejectUnauthorized: credentials?.hostname === "127.0.0.1" ? false : undefined
                   }
                 : false
         } as DataSourceOptions,
 
-        tableName: tenant ? "_" + tenant.replace(/-/g, "") : "_main"
+        tableName: tenant ? "_" + tenant.replace(/-/g, "") : DEFAULT_TABLE
+    };
+};
+
+const getClosestMails = async (
+    id: string,
+    k: number = 5,
+    filter: any = {},
+    tenant: string = DEFAULT_TABLE
+): Promise<Array<[TypeORMVectorStoreDocument, number]>> => {
+    const typeormVectorStore = await getVectorStore(tenant);
+
+    const queryString = `
+    SELECT x.id, x."pageContent", x.metadata, x.embedding <=> focus.embedding as _distance from ${typeormVectorStore.tableName} as x
+    join (SELECT * from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ? $1) as focus
+    on focus.id != x.id
+    WHERE x.metadata @> $2
+    ORDER BY _distance LIMIT $3;
+    `;
+
+    const documents = await typeormVectorStore.appDataSource.query(queryString, [id, filter, k]);
+    const results: Array<[TypeORMVectorStoreDocument, number]> = [];
+    for (const doc of documents) {
+        if (doc._distance != null && doc.pageContent != null) {
+            const document = new TypeORMVectorStoreDocument(doc);
+            document.id = doc.id;
+            results.push([document, doc._distance]);
+        }
+    }
+    return results;
+};
+
+const initializeBTPContext = async () => {
+    // get from LLM Proxy binding
+    const credentials = await getLLMAccessCredentials();
+    await BTPLLMContext.init({
+        oauthClientId: credentials.clientId,
+        oauthClientSecret: credentials.clientSecret,
+        oauthTokenUrl: credentials.tokenServiceUrl, // the Auth URL ending `ondemand.com`
+        llmProxyBaseUrl: credentials.url // the service URL ending `ondemand.com`
+    });
+};
+
+const getLLMAccessCredentials = async () => {
+    const { clientId, clientSecret, url, tokenServiceUrl } = await getDestination({
+        destinationName: LLM_SERVICE_DESTINATION
+    });
+    return {
+        clientId,
+        clientSecret,
+        url,
+        tokenServiceUrl: tokenServiceUrl.replace("/oauth/token", "")
     };
 };

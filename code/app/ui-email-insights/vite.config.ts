@@ -4,7 +4,7 @@ import zipPack from "vite-plugin-zip-pack";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base : "/sapaisaasuiemailinsights/",
+    base: "/",
     plugins: [react(), zipPack()],
     server: {
         hmr: {

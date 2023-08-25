@@ -5,31 +5,27 @@ using {
 
 context aisaas.db {
 
-      entity Mails : cuid, managed, Mail {
-            facts : Composition of many Facts
-                          on facts.mail = $self;
+      entity Mails : cuid, managed {
+            sender             : String;
+            subject            : String;
+            body               : LargeString;
+            category           : String;
+            sentiment          : Integer;
+            urgency            : Integer;
+            summary            : String;
+            translationSubject : String;
+            translationBody    : LargeString;
+            translationSummary : String;
+            potentialResponse  : LargeString;
+            facts              : Composition of many Facts
+                                       on facts.mail = $self;
       }
 
-      type Mail : {
-            subject     : String;
-            body        : LargeString;
-            sentiment   : Integer;
-            urgency     : Integer;
-            category    : String;
-            translation : LargeString;
-            response    : LargeString;
-            facts       : array of Fact;
-      }
-
-      entity Facts : Fact {
-            key mail : Association to Mails;
-            key fact : String;
-      }
-
-      type Fact : {
-            fact      : String;
-            factTitle : String;
-            value     : String;
+      entity Facts {
+            key mail      : Association to Mails;
+                fact      : String;
+                factTitle : String;
+                value     : String;
       }
 
       entity CustomFields : cuid, managed {
