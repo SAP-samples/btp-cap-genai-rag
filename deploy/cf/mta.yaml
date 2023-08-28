@@ -31,6 +31,7 @@ modules:
       - name: aisaas-destination
       - name: aisaas-uaa
       - name: aisaas-srv-api
+      - name: aisaas-html5-repo-runtime
     provides:
       - name: aisaas-approuter
         properties:
@@ -78,6 +79,7 @@ modules:
       - name: aisaas-registry
       - name: aisaas-service-manager
       - name: aisaas-service-manager-admin
+      - name: aisaas-html5-repo-runtime
       - name: aisaas-destination
       - name: aisaas-api-sb-srv
       - name: aisaas-approuter
@@ -100,6 +102,52 @@ modules:
       - name: aisaas-srv-api
         properties:
           srv-url: ${default-url}
+
+  # --------------------- WEBAPP DEPLOYER ----------------------
+  - name: aisaas-app-deployer
+  # ------------------------------------------------------------
+    type: com.sap.application.content
+    path: ../../code/app/html5-deployer
+    requires:
+      - name: aisaas-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+      - name: sapaisaasuiflp
+        target-path: resources/
+        artifacts:
+        - sapaisaasuiflp.zip
+      - name: sapaisaasemailinsights
+        target-path: resources/
+        artifacts:
+          - sapaisaasemailinsights.zip
+
+  # --------------------- UI MODULES ----------------------------
+  #
+  # ------------------------------------------------------------
+  - name: sapaisaasuiflp
+    type: html5
+    path: ../../code/app/ui-flp
+    build-parameters:
+      build-result: dist
+      builder: custom
+      ignore: [ 'node_modules/',  'default-env.json', 'manifest*.yml' ]
+      commands:
+      - npm run build
+      supported-platforms: []
+  
+  - name: sapaisaasemailinsights
+    type: html5
+    path: ../../code/app/ui-email-insights
+    build-parameters:
+      build-result: dist
+      builder: custom
+      ignore: [ 'node_modules/',  'default-env.json', 'manifest*.yml' ]
+      commands:
+      - npm run html5
+      supported-platforms: []
 
   # --------------------- COMMON DB MODULE ---------------------
   - name: aisaas-db-com
@@ -339,6 +387,27 @@ resources:
       service: autoscaler
       service-name: ${space}-aisaas-autoscaler
       service-plan: standard
+  
+
+  # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------  
+  - name: aisaas-html5-repo-host
+  # -----------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-host
+      service-name: ${space}-aisaas-html5-repo-host
+      service: html5-apps-repo
+      config:
+        sizeLimit: 2
+
+  # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
+  - name: aisaas-html5-repo-runtime
+  # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-runtime
+      service-name: ${space}-aisaas-html5-repo-runtime
+      service: html5-apps-repo
 
 
   # ----------------- POSTGRESQL -------------------------------------   

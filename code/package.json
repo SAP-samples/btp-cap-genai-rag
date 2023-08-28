@@ -27,7 +27,6 @@
         "@sap/xsenv": "^3.4.0",
         "@sap/xssec": "^3.2.17",
         "@swc/core": "^1.3.78",
-        "@sap/llm-commons": "^0.5.1",
         "axios": "^0.27.2",
         "cds-swagger-ui-express": "^0.5.0",
         "cf-nodejs-logging-support": "^6",
@@ -66,24 +65,33 @@
     },
     "scripts": {
         "start": "cds-serve",
+        "deploy": "cds deploy --to sqlite",
         "----------------------": "",
         "-Local/Hybrid-Testing-": "",
         "/--------------------/": "",
         "test": "mocha --timeout 20000",
         "---API-Service---": "",
-        "api:watch": "(cd api && cds-ts watch)",
-        "api:mtx": "(cd api && cds-ts watch --profile local-with-mtx)",
-        "api:hybrid": "(cd api && cds-ts watch --profile hybrid)",
+        "api:watch": "(cd api-service && cds-ts watch --profile development)",
+        "api:mtx": "(cd api-service && cds-ts watch --profile local-with-mtx)",
+        "api:hybrid": "(cd api-service && cds-ts watch --profile hybrid)",
         "---Backend-Service---": "",
-        "srv:watch": "(cd srv && cds-ts watch)",
-        "srv:mtx": "(cd srv && cds-ts watch --profile local-with-mtx)",
-        "srv:hybrid": "(cd srv && cds-ts watch --profile hybrid)",
+        "srv:watch": "(cd app-service && cds-ts watch --profile development)",
+        "srv:mtx": "(cd app-service && cds-ts watch --profile local-with-mtx)",
+        "srv:hybrid": "(cd app-service && cds-ts watch --profile hybrid)",
         "---Service-Broker---": "",
         "broker:hybrid": "cds bind --exec npm run broker:run",
         "broker:run": "(cd broker && cds bind --exec --profile hybrid npm start)",
+        "---HTML5-Mock-Repo---": "",
+        "mock:watch": "cds bind --exec npm run mock:run:watch",
+        "mock:hybrid": "cds bind --exec npm run mock:run:hybrid",
+        "mock:run:watch": "(cd router && cds bind --exec --profile development node ../node_modules/@sap/html5-repo-mock/index.js)",
+        "mock:run:hybrid": "(cd router && cds bind --exec --profile hybrid node ../node_modules/@sap/html5-repo-mock/index.js)",
         "---Application-Router---": "",
         "router:hybrid": "cds bind --exec npm run router:run",
         "router:run": "(cd router && cds bind --exec --profile hybrid node ../node_modules/@sap/approuter/approuter.js)",
+        "-Manual HTML5 Deployment-": "",
+        "deployer:run": "(cd app/html5-deployer && cds bind --exec --profile hybrid node ../../node_modules/@sap/html5-app-deployer/index.js)",
+        "deployer:hybrid": "cds bind --exec npm run deployer:run",
         "---------------------": "",
         "-----PostgreSQL------": "",
         "/-------------------/": "",
@@ -93,11 +101,11 @@
         "--------BUILD-------": "",
         "/------------------/": "",
         "build": "npm run build:deps && npm run build:cds && npm run build:ts && npm run cleanup:ts",
-        "build:ts": "tsc -b srv && tsc -b api",
+        "build:ts": "tsc -b app-service && tsc -b api-service",
         "build:cds": "cds build --production",
         "build:deps": "npm i",
         "cleanup:ts": "npx rimraf ./gen/**/**/*.ts && npx rimraf ./gen/**/**/tsconfig.json",
-        "cds2types": "cd srv && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
+        "cds2types": "cd app-service && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },
     "eslintConfig": {
         "extends": "eslint:recommended",
@@ -133,6 +141,11 @@
         "printWidth": 120
     },
     "cds": {
+        "folders": {
+            "db-sqlite": "db/sqlite",
+            "app-srv": "app-service/srv",
+            "api-srv": "api-service/srv"
+        },
         "build": {
             "tasks": [
                 {
@@ -141,19 +154,19 @@
                         "model": [
                             "db",
                             "db/hana",
-                            "api/srv",
-                            "srv/srv",
+                            "api-service/srv",
+                            "app-service/srv",
                             "@sap/cds-mtxs/db/extensions"
                         ]
                     }
                 },
                 {
                     "for": "nodejs",
-                    "src": "srv/srv",
+                    "src": "app-service/srv",
                     "dest": "srv",
                     "options": {
                         "model": [
-                            "srv/srv",
+                            "app-service/srv",
                             "@sap/cds-mtxs/srv/bootstrap",
                             "@sap/cds-mtxs/srv/extensibility-service"
                         ]
@@ -161,15 +174,15 @@
                 },
                 {
                     "for": "nodejs",
-                    "src": "api/srv",
+                    "src": "api-service/srv",
                     "dest": "api",
                     "options": {
-                        "model": "api/srv"
+                        "model": "api-service/srv"
                     }
                 },
                 {
                     "for": "mtx",
-                    "src": "srv/srv",
+                    "src": "app-service/srv",
                     "dest": "srv"
                 },
                 {
@@ -181,5 +194,8 @@
                 }
             ]
         }
-    }
+    },
+    "sapux": [
+        "app/ui-flp"
+    ]
 }

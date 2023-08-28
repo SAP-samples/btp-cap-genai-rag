@@ -1,0 +1,30 @@
+{
+    "welcomeFile": "/index.html",
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "^/user-api(.*)",
+            "target": "$1",
+            "service": "sap-approuter-userapi",
+            "authenticationType": "xsuaa"
+        },
+        {
+            "source": "^/api(.*)$",
+            "target": "$1",
+            "destination": "api",
+            "csrfProtection": false
+        },
+        {
+            "source": "^/react-mail-insights(.*)$",
+            "target": "/$1",
+            "destination": "ui",
+            "csrfProtection": false
+        },
+        {
+            "source": "^/(.*)$",
+            "target": "/$1",
+            "destination": "ui5",
+            "csrfProtection": false
+        }
+    ]
+}
