@@ -66,7 +66,7 @@ interface CustomField {
     isNumber: boolean;
     description: string;
 }
-export class PublicService extends ApplicationService {
+export default class PublicService extends ApplicationService {
     async init() {
         await super.init();
         this.on("getMails", this.getMails);
