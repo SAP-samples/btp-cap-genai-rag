@@ -14,7 +14,7 @@
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
         "[bas]": {
-            "multitenancy": true,
+            "multitenancy": false,
             "extensibility": false,
             "toggles": false,
             "postgres": {
