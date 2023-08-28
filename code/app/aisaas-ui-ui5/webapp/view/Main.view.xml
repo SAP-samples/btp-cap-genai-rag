@@ -1,0 +1,24 @@
+<mvc:View
+	controllerName="aisaas.ui.controller.Main"
+	displayBlock="true"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:layout="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	core:require="{ formatter:
+	'aisaas/ui/model/formatter' }">
+
+	<List
+		headerText="Mails"
+		headerLevel="H2"
+		items="{
+				path: 'api>/getMails()'
+			}">
+		<StandardListItem
+			title="{api>subject}: {api>body}"
+		/>
+	</List>
+
+
+</mvc:View>
