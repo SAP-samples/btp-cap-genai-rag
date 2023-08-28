@@ -13,6 +13,14 @@
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
+        "[bas]": {
+            "multitenancy": true,
+            "extensibility": false,
+            "toggles": false,
+            "postgres": {
+                "kind": "postgresql-db"
+            }
+        },
         "[hybrid]": {
             "multitenancy": true,
             "extensibility": false,
@@ -63,6 +71,12 @@
         "--- DB Settings ---": "---",
         " ------------------": "---",
         "db": {
+            "[bas]": {
+                "kind": "sqlite",
+                "credentials": {
+                    "url": "../db.sqlite"
+                }
+            },
             "[hybrid]": {
                 "kind": "hana",
                 "impl": "@sap/cds-hana",
@@ -92,6 +106,17 @@
         "--- Auth Settings ---": "---",
         " --------------------": "---",
         "auth": {
+            "[bas]": {
+                "kind": "mocked",
+                "users": {
+                    "alice": {
+                        "roles": ["Admin", "Member"]
+                    },
+                    "carol": {
+                        "roles": ["Member"]
+                    }
+                }
+            },
             "[hybrid]": {
                 "kind": "xsuaa"
             },

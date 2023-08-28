@@ -79,6 +79,7 @@
         "srv:watch": "(cd app-service && cds-ts watch --profile development)",
         "srv:mtx": "(cd app-service && cds-ts watch --profile local-with-mtx)",
         "srv:hybrid": "(cd app-service && cds-ts watch --profile hybrid)",
+        "srv:bas": "(cd app-service && cds-ts watch --profile bas)",
         "---Service-Broker---": "",
         "broker:hybrid": "cds bind --exec npm run broker:run",
         "broker:run": "(cd broker && cds bind --exec --profile hybrid npm start)",
