@@ -6,7 +6,9 @@ import Automator from "./utils/automator";
 import * as aiCore from "./tooling/ai-core-tooling";
 
 const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
+
 abstract class Provisioning {
+    
     public register = (service: any) => {
         service.on("UPDATE", "tenant", this.subscribe);
         service.on("DELETE", "tenant", this.unsubscribe);
@@ -35,22 +37,29 @@ abstract class Provisioning {
             let automator = new Automator(tenant, subdomain, custdomain);
             await automator.deployTenantArtifacts();
 
-            // Create AI Core Resource Group for tenant
-            const resourceGroupId = `${tenant}-${appName}`;
-            const resourceGroupCreationResponse = await aiCore.createResourceGroup(resourceGroupId);
-            console.log(
-                `Resource Group ${resourceGroupCreationResponse?.resourceGroupId} for tenant ${resourceGroupCreationResponse?.tenantId} has been created successfully.`
-            );
+            //@ts-ignore
+            if (cds.env.requires.aicore?.createResourceGroups){
+                console.log("Info: AI Core Resource Groups will be created");
+                // Create AI Core Resource Group for tenant
+                const resourceGroupId = `${tenant}-${appName}`;
+                const resourceGroupCreationResponse = await aiCore.createResourceGroup(resourceGroupId);
+                console.log(
+                    `Resource Group ${resourceGroupCreationResponse?.resourceGroupId} for tenant ${resourceGroupCreationResponse?.tenantId} has been created successfully.`
+                );
 
-            await delay(10000);
-            const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-            const responseConfigurationCreation = await aiCore.createConfiguration({}, headers);
-            if (responseConfigurationCreation.id) {
-                await delay(5000);
-                await aiCore.createDeployment(responseConfigurationCreation.id, headers);
+                await delay(10000);
+                const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+                const responseConfigurationCreation = await aiCore.createConfiguration({}, headers);
+                if (responseConfigurationCreation.id) {
+                    await delay(5000);
+                    await aiCore.createDeployment(responseConfigurationCreation.id, headers);
+                    console.log("Success: Onboarding completed!");
+                } else {
+                    console.log("Failed: Error during onboarding - Configuration not created well!");
+                }
+            }else{
+                console.log("Info: AI Core Resource Groups will not be created");
                 console.log("Success: Onboarding completed!");
-            } else {
-                console.log("Failed: Error during onboarding - Configuration not created well!");
             }
         } catch (error: any) {
             console.error("Error: Automation skipped because of error during subscription");
@@ -71,10 +80,13 @@ abstract class Provisioning {
             let automator = new Automator(tenant, subdomain);
             await automator.undeployTenantArtifacts();
 
-            // Delete AI Core Resource Group for tenant
-            const resourceGroupId = `${tenant}-${appName}`;
-            const response = await aiCore.deleteResourceGroup(resourceGroupId);
-            console.log(`Resource Group ${resourceGroupId} deleted successfully.`, response);
+            //@ts-ignore
+            if (cds.env.requires.aicore?.createResourceGroups){
+                // Delete AI Core Resource Group for tenant
+                const resourceGroupId = `${tenant}-${appName}`;
+                const response = await aiCore.deleteResourceGroup(resourceGroupId);
+                console.log(`Resource Group ${resourceGroupId} deleted successfully.`, response);
+            }
 
             console.log("Success: Unsubscription completed!");
         } catch (error: any) {

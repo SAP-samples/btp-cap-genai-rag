@@ -25,6 +25,8 @@ router:
       serviceInstanceName: xsuaa
     destination:
       serviceInstanceName: destination
+    html5-apps-repo:
+      serviceInstanceName: html5-repo-runtime
   image:
     # Provide your Application Router Docker Image repository
     repository: 
@@ -58,8 +60,8 @@ srv:
       serviceInstanceName: destination
     hana: 
       serviceInstanceName: com-hdi-container
-    # aicore: 
-      # serviceInstanceName: aicore
+    html5-apps-repo:
+      serviceInstanceName: html5-repo-runtime
   image:
     # Provide your Backend Service Docker Image repository
     repository: 
@@ -156,6 +158,27 @@ hana_deployer:
       cpu: 500m
       memory: 1G
 
+
+# HTML5 Apps Deployer Job
+# Deploys the UI modules to the HTML5 App Repository
+html5_apps_deployer:
+  cloudService: aisaas
+  image:
+    # Provide your HTML5 Apps Deployer Docker Image repository
+    repository: 
+    tag: 
+  bindings:
+    html5-apps-repo:
+      serviceInstanceName: html5-repo-host
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500M
+    requests:
+      cpu: 300m
+      memory: 500M
+
+
 # SAP XSUAA Instance (for SaaS Application)
 # XSUAA instance for SaaS application based on application service plan
 xsuaa:
@@ -168,19 +191,19 @@ xsuaa:
     # Role collections names have to be unique in the same subaccount
     # Therefore a unique identifer has to be utilized 
     role-collections:
-      - name: 'Susaas Member ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'AI SaaS Member ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Member Access
         role-template-references: 
           - '$XSAPPNAME.Member'
           - '$XSAPPNAME.Token_Exchange'
-      - name: 'Susaas Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'AI SaaS Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Administrator Access
         role-template-references: 
           - '$XSAPPNAME.Admin'
           - '$XSAPPNAME.SaaSAdmin'
           - '$XSAPPNAME.UserManagementAdmin'
           - '$XSAPPNAME.Token_Exchange'
-      - name: 'Susaas Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'AI SaaS Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Extension Developer Access
         role-template-references: 
           - '$XSAPPNAME.ExtensionDeveloper'
@@ -374,7 +397,16 @@ postgresql_db:
   parameters:
     engine_version: "13"
 
-# SAP AI Core
-# aicore:
-  # serviceOfferingName: aicore
-  # servicePlanName: free
+
+# SAP HTML5 Application Repository
+# Storing the SaaS application UI modules
+html5_repo_host:
+  serviceOfferingName: html5-apps-repo
+  servicePlanName: app-host
+
+
+# SAP HTML5 Application Repository
+# Allows access to the SaaS applicaiton UI modules 
+html5_repo_runtime:
+  serviceOfferingName: html5-apps-repo
+  servicePlanName: app-runtime

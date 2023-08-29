@@ -10,6 +10,9 @@
                 "destination": "PROVIDER_AI_CORE_DESTINATION"
             }
         },
+        "aicore": {
+            "createResourceGroups": false
+        },
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
