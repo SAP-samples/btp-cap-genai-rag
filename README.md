@@ -4,14 +4,9 @@
 
 ## Description
 
-- Showcasing BTP Usage of CAP <-> LLMs
-- Following Golden Path development
-- langchain integration (JS/TS)
-- llm-commons
-- Prompting with templates and output parsers
-- Embeddings
+Welcome to our dedicated GitHub repository, designed to provide valuable support to developers, partners and customers aiming to create advanced GenAI solutions on SAP Business Technology Platform (SAP BTP). Inside, you'll find a carefully crafted example that follows SAP BTP's respected Golden Path development approach. We've covered both single-tenant and multitenant (Software as a Service, SaaS) versions to suit different needs. Discover how to smoothly integrate different Large Language Models (LLMs) via SAP AI Core, make the most of LangChain in CAP and use advanced techniques like output parsing according a custom schema or Retrieval Augmented Generation (RAG) to achieve even higher value for your use case. Notably, our repository supports two runtimes, Cloud Foundry and Kyma, offering flexibility in your journey to harness SAP AI Services within SAP BTP.
 
-  Further details will follow soon!
+Further details will follow soon!
 
 Repo to be moved to https://github.com/SAP-samples/ prior to TechEd 2023
 
@@ -28,6 +23,7 @@ Use Case GenAI Mail-Insights
 
 ## Local testing
 
+```
 cf csk dev-aisaas-uaa dev-aisaas-uaa-key
 cf csk dev-aisaas-aicore dev-aisaas-aicore-key
 cf csk dev-aisaas-credstore dev-aisaas-credstore-key
@@ -43,6 +39,7 @@ cds bind credstore -2 dev-aisaas-credstore --kind credstore --for hybrid --outpu
 cds bind saas-registry -2 dev-aisaas-registry --kind saas-registry --for hybrid --output-file .cdsrc-private.json
 cds bind sm-container -2 dev-aisaas-service-manager --kind service-manager --for hybrid --output-file .cdsrc-private.json
 cds bind sm-admin -2 dev-aisaas-service-manager-admin --kind service-manager --for hybrid --output-file .cdsrc-private.json
+```
 
 ## How to obtain support
 
