@@ -29,3 +29,5 @@ _out
 brokerpass.txt
 *.sqlite
 *.sqlite-*
+
+.$*
