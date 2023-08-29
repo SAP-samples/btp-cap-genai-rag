@@ -106,7 +106,7 @@
         "build:ts": "tsc -b app-service && tsc -b api-service",
         "build:cds": "cds build --production",
         "build:deps": "npm i",
-        "cleanup:ts": "npx rimraf ./gen/**/**/*.ts && npx rimraf ./gen/**/**/tsconfig.json",
+        "cleanup:ts": "npx shx rm -r './gen/**/*.{ts,tsconfig}'",
         "cds2types": "cd app-service && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },
     "eslintConfig": {

@@ -1,5 +1,5 @@
 {
-    "welcomeFile": "/ui5/",
+    "welcomeFile": "/aisaasui/",
     "authenticationMethod": "route",
     "logout": {
         "logoutEndpoint": "/do/logout"

@@ -9,6 +9,7 @@ gen/
 dist/
 local/
 app-build/
+resources/
 *-content.zip
 manifest-bundle.zip
 connection.properties

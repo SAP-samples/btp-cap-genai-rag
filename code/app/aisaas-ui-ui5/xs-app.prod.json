@@ -6,7 +6,7 @@
   "routes": [
     {
       "source": "^/api/odata/v4/mail-insights/(.*)$",
-      "target": "/catalog/PublicService/$1",
+      "target": "/odata/v4/mail-insights/$1",
       "destination": "aisaas-srv-api",
       "preferLocal": true,
       "authenticationType": "xsuaa"

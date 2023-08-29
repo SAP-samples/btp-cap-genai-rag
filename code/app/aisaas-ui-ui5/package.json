@@ -8,6 +8,7 @@
 		"clean": "rimraf dist coverage",
 		"build": "ui5 build --clean-dest",
 		"build:opt": "ui5 build self-contained --clean-dest --all",
+		"copy": "shx mkdir -p ../html5-deployer/resources/ && shx cp -rf ./dist/*.zip ../html5-deployer/resources/",
 		"start": "ui5 serve --port 8081 -o index.html",
 		"start-cdn": "ui5 serve --port 8081 -o index-cdn.html",
 		"start:dist": "npm start -- --config ui5-dist.yaml",
