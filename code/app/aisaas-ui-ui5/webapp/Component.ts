@@ -1,6 +1,7 @@
 import UIComponent from "sap/ui/core/UIComponent";
 import models from "./model/models";
 import Device from "sap/ui/Device";
+import IconPool from "sap/ui/core/IconPool";
 
 /**
  * @namespace ui
@@ -21,6 +22,12 @@ export default class Component extends UIComponent {
 
 		// create the views based on the url/hash
 		this.getRouter().initialize();
+
+		// register "SAP Business Suite" font family to the icon pool
+		IconPool.registerFont({
+			fontFamily: "BusinessSuiteInAppSymbols",
+			fontURI: sap.ui.require.toUrl("sap/ushell/themes/base/fonts/")
+		});
 	}
 
 	/**
