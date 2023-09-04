@@ -1,11 +1,11 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import ResourceModel from "sap/ui/model/resource/ResourceModel";
-import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import XMLView from "sap/ui/core/mvc/XMLView";
+import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
+import ObjectPageSection from "sap/uxap/ObjectPageSection";
 import Event from "sap/ui/base/Event";
-import List from "sap/m/List";
-import Button from "sap/m/Button";
 import Context from "sap/ui/model/odata/v4/Context";
+import List from "sap/m/List";
 
 interface Email {
     ID: string,
@@ -44,6 +44,30 @@ export default class Main extends BaseController {
 		this.setModel(emailModel, this.EMAIL_MODEL);
 	}
 
+	public onPressItem(event: Event): void {
+		const selectedEmail: Context = (event.getSource() as List).getSelectedItem().getBindingContext("api") as Context;
+		const emailView: XMLView = this.byId("emailColumn") as XMLView;
+		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
+		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
+
+		this.setEmailModel({
+			ID: selectedEmail.getProperty("ID"),
+			category: selectedEmail.getProperty("category"),
+			sender: selectedEmail.getProperty("sender"),
+			modifiedAt: selectedEmail.getProperty("modifiedAt"),
+			urgency: selectedEmail.getProperty("urgency"),
+			sentiment: selectedEmail.getProperty("sentiment"),
+			subject: selectedEmail.getProperty("subject"),
+			body: selectedEmail.getProperty("body"),
+			translationSubject: selectedEmail.getProperty("translationSubject"),
+			translationBody: selectedEmail.getProperty("translationBody")
+		});
+
+		emailPage.setSelectedSection(incomingMessageSection);
+		
+		console.log(selectedEmail.getObject());
+	}
+
 	private setEmailModel(email: Email = null): void {
 		const emailModel: JSONModel = this.getModel(this.EMAIL_MODEL) as JSONModel;
 		emailModel.setProperty("/ID", email ? email.ID : null);
@@ -56,37 +80,5 @@ export default class Main extends BaseController {
 		emailModel.setProperty("/body", email ? email.body : null);
 		emailModel.setProperty("/translationSubject", email ? email.translationSubject : null);
 		emailModel.setProperty("/translationBody", email ? email.translationBody : null);
-	}
-
-	public onPressItem(event: Event): void {
-		const selectedEmail: Context = (event.getSource() as List).getSelectedItem().getBindingContext("api") as Context;
-		const emailModel: JSONModel = this.getModel(this.EMAIL_MODEL) as JSONModel;
-
-		if (selectedEmail.getProperty("ID") !== emailModel.getProperty("/ID")) {
-			this.setEmailModel({
-				ID: selectedEmail.getProperty("ID"),
-				category: selectedEmail.getProperty("category"),
-				sender: selectedEmail.getProperty("sender"),
-				modifiedAt: selectedEmail.getProperty("modifiedAt"),
-				urgency: selectedEmail.getProperty("urgency"),
-				sentiment: selectedEmail.getProperty("sentiment"),
-				subject: selectedEmail.getProperty("subject"),
-				body: selectedEmail.getProperty("body"),
-				translationSubject: selectedEmail.getProperty("translationSubject"),
-				translationBody: selectedEmail.getProperty("translationBody")
-			});
-		}
-		
-		console.log(selectedEmail.getObject());
-	}
-
-	public onTranslate(event: Event): void {
-		const localModel: JSONModel = this.getModel() as JSONModel;
-		const button: Button = event.getSource();
-
-		localModel.setProperty("/translationActivated", !localModel.getProperty("/translationActivated"));
-		button.setText(localModel.getProperty("/translationActivated") ? 
-			((this.getModel("i18n") as ResourceModel).getResourceBundle() as ResourceBundle).getText("email.header.translationButton.original") : 
-			((this.getModel("i18n") as ResourceModel).getResourceBundle() as ResourceBundle).getText("email.header.translationButton.translate") );
 	}
 }

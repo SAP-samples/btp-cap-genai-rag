@@ -1,0 +1,81 @@
+<mvc:View
+	controllerName="aisaas.ui.controller.EmailColumn"
+	displayBlock="true"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:tnt="sap.tnt"
+    xmlns:ux="sap.uxap"
+	xmlns:core="sap.ui.core"
+	core:require="{ formatter:
+	'aisaas/ui/model/formatter' }">
+
+    <ux:ObjectPageLayout id="emailPage" showAnchorBarPopover="false" upperCaseAnchorBar="false">
+		<ux:headerTitle>
+			<ux:ObjectPageDynamicHeaderTitle>
+				<ux:heading>
+					<VBox>
+						<Title text="{= !${/translationActivated} ? ${emailModel>/subject} : ${emailModel>/translationSubject} }"/>
+						<HBox>
+							<Label vAlign="Middle" text="{path: 'emailModel>/modifiedAt', formatter: 'formatter.formatDate'}"/>
+							<ObjectStatus
+								class="sapUiTinyMarginBegin"
+								inverted="true"
+								icon="sap-icon://high-priority"
+								text="{path:'emailModel>/urgency', formatter:'formatter.getUrgencyText'}"
+								state="{path:'emailModel>/urgency', formatter:'formatter.getUrgencyState'}"/>
+							<ObjectStatus
+								class="sapUiTinyMarginBegin"
+								inverted="true"
+								icon="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentIcon'}"
+								text="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentText'}"
+								state="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentState'}"/>
+							<tnt:InfoLabel
+								class="sapUiTinyMarginBegin"
+								displayOnly="true"
+								text="{emailModel>/category}"/>
+						</HBox>
+					</VBox>
+				</ux:heading>
+				<ux:actions>
+					<Button text="{i18n>email.header.translationButton.translate}" press="onTranslate"/>
+				</ux:actions>
+			</ux:ObjectPageDynamicHeaderTitle>
+		</ux:headerTitle>
+
+		<ux:headerContent>
+			<HBox wrap="Wrap" width="100%">
+				<Avatar
+					displaySize="L"
+					backgroundColor="Accent6"
+					initials="{path:'emailModel>/sender', formatter:'formatter.getAvatarInitial'}"/>
+				<VBox class="sapUiMediumMarginBegin">
+					<Title text="{i18n>email.header.customerInformation}"/>
+					<Text text="{emailModel>/sender}"/>
+				</VBox>
+			</HBox>
+		</ux:headerContent>
+
+		<ux:sections>
+			<ux:ObjectPageSection id="incomingMessageSection" titleUppercase="false" title="{i18n>email.tabs.labels.incomingMessage}">
+				<ux:subSections>
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.incomingMessage}">
+						<VBox class="sapUiTinyMargin">
+							<Text text="{= !${/translationActivated} ? ${emailModel>/body} : ${emailModel>/translationBody} }"/>
+						</VBox>
+					</ux:ObjectPageSubSection>
+				</ux:subSections>
+			</ux:ObjectPageSection>
+
+			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.labels.responsePreparation}">
+				<ux:subSections>
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.responsePreparation}">
+						<VBox class="sapUiTinyMargin">
+							<Text text="to be implemented"/>
+						</VBox>
+					</ux:ObjectPageSubSection>
+				</ux:subSections>
+			</ux:ObjectPageSection>
+		</ux:sections>
+	</ux:ObjectPageLayout>
+	
+</mvc:View>

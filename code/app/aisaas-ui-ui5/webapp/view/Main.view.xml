@@ -4,8 +4,8 @@
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:l="sap.ui.layout"
-	xmlns:core="sap.ui.core"
     xmlns:tnt="sap.tnt"
+    xmlns:core="sap.ui.core"
 	core:require="{ formatter:
 	'aisaas/ui/model/formatter' }">
 
@@ -14,7 +14,7 @@
         <content>
             <l:Splitter>
                 <l:FixFlex>
-                    <l:layoutData><l:SplitterLayoutData size="15%"/></l:layoutData>
+                    <l:layoutData><l:SplitterLayoutData size="12%"/></l:layoutData>
                     <l:fixContent/>
                     <l:flexContent>
                         <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true"/>
@@ -22,7 +22,7 @@
                 </l:FixFlex>
 
                 <l:FixFlex>
-                    <l:layoutData><l:SplitterLayoutData size="20%"/></l:layoutData>
+                    <l:layoutData><l:SplitterLayoutData size="23%"/></l:layoutData>
                     <l:fixContent/>
 
                     <l:flexContent>
@@ -30,21 +30,21 @@
                             <List
                                 id="emailsList"
                                 mode="SingleSelectMaster"
-                                noDataText="No Emails"
+                                noDataText="{i18n>list.label.noData}"
                                 items="{
                                     path: 'api>/Mails',
                                     parameters: { $select: 'translationSubject,translationBody' }
                                 }"
                                 selectionChange="onPressItem">
                                 <CustomListItem tooltip="{api>subject}">
-                                    <HBox class="sapUiTinyMarginBegin sapUiSmallMargin">
-                                        <HBox width="20%" justifyContent="Center">
+                                    <HBox class="sapUiSmallMargin" justifyContent="SpaceBetween">
+                                        <HBox justifyContent="Center">
                                             <Avatar
                                                 displaySize="M"
                                                 backgroundColor="Accent6"
                                                 initials="{path:'api>sender', formatter:'formatter.getAvatarInitial'}"/>
                                         </HBox>
-                                        <VBox width="80%" class="sapUiTinyMarginBegin">
+                                        <VBox width="calc(100% - 5rem)">
                                             <HBox justifyContent="SpaceBetween">
                                                 <Label text="{api>sender}" wrapping="true"/>
                                                 <Label text="{path: 'api>modifiedAt', formatter: 'formatter.formatDate'}" wrapping="true"/>
@@ -64,87 +64,15 @@
                                                 <Title text="{api>subject}"/>
                                                 <Text maxLines="2" text="{api>body}"/>
                                             </VBox>
-                                        </VBox>                                        
+                                        </VBox>
                                     </HBox>
                                 </CustomListItem>
                             </List>
                         </ScrollContainer>
                     </l:flexContent>
                 </l:FixFlex>
-
-                <l:FixFlex>
-                    <l:layoutData><l:SplitterLayoutData size="auto"/></l:layoutData>
-                    <l:fixContent>
-                        <l:BlockLayout background="Light" visible="{= ${emailModel>/ID} !== null }">
-                            <l:BlockLayoutRow>
-                                <l:BlockLayoutCell class="sapUiNoContentPadding">
-                                    <VBox class="sapUiMediumMargin sapUiSmallMarginTop sapUiSmallMarginBottom">
-                                        <HBox justifyContent="SpaceBetween">
-                                            <VBox justifyContent="Center">
-                                                <Title titleStyle="H3" text="{= !${/translationActivated} ? ${emailModel>/subject} : ${emailModel>/translationSubject} }"/>
-                                            </VBox>
-                                            <Button text="{i18n>email.header.translationButton.translate}" press="onTranslate"/>
-                                        </HBox>
-                                        <HBox>
-                                            <Label vAlign="Middle" text="{path: 'emailModel>/modifiedAt', formatter: 'formatter.formatDate'}"/>
-                                            <ObjectStatus
-                                                class="sapUiTinyMarginBegin"
-                                                inverted="true"
-                                                icon="sap-icon://high-priority"
-                                                text="{path:'emailModel>/urgency', formatter:'formatter.getUrgencyText'}"
-                                                state="{path:'emailModel>/urgency', formatter:'formatter.getUrgencyState'}"/>
-                                            <ObjectStatus
-                                                class="sapUiTinyMarginBegin"
-                                                inverted="true"
-                                                icon="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentIcon'}"
-                                                text="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentText'}"
-                                                state="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentState'}"/>
-                                            <tnt:InfoLabel
-                                                class="sapUiTinyMarginBegin"
-                                                displayOnly="true"
-                                                text="{emailModel>/category}"/>
-                                        </HBox>
-                                        <HBox class="sapUiMediumMarginTop">
-                                            <Avatar
-                                                displaySize="L"
-                                                backgroundColor="Accent6"
-                                                initials="{path:'emailModel>/sender', formatter:'formatter.getAvatarInitial'}"/>
-                                            <VBox class="sapUiMediumMarginBegin">
-                                                <Title text="{i18n>email.header.customerInformation}"/>
-                                                <Text text="{emailModel>/sender}"/>
-                                            </VBox>
-                                        </HBox>
-                                    </VBox>
-                                </l:BlockLayoutCell>
-                            </l:BlockLayoutRow>
-                        </l:BlockLayout>
-
-                        <IconTabBar
-                            id="emailContentTabBar"
-                            class="sapUiResponsivePadding--header"
-                            applyContentPadding="false"
-                            expandable="false"
-                            upperCase="false"
-                            visible="{= ${emailModel>/ID} !== null }"
-                            select="onPressTab">
-                            <items>
-                                <IconTabFilter text="{i18n>email.tabs.labels.message}" key="tab0"/>
-                            </items>
-                        </IconTabBar>
-                    </l:fixContent>
-
-                    <l:flexContent>
-                        <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
-                            <Panel id="emailContentTopSection" class="sapUiContentPadding" backgroundDesign="Transparent" visible="{= ${emailModel>/ID} !== null }">
-                                <Panel>
-                                    <VBox class="sapUiSmallMargin">
-                                        <Text text="{= !${/translationActivated} ? ${emailModel>/body} : ${emailModel>/translationBody} }"/>
-                                    </VBox>
-                                </Panel>
-                            </Panel>
-                        </ScrollContainer>
-                    </l:flexContent>
-                </l:FixFlex>
+                
+                <mvc:XMLView id="emailColumn" viewName="aisaas.ui.view.EmailColumn" visible="{= ${emailModel>/ID} !== null }"/>
             </l:Splitter>
         </content>
     </Page>
