@@ -21,13 +21,13 @@
 								class="sapUiTinyMarginBegin"
 								inverted="true"
 								icon="sap-icon://high-priority"
-								text="{path:'emailModel>/urgency', formatter:'formatter.getUrgencyText'}"
+								text="{parts: ['filters>/urgency', 'emailModel>/urgency'], formatter:'formatter.getUrgencyText'}"
 								state="{path:'emailModel>/urgency', formatter:'formatter.getUrgencyState'}"/>
 							<ObjectStatus
 								class="sapUiTinyMarginBegin"
 								inverted="true"
 								icon="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentIcon'}"
-								text="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentText'}"
+								text="{parts: ['filters>/sentiment', 'emailModel>/sentiment'], formatter:'formatter.getSentimentText'}"
 								state="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentState'}"/>
 							<tnt:InfoLabel
 								class="sapUiTinyMarginBegin"

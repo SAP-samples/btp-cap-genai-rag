@@ -14,29 +14,101 @@
         <content>
             <l:Splitter>
                 <l:FixFlex>
-                    <l:layoutData><l:SplitterLayoutData size="12%"/></l:layoutData>
+                    <l:layoutData><l:SplitterLayoutData size="16%"/></l:layoutData>
                     <l:fixContent/>
                     <l:flexContent>
-                        <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true"/>
+                        <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
+                            <VBox class="sapUiSmallMargin">
+                                <Title text="{i18n>filters.title.filterBy}:"/>
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
+                                    <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.requestType}"/>
+                                        <ToolbarSpacer/>
+                                        <Link id="categoryClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onClearFilter"/>
+                                    </Toolbar>
+                                    <List
+                                        id="categoryList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/categories}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter">
+                                        <StandardListItem title="{filters>label}" selected="{= ${/activeCategories}.includes(${filters>id}) }"/>
+                                    </List>
+                                </Panel>
+
+                                <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
+                                    <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.urgency}"/>
+                                        <ToolbarSpacer/>
+                                        <Link id="urgencyClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeUrgencies}.length > 0 }" press="onClearFilter"/>
+                                    </Toolbar>
+                                    <List
+                                        id="urgencyList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/urgency}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter">
+                                        <StandardListItem title="{filters>label}" selected="{= ${/activeUrgencies}.includes(${filters>id}) }"/>
+                                    </List>
+                                </Panel>
+
+                                <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
+                                    <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.sentiment}"/>
+                                        <ToolbarSpacer/>
+                                        <Link id="sentimentClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeSentiments}.length > 0 }" press="onClearFilter"/>
+                                    </Toolbar>
+                                    <List
+                                        id="sentimentList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/sentiment}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter">
+                                        <StandardListItem title="{filters>label}" selected="{= ${/activeSentiments}.includes(${filters>id}) }"/>
+                                    </List>
+                                </Panel>
+                            </VBox>
+                        </ScrollContainer>
                     </l:flexContent>
                 </l:FixFlex>
 
                 <l:FixFlex>
                     <l:layoutData><l:SplitterLayoutData size="23%"/></l:layoutData>
-                    <l:fixContent/>
+                    <l:fixContent>
+                        <Toolbar height="100%">
+                            <VBox width="100%" class="sapUiTinyMargin">
+                                <SearchField value="{/searchKeyword}" placeholder="{i18n>inbox.searchField.placeholder}" search="onSearch"/>
+                                <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
+                                    <Title text="{i18n>inbox.list.label.title} ({/emailsCount})" titleStyle="H4"/>
+                                </HBox>
+                            </VBox>
+                        </Toolbar>
+                    </l:fixContent>
 
                     <l:flexContent>
                         <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
                             <List
                                 id="emailsList"
                                 mode="SingleSelectMaster"
-                                noDataText="{i18n>list.label.noData}"
+                                noDataText="{i18n>inbox.list.label.noData}"
                                 items="{
                                     path: 'api>/Mails',
-                                    parameters: { $select: 'translationSubject,translationBody' }
+                                    parameters: {
+                                        $count: true,
+                                        $select: 'translationSubject,translationBody'
+                                    },
+                                    events: {
+                                        dataReceived: '.onUpdateEmailsList'
+                                    }
                                 }"
                                 selectionChange="onPressItem">
-                                <CustomListItem tooltip="{api>subject}">
+                                <CustomListItem tooltip="{api>subject}" selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${emailModel>/ID} }">
                                     <HBox class="sapUiSmallMargin" justifyContent="SpaceBetween">
                                         <HBox justifyContent="Center">
                                             <Avatar
@@ -53,17 +125,21 @@
                                                 <tnt:InfoLabel displayOnly="true" text="{api>category}"/>
                                                 <HBox justifyContent="End">
                                                     <ObjectStatus
-                                                        icon="{path:'api>sentiment', formatter:'formatter.getSentimentIcon'}"
-                                                        state="{path:'api>sentiment', formatter:'formatter.getSentimentState'}"/>
-                                                    <ObjectStatus
                                                         icon="sap-icon://high-priority"
                                                         state="{path:'api>urgency', formatter:'formatter.getUrgencyState'}"/>
                                                 </HBox>
                                             </HBox>
-                                            <VBox class="sapUiTinyMarginTop">
-                                                <Title text="{api>subject}"/>
-                                                <Text maxLines="2" text="{api>body}"/>
-                                            </VBox>
+                                            <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
+                                                <VBox width="calc(100% - 1.5rem)">
+                                                    <Title text="{api>subject}"/>
+                                                    <Text maxLines="2" text="{api>body}"/>
+                                                </VBox>
+                                                <VBox>
+                                                    <ObjectStatus
+                                                        icon="{path:'api>sentiment', formatter:'formatter.getSentimentIcon'}"
+                                                        state="{path:'api>sentiment', formatter:'formatter.getSentimentState'}"/>
+                                                </VBox>
+                                            </HBox>
                                         </VBox>
                                     </HBox>
                                 </CustomListItem>

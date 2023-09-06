@@ -1,4 +1,5 @@
 import DateFormat from "sap/ui/core/format/DateFormat";
+import { FilterItem } from "./entities";
 
 export default {
 	formatValue: (value: string) => {
@@ -14,43 +15,43 @@ export default {
 		return (dateString) ? dateFormatter.format(new Date(dateString)) : null;
 	},
 
-	getSentimentIcon: (level: number) => {
-		if (level) {
-			if (level < 0) return "sap-icon://BusinessSuiteInAppSymbols/icon-face-bad"
-			if (level < 6) return "sap-icon://BusinessSuiteInAppSymbols/icon-face-neutral"
-			else return "sap-icon://BusinessSuiteInAppSymbols/icon-face-very-happy"
-		} else return null 
+	getUrgencyText: (urgencies: FilterItem[], value: number) => {
+		if (value) {
+			if (value < 4) return urgencies.find((urgency: FilterItem) => urgency.id === "00").label
+			if (value < 7) return urgencies.find((urgency: FilterItem) => urgency.id === "01").label
+			else return urgencies.find((urgency: FilterItem) => urgency.id === "02").label
+		} else return null
 	},
 
-	getSentimentState: (level: number) => {
-		if (level) {
-			if (level < 0) return "Error"
-			if (level < 6) return "Warning"
-			else return "Success"
-		} else return null 
-	},
-
-	getSentimentText: (level: number) => {
-		if (level) {
-			if (level < 0) return "Angry"
-			if (level < 6) return "Skeptical"
-			else return "Happy"
-		} else return null 
-	},
-
-	getUrgencyState: (level: number) => {
-		if (level) {
-			if (level < 4) return "Success"
-			if (level < 7) return "Warning"
+	getUrgencyState: (value: number) => {
+		if (value) {
+			if (value < 4) return "Success"
+			if (value < 7) return "Warning"
 			else return "Error"
-		} else return null 
+		} else return null
 	},
 
-	getUrgencyText: (level: number) => {
-		if (level) {
-			if (level < 4) return "Not Urgent"
-			if (level < 7) return "Urgent"
-			else return "Very Urgent"
-		} else return null 
+	getSentimentIcon: (value: number) => {
+		if (value) {
+			if (value > 5) return "sap-icon://BusinessSuiteInAppSymbols/icon-face-happy"
+			if (value >= 0) return "sap-icon://BusinessSuiteInAppSymbols/icon-face-neutral"
+			else return "sap-icon://BusinessSuiteInAppSymbols/icon-face-bad"
+		} else return null
+	},
+
+	getSentimentText: (sentiments: FilterItem[], value: number) => {
+		if (value) {
+			if (value > 5) return sentiments.find((sentiment: FilterItem) => sentiment.id === "00").label
+			if (value >= 0) return sentiments.find((sentiment: FilterItem) => sentiment.id === "01").label
+			else return sentiments.find((sentiment: FilterItem) => sentiment.id === "02").label
+		} else return null
+	},
+
+	getSentimentState: (value: number) => {
+		if (value) {
+			if (value > 5) return "Success"
+			if (value >= 0) return "Warning"
+			else return "Error"
+		} else return null
 	}
 };

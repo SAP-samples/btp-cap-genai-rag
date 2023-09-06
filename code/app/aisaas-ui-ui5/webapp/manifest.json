@@ -78,6 +78,10 @@
 					"autoExpandSelect": true,
 					"earlyRequests": true
 				}
+			},
+			"filters": {
+				"type": "sap.ui.model.json.JSONModel",
+				"uri": "model/filters.json"
 			}
 		},
 
