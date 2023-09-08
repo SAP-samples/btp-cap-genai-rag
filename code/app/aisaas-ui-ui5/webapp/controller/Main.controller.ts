@@ -12,20 +12,25 @@ import ListItemBase from "sap/m/ListItemBase";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
+import { ObjectBindingInfo } from "sap/ui/base/ManagedObject";
 
-import { Email, FilterItem } from "../model/entities";
+interface FilterItem {
+	id: string,
+	label: string
+}
 
 export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
 	protected readonly ACTIVE_URGENCIES_PATH: string = "activeUrgencies";
 	protected readonly ACTIVE_SENTIMENTS_PATH: string = "activeSentiments";
-	protected readonly EMAIL_MODEL: string = "emailModel";
+	protected readonly EMAIL_ENTITY_PATH: string = "api>/getMail";
 	protected readonly EMAIL_CATEGORY_PATH: string = "category";
 	protected readonly EMAIL_URGENCY_PATH: string = "urgency";
 	protected readonly EMAIL_SENTIMENT_PATH: string = "sentiment";
 	protected readonly EMAIL_SENDER_PATH: string = "sender";
 	protected readonly EMAIL_SUBJECT_PATH: string = "subject";
 	protected readonly EMAIL_BODY_PATH: string = "body";
+	protected readonly UPDATE_GROUP: string = "UPDATE_GROUP_" + Math.random().toString(36).substring(2);
 
 	public onInit(): void {
 		this.getRouter().attachRouteMatched(this.onRouteMatched, this);
@@ -36,23 +41,10 @@ export default class Main extends BaseController {
 			activeSentiments: [],
 			searchKeyword: null,
 			emailsCount: 0,
+			activeEmailId: null,
 			translationActivated: false
 		});
 		this.setModel(model);
-
-		const emailModel: JSONModel = new JSONModel({
-			ID: null,
-			category: null,
-			sender: null,
-			modifiedAt: null,
-			urgency: null,
-			sentiment: null,
-			subject: null,
-			body: null,
-			translationSubject: null,
-			translationBody: null
-		});
-		this.setModel(emailModel, this.EMAIL_MODEL);
 	}
 
 	protected onRouteMatched(): void {
@@ -64,34 +56,45 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/emailsCount", binding.getCount());
 
-		const filteredEmails: Email[] = this.getFilteredEmails();
-		if (filteredEmails.length > 0) {
-			if (!this.isAnyFilteredEmailSelected(filteredEmails)) this.setTopEmail();
-			else (this.byId("emailsList") as List).scrollToIndex(this.getSelectedEmailIndex(filteredEmails));
-		} else this.setEmailModel();
-	}
-
-	private getFilteredEmails(): Email[] {
-		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
-		const currentContexts: Context[] = binding.getAllCurrentContexts();
-
-		const emails: Email[] = [];
-		currentContexts.map((context: Context) => emails.push(context.getObject()));
-		return emails
-	}
-
-	private isAnyFilteredEmailSelected(filteredEmails: Email[]): boolean {
-		const emailModel: JSONModel = this.getModel(this.EMAIL_MODEL) as JSONModel;
-		return filteredEmails.some((email: Email) => email.ID === emailModel.getProperty("/ID"))
-	}
-
-	private getSelectedEmailIndex(filteredEmails: Email[]): number {
-		const emailModel: JSONModel = this.getModel(this.EMAIL_MODEL) as JSONModel;
-		return filteredEmails.indexOf(filteredEmails.find((email: Email) => email.ID === emailModel.getProperty("/ID")))
+		const emailsList: List = this.byId("emailsList") as List;
+		if (emailsList.getItems().length > 0) {
+			if (!this.isActiveEmailInFilteredEmails()) {
+				this.setTopEmail();
+				this.scrollToActiveEmail(0);
+			}
+			else this.scrollToActiveEmail();
+		} else this.setActiveEmail();
 	}
 
 	private setTopEmail(): void {
-		this.setEmailModel(this.getFilteredEmails()[0]);
+		if (this.getFilteredEmailIds().length > 0) this.setActiveEmail(this.getFilteredEmailIds()[0]);
+	}
+
+	private isActiveEmailInFilteredEmails(): boolean {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const filteredEmailIds: string[] = this.getFilteredEmailIds();
+
+		return filteredEmailIds.some((id: string) => id === localModel.getProperty("/activeEmailId"))
+	}
+
+	private scrollToActiveEmail(index: number = null): void {
+		const emailsList: List = this.byId("emailsList") as List;
+
+		if (!index) {
+			const localModel: JSONModel = this.getModel() as JSONModel;
+			const filteredEmailIds: string[] = this.getFilteredEmailIds();
+			const activeEmailIndex: number = filteredEmailIds.indexOf(filteredEmailIds.find((id: string) => id === localModel.getProperty("/activeEmailId")));
+			emailsList.scrollToIndex(activeEmailIndex);
+		} else emailsList.scrollToIndex(index);
+	}
+
+	private getFilteredEmailIds(): string[] {
+		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
+		const currentContexts: Context[] = binding.getAllCurrentContexts();
+		const ids: string[] = [];
+
+		currentContexts.map((context: Context) => ids.push(context.getObject().ID));
+		return ids
 	}
 
 	public onSearch(): void {
@@ -185,41 +188,30 @@ export default class Main extends BaseController {
 		else return new Filter(filterPath, FilterOperator.LT, 0)
 	}
 
-	public onPressItem(event: Event): void {
+	public onSelectEmail(event: Event): void {
 		const selectedEmail: Context = (event.getSource() as List).getSelectedItem().getBindingContext("api") as Context;
-		const emailView: XMLView = this.byId("emailColumn") as XMLView;
-		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
-		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
-
-		this.setEmailModel({
-			ID: selectedEmail.getProperty("ID"),
-			category: selectedEmail.getProperty("category"),
-			sender: selectedEmail.getProperty("sender"),
-			modifiedAt: selectedEmail.getProperty("modifiedAt"),
-			urgency: selectedEmail.getProperty("urgency"),
-			sentiment: selectedEmail.getProperty("sentiment"),
-			subject: selectedEmail.getProperty("subject"),
-			body: selectedEmail.getProperty("body"),
-			translationSubject: selectedEmail.getProperty("translationSubject"),
-			translationBody: selectedEmail.getProperty("translationBody")
-		});
-
-		emailPage.setSelectedSection(incomingMessageSection);
+		this.setActiveEmail(selectedEmail.getProperty("ID"));
 
 		console.log(selectedEmail.getObject());
 	}
 
-	private setEmailModel(email: Email = null): void {
-		const emailModel: JSONModel = this.getModel(this.EMAIL_MODEL) as JSONModel;
-		emailModel.setProperty("/ID", email ? email.ID : null);
-		emailModel.setProperty("/category", email ? email.category : null);
-		emailModel.setProperty("/sender", email ? email.sender : null);
-		emailModel.setProperty("/modifiedAt", email ? email.modifiedAt : null);
-		emailModel.setProperty("/urgency", email ? email.urgency : null);
-		emailModel.setProperty("/sentiment", email ? email.sentiment : null);
-		emailModel.setProperty("/subject", email ? email.subject : null);
-		emailModel.setProperty("/body", email ? email.body : null);
-		emailModel.setProperty("/translationSubject", email ? email.translationSubject : null);
-		emailModel.setProperty("/translationBody", email ? email.translationBody : null);
+	private setActiveEmail(id: string = null): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const emailView: XMLView = this.byId("emailColumn") as XMLView;
+		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
+		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
+		
+		localModel.setProperty("/activeEmailId", id);
+		emailPage.setSelectedSection(incomingMessageSection);
+
+		if (id) {
+			const bindingInfo: ObjectBindingInfo = {
+				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
+				parameters: {
+					$$updateGroupId: this.UPDATE_GROUP
+				}
+			};
+			this.getView().byId("emailColumn").bindElement(bindingInfo);
+		}
 	}
 }

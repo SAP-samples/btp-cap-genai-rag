@@ -9,30 +9,30 @@
 	core:require="{ formatter:
 	'aisaas/ui/model/formatter' }">
 
-    <ux:ObjectPageLayout id="emailPage" showAnchorBarPopover="false" upperCaseAnchorBar="false">
+    <ux:ObjectPageLayout id="emailPage" showAnchorBarPopover="false" upperCaseAnchorBar="false" visible="{= ${/activeEmailId} !== null }">
 		<ux:headerTitle>
 			<ux:ObjectPageDynamicHeaderTitle>
 				<ux:heading>
 					<VBox>
-						<Title text="{= !${/translationActivated} ? ${emailModel>/subject} : ${emailModel>/translationSubject} }"/>
+						<Title text="{= !${/translationActivated} ? ${api>mail/subject} : ${api>mail/translationSubject} }"/>
 						<HBox>
-							<Label vAlign="Middle" text="{path: 'emailModel>/modifiedAt', formatter: 'formatter.formatDate'}"/>
+							<Label vAlign="Middle" text="{path: 'api>mail/modifiedAt', formatter: 'formatter.formatDate'}"/>
 							<ObjectStatus
 								class="sapUiTinyMarginBegin"
 								inverted="true"
 								icon="sap-icon://high-priority"
-								text="{parts: ['filters>/urgency', 'emailModel>/urgency'], formatter:'formatter.getUrgencyText'}"
-								state="{path:'emailModel>/urgency', formatter:'formatter.getUrgencyState'}"/>
+								text="{parts: ['filters>/urgency', 'api>mail/urgency'], formatter:'formatter.getUrgencyText'}"
+								state="{path:'api>mail/urgency', formatter:'formatter.getUrgencyState'}"/>
 							<ObjectStatus
 								class="sapUiTinyMarginBegin"
 								inverted="true"
-								icon="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentIcon'}"
-								text="{parts: ['filters>/sentiment', 'emailModel>/sentiment'], formatter:'formatter.getSentimentText'}"
-								state="{path:'emailModel>/sentiment', formatter:'formatter.getSentimentState'}"/>
+								icon="{path:'api>mail/sentiment', formatter:'formatter.getSentimentIcon'}"
+								text="{parts: ['filters>/sentiment', 'api>mail/sentiment'], formatter:'formatter.getSentimentText'}"
+								state="{path:'api>mail/sentiment', formatter:'formatter.getSentimentState'}"/>
 							<tnt:InfoLabel
 								class="sapUiTinyMarginBegin"
 								displayOnly="true"
-								text="{emailModel>/category}"/>
+								text="{api>mail/category}"/>
 						</HBox>
 					</VBox>
 				</ux:heading>
@@ -47,10 +47,10 @@
 				<Avatar
 					displaySize="L"
 					backgroundColor="Accent6"
-					initials="{path:'emailModel>/sender', formatter:'formatter.getAvatarInitial'}"/>
+					initials="{path:'api>mail/sender', formatter:'formatter.getAvatarInitial'}"/>
 				<VBox class="sapUiMediumMarginBegin">
 					<Title text="{i18n>email.header.customerInformation}"/>
-					<Text text="{emailModel>/sender}"/>
+					<Text text="{api>mail/sender}"/>
 				</VBox>
 			</HBox>
 		</ux:headerContent>
@@ -60,15 +60,15 @@
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.incomingMessage}">
 						<VBox class="sapUiTinyMargin">
-							<Text text="{= !${/translationActivated} ? ${emailModel>/body} : ${emailModel>/translationBody} }"/>
+							<Text text="{= !${/translationActivated} ? ${api>mail/body} : ${api>mail/translationBody} }"/>
 						</VBox>
 					</ux:ObjectPageSubSection>
 				</ux:subSections>
 			</ux:ObjectPageSection>
 
-			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.labels.responsePreparation}">
+			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.labels.similarEmails}">
 				<ux:subSections>
-					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.responsePreparation}">
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.similarEmails}">
 						<VBox class="sapUiTinyMargin">
 							<Text text="to be implemented"/>
 						</VBox>
@@ -77,5 +77,9 @@
 			</ux:ObjectPageSection>
 		</ux:sections>
 	</ux:ObjectPageLayout>
+
+	<FlexBox height="100%" alignItems="Center" justifyContent="Center" visible="{= !${/activeEmailId} }">
+		<Label text="{i18n>email.label.noEmail}"/>
+	</FlexBox>
 	
 </mvc:View>

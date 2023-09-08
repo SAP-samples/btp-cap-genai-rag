@@ -15,7 +15,6 @@
             <l:Splitter>
                 <l:FixFlex>
                     <l:layoutData><l:SplitterLayoutData size="16%"/></l:layoutData>
-                    <l:fixContent/>
                     <l:flexContent>
                         <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
                             <VBox class="sapUiSmallMargin">
@@ -107,48 +106,16 @@
                                         dataReceived: '.onUpdateEmailsList'
                                     }
                                 }"
-                                selectionChange="onPressItem">
-                                <CustomListItem tooltip="{api>subject}" selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${emailModel>/ID} }">
-                                    <HBox class="sapUiSmallMargin" justifyContent="SpaceBetween">
-                                        <HBox justifyContent="Center">
-                                            <Avatar
-                                                displaySize="M"
-                                                backgroundColor="Accent6"
-                                                initials="{path:'api>sender', formatter:'formatter.getAvatarInitial'}"/>
-                                        </HBox>
-                                        <VBox width="calc(100% - 5rem)">
-                                            <HBox justifyContent="SpaceBetween">
-                                                <Label text="{api>sender}" wrapping="true"/>
-                                                <Label text="{path: 'api>modifiedAt', formatter: 'formatter.formatDate'}" wrapping="true"/>
-                                            </HBox>
-                                            <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
-                                                <tnt:InfoLabel displayOnly="true" text="{api>category}"/>
-                                                <HBox justifyContent="End">
-                                                    <ObjectStatus
-                                                        icon="sap-icon://high-priority"
-                                                        state="{path:'api>urgency', formatter:'formatter.getUrgencyState'}"/>
-                                                </HBox>
-                                            </HBox>
-                                            <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
-                                                <VBox width="calc(100% - 1.5rem)">
-                                                    <Title text="{api>subject}"/>
-                                                    <Text maxLines="2" text="{api>body}"/>
-                                                </VBox>
-                                                <VBox>
-                                                    <ObjectStatus
-                                                        icon="{path:'api>sentiment', formatter:'formatter.getSentimentIcon'}"
-                                                        state="{path:'api>sentiment', formatter:'formatter.getSentimentState'}"/>
-                                                </VBox>
-                                            </HBox>
-                                        </VBox>
-                                    </HBox>
+                                selectionChange="onSelectEmail">
+                                <CustomListItem tooltip="{api>subject}" selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${/activeEmailId} }">
+                                    <core:Fragment fragmentName="aisaas.ui.view.EmailListItem" type="XML"/>
                                 </CustomListItem>
                             </List>
                         </ScrollContainer>
                     </l:flexContent>
                 </l:FixFlex>
                 
-                <mvc:XMLView id="emailColumn" viewName="aisaas.ui.view.EmailColumn" visible="{= ${emailModel>/ID} !== null }"/>
+                <mvc:XMLView id="emailColumn" viewName="aisaas.ui.view.EmailColumn"/>
             </l:Splitter>
         </content>
     </Page>
