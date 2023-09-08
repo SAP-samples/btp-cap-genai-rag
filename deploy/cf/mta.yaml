@@ -47,8 +47,16 @@ modules:
     type: nodejs
     path: ../../code/gen/srv
     build-parameters:
-      builder: npm
+      builder: custom
       ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
+      commands: 
+       - npm install --omit=dev
+       - npx shx mkdir -p temp/llm-commons
+       - npx shx mv node_modules/@sap/llm-commons temp/
+       - npx shx rm -r node_modules
+       - npx shx mkdir -p node_modules/@sap/llm-commons
+       - npx shx mv temp/llm-commons node_modules/@sap/
+       - npx shx rm -r temp
     parameters:
       app-name: aisaas-srv-${space}
       memory: 256MB
@@ -216,8 +224,16 @@ modules:
       disk-quota: 1024MB
       command: node ./node_modules/@sap/cds/bin/cds-serve
     build-parameters:
-      builder: npm
+      builder: custom
       ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
+      commands: 
+       - npm install --omit=dev
+       - npx shx mkdir -p temp/llm-commons
+       - npx shx mv node_modules/@sap/llm-commons temp/
+       - npx shx rm -r node_modules
+       - npx shx mkdir -p node_modules/@sap/llm-commons
+       - npx shx mv temp/llm-commons node_modules/@sap/
+       - npx shx rm -r temp
     requires:
       - name: aisaas-service-manager
       - name: aisaas-api-uaa
