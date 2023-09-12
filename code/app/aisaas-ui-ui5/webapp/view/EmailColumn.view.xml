@@ -9,7 +9,7 @@
 	core:require="{ formatter:
 	'aisaas/ui/model/formatter' }">
 
-    <ux:ObjectPageLayout id="emailPage" showAnchorBarPopover="false" upperCaseAnchorBar="false" visible="{= ${/activeEmailId} !== null }">
+    <ux:ObjectPageLayout id="emailPage" showAnchorBarPopover="false" upperCaseAnchorBar="false" headerContentPinned="true" visible="{= ${/activeEmailId} !== null }">
 		<ux:headerTitle>
 			<ux:ObjectPageDynamicHeaderTitle>
 				<ux:heading>
@@ -66,11 +66,23 @@
 				</ux:subSections>
 			</ux:ObjectPageSection>
 
-			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.labels.similarEmails}">
+			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.labels.similarEmails} ({/similarEmails/length})">
 				<ux:subSections>
-					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.similarEmails}">
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.similarEmails} ({/similarEmails/length})">
 						<VBox class="sapUiTinyMargin">
-							<Text text="to be implemented"/>
+							<List
+                                id="similarEmailsList"
+                                mode="SingleSelectMaster"
+                                noDataText="{i18n>email.list.label.noData}"
+                                items="{
+									path: '/similarEmails',
+									sorter: {path: 'similarity', descending: 'false'}
+								}"
+                                selectionChange="onSelectSimilarEmail">
+                                <CustomListItem selected="false">
+                                    <core:Fragment fragmentName="aisaas.ui.view.EmailWithSimilarityListItem" type="XML"/>
+                                </CustomListItem>
+                            </List>
 						</VBox>
 					</ux:ObjectPageSubSection>
 				</ux:subSections>

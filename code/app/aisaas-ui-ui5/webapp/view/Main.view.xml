@@ -85,6 +85,9 @@
                                 <SearchField value="{/searchKeyword}" placeholder="{i18n>inbox.searchField.placeholder}" search="onSearch"/>
                                 <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
                                     <Title text="{i18n>inbox.list.label.title} ({/emailsCount})" titleStyle="H4"/>
+                                    <VBox justifyContent="Center">
+                                        <Link text="{i18n>inbox.sort.label.sortBy} {/sortText}" press="onSortEmailsList"/>
+                                    </VBox>
                                 </HBox>
                             </VBox>
                         </Toolbar>

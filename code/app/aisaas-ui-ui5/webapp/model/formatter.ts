@@ -11,7 +11,7 @@ export default {
 	},
 
 	formatDate: (dateString: string) => {
-		const dateFormatter = DateFormat.getDateTimeInstance({pattern: "dd.MM.yyyy"});
+		const dateFormatter = DateFormat.getDateTimeInstance({ pattern: "dd.MM.yyyy" });
 		return (dateString) ? dateFormatter.format(new Date(dateString)) : null;
 	},
 
@@ -53,5 +53,9 @@ export default {
 			if (value >= 0) return "Warning"
 			else return "Error"
 		} else return null
+	},
+
+	getFormattedSimilarity: (value: number) => {
+		return Math.trunc(value * 100)
 	}
 };

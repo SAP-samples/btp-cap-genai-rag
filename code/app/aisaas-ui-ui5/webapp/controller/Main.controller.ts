@@ -1,5 +1,6 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import XMLView from "sap/ui/core/mvc/XMLView";
 import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 import ObjectPageSection from "sap/uxap/ObjectPageSection";
@@ -12,12 +13,10 @@ import ListItemBase from "sap/m/ListItemBase";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
+import Sorter from "sap/ui/model/Sorter";
 import { ObjectBindingInfo } from "sap/ui/base/ManagedObject";
 
-interface FilterItem {
-	id: string,
-	label: string
-}
+import { FilterItem, EmailObject } from "../model/entities";
 
 export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
@@ -30,6 +29,7 @@ export default class Main extends BaseController {
 	protected readonly EMAIL_SENDER_PATH: string = "sender";
 	protected readonly EMAIL_SUBJECT_PATH: string = "subject";
 	protected readonly EMAIL_BODY_PATH: string = "body";
+	protected readonly EMAIL_MODIFIED_AT_PATH: string = "modifiedAt";
 	protected readonly UPDATE_GROUP: string = "UPDATE_GROUP_" + Math.random().toString(36).substring(2);
 
 	public onInit(): void {
@@ -41,14 +41,18 @@ export default class Main extends BaseController {
 			activeSentiments: [],
 			searchKeyword: null,
 			emailsCount: 0,
+			sortDescending: false,
+			sortText: null,
 			activeEmailId: null,
-			translationActivated: false
+			translationActivated: false,
+			similarEmails: []
 		});
 		this.setModel(model);
 	}
 
 	protected onRouteMatched(): void {
-		this.setTopEmail();
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		localModel.setProperty("/sortText", (this.getResourceBundle() as ResourceBundle).getText("inbox.sort.label.newest"));
 	}
 
 	public onUpdateEmailsList(event: Event): void {
@@ -64,6 +68,36 @@ export default class Main extends BaseController {
 			}
 			else this.scrollToActiveEmail();
 		} else this.setActiveEmail();
+	}
+
+	public setActiveEmail(id: string = null): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const emailView: XMLView = this.byId("emailColumn") as XMLView;
+		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
+		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
+		const similarEmailsList: List = emailView.byId("similarEmailsList") as List;
+
+		localModel.setProperty("/activeEmailId", id);
+		emailPage.setSelectedSection(incomingMessageSection);
+		similarEmailsList.removeSelections(true);
+
+		if (id) {
+			const bindingInfo: ObjectBindingInfo = {
+				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
+				parameters: { $$updateGroupId: this.UPDATE_GROUP },
+				events: {
+					dataReceived: () => this.onUpdateBindingInfo()
+				}
+			};
+			this.byId("emailColumn").bindElement(bindingInfo);
+		}
+	}
+
+	private onUpdateBindingInfo(): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+
+		localModel.setProperty("/similarEmails", emailObject.closestMails);
 	}
 
 	private setTopEmail(): void {
@@ -188,30 +222,34 @@ export default class Main extends BaseController {
 		else return new Filter(filterPath, FilterOperator.LT, 0)
 	}
 
+	public clearAllFilters(): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+
+		localModel.setProperty("/activeCategories", []);
+		localModel.setProperty("/activeUrgencies", []);
+		localModel.setProperty("/activeSentiments", []);
+		localModel.setProperty("/searchKeyword", null);
+		this.applyFilter();
+	}
+
+	public onSortEmailsList(): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const resourceBundle: ResourceBundle = this.getResourceBundle() as ResourceBundle;
+
+		localModel.setProperty("/sortDescending", !localModel.getProperty("/sortDescending"));
+		localModel.setProperty("/sortText", localModel.getProperty("/sortText") === resourceBundle.getText("inbox.sort.label.newest") ?
+			resourceBundle.getText("inbox.sort.label.oldest") :
+			resourceBundle.getText("inbox.sort.label.newest"));
+
+		const sorter = new Sorter(this.EMAIL_MODIFIED_AT_PATH, localModel.getProperty("/sortDescending"));
+		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
+		binding.sort(sorter);
+	}
+
 	public onSelectEmail(event: Event): void {
 		const selectedEmail: Context = (event.getSource() as List).getSelectedItem().getBindingContext("api") as Context;
 		this.setActiveEmail(selectedEmail.getProperty("ID"));
 
 		console.log(selectedEmail.getObject());
-	}
-
-	private setActiveEmail(id: string = null): void {
-		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailView: XMLView = this.byId("emailColumn") as XMLView;
-		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
-		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
-		
-		localModel.setProperty("/activeEmailId", id);
-		emailPage.setSelectedSection(incomingMessageSection);
-
-		if (id) {
-			const bindingInfo: ObjectBindingInfo = {
-				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
-				parameters: {
-					$$updateGroupId: this.UPDATE_GROUP
-				}
-			};
-			this.getView().byId("emailColumn").bindElement(bindingInfo);
-		}
 	}
 }
