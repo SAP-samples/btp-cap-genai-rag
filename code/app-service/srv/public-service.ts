@@ -66,7 +66,9 @@ interface CustomField {
     isNumber: boolean;
     description: string;
 }
-export class PublicService extends ApplicationService {
+
+type ZodOptionalStringOrNumber = z.ZodString | z.ZodNumber | z.ZodOptional<z.ZodString | z.ZodNumber>;
+export default class PublicService extends ApplicationService {
     async init() {
         await super.init();
         this.on("getMails", this.getMails);
@@ -142,22 +144,24 @@ export class PublicService extends ApplicationService {
     private upsertInsights = async (mails: Array<IBaseMail>) => {
         // dynamically add custom fields
         // todo: custom fields from database
-        let customFields = [
+        let customFields: Array<CustomField> = [
             {
                 key: "location",
                 isNumber: false,
                 description: "Extract the geo location for the trip the email is about"
             }
         ];
+
         const zodCustomFields = customFields.reduce(
-            (fields: { [key: string]: any }, field: CustomField) => {
+            (fields: { [key: string]: ZodOptionalStringOrNumber }, field: CustomField) => {
                 return {
                     ...fields,
                     [field.key]: z.optional(field.isNumber ? z.number() : z.string()).describe(field.description)
                 };
             },
-            {}
+            {} as { [key: string]: ZodOptionalStringOrNumber }
         );
+
         let mailInsightsSchemaWithCustomFields = MAIL_INSIGHTS_SCHEMA.merge(
             z.object({
                 customFields: z.object(zodCustomFields)

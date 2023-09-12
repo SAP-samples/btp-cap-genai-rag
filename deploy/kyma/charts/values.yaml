@@ -83,6 +83,10 @@ api:
       serviceInstanceName: xsuaa-api
     sm-container:
       serviceInstanceName: sm-container
+    destination:
+      serviceInstanceName: destination
+    postgresql-db:
+      serviceInstanceName: postgresql-db
   image:
     # Provide your API Service Docker Image repository
     repository: 
