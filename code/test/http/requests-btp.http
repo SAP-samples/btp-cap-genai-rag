@@ -17,43 +17,11 @@ client_id={{btpXsuaaClient}}
 &grant_type=client_credentials
 
 
-### EMBED
-@token = {{getXsuaaToken.response.body.$.access_token}}
-
-# @name embed
-POST {{btpAppHostname}}/odata/v4/mail-insights/embed
-content-type: application/json
-Authorization: Bearer {{token}}
-
-{
-    "texts": [
-    "Couples waltz gracefully across the dance floor, bathed in soft, romantic lighting.",
-    "A blacksmith hammers a piece of glowing metal, sparks flying in all directions.",
-    "The first snow of winter blankets the landscape in a serene, white quietness.",
-    "The aroma of sizzling bacon and fresh coffee fills the kitchen on a lazy morning.",
-    "A scientist makes a groundbreaking discovery, unlocking the mysteries of the universe."
-  ]
-}
-
-### SIMILARITY SEARCH
-@token = {{getXsuaaToken.response.body.$.access_token}}
-
-# @name simSearch
-POST {{btpAppHostname}}/odata/v4/mail-insights/simSearch
-content-type: application/json
-Authorization: Bearer {{token}}
-
-{
-    "text": "At the wedding, the dance floor came alive as the bride and groom swayed in each other's arms.",
-    "k": 2
-}
-
-
 ### ADD MAILS
 @token = {{getXsuaaToken.response.body.$.access_token}}
 
 # @name addMails
-POST {{btpAppHostname}}/odata/v4/mail-insights/addMails
+POST {{btpAppHostname}}/rest/api/addMails
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -62,84 +30,75 @@ Authorization: Bearer {{token}}
   {
     "subject": "Disney World trip",
     "body": "Hello. I'm trying to book a flight and hotel package on your website for my family's trip to Disney World, but I'm having trouble finding a hotel that offers a shuttle to the parks. Can you help me?\nBest,\nLisa Brown",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Assistance Needed for a Multi-City European Tour",
     "body": "Hello Expedia Team, I'm planning a multi-city tour of Europe for next summer and I'm having trouble figuring out the best way to book the flights and hotels. Can you assist me in creating an itinerary that includes Rome, Paris, Berlin, and Barcelona?\nThanks in Advance,\nTom Davis",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Help Needed in Booking Accessible Accommodation and Transportation",
     "body": "Hello, My mother uses a wheelchair and we want to book a holiday together. Could you help us find accommodations, transportation, and activities that are accessible and cater to her needs?\nSincerely,\nMary Taylor",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Assistance Requested for Group Booking",
     "body": "Hi, I'm trying to arrange a trip for a group of 20 people, but I'm finding it challenging to get flights and hotels that can accommodate us all at the same time. Can you assist?\nThank you,\nCharlie Miller",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },{
     "subject": "Cancellation procedure",
     "body": "I've booked a flight to Paris next month, but due to unforeseen circumstances, I need to cancel it. What's your cancellation policy, and can I get a refund?\nThank You,\nRobert Jackson",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Request to Cancel Flight Booking to Madrid",
     "body": "Dear customer support team, due to a family emergency, I need to cancel my upcoming flight to Madrid. The booking reference is #12345. Could you please assist me with this process?\nBest Wishes,\nEmily Wilson",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Change of Hotel Reservation Dates for Boston Trip",
     "body": "Hello, I have a hotel reservation in Boston next week (Booking reference #54321), but I need to change the dates to the following week. Can you help me with this change?\nBest regards,\nPatricia Thomas",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Need to Reschedule My Package Tour to Bali",
     "body": "Hi there, I've booked a package tour to Bali next month, but due to work commitments, I need to reschedule it for the month after. My booking reference is #67890. Could you please assist?\nRegards,\nJennifer White",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Request to Alter Multi-Destination Itinerary",
     "body": "Dear Support, Due to an unexpected work commitment, I need to alter my multi-destination itinerary. I need to cut my time in Tokyo short and extend my stay in Beijing. My booking reference is #34567. Please assist.\nMany Thanks,\nLinda Martin",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Partial Cancellation of Group Booking Needed",
     "body": "Hello, I booked a group trip, but four of our members can no longer attend. How do I cancel for these four without affecting the rest of the group's booking?\nWarm Regards,\nCarlos Rodriguez",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Change of Accommodation Due to Medical Requirements",
     "body": "Hi, I recently had a surgery and now require a room with specific facilities to accommodate my recovery. Can you help me change my existing hotel booking to a room that meets these requirements?\nWarm Regards\nSamuel Njoroge",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },{
     "subject": "URGENT! Reservation lost!",
     "body": "I just arrived at my hotel and they don't have my reservation. I booked and paid through your website. Can you sort this out?\nThanks,\nAnne-Sophie Lefevre",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Hotel Not Recognizing My Booking in Sydney",
     "body": "Hi, I've just arrived at my hotel in Sydney, and they're saying they have no record of my booking. I booked and paid through your website. My booking reference is #23456. Please help!\nRegards,\nLiu Wei",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Car Rental Not Available Upon Arrival in Florida",
     "body": "Hi, I've just landed in Florida and the car rental company doesn't have my reservation. I have a confirmation from your website, but they say they don't have a car for me. Can you assist?\nRegards,\nAna Santos",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
   },
   {
     "subject": "Issue with Airport Transfer in Dubai",
     "body": "Dear Expedia Team, I landed in Dubai this morning and the airport transfer I booked through your site didn't show up. I've had to take a taxi to my hotel. Can you please look into this?\nThank you,\nSara Johansson",
-    "sender": "kay@x.com"
+    "sender": "sample.sender@example.org"
     }
   ]
 }
-
-### GET MAIL
-@token = {{getXsuaaToken.response.body.$.access_token}}
-@id = {{addMails.response.body.$.value[0].id}}
-
-# @name getMail
-GET {{btpAppHostname}}/odata/v4/mail-insights/getMail(id={{id}})
-content-type: application/json
-Authorization: Bearer {{token}}
