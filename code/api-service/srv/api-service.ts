@@ -151,7 +151,7 @@ export default class ApiService extends ApplicationService {
             }
         ];
         const zodCustomFields = customFields.reduce(
-            (fields: { [key: string]: z.ZodNumber | z.ZodString }, field: CustomField) => {
+            (fields: { [key: string]: z.ZodNumber | z.ZodString | any }, field: CustomField) => {
                 return {
                     ...fields,
                     [field.key]: z.optional(field.isNumber ? z.number() : z.string()).describe(field.description)

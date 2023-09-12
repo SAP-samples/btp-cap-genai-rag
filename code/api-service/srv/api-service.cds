@@ -3,7 +3,7 @@ using {aisaas.db} from '../../db/data-model';
 @requires: 'authenticated-user'
 service ApiService @(
      path    : 'api',
-     protocol: 'odata-v4',
+     protocol: 'rest',
      impl    : 'srv/api-service'
 ) {
      entity Mails as projection on db.Mails;
