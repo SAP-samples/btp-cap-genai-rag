@@ -19,6 +19,7 @@
         "@sap-cloud-sdk/generator": "^3.4.0",
         "@sap-cloud-sdk/http-client": "^3.2.0",
         "@sap-cloud-sdk/openapi": "^3.2.0",
+        "@sap/llm-commons": "^0.8.1",
         "@sap/audit-logging": "^5",
         "@sap/cds": "^7.1.1",
         "@sap/cds-hana": "^2.0.0",
