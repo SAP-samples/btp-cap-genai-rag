@@ -56,9 +56,9 @@
 		</ux:headerContent>
 
 		<ux:sections>
-			<ux:ObjectPageSection id="incomingMessageSection" titleUppercase="false" title="{i18n>email.tabs.labels.incomingMessage}">
+			<ux:ObjectPageSection id="incomingMessageSection" titleUppercase="false" title="{i18n>email.tabs.label.incomingMessage}">
 				<ux:subSections>
-					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.incomingMessage}">
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.incomingMessage}">
 						<VBox class="sapUiTinyMargin">
 							<Text text="{= !${/translationActivated} ? ${api>mail/body} : ${api>mail/translationBody} }"/>
 						</VBox>
@@ -66,9 +66,37 @@
 				</ux:subSections>
 			</ux:ObjectPageSection>
 
-			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.labels.similarEmails} ({/similarEmails/length})">
+			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.label.responsePreparation}">
 				<ux:subSections>
-					<ux:ObjectPageSubSection title="{i18n>email.tabs.labels.similarEmails} ({/similarEmails/length})">
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.responsePreparation}">
+						<VBox class="sapUiTinyMargin">
+							<Title text="{i18n>email.title.additionalInfo}:"/>
+							<TextArea growing="true" width="100%" valueLiveUpdate="true" placeholder="{i18n>email.placeholder.additionalInfo}" value="{/additionalInfo}"
+								liveChange="onChangeAdditionalInfo"/>
+							<HBox justifyContent="End">
+								<Button type="Emphasized" text="{i18n>email.label.generateButton}" enabled="{= ${/additionalInfo} !== null }"/>
+							</HBox>
+						</VBox>
+					</ux:ObjectPageSubSection>
+				</ux:subSections>
+			</ux:ObjectPageSection>
+
+			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.label.suggestedResponse}">
+				<ux:subSections>
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.suggestedResponse}">
+						<VBox class="sapUiTinyMargin">
+							<TextArea growing="true" width="100%" valueLiveUpdate="true" value="{/potentialResponse}" liveChange="onChangeResponse"/>
+							<HBox justifyContent="End">
+								<Button type="Emphasized" text="{i18n>email.label.submitButton}" enabled="{= ${/potentialResponse} !== null }"/>
+							</HBox>
+						</VBox>
+					</ux:ObjectPageSubSection>
+				</ux:subSections>
+			</ux:ObjectPageSection>
+
+			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.label.similarEmails} ({/similarEmails/length})">
+				<ux:subSections>
+					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.similarEmails} ({/similarEmails/length})">
 						<VBox class="sapUiTinyMargin">
 							<List
                                 id="similarEmailsList"

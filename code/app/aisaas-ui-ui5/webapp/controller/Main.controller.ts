@@ -9,6 +9,7 @@ import Context from "sap/ui/model/odata/v4/Context";
 import List from "sap/m/List";
 import Link from "sap/m/Link";
 import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
+import ODataContextBinding from "sap/ui/model/odata/v4/ODataContextBinding";
 import ListItemBase from "sap/m/ListItemBase";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
@@ -45,6 +46,8 @@ export default class Main extends BaseController {
 			sortText: null,
 			activeEmailId: null,
 			translationActivated: false,
+			additionalInfo: null,
+			potentialResponse: null,
 			similarEmails: []
 		});
 		this.setModel(model);
@@ -86,18 +89,21 @@ export default class Main extends BaseController {
 				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
 				parameters: { $$updateGroupId: this.UPDATE_GROUP },
 				events: {
-					dataReceived: () => this.onUpdateBindingInfo()
+					dataReceived: (event: Event) => this.onUpdateBindingInfo(event)
 				}
 			};
 			this.byId("emailColumn").bindElement(bindingInfo);
 		}
 	}
 
-	private onUpdateBindingInfo(): void {
+	private onUpdateBindingInfo(event: Event): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
 
+		localModel.setProperty("/potentialResponse", emailObject.mail.potentialResponse);
 		localModel.setProperty("/similarEmails", emailObject.closestMails);
+
+		console.log(emailObject.mail);
 	}
 
 	private setTopEmail(): void {
@@ -249,7 +255,5 @@ export default class Main extends BaseController {
 	public onSelectEmail(event: Event): void {
 		const selectedEmail: Context = (event.getSource() as List).getSelectedItem().getBindingContext("api") as Context;
 		this.setActiveEmail(selectedEmail.getProperty("ID"));
-
-		console.log(selectedEmail.getObject());
 	}
 }

@@ -9,15 +9,14 @@
 	core:require="{ formatter:
 	'aisaas/ui/model/formatter' }">
 
-	<Page title="{i18n>appTitle}" class="sapUiResponsivePadding--header">
-        <headerContent></headerContent>
+	<Page showHeader="false">
         <content>
             <l:Splitter>
                 <l:FixFlex>
                     <l:layoutData><l:SplitterLayoutData size="16%"/></l:layoutData>
                     <l:flexContent>
                         <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
-                            <VBox class="sapUiSmallMargin">
+                            <VBox class="sapUiSmallMarginTopBottom sapUiLargeMarginBegin">
                                 <Title text="{i18n>filters.title.filterBy}:"/>
                                 <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>

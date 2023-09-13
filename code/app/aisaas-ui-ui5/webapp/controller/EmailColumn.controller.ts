@@ -3,6 +3,7 @@ import JSONModel from "sap/ui/model/json/JSONModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import Event from "sap/ui/base/Event";
 import Button from "sap/m/Button";
+import TextArea from "sap/m/TextArea";
 import List from "sap/m/List";
 import Context from "sap/ui/model/odata/v4/Context";
 import XMLView from "sap/ui/core/mvc/XMLView";
@@ -18,6 +19,22 @@ export default class EmailColumn extends BaseController {
 		button.setText(localModel.getProperty("/translationActivated") ?
 			resourceBundle.getText("email.header.translationButton.original") :
 			resourceBundle.getText("email.header.translationButton.translate"));
+	}
+
+	public onChangeAdditionalInfo(event: Event): void {
+		const value: string = (event.getSource() as TextArea).getValue();
+		if (value.replace(/[^A-Z0-9]+/ig, '') === '') {
+			const localModel: JSONModel = this.getModel() as JSONModel;
+			localModel.setProperty("/additionalInfo", null);
+		}
+	}
+
+	public onChangeResponse(event: Event): void {
+		const value: string = (event.getSource() as TextArea).getValue();
+		if (value.replace(/[^A-Z0-9]+/ig, '') === '') {
+			const localModel: JSONModel = this.getModel() as JSONModel;
+			localModel.setProperty("/potentialResponse", null);
+		}
 	}
 
 	public onSelectSimilarEmail(event: Event): void {
