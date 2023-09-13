@@ -21,7 +21,7 @@ client_id={{btpXsuaaClient}}
 @token = {{getXsuaaToken.response.body.$.access_token}}
 
 # @name addMails
-POST http://localhost:4004/rest/api/addMails
+POST http://localhost:4005/rest/api/addMails
 content-type: application/json
 Authorization: Bearer {{token}}
 
