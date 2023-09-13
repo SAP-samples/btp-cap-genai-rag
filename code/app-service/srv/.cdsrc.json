@@ -21,6 +21,12 @@
                 "destination": "PROVIDER_AI_CORE_DESTINATION"
             }
         },
+        "SUBSCRIBER_OFFICE365_DESTINATION": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "SUBSCRIBER_OFFICE365_DESTINATION"
+            }
+        },
         "aicore": {
             "createResourceGroups": false
         },

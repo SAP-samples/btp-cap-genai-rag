@@ -18,9 +18,11 @@ service PublicService @(
         };
     };
 
-    function getMails()                           returns array of Mails;
-    action   recalculateInsights()                returns Boolean;
-    function deleteMail(id : UUID)                returns Boolean;
+    function getMails()                         returns array of Mails;
+    function deleteMail(id : UUID)              returns Boolean;
+
+    action syncWithOffice365()                  returns Boolean;
+    action recalculateInsights()                returns Boolean;
 
     type IBaseMail {
         sender  : String;

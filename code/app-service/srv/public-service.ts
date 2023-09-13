@@ -1,6 +1,6 @@
 import { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
 import {
@@ -77,6 +77,7 @@ export default class PublicService extends ApplicationService {
         this.on("recalculateInsights", this.recalculateInsights);
         this.on("deleteMail", this.deleteMail);
         this.on("userInfo", this.userInfo);
+        this.on("syncWithOffice365", this.syncWithOffice365);
     }
 
     private getMails = async (_req: Request) => {
@@ -131,6 +132,46 @@ export default class PublicService extends ApplicationService {
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return {};
+        }
+    };
+
+    private syncWithOffice365 = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
+
+            const mails = (
+                await mailInbox.send({
+                    method: "GET",
+                    path: `messages?$select=id,sender,subject,body`
+                })
+            ).value?.map((mail: any) => {
+                return {
+                    ID: uuidv5(mail.id, uuidv5.URL),
+                    sender: mail.sender?.emailAddress?.address || "",
+                    subject: mail.subject || "",
+                    body: mail.body?.content || ""
+                };
+            });
+
+            const mailBatch = await this.upsertInsights(mails);
+
+            // embed mail bodies with IDs
+            console.log("EMBED MAILS WITH IDs...");
+            const typeormVectorStore = await getVectorStore(tenant);
+
+            const queryString = `DELETE from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ?| $1`;
+            await typeormVectorStore.appDataSource.query(queryString, [mails.map( (mail: any) => mail.ID)]);
+
+            await typeormVectorStore.addDocuments(
+                mailBatch.map((mail: IBaseMail) => ({
+                    pageContent: mail.body,
+                    metadata: { id: mail.ID }
+                }))
+            );
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
         }
     };
 
