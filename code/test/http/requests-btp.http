@@ -1,7 +1,7 @@
 @xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
 @btpXsuaaClient = sb-aisaas-api-dev-sap-demo!b12345
 @btpXsuaaSecret = abcd1234abcd1234abcd1234
-@btpAppHostname = https://sap-demo-dev-aisaas-api-srv.cfapps.eu10.hana.ondemand.com
+@btpAppHostname = https://sap-demo-dev-aisaas-api-srv.cfapps.eu10.hana.ondemand.com 
 
 
 ### GET XSUAA TOKEN
@@ -22,6 +22,7 @@ client_id={{btpXsuaaClient}}
 
 # @name addMails
 POST {{btpAppHostname}}/rest/api/addMails
+# POST {{btpAppHostname}}/odata/v4/mail-insights/addMails
 content-type: application/json
 Authorization: Bearer {{token}}
 
