@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "es2022",
+		"moduleResolution": "node",
+		"skipLibCheck": true,
+		"allowJs": true,
+		"strict": true,
+		"strictNullChecks": false,
+		"strictPropertyInitialization": false,
+		"rootDir": "./webapp",
+		"outDir": "./dist",
+		"types": ["@sapui5/types", "@types/qunit"],
+		"paths": {
+			"ui/*": ["./webapp/*"],
+			"unit/*": ["./webapp/test/unit/*"],
+			"integration/*": ["./webapp/test/integration/*"]
+		}
+	},
+	"include": ["./webapp/**/*"]
+}

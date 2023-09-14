@@ -7,6 +7,11 @@ parameters:
   enable-parallel-deployments: true
   autoscalerMinInstance: 1
   autoscalerMaxInstance: 2
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm run build
 
 modules:
   # --------------------- APPROUTER MODULE ---------------------

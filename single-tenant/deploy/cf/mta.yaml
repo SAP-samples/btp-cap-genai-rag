@@ -10,10 +10,7 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-        - npm install --prefix ../../code/api
-        - npm run build:cf --prefix ../../code/api
-        - npm install --prefix ../../code/ui
-        - npm run build --prefix ../../code/ui
+        - npm run build
 
 modules:
   # --------------------- APPROUTER MODULE ---------------------
@@ -47,7 +44,7 @@ modules:
   - name: ai-srv
   # ------------------------------------------------------------
     type: nodejs
-    path: ../../code/api/gen/srv
+    path: ../../code/gen/srv
     build-parameters:
       builder: custom
       ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
@@ -116,20 +113,31 @@ modules:
   - name: ai-ui
   # ------------------------------------------------------------
     type: html5
-    path: ../../code/ui
+    path: ../../code/app/ai-ui-ui5
     build-parameters:
       build-result: dist
       builder: custom
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
       commands:
         - npm run build
+        - npm run copy
       supported-platforms: []
+
+  # ------------------- HTML5 APP DEPLOYER ---------------------
+  - name: ai-app-deployer
+  # ------------------------------------------------------------
+    type: com.sap.html5.application-content
+    path: ../../code/app/html5-deployer
+    build-parameters:
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    requires:
+      - name: ai-html5-repo-host
 
   # --------------------- DB MODULE --------------------------
   - name: ai-db-deployer
   # ------------------------------------------------------------
     type: hdb
-    path: ../../code/api/gen/db-com
+    path: ../../code/gen/db
     build-parameters:
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
     parameters:
