@@ -172,6 +172,7 @@ export default class PublicService extends ApplicationService {
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
+            req.error(`Error: Shared Inbox Sync Error: ${error?.message}`)
         }
     };
 
