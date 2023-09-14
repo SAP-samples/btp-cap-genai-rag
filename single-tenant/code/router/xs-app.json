@@ -1,0 +1,17 @@
+{
+    "welcomeFile": "/index.html",
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "^/api(.*)$",
+            "target": "$1",
+            "destination": "ai-srv-api",
+            "csrfProtection": false
+        },
+        {
+            "source": "^/(.*)$",
+            "target": "$1",
+            "localDir": "./dist"
+        }
+    ]
+}
