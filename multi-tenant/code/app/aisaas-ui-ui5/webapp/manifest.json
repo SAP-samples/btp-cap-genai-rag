@@ -1,0 +1,112 @@
+{
+	"_version": "1.12.0",
+
+	"sap.app": {
+		"id": "aisaas.ui",
+		"type": "application",
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"dataSources": {
+			"appService": {
+				"uri": "api/odata/v4/mail-insights/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "4.0"
+				}
+			},
+			"profileService": {
+				"uri": "user-api/currentUser",
+				"type": "JSON"
+			}
+		}
+	},
+
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "aisaas.ui.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		},
+
+		"dependencies": {
+			"minUI5Version": "1.117.1",
+			"libs": {
+				"sap.m": {},
+				"sap.ui.core": {},
+				"sap.f": {},
+				"sap.ui.layout": {}
+			}
+		},
+
+		"handleValidation": true,
+
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "aisaas.ui.i18n.i18n",
+					"bundleUrl": "i18n/i18n.properties",
+                    "supportedLocales": ["en", ""],
+                    "fallbackLocale": "en"
+				}
+			},
+			"api": {
+				"dataSource": "appService",
+				"preload": true,
+				"settings": {
+					"operationMode": "Server",
+					"synchronizationMode": "None",
+					"autoExpandSelect": true,
+					"earlyRequests": true
+				}
+			},
+			"filters": {
+				"type": "sap.ui.model.json.JSONModel",
+				"uri": "model/filters.json"
+			}
+		},
+
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"viewPath": "aisaas.ui.view",
+				"controlId": "app",
+				"controlAggregation": "pages",
+				"async": true
+			},
+			"routes": [
+				{
+					"pattern": "",
+					"name": "main",
+					"target": "main"
+				}
+			],
+			"targets": {
+				"main": {
+					"viewId": "main",
+					"viewName": "Main"
+				}
+			}
+		}
+	}
+}
