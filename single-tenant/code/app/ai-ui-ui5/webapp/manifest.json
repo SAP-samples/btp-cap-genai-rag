@@ -2,7 +2,7 @@
 	"_version": "1.12.0",
 
 	"sap.app": {
-		"id": "aisaas.ui",
+		"id": "ai.ui",
 		"type": "application",
 		"title": "{{appTitle}}",
 		"description": "{{appDescription}}",

@@ -7,8 +7,7 @@
     {
       "source": "^/api/odata/v4/mail-insights/(.*)$",
       "target": "/odata/v4/mail-insights/$1",
-      "destination": "aisaas-srv-api",
-      "preferLocal": true,
+      "destination": "ai-srv-api",
       "authenticationType": "xsuaa"
     },
     {

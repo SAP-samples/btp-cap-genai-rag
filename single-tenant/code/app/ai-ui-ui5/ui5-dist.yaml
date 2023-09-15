@@ -1,6 +1,6 @@
 specVersion: "3.0"
 metadata:
-  name: aisaasui
+  name: aiui
 type: application
 resources:
   configuration:

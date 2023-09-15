@@ -55,7 +55,7 @@ modules:
       builder: custom
       ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
       commands: 
-       - npm install --omit=dev
+       - npm ci
        - npx shx mkdir -p temp/llm-commons
        - npx shx mv node_modules/@sap/llm-commons temp/
        - npx shx rm -r node_modules
@@ -232,7 +232,7 @@ modules:
       builder: custom
       ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
       commands: 
-       - npm install --omit=dev
+       - npm ci
        - npx shx mkdir -p temp/llm-commons
        - npx shx mv node_modules/@sap/llm-commons temp/
        - npx shx rm -r node_modules

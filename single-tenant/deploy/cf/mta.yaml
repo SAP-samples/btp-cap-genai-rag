@@ -37,7 +37,6 @@ modules:
         properties:
           app-url: ${default-url}
           application: ${app-name}
-          api: ${api-name}
           app-domain: ${app-domain}
 
   # --------------------- SERVER MODULE ------------------------
@@ -49,7 +48,7 @@ modules:
       builder: custom
       ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
       commands: 
-       - npm install --omit=dev
+       - npm ci
        - npx shx mkdir -p temp/llm-commons
        - npx shx mv node_modules/@sap/llm-commons temp/
        - npx shx rm -r node_modules
@@ -69,6 +68,7 @@ modules:
     requires:
       - name: ai-uaa
       - name: ai-logging
+      - name: ai-hdi-container
       - name: ai-aicore
       - name: ai-postgresql-db
       - name: ai-html5-repo-runtime
@@ -128,6 +128,8 @@ modules:
   # ------------------------------------------------------------
     type: com.sap.html5.application-content
     path: ../../code/app/html5-deployer
+    parameters:
+      app-name: ai-app-deployer-${space}
     build-parameters:
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
     requires:

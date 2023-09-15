@@ -26,6 +26,10 @@ ha:
   pdb:
     minAvailable: 1
 
+serviceAccount:
+  enabled: false 
+  automountToken: false 
+
 hpa:
   enabled: true
   minReplicaCount: 1 # To use High-Availability set minReplicaCount to at least 2

@@ -4,8 +4,7 @@
     "required": [
         "global",
         "srv",
-        "router",
-        "broker"
+        "router"
     ],
     "properties": {
         "global": {
