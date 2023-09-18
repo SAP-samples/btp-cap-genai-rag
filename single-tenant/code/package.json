@@ -1,0 +1,31 @@
+{
+    "name": "genai-mail-support",
+    "version": "1.0.0",
+    "description": "A simple CAP project connecting to LLM proxy service supporting email processing",
+    "repository": "<Add your repository here>",
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "---DEV---": "",
+        "watch": "npm run watch:api && npm run watch:ui",
+        "watch:api": "npm --prefix ./api run watch",
+        "watch:ui": "npm run watch:vite && npm run start:router",
+        "watch:vite": "npm --prefix ./ui run dev",
+        "start:router": "npm --prefix ./router run start:local"
+    },
+    "prettier": {
+        "arrowParens": "always",
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": false,
+        "trailingComma": "none",
+        "printWidth": 120
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.13",
+        "@types/express": "^4.17.17"
+    },
+    "dependencies": {
+        "pg": "^8.11.3"
+    }
+}

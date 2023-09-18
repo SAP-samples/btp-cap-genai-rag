@@ -1,0 +1,18 @@
+{
+    "welcomeFile": "/index.html",
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "^/api(.*)$",
+            "target": "$1",
+            "destination": "api",
+            "csrfProtection": false
+        },
+        {
+            "source": "^/(.*)$",
+            "target": "/$1",
+            "destination": "ui",
+            "csrfProtection": false
+        }
+    ]
+}

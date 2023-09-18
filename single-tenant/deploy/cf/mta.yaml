@@ -1,0 +1,292 @@
+_schema-version: "3.2"
+ID: ai
+version: 0.0.1
+
+parameters:
+  enable-parallel-deployments: true
+  autoscalerMinInstance: 1
+  autoscalerMaxInstance: 2
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm install --prefix ../../code/api
+        - npm run build:cf --prefix ../../code/api
+        - npm install --prefix ../../code/ui
+        - npm run build --prefix ../../code/ui
+
+modules:
+  # --------------------- APPROUTER MODULE ---------------------
+  - name: ai
+  # ------------------------------------------------------------
+    type: approuter.nodejs
+    path: ../../code/router
+    build-parameters:
+      builder: npm
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    parameters:
+      app-name: ai-${space}
+      disk-quota: 256MB
+      memory: 128MB
+      app-domain: ${app-name}.${default-domain}
+      keep-existing-routes: true
+    requires:
+      - name: ai-destination
+      - name: ai-uaa
+      - name: ai-srv-api
+      - name: ai-html5-repo-runtime
+    provides:
+      - name: ai-approuter
+        properties:
+          app-url: ${default-url}
+          application: ${app-name}
+          api: ${api-name}
+          app-domain: ${app-domain}
+
+  # --------------------- SERVER MODULE ------------------------
+  - name: ai-srv
+  # ------------------------------------------------------------
+    type: nodejs
+    path: ../../code/api/gen/srv
+    build-parameters:
+      builder: custom
+      ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
+      commands: 
+       - npm install --omit=dev
+       - npx shx mkdir -p temp/llm-commons
+       - npx shx mv node_modules/@sap/llm-commons temp/
+       - npx shx rm -r node_modules
+       - npx shx mkdir -p node_modules/@sap/llm-commons
+       - npx shx mv temp/llm-commons node_modules/@sap/
+       - npx shx rm -r temp
+    parameters:
+      app-name: ai-srv-${space}
+      memory: 256MB
+      disk-quota: 1024MB
+      command: node ./node_modules/@sap/cds/bin/cds-serve
+    properties:
+      appDomain: ~{ai-approuter/app-domain}
+      srvUrl: "https://${app-name}.${default-domain}"
+      approuterUrl: ~{ai-approuter/app-url}
+      appName: ~{ai-approuter/application}
+    requires:
+      - name: ai-uaa
+      - name: ai-logging
+      - name: ai-aicore
+      - name: ai-postgresql-db
+      - name: ai-html5-repo-runtime
+      - name: ai-destination
+      - name: ai-approuter
+      - name: ai-autoscaler
+        parameters:
+          config:
+            instance_min_count: 1
+            instance_max_count: 2
+            scaling_rules:
+              - {
+                  "metric_type": "memoryutil",
+                  "threshold": 80,
+                  "operator": ">=",
+                  "adjustment": "+1",
+                }
+              - {
+                  "metric_type": "memoryutil",
+                  "threshold": 60,
+                  "operator": "<",
+                  "adjustment": "-1",
+                }
+              - {
+                  "metric_type": "cpu",
+                  "threshold": 80,
+                  "operator": ">=",
+                  "adjustment": "+1",
+                }
+              - {
+                  "metric_type": "cpu",
+                  "threshold": 30,
+                  "operator": "<",
+                  "adjustment": "-1",
+                }
+    provides:
+      - name: ai-srv-api
+        properties:
+          srv-url: ${default-url}
+  
+  # --------------------- UI MODULE ----------------------------
+  - name: ai-ui
+  # ------------------------------------------------------------
+    type: html5
+    path: ../../code/ui
+    build-parameters:
+      build-result: dist
+      builder: custom
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+      commands:
+        - npm run build
+      supported-platforms: []
+
+  # --------------------- DB MODULE --------------------------
+  - name: ai-db-deployer
+  # ------------------------------------------------------------
+    type: hdb
+    path: ../../code/api/gen/db-com
+    build-parameters:
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    parameters:
+      app-name: ai-db-deployer-${space}
+      memory: 256MB
+      disk-quota: 1024MB
+    requires:
+      - name: ai-hdi-container
+
+resources:
+  # ----------------------- UAA SERVICE ------------------------
+  - name: ai-uaa
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    properties:
+      xsuaa-app: ${xsuaa-app}
+      XSAPPNAME: ${xsuaa-app}
+    parameters:
+      service: xsuaa
+      service-name: ${space}-ai-uaa
+      service-plan: application
+      xsuaa-app: ai-${space}-${org}
+      config:
+        xsappname: ${xsuaa-app}
+        tenant-mode: dedicated
+        role-collections:
+          - name: AI Member (${space})
+            description: Member Access
+            role-template-references:
+              - "$XSAPPNAME.Member"
+              - "$XSAPPNAME.Token_Exchange"
+          - name: AI Administrator (${space})
+            description: Administrator Access
+            role-template-references:
+              - "$XSAPPNAME.Admin"
+              - "$XSAPPNAME.Token_Exchange"
+        scopes:
+          - name: uaa.user
+            description: UAA
+          - name: "$XSAPPNAME.Member"
+            description: Member
+          - name: "$XSAPPNAME.Admin"
+            description: Administrator
+        attributes: []
+        role-templates:
+          - name: Token_Exchange
+            description: UAA Token Exchange
+            scope-references: ["uaa.user"]
+          - name: Member
+            description: Member
+            scope-references: ["$XSAPPNAME.Member"]
+          - name: Admin
+            description: Administrator
+            scope-references: ["$XSAPPNAME.Admin"]
+        oauth2-configuration:
+          token-validity: 900
+          redirect-uris:
+            - http*://*.cfapps.*.hana.ondemand.com/**
+            - http://*.localhost:5000/**
+            - http://localhost:5000/**
+          credential-types:
+            - binding-secret
+            - x509
+
+  # ---------------- APPLICATION LOGGING SERVICE ---------------
+  - name: ai-logging
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: application-logs
+      service-name: ${space}-ai-logging
+      service-plan: lite
+
+  # ----------------- DESTINATION SERVICE ----------------------
+  - name: ai-destination
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: ai-srv-api
+    parameters:
+      service-plan: lite
+      service-name: ${space}-ai-destination
+      service: destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: ai-srv-api
+                Description: AI Service API
+                URL: ~{ai-srv-api/srv-url}
+                Type: HTTP
+                ProxyType: Internet
+                Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                forwardAuthToken: true
+
+  # ----------------- AUTOSCALER  ------------------------------------
+  - name: ai-autoscaler
+  # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-name: ${space}-ai-autoscaler
+      service-plan: standard
+
+  # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------
+  - name: ai-html5-repo-host
+  # -----------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-host
+      service-name: ${space}-ai-html5-repo-host
+      service: html5-apps-repo
+      config:
+        sizeLimit: 2
+
+  # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
+  - name: ai-html5-repo-runtime
+  # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-runtime
+      service-name: ${space}-ai-html5-repo-runtime
+      service: html5-apps-repo
+
+  # ------------.----- AI DB HDI CONTAINER ---------------------
+  - name: ai-hdi-container
+  # ------------------------------------------------------------
+    type: com.sap.xs.hdi-container
+    parameters:
+      service-name: ${space}-ai-hdi-container
+    properties:
+      com-container-name: "${service-name}"
+
+
+  # ----------------- POSTGRESQL -------------------------------------
+  - name: ai-postgresql-db
+  # ------------------------------------------------------------------
+    active: true
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: postgresql-db
+      service-name: ${space}-ai-postgresql-db
+      service-plan: free
+      config:
+        engine_version: "13"
+
+
+  # ---------------- CORE AI SERVICE ---------------------------
+  - name: ai-aicore
+  # ------------------------------------------------------------
+    active: false
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: aicore
+      service-name: ${space}-ai-aicore
+      service-plan: standard

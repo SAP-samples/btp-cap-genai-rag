@@ -1,0 +1,34 @@
+# CAP
+_out
+*.db
+*.sqlite
+connection.properties
+default-*.json
+.cdsrc-private.json
+api/gen/
+node_modules/
+target/
+
+# Web IDE, App Studio
+.che/
+
+# MTA
+*_mta_build_tmp
+*.mtar
+*.mta
+mta_archives/
+
+# Other
+.DS_Store
+*.orig
+*.log
+
+*.iml
+*.flattened-pom.xml
+
+# IDEs
+# .vscode
+# .idea
+
+router/dist
+ui/dist

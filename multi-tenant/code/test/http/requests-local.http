@@ -1,29 +1,10 @@
-@xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
-@btpXsuaaClient = sb-aisaas-api-dev-sap-demo!b12345
-@btpXsuaaSecret = abcd1234abcd1234abcd1234
-@btpAppHostname = https://sap-demo-dev-aisaas-api-srv.cfapps.eu10.hana.ondemand.com
-
-
-### GET XSUAA TOKEN
-
-# @name getXsuaaToken
-POST {{xsuaaHostname}}/oauth/token
-Accept: application/json
-Content-Type: application/x-www-form-urlencoded
-Authorization: Basic {{btpXsuaaClient}}:{{btpXsuaaSecret}}
-
-client_id={{btpXsuaaClient}}
-&client_secret={{btpXsuaaSecret}}
-&grant_type=client_credentials
-
-
 ### ADD MAILS
-@token = {{getXsuaaToken.response.body.$.access_token}}
 
 # @name addMails
-POST {{btpAppHostname}}/rest/api/addMails
+POST http://localhost:4005/rest/api/addMails
+# POST http://localhost:4004/odata/v4/mail-insights/addMails
 content-type: application/json
-Authorization: Bearer {{token}}
+Authorization: Basic alice:
 
 {
     "mails":[
