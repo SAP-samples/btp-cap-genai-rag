@@ -1,24 +1,24 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import Event from "sap/ui/base/Event";
 import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import List from "sap/m/List";
 import Context from "sap/ui/model/odata/v4/Context";
-import XMLView from "sap/ui/core/mvc/XMLView";
+import View from "sap/ui/core/mvc/View";
 import MainController from "./Main.controller";
+
+import { EmailObject } from "../model/entities";
 
 export default class EmailColumn extends BaseController {
 	public onTranslate(event: Event): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const resourceBundle: ResourceBundle = this.getResourceBundle() as ResourceBundle;
 		const button: Button = event.getSource();
 
 		localModel.setProperty("/translationActivated", !localModel.getProperty("/translationActivated"));
 		button.setText(localModel.getProperty("/translationActivated") ?
-			resourceBundle.getText("email.header.translationButton.original") :
-			resourceBundle.getText("email.header.translationButton.translate"));
+			this.getText("email.header.translationButton.original") :
+			this.getText("email.header.translationButton.translate"));
 	}
 
 	public onChangeAdditionalInfo(event: Event): void {
@@ -37,12 +37,24 @@ export default class EmailColumn extends BaseController {
 		}
 	}
 
-	public onSelectSimilarEmail(event: Event): void {
-		const selectedEmail: Context = (event.getSource() as List).getSelectedItem().getBindingContext() as Context;
-		const parentView: XMLView = this.getView().getParent().getParent().getParent() as XMLView;
+	public async onSelectSimilarEmail(event: Event): Promise<void> {
+		const emailObject: EmailObject = this.getView().getBindingContext("api").getObject() as EmailObject;
+		const similarEmailsList: List = event.getSource() as List;
+		const selectedEmailContext: Context = similarEmailsList.getSelectedItem().getBindingContext() as Context;
+		const selectedId: string = selectedEmailContext.getProperty("mail/ID");
+
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse) {
+			await this.openConfirmationDialog(this.getText("confirmationDialog.message"), () => this.selectSimilarEmail(selectedId));
+			similarEmailsList.removeSelections(true);
+		} else this.selectSimilarEmail(selectedId);
+	}
+
+	public selectSimilarEmail(id: string): void {
+		const parentView: View = this.getView().getParent().getParent().getParent() as View;
 		const parentController: MainController = parentView.getController() as MainController;
 
 		parentController.clearAllFilters();
-		parentController.setActiveEmail(selectedEmail.getProperty("mail/ID"));
+		parentController.setActiveEmail(id);
 	}
 }

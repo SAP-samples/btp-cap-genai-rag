@@ -1,7 +1,6 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import ResourceBundle from "sap/base/i18n/ResourceBundle";
-import XMLView from "sap/ui/core/mvc/XMLView";
+import View from "sap/ui/core/mvc/View";
 import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 import ObjectPageSection from "sap/uxap/ObjectPageSection";
 import Event from "sap/ui/base/Event";
@@ -23,7 +22,6 @@ export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
 	protected readonly ACTIVE_URGENCIES_PATH: string = "activeUrgencies";
 	protected readonly ACTIVE_SENTIMENTS_PATH: string = "activeSentiments";
-	protected readonly EMAIL_ENTITY_PATH: string = "api>/getMail";
 	protected readonly EMAIL_CATEGORY_PATH: string = "category";
 	protected readonly EMAIL_URGENCY_PATH: string = "urgency";
 	protected readonly EMAIL_SENTIMENT_PATH: string = "sentiment";
@@ -31,9 +29,11 @@ export default class Main extends BaseController {
 	protected readonly EMAIL_SUBJECT_PATH: string = "subject";
 	protected readonly EMAIL_BODY_PATH: string = "body";
 	protected readonly EMAIL_MODIFIED_AT_PATH: string = "modifiedAt";
+	protected readonly EMAIL_ENTITY_PATH: string = "api>/getMail";
 	protected readonly UPDATE_GROUP: string = "UPDATE_GROUP_" + Math.random().toString(36).substring(2);
 
 	public onInit(): void {
+		super.onInit();
 		this.getRouter().attachRouteMatched(this.onRouteMatched, this);
 
 		const model: JSONModel = new JSONModel({
@@ -55,7 +55,7 @@ export default class Main extends BaseController {
 
 	protected onRouteMatched(): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		localModel.setProperty("/sortText", (this.getResourceBundle() as ResourceBundle).getText("inbox.sort.label.newest"));
+		localModel.setProperty("/sortText", this.getText("inbox.sort.label.newest"));
 	}
 
 	public onUpdateEmailsList(event: Event): void {
@@ -75,7 +75,7 @@ export default class Main extends BaseController {
 
 	public setActiveEmail(id: string = null): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailView: XMLView = this.byId("emailColumn") as XMLView;
+		const emailView: View = this.byId("emailColumn") as View;
 		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
 		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
 		const similarEmailsList: List = emailView.byId("similarEmailsList") as List;
@@ -92,7 +92,7 @@ export default class Main extends BaseController {
 					dataReceived: (event: Event) => this.onUpdateBindingInfo(event)
 				}
 			};
-			this.byId("emailColumn").bindElement(bindingInfo);
+			emailView.bindElement(bindingInfo);
 		}
 	}
 
@@ -240,20 +240,27 @@ export default class Main extends BaseController {
 
 	public onSortEmailsList(): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const resourceBundle: ResourceBundle = this.getResourceBundle() as ResourceBundle;
-
 		localModel.setProperty("/sortDescending", !localModel.getProperty("/sortDescending"));
-		localModel.setProperty("/sortText", localModel.getProperty("/sortText") === resourceBundle.getText("inbox.sort.label.newest") ?
-			resourceBundle.getText("inbox.sort.label.oldest") :
-			resourceBundle.getText("inbox.sort.label.newest"));
+		localModel.setProperty("/sortText", localModel.getProperty("/sortText") === this.getText("inbox.sort.label.newest") ?
+			this.getText("inbox.sort.label.oldest") :
+			this.getText("inbox.sort.label.newest"));
 
 		const sorter = new Sorter(this.EMAIL_MODIFIED_AT_PATH, localModel.getProperty("/sortDescending"));
 		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
 		binding.sort(sorter);
 	}
 
-	public onSelectEmail(event: Event): void {
-		const selectedEmail: Context = (event.getSource() as List).getSelectedItem().getBindingContext("api") as Context;
-		this.setActiveEmail(selectedEmail.getProperty("ID"));
+	public async onSelectEmail(event: Event): Promise<void> {
+		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+		const emailsList: List = event.getSource() as List;
+		const selectedEmailContext: Context = emailsList.getSelectedItem().getBindingContext("api") as Context;
+		const selectedId: string = selectedEmailContext.getProperty("ID");
+
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse) {
+			const activeListItem: ListItemBase = emailsList.getItems().find((item: ListItemBase) => item.getBindingContext("api").getProperty("ID") === localModel.getProperty("/activeEmailId"));
+			emailsList.setSelectedItem(activeListItem);
+			await this.openConfirmationDialog(this.getText("confirmationDialog.message"), () => this.setActiveEmail(selectedId));
+		} else this.setActiveEmail(selectedId);
 	}
 }

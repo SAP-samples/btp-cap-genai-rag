@@ -6,11 +6,19 @@ import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import Router from "sap/ui/core/routing/Router";
 import History from "sap/ui/core/routing/History";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 /**
  * @namespace ui.controller
  */
 export default abstract class BaseController extends Controller {
+	private resourceBundle: ResourceBundle;
+	private confirmationDialog: ConfirmationDialog;
+
+	public onInit(): void {
+        this.confirmationDialog = new ConfirmationDialog(this.getView());
+    }
+
 	/**
 	 * Convenience method for accessing the component of the controller's view.
 	 * @returns The component of the controller's view
@@ -31,10 +39,16 @@ export default abstract class BaseController extends Controller {
 	 * Convenience method for getting the i18n resource bundle of the component.
 	 * @returns The i18n resource bundle of the component
 	 */
-	public getResourceBundle(): ResourceBundle | Promise<ResourceBundle> {
-		const oModel = this.getOwnerComponent().getModel("i18n") as ResourceModel;
-		return oModel.getResourceBundle();
-	}
+	private getResourceBundle(): ResourceBundle {
+        const oModel: ResourceModel = this.getOwnerComponent().getModel("i18n") as ResourceModel;
+        return oModel.getResourceBundle() as ResourceBundle;
+    }
+	public getText(sKey: string, aArgs?: any[], bIgnoreKeyFallback?: boolean): string {
+        if (!this.resourceBundle) {
+            this.resourceBundle = this.getResourceBundle();
+        }
+        return this.resourceBundle.getText(sKey, aArgs, bIgnoreKeyFallback);
+    }
 
 	/**
 	 * Convenience method for getting the view model by name in every controller of the application.
@@ -80,4 +94,8 @@ export default abstract class BaseController extends Controller {
 			this.getRouter().navTo("main", {}, undefined, true);
 		}
 	}
+
+	public async openConfirmationDialog(message: string, onConfirm: () => void): Promise<void> {
+        await this.confirmationDialog.open(message, onConfirm);
+    }
 }
