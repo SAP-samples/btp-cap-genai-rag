@@ -15,7 +15,7 @@ import { getDestination } from "@sap-cloud-sdk/connectivity";
 import { BTPLLMContext } from "@sap/llm-commons";
 import { BTPOpenAIChat } from "@sap/llm-commons/langchain/chat/openai";
 import { BTPOpenAIEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
-import { LLMChain } from "langchain";
+import { LLMChain } from "langchain/chains";
 
 interface IBaseMail {
     ID?: string;
@@ -322,9 +322,7 @@ export default class PublicService extends ApplicationService {
                 authenticated: req.user.is("authenticated-user"),
                 identified: req.user.is("identified-user"),
                 Member: req.user.is("Member"),
-                Admin: req.user.is("Admin"),
-                ExtendCDS: req.user.is("ExtendCDS"),
-                ExtendCDSdelete: req.user.is("ExtendCDSdelete")
+                Admin: req.user.is("Admin")
             }
         };
 
