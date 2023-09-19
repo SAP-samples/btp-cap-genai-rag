@@ -15,7 +15,7 @@ import { getDestination } from "@sap-cloud-sdk/connectivity";
 import { BTPLLMContext } from "@sap/llm-commons";
 import { BTPOpenAIChat } from "@sap/llm-commons/langchain/chat/openai";
 import { BTPOpenAIEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
-import { LLMChain } from "langchain";
+import { LLMChain } from "langchain/chains";
 
 interface IBaseMail {
     ID?: string;
