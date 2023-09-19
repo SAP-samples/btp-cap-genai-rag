@@ -1,9 +1,13 @@
 # Post-Deployment Actions
 
-Depending on your favorite runtime, you need to apply two Post-Deployment Actions. Just follow the below instructions. 
+Depending on your favorite runtime, you need to apply two Post-Deployment Actions. In a single-tenant setup, Post-Deployment actions are required in the Kyma runtime only. 
+
+[SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime-multitenant-only) (Multitenant only)
+
+[SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
 
 
-## SAP BTP, Cloud Foundry Runtime
+## SAP BTP, Cloud Foundry Runtime (Multitenant only)
 
 In Cloud Foundry, our SaaS sample application requires the usage of a Credential Store instance to securely store a SAP BTP Subaccount Admin user as well as the API Service Broker credentials. 
 
@@ -55,7 +59,7 @@ In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is re
 
 2. By running these scripts in your development environment, you will get the egress IP addresses of your Kyma Cluster.
    
-   > **Important** - These are just sample values! Make sure you run the script and determine your own Cluster IP addresses!
+   > **Important** - These are just sample values! Make sure you run the script and determine your Cluster IP addresses!
 
     ```sh
     sh ./get-egress-ips.sh
@@ -71,7 +75,7 @@ In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is re
 
 4. In the **Instance Parameters** section, please add a new parameter called **allow_access**. Add the Egress IPs of your Kyma Cluster as comma-separated string. 
 
-    > **Hint** - If you are planning to setup a hybrid testing setup, please also add your own IP address to the list of IP addresses. Keep in mind your private IP address is likely to change on a daily basis, so make sure to update that value from time to time.
+    > **Hint** - If you are planning to setup a hybrid testing setup, please also add your own IP address to the list of IP addresses. Keep in mind your private IP address is likely to change on a daily basis, so make sure to update that value from time to time. You can get your latest current IP address by using a website like [http://ifconfig.me/ip](http://ifconfig.me/ip).
 
     [<img src="./images/PDEP_KymaIPs.png" width="200"/>](./images/PDEP_KymaIPs.png?raw=true)
 

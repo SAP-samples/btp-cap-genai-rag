@@ -12,6 +12,15 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    **App Service**
 
+   **Single-Tenant**
+
+   ```sh
+   cds bind -2 <ReleaseName>-srv-destination,<ReleaseName>-srv-xsuaa,<ReleaseName>-srv-hana --on k8s --for hybrid
+   cds bind postgresql-db -2 <ReleaseName>-srv-postgresql-db --kind postgresql-db --on k8s --for hybrid
+   ```
+
+   **Multitenant**
+
    ```sh
    cds bind -2 <ReleaseName>-srv-destination,<ReleaseName>-srv-xsuaa --on k8s --for hybrid --output-file app-service/.cdsrc-private.json
    cds bind hana -2 <ReleaseName>-srv-hana --kind hana --on k8s --for hybrid --output-file app-service/.cdsrc-private.json
@@ -24,6 +33,8 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    **API Service**
 
+   **Multi-Tenant**
+
    ```sh
    cds bind -2 <ReleaseName>-api-destination,<ReleaseName>-api-xsuaa-api --on k8s --for hybrid --output-file api-service/.cdsrc-private.json
    cds bind sm-container -2 <ReleaseName>-api-sm-container --kind service-manager --on k8s --for hybrid --output-file api-service/.cdsrc-private.json
@@ -31,6 +42,8 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    ```
 
    **Application Router**
+
+   **Single-Tenant & Multitenant**
 
    ```sh
    cds bind -2 <ReleaseName>-router-destination,<ReleaseName>-router-xsuaa --on k8s --for hybrid --output-file router/.cdsrc-private.json
@@ -41,11 +54,15 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    If you would like to run the HTML5 Apps Deployer in a hybrid mode, please ensure the respective HTML5 Apps Repository binding is configured.
 
+   **Single-Tenant & Multitenant**
+
    ```sh
    cds bind html5-apps-repo -2 <ReleaseName>-html5-apps-deployer-html5-apps-repo --kind html5-apps-repo --on k8s --for hybrid --output-file app/html5-deployer/.cdsrc-private.json
    ```
 
    **Optional - API Service Broker**
+
+   **Multitenant**
 
    ```sh
    cds bind -2 <ReleaseName>-api-xsuaa-api --on k8s --for hybrid --output-file broker/.cdsrc-private.json
@@ -116,6 +133,18 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    **Service Keys**
 
+   **Single-Tenant**
+   
+   ```sh
+   cf csk <Space>-ai-uaa <Space>-ai-uaa-key
+   cf csk <Space>-ai-destination <Space>-ai-destination-key
+   cf csk <Space>-ai-postgresql-db <Space>-ai-postgresql-db-key
+   cf csk <Space>-ai-com-hdi-container <Space>-ai-com-hdi-container-key
+   cf csk <Space>-ai-html5-repo-runtime <Space>-ai-html5-repo-runtime-key
+   ```
+
+   **Multi-Tenant**
+
    ```sh
    cf csk <Space>-aisaas-uaa <Space>-aisaas-uaa-key
    cf csk <Space>-aisaas-api-uaa <Space>-aisaas-api-uaa-key
@@ -131,7 +160,16 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    **App Service**
 
+   **Single-Tenant**
+
+   ```sh
+   cds bind -2 <Space>-ai-destination,<Space>-ai-uaa,<Space>-ai-com-hdi-container --for hybrid
+   cds bind postgresql-db -2 <Space>-ai-postgresql-db --kind postgresql-db --for hybrid
    ```
+
+   **Multitenant**
+
+   ```sh
    cds bind -2 <Space>-aisaas-destination,<Space>-aisaas-uaa --for hybrid --output-file app-service/.cdsrc-private.json
    cds bind hana -2 <Space>-aisaas-com-hdi-container --kind hana --for hybrid --output-file app-service/.cdsrc-private.json
    cds bind credstore -2 <Space>-aisaas-credstore --kind credstore --for hybrid --output-file app-service/.cdsrc-private.json
@@ -144,6 +182,8 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    **API Service**
 
+   **Multitenant**
+
    ```
    cds bind -2 <Space>-aisaas-destination,<Space>-aisaas-api-uaa --for hybrid --output-file api-service/.cdsrc-private.json
    cds bind postgresql-db -2 <Space>-aisaas-postgresql-db --kind postgresql-db --for hybrid --output-file api-service/.cdsrc-private.json
@@ -152,12 +192,33 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    ### Application Router
 
+   **Single-Tenant**
+
+   ```sh
+   cds bind -2 <Space>-ai-destination,<Space>-ai-uaa --for hybrid --output-file router/.cdsrc-private.json
+   cds bind html5-apps-repo -2 <Space>-ai-html5-repo-runtime --kind html5-apps-repo --for hybrid --output-file router/.cdsrc-private.json
+   ```
+
+   **Multitenant**
+
    ```sh
    cds bind -2 <Space>-aisaas-destination,<Space>-aisaas-uaa --for hybrid --output-file router/.cdsrc-private.json
    cds bind html5-apps-repo -2 <Space>-aisaas-html5-repo-runtime --kind html5-apps-repo --for hybrid --output-file router/.cdsrc-private.json
    ```
 
    ### Optional - HTML5 Deployer
+
+   **Single-Tenant**
+
+   ```sh
+   cf csk <Space>-ai-html5-repo-host <Space>-ai-html5-repo-host-key
+   ```
+
+   ```sh
+   cds bind html5-apps-repo -2 <Space>-ai-html5-repo-host --kind html5-apps-repo --for hybrid --output-file app/html5-deployer/.cdsrc-private.json
+   ```
+
+   **Multitenant**
 
    ```sh
    cf csk <Space>-aisaas-html5-repo-host <Space>-aisaas-html5-repo-host-key
@@ -169,6 +230,8 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    ### Optional - API Service Broker
 
+   **Multitenant** 
+
    ```sh
    cds bind -2 <Space>-aisaas-api-uaa --for hybrid --output-file broker/.cdsrc-private.json
    ```
@@ -176,6 +239,19 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 3. In Cloud Foundry, it is not (yet) possible to whitelist a personal IP address for your PostgreSQL Service Instance. Therefore, you must setup an SSH tunnel to an existing Cloud Foundry workload to connect to your PostgreSQL instance. To setup that tunnel please run the following commands in your development environment.
 
    **PostgreSQL SSH Tunnel**
+   
+   **Single-Tenant**
+   
+   ```sh
+   cf enable-ssh ai-srv-<Space>
+   cf restart ai-srv-<Space>
+   cf service-key <Space>-ai-postgresql-db <Space>-ai-postgresql-db-key
+
+   # Grab the hostname and port from the created Service Key and open the tunnel
+   cf ssh -L 63306:<hostname>:<port> ai-srv-<Space>
+   ```
+
+   **Multitenant**
 
    ```sh
    cf enable-ssh aisaas-srv-<Space>
@@ -189,7 +265,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 4. Once the tunnel is up and running, please update the **.cdsrc-private.json** files in your **app-service** and **api-service** folder, by replacing the **port** and **hostname** as depicted below. All other properties **must** remain unchanged.
 
    **Update hybrid profile** <br>
-   (app-service/.cdsrc-private.json & api-service/.cdsrc-private.json)
+   (app-service/.cdsrc-private.json & api-service/.cdsrc-private.json or .cdsrc-private.json for Single-Tenant)
 
    ```json
    "postgres": {
@@ -216,6 +292,8 @@ After configuring your **.cdsrc-private.json** files and (if necessary) opening 
 1. Ensure you already created a Subscriber Subaccount in your SAP BTP Global account and successfully subscribed to the AI SaaS application. 
 
 2. If not done yet, please copy the **.env.sample** file in your **code** directory and rename it to **.env**. It will contain the configuration details for the HTML5 Repo Mock, to work properly and to recognize the **TENANT_HOST_PATTERN** in a **.localhost** context. Furthermore, the **.env** file contains the destinations to your local CAP App-Service backend as well as the UI5 Typescript app being continuously transpiled upon any change.
+
+   >**Important** - In a Single-Tenant scenario, please remove the **TENANT_HOST_PATTERN** variable from the *.env* file. 
 
 3. Ensure you installed the **@ui5/cli** npm package globally in your development environment and install the dependencies of the SAP UI5 component by executing the following commands. 
 

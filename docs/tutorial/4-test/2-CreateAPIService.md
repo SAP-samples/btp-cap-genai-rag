@@ -1,6 +1,8 @@
-# Create an API Service Instance
+# Create an API Service Instance (Multitenant only)
 
-Follow the next steps to create a new API Service instance within a dedicated Subscriber Subaccount. The actual API Service Broker was registered during the Provisioning/Onboarding process of the SaaS application.
+> **Important** - This chapter is only relevant for the multitenant version of our AI Sample Scenario. In a single tenant setup, you can use the Application Service endpoints to push sample data to your application. 
+
+Follow the next steps to create a new API Service instance within a dedicated Subscriber Subaccount. The actual API Service Broker was registered during the Provisioning/Onboarding process of the SaaS application. If the 
 
 1. Go to the Subscriber Subaccount in which you have created the SaaS application subscription.
 

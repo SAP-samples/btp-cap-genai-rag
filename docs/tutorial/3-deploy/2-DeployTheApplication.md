@@ -1,6 +1,10 @@
 #  Deploy the Application 
 
-Depending on your target runtime, different deployment steps are required. Please follow the corresponding instructions for Cloud Foundry and Kyma.
+Depending on your target runtime, different deployment steps are required. Please follow the corresponding instructions for your chosen runtime.
+
+[SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
+
+[SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
 
 
 ## SAP BTP, Cloud Foundry Runtime
@@ -21,27 +25,20 @@ As the application components are part of the deployment archive in the Cloud Fo
 
     > **Important** - Ensure to update your **free-tier-private.mtaext** file in case you want to use an **existing PostgreSQL instance** as depicted below! 
     > ```yaml
-    > modules:
-    >   - name: aisaas-srv
-    >      # Bind existing instance
-    >      requires:
-    >        - name: postgresql-db
-    >
     > resources:
-    >    # Disable new instance creation
-    >    - name: aisaas-postgresql-db
-    >      active: false
-    >
-    >    # Reuse existing instance
-    >    - name: postgresql-db
+    >    - name: ai-postgresql-db
+    >      # Reuse existing instance
     >      type: org.cloudfoundry.existing-service
     >      parameters:
-    >         service-name: existing-pgsql-service-name  
+    >        service-name: ${space}-aisaas-postgresql-db
+    >        service-plan: free
+    >        config:
+    >          engine_version: "13"
     > ```
     > A similar setup can also be achieved with an existing Credential Store Service instance. 
 
     ```sh
-    # Run in ./deploy/cf # 
+    # Run in ./multi/single-tenant/deploy/cf # 
     npm run deploy
     ```
 
@@ -90,23 +87,22 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
         > 
         > In a productive SAP BTP landscape, your **shootName** will always starts with a letter like *a1b2c3* or with the prefix **c-** like c-1b2c3d4*. 
 
-
     **router**
 
-      * image.repository - Registry details of your **Application Router** Container Image like \<username>/aisaas-router if your images are stored in Docker Hub or ghcr.io/\<namespace>/aisaas-router in case of GitHub.
+      * image.repository - Registry details of your **Application Router** Container Image like \<username>/ai(saas)-router if your images are stored in Docker Hub or ghcr.io/\<namespace>/aisaas-router in case of GitHub.
       * image.tag - Provide the tag of your container image if you do not want to use the latest image.
 
     **srv**
 
-      * image.repository - Registry details of your **App Service** Container Image repository like \<username>/aisaas-srv.
+      * image.repository - Registry details of your **App Service** Container Image repository like \<username>/ai(saas)-srv.
       * image.tag - Provide the tag of your container image if you do not want to use the latest image.
         
-    **api**
+    **api** (Multitenant only)
 
       * image.repository - Registry details of your **API Service** Container Image repository like \<username>/aisaas-api
       * image.tag - Provide the tag of your container image if you do not want to use the latest image.
 
-    **broker**
+    **broker** (Multitenant only)
 
       * image.repository - Registry details of your **API Service Broker** Container Image repository like \<username>/aisaas-broker.
       * image.tag - Provide the tag of your container image if you do not want to use the latest image.
@@ -114,17 +110,17 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
 
           > **Important** - Run the following script which will generate new GUIDs in a new */code/broker/catalog-private.json* file.<br>
           > 
-          > **Run in ./code/broker**
+          > **Run in ./multi-tenant/code/broker**
           > ```sh 
-          > # Execute in ./code/broker #
+          > # Execute in ./multi-tenant/code/broker #
           > cp catalog.json catalog-private.json
           > npx --yes -p @sap/sbf gen-catalog-ids catalog-private.json
           > cat catalog-private.json
           > ```
 
-    **hana_deployer**
+    **hana_deployer** 
 
-      * image.repository - Registry details of your **HDI Container Deployer** Container Image repository like \<username>/aisaas-db-com.
+      * image.repository - Registry details of your **HDI Container Deployer** Container Image repository like \<username>/ai(saas)-db(-com).
       * image.tag - Provide the tag of your container image if you do not want to use the latest image.
 
     **html5_apps_deployer**
@@ -155,7 +151,7 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
 3.  Please double-check that your Container Images have been successfully pushed to your Container Registry and deploy the application to your Kyma Cluster by running the following command. 
 
     ```sh
-    # Run in ./deploy/kyma # 
+    # Run in ./multi/single-tenant/deploy/kyma # 
     helm install <ReleaseName> ./charts -f ./charts/values-private.yaml -n <Namespace>
 
     # Example
@@ -170,6 +166,7 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
     > srv:
     >   bindings:
     >      postgresql-db:
+    >        serviceInstanceName: 
     >        serviceInstanceFullname: existing-pgsql-instance-name
     >
     > # Disable instance creation

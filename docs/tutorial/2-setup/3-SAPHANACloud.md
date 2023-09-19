@@ -12,7 +12,6 @@ To do so, please follow the respective SAP HANA Academy tutorial and official SA
 
 Create a Subscription of the SAP HANA Cloud Tools, assign the role collections to your user and create a new SAP HANA Cloud instance using the Subscription interface. Please ensure this SAP HANA Cloud Instance is shared with your Kyma Cluster/Namespace or Cloud Foundry Org/Space. 
 
-
 ## Share an existing Instance
 
 Switch to the SAP BTP Subaccount hosting your SAP HANA Cloud instance and use the SAP HANA Cloud Tools, to share the instance with your new Cloud Foundry Org/Space respectively your Kyma Cluster/Namespace. 

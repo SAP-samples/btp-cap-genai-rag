@@ -1,6 +1,6 @@
-# Create a Subscription
+# Create a Subscription (Multitenant only)
 
-Follow the next steps to create a new SaaS Subscription within a dedicated Subscriber Subaccount. 
+> **Important** - This chapter is only relevant for the multitenant version of our AI Sample Scenario. In a single tenant setup, you can directly access your application using the Cloud Foundry Route or Virtual Service created for your Application Router. 
 
 1. Create a new Subscriber Subaccount in the same SAP BTP region where your Provider Subaccount is allocated. 
 

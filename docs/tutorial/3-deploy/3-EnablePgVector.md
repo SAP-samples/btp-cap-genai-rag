@@ -1,13 +1,17 @@
 # Enable pgvector extension
 
-Once the application was successfully deployed, you need to enable the **pgvector** extension on your new **PostgreSQL on SAP BTP, hyperscaler option** service instance. Further details can be found in the official SAP Help documentation.
+Once the application was successfully deployed, you need to enable the **pgvector** extension on your new **PostgreSQL on SAP BTP, hyperscaler option** service instance. Please follow the tutorial steps of your selected runtime. 
 
-[SAP Help | Using the ‘PostgreSQL, hyperscaler option’ Extension APIs](https://help.sap.com/docs/postgresql-hyperscaler-option/postgresql-on-sap-btp-hyperscaler-option/using-postgresql-hyperscaler-option-extension-apis?locale=en-US)
+[SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
 
-[SAP Help | Using the ‘PostgreSQL, Hyperscaler Option’ Extension APIs for Kyma](https://help.sap.com/docs/postgresql-hyperscaler-option/postgresql-on-sap-btp-hyperscaler-option/using-postgresql-hyperscaler-option-extension-apis-for-kyma?locale=en-US)
+[SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
 
 
 ## SAP BTP, Cloud Foundry Runtime
+
+Further details can be found in the official SAP Help documentation.
+
+[SAP Help | Using the ‘PostgreSQL, hyperscaler option’ Extension APIs](https://help.sap.com/docs/postgresql-hyperscaler-option/postgresql-on-sap-btp-hyperscaler-option/using-postgresql-hyperscaler-option-extension-apis?locale=en-US)
 
 1. Create a new **Service Key** for your **PostgreSQL on SAP BTP, hyperscaler option** service instance in your **SAP BTP Cockpit**.
 
@@ -56,7 +60,9 @@ Once the application was successfully deployed, you need to enable the **pgvecto
 
 ## SAP BTP, Kyma Runtime
 
-The **PostgreSQL on SAP BTP, hyperscaler option** as well as the Extension API endpoints are available for Kyma instances in AWS regions only (as of September 2023).
+Further details can be found in the official SAP Help documentation. The **PostgreSQL on SAP BTP, hyperscaler option** as well as the Extension API endpoints are available for Kyma instances in AWS regions only (as of September 2023).
+
+[SAP Help | Using the ‘PostgreSQL, Hyperscaler Option’ Extension APIs for Kyma](https://help.sap.com/docs/postgresql-hyperscaler-option/postgresql-on-sap-btp-hyperscaler-option/using-postgresql-hyperscaler-option-extension-apis-for-kyma?locale=en-US)
 
 1. Create a new **Service Binding** for your **PostgreSQL on SAP BTP, hyperscaler option** service instance in your **Kyma Dashboard**.
 

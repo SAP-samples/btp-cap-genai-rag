@@ -10,9 +10,18 @@ Even though we are in a local development setup, the Large-Language-Model (LLM) 
 
 2. Once the application is installed and all Service Instances are created please run the following commands, to create the respective **.cdsrc-private.json** files required for local testing. 
 
-    > **Hint** - We are creating two profiles in this case. **development** for local scenarios without **multitenancy** and **local-with-mtx** for local scenarios with **multitenancy**. 
+    > **Hint** - We are creating two profiles in the multitenant case. **development** for local scenarios without **multitenancy** and **local-with-mtx** for local scenarios with **multitenancy**. 
 
     **App Service**
+
+    **Single Tenant**
+
+    ```sh
+    cds bind -2 <ReleaseName>-srv-destination --on k8s --for development
+    cds bind auth -2 <ReleaseName>-srv-xsuaa --kind mocked --on k8s --for development
+    ```
+
+    **Multitenant**
 
     ```sh
     cds bind -2 <ReleaseName>-srv-destination --on k8s --for development --output-file app-service/.cdsrc-private.json
@@ -22,6 +31,8 @@ Even though we are in a local development setup, the Large-Language-Model (LLM) 
     ```
 
     **API Service**
+
+    **Multitenant**
 
     ```sh
     cds bind -2 <ReleaseName>-api-srv-destination --on k8s --for development --output-file api-service/.cdsrc-private.json
@@ -43,6 +54,20 @@ Even though we are in a local development setup, the Large-Language-Model (LLM) 
 
     **App Service**
 
+    **Single-Tenant**
+
+    ```sh
+    cf csk <Space>-ai-uaa <Space>-ai-uaa-key
+    cf csk <Space>-ai-destination <Space>-ai-destination-key
+    ```
+
+    ```sh
+    cds bind -2 <Space>-ai-destination --for development
+    cds bind auth -2 <Space>-ai-uaa --kind mocked --for development
+    ```
+
+    **Multitenant**
+
     ```sh
     cf csk <Space>-aisaas-uaa <Space>-aisaas-uaa-key
     cf csk <Space>-aisaas-destination <Space>-aisaas-destination-key
@@ -56,6 +81,8 @@ Even though we are in a local development setup, the Large-Language-Model (LLM) 
     ```
 
     **API Service**
+
+    **Multitenant**
 
     ```sh
     cf csk <Space>-aisaas-api-uaa <Space>-aisaas-api-uaa-key
