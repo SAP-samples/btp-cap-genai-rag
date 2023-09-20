@@ -1,4 +1,4 @@
-# Develop a CAP-based (multitenant SaaS) application using GenAI and Retrieval Augmented Generation (RAG) on SAP BTP
+# Develop a CAP-based (multitenant) application using GenAI and RAG on SAP BTP
 
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/btp-cap-multitenant-ai)](https://api.reuse.software/info/github.com/SAP-samples/btp-cap-multitenant-ai)
 
