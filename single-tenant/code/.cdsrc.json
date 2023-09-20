@@ -1,1 +1,35 @@
-{}
+{
+    "requires": {
+        "auth": {
+            "kind": "xsuaa",
+            "[development]": {
+                "kind": "mocked"
+            }
+        },
+        "db": {
+            "kind": "hana", 
+            "impl": "@sap/cds-hana",
+            "deploy-format": "hdbtable",
+            "[development]": {
+                "kind": "sqlite",
+                "impl": "",
+                "credentials": {
+                    "url": "db.sqlite"
+                }
+            }
+        },
+        "postgres": {
+            "kind": "postgresql-db",
+            "[development]": {
+                "kind": "postgres",
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
+                }
+            }
+        }
+    }
+}
