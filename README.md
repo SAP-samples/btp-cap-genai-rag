@@ -3,7 +3,7 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/btp-cap-multitenant-ai)](https://api.reuse.software/info/github.com/SAP-samples/btp-cap-multitenant-ai)
 
 > [!NOTE]  
-> Repo is under active development until TechEd 2023
+> Repo is under active development (targeted TechEd 2023)
 
 Welcome to our dedicated GitHub repository, designed to provide valuable support to developers, partners and customers aiming to create advanced **GenAI** solutions on **SAP Business Technology Platform (SAP BTP)**. Inside, you'll find a carefully crafted example that follows SAP BTP's respected Golden Path development approach. We've covered both [single-tenant and multitenant (Software as a Service, SaaS) versions](#versions) to suit different needs. Discover how to smoothly integrate different **Large Language Models (LLMs)** via SAP AI Core, make the most of LangChain in CAP and use advanced techniques like output parsing according a custom schema or **Retrieval Augmented Generation (RAG)** through embeddings and a vector database to achieve even higher value for your use case. Notably, our repository supports two runtimes, Cloud Foundry and Kyma, offering flexibility in your journey to harness GenAI on SAP BTP.
 
