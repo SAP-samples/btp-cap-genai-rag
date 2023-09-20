@@ -57,7 +57,7 @@ For additional support, [ask a question in SAP Community](https://answers.sap.co
 - Prompt Engineering: Work in progress
 - RAG Feature: Pending implementation
 - Custom Fields & Target Language Configuration: Awaiting implementation
-- _llm-commons_ Package: Actively in development and currently accessible through internal npm registry
+- _llm-commons_ Package: Actively in development and currently accessible through internal npm registry - we deliver it directly with _node_modules_, so please do not delete the _node_modules_ or the _package-locl.json_
 
 ## Contributing
 
