@@ -1,15 +1,17 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import Event from "sap/ui/base/Event";
+import Context from "sap/ui/model/odata/v4/Context";
+import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
+import ODataContextBinding from "sap/ui/model/odata/v4/ODataContextBinding";
 import View from "sap/ui/core/mvc/View";
 import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 import ObjectPageSection from "sap/uxap/ObjectPageSection";
-import Event from "sap/ui/base/Event";
-import Context from "sap/ui/model/odata/v4/Context";
-import List from "sap/m/List";
 import Link from "sap/m/Link";
-import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
-import ODataContextBinding from "sap/ui/model/odata/v4/ODataContextBinding";
+import List from "sap/m/List";
 import ListItemBase from "sap/m/ListItemBase";
+import CustomListItem from "sap/m/CustomListItem";
+import Panel from "sap/m/Panel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
@@ -83,6 +85,7 @@ export default class Main extends BaseController {
 		localModel.setProperty("/activeEmailId", id);
 		emailPage.setSelectedSection(incomingMessageSection);
 		similarEmailsList.removeSelections(true);
+		similarEmailsList.getItems().map((listItem: ListItemBase) => ((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false));
 
 		if (id) {
 			const bindingInfo: ObjectBindingInfo = {
@@ -100,6 +103,7 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
 
+		localModel.setProperty("/additionalInfo", null);
 		localModel.setProperty("/potentialResponse", emailObject.mail.potentialResponse);
 		localModel.setProperty("/similarEmails", emailObject.closestMails);
 

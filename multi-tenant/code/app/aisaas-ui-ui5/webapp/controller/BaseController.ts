@@ -16,8 +16,8 @@ export default abstract class BaseController extends Controller {
 	private confirmationDialog: ConfirmationDialog;
 
 	public onInit(): void {
-        this.confirmationDialog = new ConfirmationDialog(this.getView());
-    }
+		this.confirmationDialog = new ConfirmationDialog(this.getView());
+	}
 
 	/**
 	 * Convenience method for accessing the component of the controller's view.
@@ -40,15 +40,15 @@ export default abstract class BaseController extends Controller {
 	 * @returns The i18n resource bundle of the component
 	 */
 	private getResourceBundle(): ResourceBundle {
-        const oModel: ResourceModel = this.getOwnerComponent().getModel("i18n") as ResourceModel;
-        return oModel.getResourceBundle() as ResourceBundle;
-    }
+		const oModel: ResourceModel = this.getOwnerComponent().getModel("i18n") as ResourceModel;
+		return oModel.getResourceBundle() as ResourceBundle;
+	}
 	public getText(sKey: string, aArgs?: any[], bIgnoreKeyFallback?: boolean): string {
-        if (!this.resourceBundle) {
-            this.resourceBundle = this.getResourceBundle();
-        }
-        return this.resourceBundle.getText(sKey, aArgs, bIgnoreKeyFallback);
-    }
+		if (!this.resourceBundle) {
+			this.resourceBundle = this.getResourceBundle();
+		}
+		return this.resourceBundle.getText(sKey, aArgs, bIgnoreKeyFallback);
+	}
 
 	/**
 	 * Convenience method for getting the view model by name in every controller of the application.
@@ -96,6 +96,6 @@ export default abstract class BaseController extends Controller {
 	}
 
 	public async openConfirmationDialog(message: string, onConfirm: () => void): Promise<void> {
-        await this.confirmationDialog.open(message, onConfirm);
-    }
+		await this.confirmationDialog.open(message, onConfirm);
+	}
 }
