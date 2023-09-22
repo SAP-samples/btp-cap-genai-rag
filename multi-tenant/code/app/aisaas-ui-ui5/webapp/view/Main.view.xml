@@ -22,7 +22,7 @@
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.requestType}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="categoryClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onClearFilter"/>
+                                        <Link id="categoryClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="categoryList"
@@ -40,7 +40,7 @@
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.urgency}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="urgencyClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeUrgencies}.length > 0 }" press="onClearFilter"/>
+                                        <Link id="urgencyClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeUrgencies}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="urgencyList"
@@ -58,7 +58,7 @@
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.sentiment}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="sentimentClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeSentiments}.length > 0 }" press="onClearFilter"/>
+                                        <Link id="sentimentClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeSentiments}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="sentimentList"

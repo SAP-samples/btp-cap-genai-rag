@@ -141,23 +141,62 @@ export default class Main extends BaseController {
 		return ids
 	}
 
-	public onSearch(): void {
+	public async onSearch(): Promise<void> {
+		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+		const localModel: JSONModel = this.getModel() as JSONModel;
+
+		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse && localModel.getProperty("/emailsCount") > 0) {
+			await this.openConfirmationDialog(this.getText("confirmationDialog.message.mayBeLost"), this.applyFilter.bind(this), () => this.clearSearchFilter());
+		} else this.applyFilter();
+	}
+
+	private clearSearchFilter(): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+
+		localModel.setProperty("/searchKeyword", null);
 		this.applyFilter();
 	}
 
-	public onSelectFilter(event: Event): void {
+	public async onSelectFilter(event: Event): Promise<void> {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const list: List = event.getSource() as List;
-
 		const selectedListItems: ListItemBase[] = list.getSelectedItems();
 		const selectedIds: string[] = [];
 		selectedListItems.map((selectedListItem: ListItemBase) => selectedIds.push(selectedListItem.getBindingContext("filters").getProperty("id")));
-		localModel.setProperty(`/${this.getActivePath(list.getId())}`, selectedIds);
 
+		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse && localModel.getProperty("/emailsCount") > 0) {
+			await this.openConfirmationDialog(
+				this.getText("confirmationDialog.message.mayBeLost"),
+				() => this.applySelectedFilter(this.getActivePath(list.getId()), selectedIds),
+				() => this.restoreFilter(list.getId())
+			);
+		}
+		else {
+			localModel.setProperty(`/${this.getActivePath(list.getId())}`, selectedIds);
+			this.applyFilter();
+		}
+	}
+
+	private applySelectedFilter(propertyName: string, ids: string[]): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+
+		localModel.setProperty(`/${propertyName}`, ids);
 		this.applyFilter();
 	}
 
-	public onClearFilter(event: Event): void {
+	private restoreFilter(listId: string): void {
+		const list: List = this.byId(listId) as List;
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const selectedIds: string[] = localModel.getProperty(`/${this.getActivePath(listId)}`);
+
+		list.removeSelections(true);
+		list.getItems().map((item: ListItemBase) => {
+			if (selectedIds?.includes((item.getBindingContext("filters").getObject() as FilterItem).id)) list.setSelectedItem(item);
+		});
+	}
+
+	public onPressClear(event: Event): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const link: Link = event.getSource() as Link;
 
@@ -180,7 +219,9 @@ export default class Main extends BaseController {
 		const activeCategories: string[] = localModel.getProperty(`/${this.ACTIVE_CATEGORIES_PATH}`);
 		if (activeCategories.length > 0) {
 			const orFilter: Filter[] = [];
-			activeCategories.map((id: string) => orFilter.push(this.getKeywordFilter(filtersModel.getProperty("/categories").find((category: FilterItem) => category.id === id).label, this.EMAIL_CATEGORY_PATH)));
+			activeCategories.map((id: string) => orFilter
+				.push(this.getKeywordFilter(filtersModel.getProperty("/categories")
+					.find((category: FilterItem) => category.id === id).label, this.EMAIL_CATEGORY_PATH)));
 			andFilter.push(new Filter({ filters: orFilter, and: false }));
 		}
 
@@ -232,16 +273,6 @@ export default class Main extends BaseController {
 		else return new Filter(filterPath, FilterOperator.LT, 0)
 	}
 
-	public clearAllFilters(): void {
-		const localModel: JSONModel = this.getModel() as JSONModel;
-
-		localModel.setProperty("/activeCategories", []);
-		localModel.setProperty("/activeUrgencies", []);
-		localModel.setProperty("/activeSentiments", []);
-		localModel.setProperty("/searchKeyword", null);
-		this.applyFilter();
-	}
-
 	public onSortEmailsList(): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/sortDescending", !localModel.getProperty("/sortDescending"));
@@ -264,7 +295,7 @@ export default class Main extends BaseController {
 		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse) {
 			const activeListItem: ListItemBase = emailsList.getItems().find((item: ListItemBase) => item.getBindingContext("api").getProperty("ID") === localModel.getProperty("/activeEmailId"));
 			emailsList.setSelectedItem(activeListItem);
-			await this.openConfirmationDialog(this.getText("confirmationDialog.message"), () => this.setActiveEmail(selectedId));
+			await this.openConfirmationDialog(this.getText("confirmationDialog.message.willBeLost"), () => this.setActiveEmail(selectedId));
 		} else this.setActiveEmail(selectedId);
 	}
 }

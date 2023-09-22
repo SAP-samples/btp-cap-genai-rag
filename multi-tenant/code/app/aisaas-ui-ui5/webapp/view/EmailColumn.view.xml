@@ -71,7 +71,7 @@
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.responsePreparation}">
 						<VBox class="sapUiTinyMargin">
 							<Title text="{i18n>email.title.additionalInfo}:"/>
-							<TextArea growing="true" width="100%" valueLiveUpdate="true" placeholder="{i18n>email.placeholder.additionalInfo}" value="{/additionalInfo}"/>
+							<TextArea width="100%" growing="true" valueLiveUpdate="true" placeholder="{i18n>email.placeholder.additionalInfo}" value="{/additionalInfo}"/>
 							<HBox justifyContent="End">
 								<Button type="Emphasized" text="{i18n>email.label.generateButton}" press="onPressGenerate"/>
 							</HBox>
@@ -84,7 +84,14 @@
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.suggestedResponse}">
 						<VBox class="sapUiTinyMargin">
-							<TextArea growing="true" width="100%" valueLiveUpdate="true" value="{/potentialResponse}" liveChange="onChangeResponse"/>
+							<TextArea
+								width="100%"
+								growing="true"
+								valueLiveUpdate="true"
+								value="{/potentialResponse}"
+								showValueStateMessage="false"
+								valueState="{= ${/potentialResponse} !== ${api>mail/potentialResponse} ? 'Warning' : 'None' }"
+								liveChange="onChangeResponse"/>
 							<HBox justifyContent="End">
 								<Button type="Emphasized" text="{i18n>email.label.submitButton}" press="onPressSubmit"/>
 							</HBox>

@@ -95,7 +95,7 @@ export default abstract class BaseController extends Controller {
 		}
 	}
 
-	public async openConfirmationDialog(message: string, onConfirm: () => void): Promise<void> {
-		await this.confirmationDialog.open(message, onConfirm);
+	public async openConfirmationDialog(message: string, onConfirm: () => void, onCancel?: () => void): Promise<void> {
+		await this.confirmationDialog.open(message, onConfirm, onCancel);
 	}
 }

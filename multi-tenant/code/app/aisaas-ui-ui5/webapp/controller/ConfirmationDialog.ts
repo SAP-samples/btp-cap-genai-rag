@@ -9,6 +9,7 @@ export default class ConfirmationDialog extends ManagedObject {
 
     private parentView: View;
     private onConfirm: () => void;
+    private onCancel: () => void;
     private readonly FRAGMENT_NAME: string = "aisaas.ui.view.ConfirmationDialog";
     private readonly DIALOG_ID: string = "confirmationDialog";
     private readonly MESSAGE_ID: string = "messageLabel";
@@ -18,7 +19,7 @@ export default class ConfirmationDialog extends ManagedObject {
         this.parentView = parentView;
     }
 
-    public async open(message: string, onConfirm: () => void): Promise<void> {
+    public async open(message: string, onConfirm: () => void, onCancel: () => void): Promise<void> {
         if (!this.parentView.byId(this.DIALOG_ID)) {
             await Fragment.load({
                 id: this.parentView.getId(),
@@ -29,6 +30,7 @@ export default class ConfirmationDialog extends ManagedObject {
 
         (this.parentView.byId(this.MESSAGE_ID) as Label).setText(message);
         this.onConfirm = onConfirm;
+        this.onCancel = onCancel;
 
         (this.parentView.byId(this.DIALOG_ID) as Dialog).open();
     }
@@ -40,5 +42,6 @@ export default class ConfirmationDialog extends ManagedObject {
 
     public onCancelPress(): void {
         (this.parentView.byId(this.DIALOG_ID) as Dialog).close();
+        if (this.onCancel) this.onCancel();
     }
 }
