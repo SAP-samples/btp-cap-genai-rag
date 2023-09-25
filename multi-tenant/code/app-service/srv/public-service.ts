@@ -1,4 +1,4 @@
-import { ApplicationService } from "@sap/cds";
+import cds, { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import { DataSourceOptions } from "typeorm";
@@ -9,65 +9,39 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate
 } from "langchain/prompts";
+import { LLMChain } from "langchain/chains";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 import { getDestination } from "@sap-cloud-sdk/connectivity";
 import { BTPLLMContext } from "@sap/llm-commons";
-import { BTPOpenAIChat } from "@sap/llm-commons/langchain/chat/openai";
-import { BTPOpenAIEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
-import { LLMChain } from "langchain/chains";
-
-interface IBaseMail {
-    ID?: string;
-    sender: string;
-    subject: string;
-    body: string;
-}
-
-const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
-
-const DEFAULT_TABLE = "_main";
-
-const MAIL_INSIGHTS_SCHEMA = z
-    .object({
-        category: z.string().describe(`Category of the email. It could be one of the following:
-        - Booking Assistance
-        - Cancellation
-        - Problem During Travel
-        - Post-Trip Complaint
-        - General Inquiry
-        - Special Requests
-        `),
-        sentiment: z.number().describe("The sentiment of the email: -10 for very bad up to 10 for very good"),
-        urgency: z
-            .number()
-            .describe("Whether the email is urgent or not ranging from 0 for not urgent to 10 for urgent"),
-        summary: z.string().describe("Summary of the mail in original language"),
-        translationSubject: z.string().describe("Translation of the mail subject into german"),
-        translationBody: z.string().describe("Translation of the mail body into german"),
-        translationSummary: z.string().describe("Summary of the mail into german"),
-        potentialResponse: z
-            .string()
-            .describe("A potential response of the mail acting as customer service in the source language as email"),
-        facts: z
-            .array(
-                z.object({
-                    fact: z.string().optional().describe("key for the fact which should be unique"),
-                    factTitle: z.string().optional().describe("label for the fact which should be unique"),
-                    value: z.string().optional().describe("value or insight of the fact")
-                })
-            )
-            .describe("An array additional of up to 5 key facts found in the email")
-    })
-    .describe("Insights about the email and potential actions as e.g., a potential reply to the incoming email");
-
-interface CustomField {
-    key: string;
-    isNumber: boolean;
-    description: string;
-}
+import { BTPOpenAIGPTChat } from "@sap/llm-commons/langchain/chat/openai";
+import { BTPOpenAIGPTEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
+import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail, CustomField } from "./types";
+import {
+    MAIL_INSIGHTS_TRANSLATION_SCHEMA,
+    MAIL_RESPONSE_TRANSLATION_SCHEMA,
+    MAIL_INSIGHTS_SCHEMA,
+    MAIL_LANGUAGE_SCHEMA,
+    MAIL_RESPONSE_SCHEMA
+} from "./schemas";
 
 type ZodOptionalStringOrNumber = z.ZodString | z.ZodNumber | z.ZodOptional<z.ZodString | z.ZodNumber>;
+
+const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
+const DEFAULT_TABLE = "_main";
+
+const filterForTranslation = ({ subject, body, sender, requestedServices, customFields, summary, keyFacts, responseBody }: any) => ({
+    subject,
+    body,
+    sender,
+    requestedServices,
+    customFields,
+    summary,
+    keyFacts,
+    responseBody
+});
+
+
 export default class PublicService extends ApplicationService {
     async init() {
         await super.init();
@@ -75,8 +49,8 @@ export default class PublicService extends ApplicationService {
         this.on("getMail", this.getMail);
         this.on("addMails", this.addMails);
         this.on("recalculateInsights", this.recalculateInsights);
+        this.on("recalculateResponse", this.recalculateResponse);
         this.on("deleteMail", this.deleteMail);
-        this.on("userInfo", this.userInfo);
         this.on("syncWithOffice365", this.syncWithOffice365);
     }
 
@@ -164,9 +138,9 @@ export default class PublicService extends ApplicationService {
             await typeormVectorStore.appDataSource.query(queryString, [mails.map( (mail: any) => mail.ID)]);
 
             await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: IBaseMail) => ({
-                    pageContent: mail.body,
-                    metadata: { id: mail.ID }
+                mailBatch.map((mail: ITranslatedMail) => ({
+                    pageContent: mail.mail.body,
+                    metadata: { id: mail.mail.ID }
                 }))
             );
             return true;
@@ -183,41 +157,46 @@ export default class PublicService extends ApplicationService {
         return true;
     };
 
-    private upsertInsights = async (mails: Array<IBaseMail>) => {
-        // dynamically add custom fields
-        // todo: custom fields from database
-        let customFields: Array<CustomField> = [
-            {
-                key: "location",
-                isNumber: false,
-                description: "Extract the geo location for the trip the email is about"
-            }
-        ];
+    private recalculateResponse = async (req: Request) => {
+        const { id, additionalInformation = "" } = req.data;
+        const { Mails } = this.entities;
+        const mail = await SELECT.one.from(Mails, id);
+        await this.upsertResponse(mail, additionalInformation);
+        return true;
+    };
+
+    private extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
+        const { CustomFields } = this.entities;
+        const customFields = await SELECT.from(CustomFields);
 
         const zodCustomFields = customFields.reduce(
-            (fields: { [key: string]: ZodOptionalStringOrNumber }, field: CustomField) => {
+            (fields: { [title: string]: ZodOptionalStringOrNumber }, field: CustomField) => {
                 return {
                     ...fields,
-                    [field.key]: z.optional(field.isNumber ? z.number() : z.string()).describe(field.description)
+                    [field.title]: (field.isNumber ? z.number() : z.string()).nullable().describe(field.description)
                 };
             },
             {} as { [key: string]: ZodOptionalStringOrNumber }
         );
-
         let mailInsightsSchemaWithCustomFields = MAIL_INSIGHTS_SCHEMA.merge(
-            z.object({
-                customFields: z.object(zodCustomFields)
-            })
+            z
+                .object({
+                    customFields: z.object(zodCustomFields)
+                })
+                .describe(`Extract additional information ouf of the mail.`)
         );
         const parser = StructuredOutputParser.fromZodSchema(mailInsightsSchemaWithCustomFields);
         const formatInstructions = parser.getFormatInstructions();
+
         await initializeBTPContext();
-        const llm = new BTPOpenAIChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+
         const systemPrompt = new PromptTemplate({
             template: "Give insights about the incoming email.\n{format_instructions}",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
+
         const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
         const humanTemplate = "{subject}\n{body}";
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
@@ -227,50 +206,276 @@ export default class PublicService extends ApplicationService {
             llm: llm,
             prompt: chatPrompt
         });
+
         console.log("GENERATING INSIGHTS...");
         const mailsInsights = await Promise.all(
-            mails.map(async (mail: { ID?: string; subject: string; body: string; sender: string }) => {
+            mails.map(async (mail: IBaseMail): Promise<IProcessedMail> => {
                 const result = await chain.call({
                     subject: mail.subject,
                     body: mail.body
                 });
-                const insights = await parser.parse(result.text);
-                return { mail, insights };
+                const insights = await parser.parse(fixJsonString(result.text));
+                const reducedInsights = (({ customFields, ...o }) => o)(insights);
+                const customFields = Object.entries(insights.customFields).map(
+                    ([key, value]): { title?: string; value?: string } => ({
+                        title: key,
+                        value: value
+                    })
+                );
+
+                return { mail: { ...mail }, insights: { ...reducedInsights, customFields: customFields } };
             })
         );
 
+        return mailsInsights;
+    };
+
+    private preparePotentialResponses = async (mails: Array<IBaseMail>, additionalInformation: String | "" = "") => {
+        let responseAdditionalInformation = additionalInformation ;
+
+        // prepare response
+        const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
+        const formatInstructions = parser.getFormatInstructions();
+
+        await initializeBTPContext();
+        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+
+        const systemPrompt = new PromptTemplate({
+            template:
+                "Formulate a response to the original mail using given additional information. Address the sender appropriately.\n{format_instructions}",
+            inputVariables: [],
+            partialVariables: { format_instructions: formatInstructions }
+        });
+
+        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+        const humanTemplate = "{sender}\n{subject}\n{body}\n{additionalInformation}";
+        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
+        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+
+        const chain = new LLMChain({
+            llm: llm,
+            prompt: chatPrompt
+        });
+
+        const potentialResponses = await Promise.all(
+            mails.map(async (mail: IBaseMail) => {
+                const result = await chain.call({
+                    sender: mail.senderEmailAddress,
+                    subject: mail.subject,
+                    body: mail.body,
+                    additionalInformation: responseAdditionalInformation
+                });
+                
+                const response = await parser.parse(fixJsonString(result.text));
+                return { mail, response };
+            })
+        );
+
+        return potentialResponses;
+    };
+
+    // Extract Language Matches
+    private extractLanguageMatches = async (mails: Array<IBaseMail>) => {
+        // prepare response
+        const parser = StructuredOutputParser.fromZodSchema(MAIL_LANGUAGE_SCHEMA);
+        const formatInstructions = parser.getFormatInstructions();
+
+        await initializeBTPContext();
+        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+
+        const systemPrompt = new PromptTemplate({
+            template: "Extract the language related information.\n{format_instructions}",
+            inputVariables: [],
+            partialVariables: { format_instructions: formatInstructions }
+        });
+
+        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{mail}");
+        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+
+        const chain = new LLMChain({
+            llm: llm,
+            prompt: chatPrompt
+        });
+
+        const languageMatches = await Promise.all(
+            mails.map(async (mail: IBaseMail) => {
+                const result = await chain.call({ mail: mail.body });
+
+                // Workaround - Add missing ',' for valid JSON
+                const languageMatch = await parser.parse(fixJsonString(result.text));
+
+                return { mail, languageMatch };
+            })
+        );
+
+        return languageMatches;
+    };
+
+    // Translates all insights
+    private translateInsights = async (mails: Array<IProcessedMail>) => {
+        // prepare response
+        const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_TRANSLATION_SCHEMA);
+        const formatInstructions = parser.getFormatInstructions();
+
+        await initializeBTPContext();
+        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+
+        const systemPrompt = new PromptTemplate({
+            template: "Translate the insights of the incoming json.\n{format_instructions}",
+            inputVariables: [],
+            partialVariables: { format_instructions: formatInstructions }
+        });
+
+        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{insights}");
+        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+
+        const chain = new LLMChain({
+            llm: llm,
+            prompt: chatPrompt
+        });
+
+        const translations = await Promise.all(
+            mails.map(async (mail: IProcessedMail) => {
+                if (!mail.insights.languageMatch) {
+                    const result = await chain.call({
+                        insights: JSON.stringify(
+                            filterForTranslation({
+                                ...mail.mail,
+                                ...mail.insights
+                            })
+                        )
+                    });
+                    const translations = [await parser.parse(fixJsonString(result.text))];
+                    
+                    return { ...mail, translations };
+                } else {
+                    return { ...mail, translations: [] };
+                }
+            })
+        );
+
+        return translations;
+    };
+
+    // Only translates the Potential Response
+    private translatePotentialResponse = async (responseBody: String) => {
+        // prepare response
+        const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
+        const formatInstructions = parser.getFormatInstructions();
+
+        await initializeBTPContext();
+        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+
+        const systemPrompt = new PromptTemplate({
+            template: "Translate the response of the incoming json.\n{format_instructions}",
+            inputVariables: [],
+            partialVariables: { format_instructions: formatInstructions }
+        });
+
+        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{response}");
+        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+
+        const chain = new LLMChain({
+            llm: llm,
+            prompt: chatPrompt
+        });
+
+        const result = await chain.call({ response: JSON.stringify(responseBody)});
+        const translation = await parser.parse(fixJsonString(result.text));
+        return translation;
+    };
+
+    private upsertInsights = async (mails: Array<IBaseMail>) => {
+        // Add unique ID to mails if not existent
+        mails = mails.map((mail) => {
+            return { ...mail, ID: mail.ID || uuidv4() };
+        });
+
+        const generalInsights = await this.extractGeneralInsights(mails);
+        const potentialResponses = await this.preparePotentialResponses(mails);
+        const languageMatches = await this.extractLanguageMatches(mails);
+
+        const processedMails = mails.reduce((mails: Array<IProcessedMail>, mail: IBaseMail) => {
+            return [
+                ...mails,
+                {
+                    mail: { ...mail },
+                    insights: {
+                        ...generalInsights.filter(
+                            (res: { mail: IBaseMail; insights: any }) => res.mail.ID === mail.ID
+                        )[0].insights,
+                        ...potentialResponses.filter(
+                            (res: { mail: IBaseMail; response: any }) => res.mail.ID === mail.ID
+                        )[0].response,
+                        ...languageMatches.filter(
+                            (res: { mail: IBaseMail; languageMatch: any }) => res.mail.ID === mail.ID
+                        )[0].languageMatch
+                    }
+                }
+            ];
+        }, new Array<IProcessedMail>());
+
+        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails);
+
         // insert mails with insights
         console.log("UPDATE MAILS WITH INSIGHTS...");
-        const mailBatch = mailsInsights.reduce(
-            (mails: Array<IBaseMail>, { mail, insights }: { mail: IBaseMail; insights: any }) => {
-                return [
-                    ...mails,
-                    {
-                        ID: mail.ID || uuidv4(),
-                        subject: mail.subject,
-                        body: mail.body,
-                        sender: mail.sender,
-                        category: insights.category,
-                        sentiment: insights.sentiment,
-                        urgency: insights.urgency,
-                        summary: insights.summary,
-                        translationSubject: insights.translationSubject,
-                        translationBody: insights.translationBody,
-                        translationSummary: insights.translationBody,
-                        potentialResponse: insights.potentialResponse
-                        // add facts
-                        // add custom fields
-                    }
-                ];
-            },
-            new Array<IBaseMail>()
-        );
+
+        const dbEntries = translatedMails.map((translatedMail) => {
+            return {
+                ...translatedMail.mail,
+                ...translatedMail.insights,
+                translations: translatedMail.translations
+            };
+        });
 
         cds.tx(async () => {
             const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries(mailBatch);
+            await UPSERT.into(Mails).entries(dbEntries);
         });
-        return mailBatch;
+
+        return translatedMails;
+    };
+
+    private upsertResponse = async (mail: IStoredMail, additionalInformation: String = "") => {
+        const processedMail = {
+            mail: { ...mail },
+            insights: {
+                ...mail,
+                responseBody: (
+                    await this.preparePotentialResponses(
+                        [{
+                                ID: mail.ID,
+                                body: mail.body,
+                                senderEmailAddress: mail.senderEmailAddress,
+                                subject: mail.subject
+                        }],
+                        additionalInformation
+                    )
+                )[0]?.response?.responseBody
+            }
+        };
+
+        // insert mails with insights
+        console.log("UPDATE RESPONSE...");
+        let translation: String;
+
+        if (!mail.languageMatch) {
+            translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
+        }
+
+        const dbEntry = [{
+                ...mail,
+                responseBody: processedMail.insights.responseBody,
+                translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+        }];
+
+        cds.tx(async () => {
+            const { Mails } = this.entities;
+            await UPSERT.into(Mails).entries(dbEntry);
+        });
     };
 
     private deleteMail = async (req: Request) => {
@@ -278,13 +483,13 @@ export default class PublicService extends ApplicationService {
             const { tenant } = req;
             const { id } = req.data;
             const { Mails } = this.entities;
-            const response = await DELETE.from(Mails, id);
-            console.log(response);
+
+            await DELETE.from(Mails, id);
+
             const typeormVectorStore = await getVectorStore(tenant);
             const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
 
-            const vectorStoreResult = await typeormVectorStore.appDataSource.query(queryString, [id]);
-            console.log(vectorStoreResult);
+            await typeormVectorStore.appDataSource.query(queryString, [id]);
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -296,45 +501,35 @@ export default class PublicService extends ApplicationService {
             const { tenant } = req;
             const { mails } = req.data;
             const mailBatch = await this.upsertInsights(mails);
-            // embed mail bodies with IDs
+
+            // Embed mail bodies with IDs
             console.log("EMBED MAILS WITH IDs...");
             const typeormVectorStore = await getVectorStore(tenant);
             await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: IBaseMail) => ({
-                    pageContent: mail.body,
+                mailBatch.map((mail: any) => ({
+                    pageContent: mail.mail.body,
                     // add category, services, actions to metadata
-                    metadata: { id: mail.ID }
+                    metadata: { id: mail.mail.ID }
                 }))
             );
 
-            return mailBatch[0];
+            // Return array of added Mails
+            return mailBatch.map((mail) => {
+                return {
+                    ...mail.mail,
+                    ...mail.insights,
+                    translations: mail.translations
+                };
+            });
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
         }
-    };
-
-    private userInfo = (req: Request) => {
-        let results = {
-            user: req.user.id,
-            locale: req.locale,
-            tenant: req.tenant,
-            scopes: {
-                authenticated: req.user.is("authenticated-user"),
-                identified: req.user.is("identified-user"),
-                Member: req.user.is("Member"),
-                Admin: req.user.is("Admin"),
-                ExtendCDS: req.user.is("ExtendCDS"),
-                ExtendCDSdelete: req.user.is("ExtendCDSdelete")
-            }
-        };
-
-        return results;
     };
 }
 
 const getVectorStore = async (tenant: string) => {
     await initializeBTPContext();
-    const embeddings = new BTPOpenAIEmbedding({
+    const embeddings = new BTPOpenAIGPTEmbedding({
         deployment_id: "text-embedding-ada-002-v2"
     });
     const args = getPostgresConnectionOptions(tenant);
@@ -417,3 +612,14 @@ const getLLMAccessCredentials = async () => {
         tokenServiceUrl: tokenServiceUrl.replace("/oauth/token", "")
     };
 };
+
+const fixJsonString = (jsonString : String) => {
+    
+    return jsonString
+        // Workaround - Add missing ',' for valid JSON
+        .replace(/\"\s*\"/g, '", "')
+        // Workaround - Replace \n by \\n in property values
+        .replace(/"([^"]*)"/g, (match, capture) => {
+            return match.replace(/\n(?!\\n)/g, "\\n");
+        });
+}
