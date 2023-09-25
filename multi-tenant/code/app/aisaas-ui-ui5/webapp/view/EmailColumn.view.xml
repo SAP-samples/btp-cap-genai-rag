@@ -14,7 +14,7 @@
 			<ux:ObjectPageDynamicHeaderTitle>
 				<ux:heading>
 					<VBox>
-						<Title text="{= !${/translationActivated} ? ${api>mail/subject} : ${api>mail/translationSubject} }"/>
+						<Title wrapping="true" text="{= !${/translationActivated} ? ${api>mail/subject} : ${api>mail/translations/0/subject} }"/>
 						<HBox>
 							<Label vAlign="Middle" text="{path: 'api>mail/modifiedAt', formatter: 'formatter.formatDate'}"/>
 							<ObjectStatus
@@ -37,7 +37,7 @@
 					</VBox>
 				</ux:heading>
 				<ux:actions>
-					<Button text="{i18n>email.header.translationButton.translate}" press="onTranslate"/>
+					<Button id="translationButton" visible="{= !${api>mail/languageMatch} }" press="onTranslate"/>
 				</ux:actions>
 			</ux:ObjectPageDynamicHeaderTitle>
 		</ux:headerTitle>
@@ -50,7 +50,8 @@
 					initials="{path:'api>mail/sender', formatter:'formatter.getAvatarInitial'}"/>
 				<VBox class="sapUiMediumMarginBegin">
 					<Title text="{i18n>email.header.customerInformation}"/>
-					<Text text="{api>mail/sender}"/>
+					<Text text="{= !${/translationActivated} ? ${api>mail/sender} : ${api>mail/translations/0/sender} }"/>
+					<Text text="{api>mail/senderEmailAddress}"/>
 				</VBox>
 			</HBox>
 		</ux:headerContent>
@@ -60,7 +61,7 @@
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.incomingMessage}">
 						<VBox class="sapUiTinyMargin">
-							<Text text="{= !${/translationActivated} ? ${api>mail/body} : ${api>mail/translationBody} }"/>
+							<Text text="{= !${/translationActivated} ? ${api>mail/body} : ${api>mail/translations/0/body} }"/>
 						</VBox>
 					</ux:ObjectPageSubSection>
 				</ux:subSections>
@@ -87,10 +88,20 @@
 							<TextArea
 								width="100%"
 								growing="true"
+								visible="{= !${/translationActivated} }"
 								valueLiveUpdate="true"
-								value="{/potentialResponse}"
+								value="{/responseBody}"
 								showValueStateMessage="false"
-								valueState="{= ${/potentialResponse} !== ${api>mail/potentialResponse} ? 'Warning' : 'None' }"
+								valueState="{= ${/responseBody} !== ${api>mail/responseBody} ? 'Warning' : 'None' }"
+								liveChange="onChangeResponse"/>
+							<TextArea
+								width="100%"
+								growing="true"
+								visible="{= ${/translationActivated} }"
+								valueLiveUpdate="true"
+								value="{/translatedResponseBody}"
+								showValueStateMessage="false"
+								valueState="{= ${/translatedResponseBody} !== ${api>mail/translations/0/responseBody} ? 'Warning' : 'None' }"
 								liveChange="onChangeResponse"/>
 							<HBox justifyContent="End">
 								<Button type="Emphasized" text="{i18n>email.label.submitButton}" press="onPressSubmit"/>

@@ -11,6 +11,7 @@ import Link from "sap/m/Link";
 import List from "sap/m/List";
 import ListItemBase from "sap/m/ListItemBase";
 import CustomListItem from "sap/m/CustomListItem";
+import Button from "sap/m/Button";
 import Panel from "sap/m/Panel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
@@ -49,7 +50,8 @@ export default class Main extends BaseController {
 			activeEmailId: null,
 			translationActivated: false,
 			additionalInfo: null,
-			potentialResponse: null,
+			responseBody: null,
+			translatedResponseBody: null,
 			similarEmails: []
 		});
 		this.setModel(model);
@@ -96,6 +98,10 @@ export default class Main extends BaseController {
 				}
 			};
 			emailView.bindElement(bindingInfo);
+
+			const translationButton: Button = emailView.byId("translationButton") as Button;
+			translationButton.setText(this.getText("email.header.translationButton.translate"));
+			localModel.setProperty("/translationActivated", false);
 		}
 	}
 
@@ -104,7 +110,8 @@ export default class Main extends BaseController {
 		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
 
 		localModel.setProperty("/additionalInfo", null);
-		localModel.setProperty("/potentialResponse", emailObject.mail.potentialResponse);
+		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
+		localModel.setProperty("/translatedResponseBody", emailObject.mail.translations.length > 0 && emailObject.mail.translations[0].responseBody);
 		localModel.setProperty("/similarEmails", emailObject.closestMails);
 
 		console.log(emailObject.mail);
@@ -142,10 +149,7 @@ export default class Main extends BaseController {
 	}
 
 	public async onSearch(): Promise<void> {
-		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
-		const localModel: JSONModel = this.getModel() as JSONModel;
-
-		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse && localModel.getProperty("/emailsCount") > 0) {
+		if (this.hasResponseChanged()) {
 			await this.openConfirmationDialog(this.getText("confirmationDialog.message.mayBeLost"), this.applyFilter.bind(this), () => this.clearSearchFilter());
 		} else this.applyFilter();
 	}
@@ -164,8 +168,7 @@ export default class Main extends BaseController {
 		const selectedIds: string[] = [];
 		selectedListItems.map((selectedListItem: ListItemBase) => selectedIds.push(selectedListItem.getBindingContext("filters").getProperty("id")));
 
-		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
-		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse && localModel.getProperty("/emailsCount") > 0) {
+		if (this.hasResponseChanged()) {
 			await this.openConfirmationDialog(
 				this.getText("confirmationDialog.message.mayBeLost"),
 				() => this.applySelectedFilter(this.getActivePath(list.getId()), selectedIds),
@@ -286,16 +289,28 @@ export default class Main extends BaseController {
 	}
 
 	public async onSelectEmail(event: Event): Promise<void> {
-		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
 		const emailsList: List = event.getSource() as List;
 		const selectedEmailContext: Context = emailsList.getSelectedItem().getBindingContext("api") as Context;
 		const selectedId: string = selectedEmailContext.getProperty("ID");
-
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		if (localModel.getProperty("/potentialResponse") !== emailObject.mail.potentialResponse) {
+
+		if (this.hasResponseChanged()) {
 			const activeListItem: ListItemBase = emailsList.getItems().find((item: ListItemBase) => item.getBindingContext("api").getProperty("ID") === localModel.getProperty("/activeEmailId"));
 			emailsList.setSelectedItem(activeListItem);
 			await this.openConfirmationDialog(this.getText("confirmationDialog.message.willBeLost"), () => this.setActiveEmail(selectedId));
 		} else this.setActiveEmail(selectedId);
+	}
+
+	private hasResponseChanged(): boolean {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+
+		if (!localModel.getProperty("/translationActivated")) {
+			if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody && localModel.getProperty("/emailsCount") > 0) return true
+			else return false
+		} else {
+			if (localModel.getProperty("/translatedResponseBody") !== emailObject.mail.translations[0].responseBody && localModel.getProperty("/emailsCount") > 0) return true
+			else return false
+		}
 	}
 }

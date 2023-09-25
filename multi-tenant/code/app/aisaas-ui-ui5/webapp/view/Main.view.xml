@@ -101,8 +101,7 @@
                                 items="{
                                     path: 'api>/Mails',
                                     parameters: {
-                                        $count: true,
-                                        $select: 'translationSubject,translationBody'
+                                        $count: true
                                     },
                                     events: {
                                         dataReceived: '.onUpdateEmailsList'

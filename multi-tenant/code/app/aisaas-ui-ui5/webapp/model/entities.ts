@@ -15,16 +15,17 @@ export interface Mail {
     modifiedAt: Date,
     modifiedBy: string,
     sender: string,
+    senderEmailAddress: String,
     subject: string,
     body: string,
     category: string,
     sentiment: number,
     urgency: number,
     summary: string,
-    translationSubject: string,
-    translationBody: string,
-    translationSummary: string,
-    potentialResponse: string
+    responseBody: string,
+    languageNameDetermined: string,
+    languageMatch: boolean,
+    translations: Mail[]
 }
 
 export interface ClosestMail {

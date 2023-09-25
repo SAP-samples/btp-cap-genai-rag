@@ -10,19 +10,27 @@
         },
         {
             "id": "02",
-            "label": "Problem During Travel"
+            "label": "Feedback"
         },
         {
             "id": "03",
-            "label": "Post-Trip Complaint"
-        },
-        {
-            "id": "04",
             "label": "General Inquiry"
         },
         {
+            "id": "04",
+            "label": "Post-Trip Complaint"
+        },
+        {
             "id": "05",
+            "label": "Problem During Travel"
+        },
+        {
+            "id": "06",
             "label": "Special Requests"
+        },
+        {
+            "id": "07",
+            "label": "Unexpected Problem"
         }
     ],
     "urgency": [

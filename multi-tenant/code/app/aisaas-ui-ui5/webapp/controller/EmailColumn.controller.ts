@@ -22,10 +22,10 @@ export default class EmailColumn extends BaseController {
 
 	public onChangeResponse(event: Event): void {
 		const value: string = (event.getSource() as TextArea).getValue();
-		
+
 		if (value.replace(/[^A-Z0-9]+/ig, '') === '') {
 			const localModel: JSONModel = this.getModel() as JSONModel;
-			localModel.setProperty("/potentialResponse", null);
+			localModel.setProperty(!localModel.getProperty("/translationActivated") ? "/responseBody" : "/translatedResponseBody", null);
 		}
 	}
 
@@ -33,7 +33,10 @@ export default class EmailColumn extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const button: Button = event.getSource();
 
-		localModel.setProperty("/potentialResponse", button.getBindingContext("api").getProperty("mail/potentialResponse"));
+		if (!localModel.getProperty("/translationActivated"))
+			localModel.setProperty("/responseBody", button.getBindingContext("api").getProperty("mail/responseBody"));
+		else localModel.setProperty("/translatedResponseBody", button.getBindingContext("api").getProperty("mail/translations/0/responseBody"));
+
 		MessageToast.show("not implemented!");
 	}
 }
