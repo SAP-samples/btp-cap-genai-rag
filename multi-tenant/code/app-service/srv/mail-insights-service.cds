@@ -1,6 +1,6 @@
 using {aisaas.db as db} from '../../db/data-model';
 
-@(requires: ['Member', 'Admin'])
+@(requires: ['Member', 'Admin', 'system-user'])
 service PublicService @(
     path    : 'mail-insights',
     protocol: 'odata-v4',

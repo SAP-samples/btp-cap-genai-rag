@@ -1,6 +1,6 @@
 using {aisaas.db as db} from '../db/schema';
 
-@(requires: ['Member', 'Admin'])
+@(requires: ['Member', 'Admin', 'system-user'])
 service MailInsightsService @(
     path    : 'mail-insights',
     protocol: 'odata-v4'
