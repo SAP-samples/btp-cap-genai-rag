@@ -27,10 +27,10 @@ context aisaas.db {
       }
 
       entity Mails : cuid, managed {
-            sender                 :      String;
-            senderEmailAddress     :      String;
             subject                :      String;
             body                   :      LargeString;
+            senderEmailAddress     :      String;
+            sender                 :      String;
             category               :      String;
             sentiment              :      Integer;
             urgency                :      Integer;

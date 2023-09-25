@@ -15,6 +15,10 @@ export interface ITranslatedMail extends IProcessedMail {
     translations? : Array<ITranslatedInsights> | {};
 }
 
+export interface IStoredMail extends IBaseMail, IInsights {
+    translations? : Array<ITranslatedInsights> | [];
+}
+
 export interface CustomField {
     title?: string;
     isNumber?: boolean;

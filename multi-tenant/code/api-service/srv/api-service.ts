@@ -16,10 +16,11 @@ import { getDestination } from "@sap-cloud-sdk/connectivity";
 import { BTPLLMContext } from "@sap/llm-commons";
 import { BTPOpenAIGPTChat } from "@sap/llm-commons/langchain/chat/openai";
 import { BTPOpenAIGPTEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
-import { IBaseMail, IProcessedMail, ITranslatedMail, CustomField } from "./types";
+import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail, CustomField } from "./types";
 import {
     MAIL_INSIGHTS_SCHEMA,
     MAIL_INSIGHTS_TRANSLATION_SCHEMA,
+    MAIL_RESPONSE_TRANSLATION_SCHEMA,
     MAIL_LANGUAGE_SCHEMA,
     MAIL_RESPONSE_SCHEMA
 } from "./schemas";
@@ -179,7 +180,7 @@ export default class ApiService extends ApplicationService {
                     subject: mail.subject,
                     body: mail.body
                 });
-                const insights = await parser.parse(result.text.replace(/\"\s*\"/g, '", "'));
+                const insights = await parser.parse(fixJsonString(result.text));
                 const reducedInsights = (({ customFields, ...o }) => o)(insights);
                 const customFields = Object.entries(insights.customFields).map(
                     ([key, value]): { title?: string; value?: string } => ({
@@ -196,7 +197,7 @@ export default class ApiService extends ApplicationService {
     };
 
     private preparePotentialResponses = async (mails: Array<IBaseMail>, additionalInformation: String | "" = "") => {
-        let responseAdditionalInformation = additionalInformation;
+        let responseAdditionalInformation = additionalInformation ;
 
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
@@ -230,11 +231,8 @@ export default class ApiService extends ApplicationService {
                     body: mail.body,
                     additionalInformation: responseAdditionalInformation
                 });
-                // Workaround - Replace "\n" by "\\n" if it occurs
-                // Add missing '"' if required to make it a valid JSON
-                const response = await parser.parse(
-                    result.text.replace(/\n(?!\\n)/g, "\\n").replace(/\"\s*\"/g, '", "')
-                );
+                
+                const response = await parser.parse(fixJsonString(result.text));
                 return { mail, response };
             })
         );
@@ -242,6 +240,7 @@ export default class ApiService extends ApplicationService {
         return potentialResponses;
     };
 
+    // Extract Language Matches
     private extractLanguageMatches = async (mails: Array<IBaseMail>) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_LANGUAGE_SCHEMA);
@@ -268,7 +267,10 @@ export default class ApiService extends ApplicationService {
         const languageMatches = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
                 const result = await chain.call({ mail: mail.body });
-                const languageMatch = await parser.parse(result.text.replace(/\"\s*\"/g, '", "'));
+
+                // Workaround - Add missing ',' for valid JSON
+                const languageMatch = await parser.parse(fixJsonString(result.text));
+
                 return { mail, languageMatch };
             })
         );
@@ -276,6 +278,7 @@ export default class ApiService extends ApplicationService {
         return languageMatches;
     };
 
+    // Translates all insights
     private translateInsights = async (mails: Array<IProcessedMail>) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_TRANSLATION_SCHEMA);
@@ -310,7 +313,8 @@ export default class ApiService extends ApplicationService {
                             })
                         )
                     });
-                    const translations = [await parser.parse(result.text.replace(/\"\s*\"/g, '", "'))];
+                    const translations = [await parser.parse(fixJsonString(result.text))];
+                    
                     return { ...mail, translations };
                 } else {
                     return { ...mail, translations: [] };
@@ -319,6 +323,35 @@ export default class ApiService extends ApplicationService {
         );
 
         return translations;
+    };
+
+    // Only translates the Potential Response
+    private translatePotentialResponse = async (responseBody: String) => {
+        // prepare response
+        const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
+        const formatInstructions = parser.getFormatInstructions();
+
+        await initializeBTPContext();
+        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+
+        const systemPrompt = new PromptTemplate({
+            template: "Translate the response of the incoming json.\n{format_instructions}",
+            inputVariables: [],
+            partialVariables: { format_instructions: formatInstructions }
+        });
+
+        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{response}");
+        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+
+        const chain = new LLMChain({
+            llm: llm,
+            prompt: chatPrompt
+        });
+
+        const result = await chain.call({ response: JSON.stringify(responseBody)});
+        const translation = await parser.parse(fixJsonString(result.text));
+        return translation;
     };
 
     private upsertInsights = async (mails: Array<IBaseMail>) => {
@@ -372,44 +405,42 @@ export default class ApiService extends ApplicationService {
         return translatedMails;
     };
 
-    private upsertResponse = async (mail: any, additionalInformation: String = "") => {
-        const processedMail = [
-            {
-                mail: { ...mail },
-                insights: {
-                    ...mail,
-                    responseBody: (
-                        await this.preparePotentialResponses(
-                            [
-                                {
-                                    ID: mail.ID,
-                                    body: mail.body,
-                                    senderEmailAddress: mail.senderEmailAddress,
-                                    subject: mail.subject
-                                }
-                            ],
-                            additionalInformation
-                        )
-                    )[0]?.response?.responseBody
-                }
+    private upsertResponse = async (mail: IStoredMail, additionalInformation: String = "") => {
+        const processedMail = {
+            mail: { ...mail },
+            insights: {
+                ...mail,
+                responseBody: (
+                    await this.preparePotentialResponses(
+                        [{
+                                ID: mail.ID,
+                                body: mail.body,
+                                senderEmailAddress: mail.senderEmailAddress,
+                                subject: mail.subject
+                        }],
+                        additionalInformation
+                    )
+                )[0]?.response?.responseBody
             }
-        ];
+        };
 
         // insert mails with insights
         console.log("UPDATE RESPONSE...");
+        let translation: String;
 
-        const translation = (await this.translateInsights(processedMail))[0]?.translations[0]?.responseBody;
-        const dbEntries = [
-            {
-                ...processedMail[0].mail,
-                ...processedMail[0].insights,
-                translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : {}
-            }
-        ];
+        if (!mail.languageMatch) {
+            translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
+        }
+
+        const dbEntry = [{
+                ...mail,
+                responseBody: processedMail.insights.responseBody,
+                translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+        }];
 
         cds.tx(async () => {
             const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries(dbEntries);
+            await UPSERT.into(Mails).entries(dbEntry);
         });
     };
 
@@ -547,3 +578,14 @@ const getLLMAccessCredentials = async () => {
         tokenServiceUrl: tokenServiceUrl.replace("/oauth/token", "")
     };
 };
+
+const fixJsonString = (jsonString : String) => {
+    
+    return jsonString
+        // Workaround - Add missing ',' for valid JSON
+        .replace(/\"\s*\"/g, '", "')
+        // Workaround - Replace \n by \\n in property values
+        .replace(/"([^"]*)"/g, (match, capture) => {
+            return match.replace(/\n(?!\\n)/g, "\\n");
+        });
+}

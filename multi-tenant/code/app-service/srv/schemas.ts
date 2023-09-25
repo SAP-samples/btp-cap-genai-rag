@@ -6,6 +6,7 @@ export {
     MAIL_LANGUAGE_SCHEMA,
     MAIL_INSIGHTS_SCHEMA,
     MAIL_INSIGHTS_TRANSLATION_SCHEMA,
+    MAIL_RESPONSE_TRANSLATION_SCHEMA,
     MAIL_RESPONSE_SCHEMA
 }
 
@@ -105,6 +106,12 @@ const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
     responseBody: z.string()
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
       Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
+    
+const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
+    responseBody: z.string()
+}).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
+        Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
+    
 
 const MAIL_RESPONSE_SCHEMA = z
     .object({
