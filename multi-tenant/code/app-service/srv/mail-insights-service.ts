@@ -110,6 +110,7 @@ export default class PublicService extends ApplicationService {
                               m.body;
                               m.category;
                               m.sender;
+                              m.translations;
                           })
                     : [];
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
