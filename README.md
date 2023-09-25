@@ -37,9 +37,9 @@ Furthermore, the system takes automation to the next level by generating potenti
 
 Though initially tailored for a travel agency, the code can be adapted to suit various industries, making it a versatile solution for augmenting customer support with data-driven insights and automation.
 
-The same business scenarion is also available as [single tenant version](https://github.com/SAP-samples/btp-cap-genai-rag/tree/main/single-tenant).
+The same business scenario is also available as [single tenant version](https://github.com/SAP-samples/btp-cap-genai-rag/tree/main/single-tenant).
 
-> Add Screenshots of the webapp
+> TODO: Add Screenshots of the webapp
 
 
 ## Getting started
