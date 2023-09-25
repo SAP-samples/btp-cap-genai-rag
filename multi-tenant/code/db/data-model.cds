@@ -5,32 +5,49 @@ using {
 
 context aisaas.db {
 
+      type KeyFacts {
+            keyfact         : String;
+            keyfactcategory : String;
+      }
+
+      type CustomField {
+            title : String;
+            value : String
+      }
+
+      type Translation {
+            sender            :      String;
+            subject           :      String;
+            body              :      LargeString;
+            summary           :      String;
+            responseBody      :      LargeString;
+            customFields      : many CustomField;
+            keyFacts          : many KeyFacts;
+            requestedServices : many String;
+      }
+
       entity Mails : cuid, managed {
-            sender             : String;
-            subject            : String;
-            body               : LargeString;
-            category           : String;
-            sentiment          : Integer;
-            urgency            : Integer;
-            summary            : String;
-            translationSubject : String;
-            translationBody    : LargeString;
-            translationSummary : String;
-            potentialResponse  : LargeString;
-            facts              : Composition of many Facts
-                                       on facts.mail = $self;
+            subject                :      String;
+            body                   :      LargeString;
+            senderEmailAddress     :      String;
+            sender                 :      String;
+            category               :      String;
+            sentiment              :      Integer;
+            urgency                :      Integer;
+            summary                :      String;
+            responseBody           :      LargeString;
+            languageNameDetermined :      String;
+            languageMatch          :      Boolean;
+            requestedServices      : many String;
+            suggestedActions       : many String;
+            customFields           : many CustomField;
+            keyFacts               : many KeyFacts;
+            translations           : many Translation;
       }
 
-      entity Facts {
-            key mail      : Association to Mails;
-                fact      : String;
-                factTitle : String;
-                value     : String;
-      }
-
-      entity CustomFields : cuid, managed {
+      entity CustomFields {
             title       : String;
             isNumber    : Boolean;
             description : String;
-      }
+      };
 }
