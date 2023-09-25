@@ -1,9 +1,9 @@
 {
-    "name": "aisaas",
-    "version": "0.0.1",
-    "repository": "https://github.com/SAP-samples/btp-cap-multitenant-ai",
-    "license": "Apache-2.0",
-    "description": "AI SaaS",
+    "name": "btp-cap-genai-rag",
+    "version": "1.0.0",
+    "description": "A simple CAP project.",
+    "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
+    "license": "Apache License 2.0",
     "engines": {
         "node": "^18.x"
     },
@@ -34,7 +34,8 @@
         "combined-stream": "^1.0.8",
         "cors": "^2.8.5",
         "express": "^4",
-        "langchain": "^0.0.150",
+        "openai": "~4.4.0",
+        "langchain": "^0.0.153",
         "node-fetch": "^2.6.7",
         "node-jose": "^2.1",
         "passport": "^0.6.0",

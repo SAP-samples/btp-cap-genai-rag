@@ -1,9 +1,9 @@
 {
-  "name": "ai",
-  "version": "0.0.1",
-  "repository": "https://github.com/sap-samples/btp-cap-multitenant-ai",
+  "name": "btp-cap-genai-rag",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
   "license": "Apache License 2.0",
-  "description": "AI",
   "scripts": {
     "---BUILD---": "",
     "build": "npm run install && npm run build:cds && npm run build:ts && npm run cleanup:ts && npm run build:ui",
@@ -13,8 +13,8 @@
     "build:ui": "npm run build --prefix ../../code/app/ai-ui-react",
     "cleanup:ts": "npx shx rm -r '../../code/gen/**/*.{ts,tsconfig}'",
     "---DEPLOY---": "",
-    "build:mbt": "mbt build -p=cf -t=./mta_archives --mtar=genai.mtar",
-    "deploy": "cf deploy mta_archives/genai.mtar",
+    "build:mbt": "mbt build -p=cf -t=./mta_archives --mtar=ai.mtar",
+    "deploy": "cf deploy mta_archives/ai.mtar",
     "build:deploy": "npm run build && npm run build:mbt && npm run deploy"
   }
 }

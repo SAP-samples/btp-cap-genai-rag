@@ -1,5 +1,5 @@
 <mvc:View
-	controllerName="aisaas.ui.controller.Main"
+	controllerName="ai.ui.controller.Main"
 	displayBlock="true"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
@@ -7,7 +7,7 @@
     xmlns:tnt="sap.tnt"
     xmlns:core="sap.ui.core"
 	core:require="{ formatter:
-	'aisaas/ui/model/formatter' }">
+	'ai/ui/model/formatter' }">
 
 	<Page showHeader="false">
         <content>
@@ -22,7 +22,7 @@
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.requestType}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="categoryClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onClearFilter"/>
+                                        <Link id="categoryClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="categoryList"
@@ -40,7 +40,7 @@
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.urgency}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="urgencyClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeUrgencies}.length > 0 }" press="onClearFilter"/>
+                                        <Link id="urgencyClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeUrgencies}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="urgencyList"
@@ -58,7 +58,7 @@
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.sentiment}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="sentimentClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeSentiments}.length > 0 }" press="onClearFilter"/>
+                                        <Link id="sentimentClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeSentiments}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="sentimentList"
@@ -101,8 +101,7 @@
                                 items="{
                                     path: 'api>/Mails',
                                     parameters: {
-                                        $count: true,
-                                        $select: 'translationSubject,translationBody'
+                                        $count: true
                                     },
                                     events: {
                                         dataReceived: '.onUpdateEmailsList'
@@ -110,14 +109,14 @@
                                 }"
                                 selectionChange="onSelectEmail">
                                 <CustomListItem tooltip="{api>subject}" selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${/activeEmailId} }">
-                                    <core:Fragment fragmentName="aisaas.ui.view.EmailListItem" type="XML"/>
+                                    <core:Fragment fragmentName="ai.ui.view.EmailListItem" type="XML"/>
                                 </CustomListItem>
                             </List>
                         </ScrollContainer>
                     </l:flexContent>
                 </l:FixFlex>
                 
-                <mvc:XMLView id="emailColumn" viewName="aisaas.ui.view.EmailColumn"/>
+                <mvc:XMLView id="emailColumn" viewName="ai.ui.view.EmailColumn"/>
             </l:Splitter>
         </content>
     </Page>

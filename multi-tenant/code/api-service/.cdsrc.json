@@ -1,5 +1,6 @@
 {
     "folders": {
+        "app": "../app",
         "db-sqlite": "../db/sqlite"
     },
     "requires": {
@@ -86,12 +87,42 @@
             "[hybrid]": {
                 "kind": "xsuaa"
             },
+            "[bas]": {
+                "kind": "basic",
+                "users": {
+                    "alice": {
+                        "tenant": "t1",
+                        "roles": ["Admin", "Member", "cds.Subscriber"]
+                    },
+                    "bob": {
+                        "roles": ["Member"]
+                    }
+                }
+            },
             "[local-with-mtx]": {
-                "kind": "mocked"
+                "kind": "basic",
+                "users": {
+                    "alice": {
+                        "tenant": "t1",
+                        "roles": ["Admin", "Member", "cds.Subscriber"]
+                    },
+                    "bob": {
+                        "tenant": "t1",
+                        "roles": ["Member"]
+                    }
+                }
             },
             "[development]": {
-                "kind": "mocked"
-            } 
-        }
+                "kind": "basic",
+                "users": {
+                    "alice": {
+                        "roles": ["Admin", "Member"]
+                    },
+                    "carol": {
+                        "roles": ["Member"]
+                    }
+                }
+            }
+        } 
     }
 }

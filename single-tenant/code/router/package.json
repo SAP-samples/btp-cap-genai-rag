@@ -2,9 +2,7 @@
     "name": "router",
     "version": "1.0.0",
     "scripts": {
-        "start": "node index.js",
-        "start:local": "node node_modules/@sap/approuter/approuter.js --workingDir ./dev --port 5100",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "node index.js"
     },
     "dependencies": {
         "@sap/approuter": "^14.1.2"

@@ -2,7 +2,7 @@
    xmlns="sap.m"
    xmlns:tnt="sap.tnt"
    xmlns:core="sap.ui.core"
-   core:require="{ formatter: 'aisaas/ui/model/formatter' }">
+   core:require="{ formatter: 'ai/ui/model/formatter' }">
     <HBox class="sapUiSmallMargin" justifyContent="SpaceBetween">
         <HBox justifyContent="Center">
             <Avatar

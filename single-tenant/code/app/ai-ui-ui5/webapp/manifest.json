@@ -36,7 +36,7 @@
 
 	"sap.ui5": {
 		"rootView": {
-			"viewName": "aisaas.ui.view.App",
+			"viewName": "ai.ui.view.App",
 			"type": "XML",
 			"async": true,
 			"id": "app"
@@ -63,7 +63,7 @@
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
-					"bundleName": "aisaas.ui.i18n.i18n",
+					"bundleName": "ai.ui.i18n.i18n",
 					"bundleUrl": "i18n/i18n.properties",
                     "supportedLocales": ["en", ""],
                     "fallbackLocale": "en"
@@ -89,7 +89,7 @@
 			"config": {
 				"routerClass": "sap.m.routing.Router",
 				"viewType": "XML",
-				"viewPath": "aisaas.ui.view",
+				"viewPath": "ai.ui.view",
 				"controlId": "app",
 				"controlAggregation": "pages",
 				"async": true

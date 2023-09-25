@@ -1,5 +1,4 @@
-local
 package-lock.json
+*-private.json
 package.json
 node_modules
-dev

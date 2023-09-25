@@ -1,32 +1,3 @@
-POST http://localhost:4004/sample/completion
-content-type: application/json
-
-{
-    "prompt": "tell me a joke about sap technology"
-}
-
-###
-POST http://localhost:4004/sample/chatCompletion
-content-type: application/json
-
-{
-    "messages": [
-        {"role": "system", "content": "An interaction between a human and a machine"},
-        {"role": "user", "content": "Hello"},
-        {"role": "assistant", "content": "Hello"},
-        {"role": "user", "content": "Who are you?"},
-        {"role": "assistant", "content": "I am an intelligent machine"},
-        {"role": "user", "content": "Who created you?"}
-    ]
-}
-
-###
-POST http://localhost:4004/sample/embedding
-content-type: application/json
-
-{
-    "input": "SAP SE is a German multinational software company based in Walldorf, Baden-Württemberg. It develops enterprise software to manage business operations and customer relations.[2][3] The company is the world's leading enterprise resource planning (ERP) software vendor.[4][5] SAP is the largest non-American software company by revenue, the world's third-largest publicly traded software company by revenue, and the second-largest German company by market capitalization.[6] Apart from ERP software, the company also sells database software and technology (particularly its own brands), cloud-engineered systems, and other ERP software products, such as human capital management (HCM) software, customer relationship management (CRM) software (also known as customer experience), enterprise performance management (EPM) software, product lifecycle management (PLM) software, supplier relationship management (SRM) software, supply chain management (SCM) software, business technology platform (BTP) software and programming environment SAP AppGyver for business."
-}
 
 ### ADD MAILS
 # @name addMails
@@ -35,22 +6,42 @@ content-type: application/json
 Authorization: Basic alice:
 
 {
-    "mails": [
-        "Dear Adi Pleyer, I am not very happy with the delivery I received from you. The motor is not reaching the desired speed and produces strange sounds. I would like to return the vehicle. Please let me know how I can give it back to you. Best regards, Kay"
+  "mails": [
+    {
+        "subject": "Help Needed in Booking Family Suite in Rome",
+        "body": "Dear Support Team, as a loyal customer I'm trying to book a family suite in Rome for my family of five. However, I can't seem to find a suitable one on your website. Can you help me find a hotel that can accommodate us comfortably? \nMany Thanks,  \nJane Smith ",
+        "senderEmailAddress": "jane.smith@tttraveler.org"
+    },
+    {
+        "subject": "Help Needed in Booking President Suite in Singapore",
+        "body": "Dear Support Team, I'm trying to book a president suite in Singapore for my team of fifty. However, I can't seem to find a suitable one on your website. Can you help me find a hotel that can accommodate us comfortably? \nMany Thanks,  \nJordan Belford ",
+        "senderEmailAddress": "jordan.belford@stratton-oakmont.org"
+    },
+    {
+        "subject": "ヨーロッパ複数都市ツアーの支援が必要です",
+        "body": "こんにちは、ThorToursチームの皆様、来年の夏にヨーロッパで複数の都市を巡るツアーを計画しており、飛行機やホテルの予約方法について最適な方法が分からずにいます。ローマ、パリ、ベルリン、バルセロナを含む旅程を作成するお手伝いをしていただけますか？\nよろしくお願いいたします。\nトム・デイビス\n",
+        "senderEmailAddress": "tom.davis@tttraveler.org"
+    },
+    {
+        "subject": "需要协助安排多城欧洲之旅",
+        "body": "你好，ThorTours团队，我计划在明年夏天进行一次欧洲多城市之旅，但我对如何预订机票和酒店感到困惑。你们能帮助我制定一个包括罗马、巴黎、柏林和巴塞罗那的行程吗？\n提前感谢你们，\n汤姆·戴维斯\n",
+        "senderEmailAddress": "tom.davis@tttraveler.org"
+    }  
   ]
 }
-
-### GET MAIL
-@id = {{addMails.response.body.$.value[0].id}}
-
-# @name getMail
-GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
-content-type: application/json
-Authorization: Basic alice:
-
 
 ### GET MAILS
 # @name getMails
 GET http://localhost:4004/odata/v4/mail-insights/getMails()
 content-type: application/json
+Authorization: Basic alice:
+
+
+### GET MAIL
+@id = {{getMails.response.body.$.value[0].ID}}
+
+# @name getMail
+GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
+content-type: application/json
+Authorization: Basic alice:
 

@@ -1,4 +1,4 @@
-import Main from "aisaas/ui/controller/Main.controller";
+import Main from "ai/ui/controller/Main.controller";
 
 QUnit.module("Sample Main controller test");
 
