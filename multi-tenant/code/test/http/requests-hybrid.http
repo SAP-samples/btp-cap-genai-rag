@@ -1,5 +1,5 @@
 @xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
-@btpXsuaaClient = sb-aisaas-dev-sap-demo!t12345
+@btpXsuaaClient = sb-aisaas-api-dev-sap-demo!b12345
 @btpXsuaaSecret = abcd1234abcd1234abcd1234
 
 
@@ -21,85 +21,46 @@ client_id={{btpXsuaaClient}}
 @token = {{getXsuaaToken.response.body.$.access_token}}
 
 # @name addMails
-POST http://localhost:4005/rest/api/addMails
-# POST http://localhost:4004/odata/v4/mail-insights/addMails
+POST http://localhost:4005/rest/api/mail-insights/addMails
 content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "mails":[
-  {
-    "subject": "Disney World trip",
-    "body": "Hello. I'm trying to book a flight and hotel package on your website for my family's trip to Disney World, but I'm having trouble finding a hotel that offers a shuttle to the parks. Can you help me?\nBest,\nLisa Brown",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Assistance Needed for a Multi-City European Tour",
-    "body": "Hello Expedia Team, I'm planning a multi-city tour of Europe for next summer and I'm having trouble figuring out the best way to book the flights and hotels. Can you assist me in creating an itinerary that includes Rome, Paris, Berlin, and Barcelona?\nThanks in Advance,\nTom Davis",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Help Needed in Booking Accessible Accommodation and Transportation",
-    "body": "Hello, My mother uses a wheelchair and we want to book a holiday together. Could you help us find accommodations, transportation, and activities that are accessible and cater to her needs?\nSincerely,\nMary Taylor",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Assistance Requested for Group Booking",
-    "body": "Hi, I'm trying to arrange a trip for a group of 20 people, but I'm finding it challenging to get flights and hotels that can accommodate us all at the same time. Can you assist?\nThank you,\nCharlie Miller",
-    "sender": "sample.sender@example.org"
-  },{
-    "subject": "Cancellation procedure",
-    "body": "I've booked a flight to Paris next month, but due to unforeseen circumstances, I need to cancel it. What's your cancellation policy, and can I get a refund?\nThank You,\nRobert Jackson",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Request to Cancel Flight Booking to Madrid",
-    "body": "Dear customer support team, due to a family emergency, I need to cancel my upcoming flight to Madrid. The booking reference is #12345. Could you please assist me with this process?\nBest Wishes,\nEmily Wilson",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Change of Hotel Reservation Dates for Boston Trip",
-    "body": "Hello, I have a hotel reservation in Boston next week (Booking reference #54321), but I need to change the dates to the following week. Can you help me with this change?\nBest regards,\nPatricia Thomas",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Need to Reschedule My Package Tour to Bali",
-    "body": "Hi there, I've booked a package tour to Bali next month, but due to work commitments, I need to reschedule it for the month after. My booking reference is #67890. Could you please assist?\nRegards,\nJennifer White",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Request to Alter Multi-Destination Itinerary",
-    "body": "Dear Support, Due to an unexpected work commitment, I need to alter my multi-destination itinerary. I need to cut my time in Tokyo short and extend my stay in Beijing. My booking reference is #34567. Please assist.\nMany Thanks,\nLinda Martin",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Partial Cancellation of Group Booking Needed",
-    "body": "Hello, I booked a group trip, but four of our members can no longer attend. How do I cancel for these four without affecting the rest of the group's booking?\nWarm Regards,\nCarlos Rodriguez",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Change of Accommodation Due to Medical Requirements",
-    "body": "Hi, I recently had a surgery and now require a room with specific facilities to accommodate my recovery. Can you help me change my existing hotel booking to a room that meets these requirements?\nWarm Regards\nSamuel Njoroge",
-    "sender": "sample.sender@example.org"
-  },{
-    "subject": "URGENT! Reservation lost!",
-    "body": "I just arrived at my hotel and they don't have my reservation. I booked and paid through your website. Can you sort this out?\nThanks,\nAnne-Sophie Lefevre",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Hotel Not Recognizing My Booking in Sydney",
-    "body": "Hi, I've just arrived at my hotel in Sydney, and they're saying they have no record of my booking. I booked and paid through your website. My booking reference is #23456. Please help!\nRegards,\nLiu Wei",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Car Rental Not Available Upon Arrival in Florida",
-    "body": "Hi, I've just landed in Florida and the car rental company doesn't have my reservation. I have a confirmation from your website, but they say they don't have a car for me. Can you assist?\nRegards,\nAna Santos",
-    "sender": "sample.sender@example.org"
-  },
-  {
-    "subject": "Issue with Airport Transfer in Dubai",
-    "body": "Dear Expedia Team, I landed in Dubai this morning and the airport transfer I booked through your site didn't show up. I've had to take a taxi to my hotel. Can you please look into this?\nThank you,\nSara Johansson",
-    "sender": "sample.sender@example.org"
-    }
+  "mails": [
+    {
+        "subject": "Help Needed in Booking Family Suite in Rome",
+        "body": "Dear Support Team, as a loyal customer I'm trying to book a family suite in Rome for my family of five. However, I can't seem to find a suitable one on your website. Can you help me find a hotel that can accommodate us comfortably? \nMany Thanks,  \nJane Smith ",
+        "senderEmailAddress": "jane.smith@tttraveler.org"
+    },
+    {
+        "subject": "Help Needed in Booking President Suite in Singapore",
+        "body": "Dear Support Team, I'm trying to book a president suite in Singapore for my team of fifty. However, I can't seem to find a suitable one on your website. Can you help me find a hotel that can accommodate us comfortably? \nMany Thanks,  \nJordan Belford ",
+        "senderEmailAddress": "jordan.belford@stratton-oakmont.org"
+    },
+    {
+        "subject": "ヨーロッパ複数都市ツアーの支援が必要です",
+        "body": "こんにちは、ThorToursチームの皆様、来年の夏にヨーロッパで複数の都市を巡るツアーを計画しており、飛行機やホテルの予約方法について最適な方法が分からずにいます。ローマ、パリ、ベルリン、バルセロナを含む旅程を作成するお手伝いをしていただけますか？\nよろしくお願いいたします。\nトム・デイビス\n",
+        "senderEmailAddress": "tom.davis@tttraveler.org"
+    },
+    {
+        "subject": "需要协助安排多城欧洲之旅",
+        "body": "你好，ThorTours团队，我计划在明年夏天进行一次欧洲多城市之旅，但我对如何预订机票和酒店感到困惑。你们能帮助我制定一个包括罗马、巴黎、柏林和巴塞罗那的行程吗？\n提前感谢你们，\n汤姆·戴维斯\n",
+        "senderEmailAddress": "tom.davis@tttraveler.org"
+    }  
   ]
 }
+
+### GET MAILS
+# @name getMails
+GET http://localhost:4005/rest/api/mail-insights/getMails()
+content-type: application/json
+Authorization: Bearer {{token}}
+
+
+### GET MAIL
+@id = {{getMails.response.body.$.value[0].ID}}
+
+# @name getMail
+GET http://localhost:4005/rest/api/mail-insights/getMail(id={{id}})
+content-type: application/json
+Authorization: Bearer {{token}}

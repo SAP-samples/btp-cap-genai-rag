@@ -10,11 +10,19 @@
         },
         {
             "id": "02",
-            "label": "General Inquiry"
+            "label": "Problem During Travel"
         },
         {
             "id": "03",
-            "label": "Problem During Travel"
+            "label": "Post-Trip Complaint"
+        },
+        {
+            "id": "04",
+            "label": "General Inquiry"
+        },
+        {
+            "id": "05",
+            "label": "Special Requests"
         }
     ],
     "urgency": [

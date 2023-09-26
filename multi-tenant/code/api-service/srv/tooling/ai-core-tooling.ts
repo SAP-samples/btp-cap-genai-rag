@@ -4,7 +4,7 @@ import { HttpResponse } from "@sap-cloud-sdk/http-client";
 import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
 import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
-import { CreateChatCompletionRequest, CreateChatCompletionResponse, ChatCompletionRequestMessage } from "openai";
+import { OpenAI as OpenAIClient } from "openai";
 import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "../vendor/AI_CORE_API";
 
 enum Tasks {
@@ -75,9 +75,13 @@ export const completion = async (prompt: string, tenant: string, LLMParams: {} =
  * @returns the text completion
  */
 export const chatCompletion = async (
-    request: CreateChatCompletionRequest,
+    request: | OpenAIClient.Chat.ChatCompletionCreateParamsStreaming
+             | OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
     tenant: string
-): Promise<CreateChatCompletionResponse> => {
+): Promise<
+    | AsyncIterable<OpenAIClient.Chat.Completions.ChatCompletionChunk>
+    | OpenAIClient.Chat.Completions.ChatCompletion
+    > => {
     const appName = getAppName();
     //const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const resourceGroupId = "default";
@@ -85,7 +89,7 @@ export const chatCompletion = async (
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
         const payload: any = {
-            messages: request.messages.map((value: ChatCompletionRequestMessage) => ({
+            messages: request.messages.map((value: OpenAIClient.Chat.Completions.ChatCompletionMessage) => ({
                 role: value.role,
                 content: value.content
             })),

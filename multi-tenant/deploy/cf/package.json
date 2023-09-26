@@ -1,9 +1,9 @@
 {
-  "name": "aisaas",
-  "version": "0.0.1",
-  "repository": "https://github.com/sap-samples/btp-cap-multitenant-ai",
+  "name": "btp-cap-genai-rag",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
   "license": "Apache License 2.0",
-  "description": "AI SaaS",
   "scripts": {
     "---BUILD---": "",
     "build": "npm run install && npm run build:cds && npm run build:ts && npm run cleanup:ts",
@@ -12,11 +12,8 @@
     "build:cds": "npx -p @sap/cds-dk cds build -in ../../code --profile production",
     "cleanup:ts": "npx shx rm -r '../../code/gen/**/*.{ts,tsconfig}'",
     "---DEPLOY---": "",
-    "build:mbt": "mbt build -p=cf -t=./mta_archives --mtar=saas-genai.mtar",
-    "deploy": "cf deploy mta_archives/saas-genai.mtar -e ./mtaext/free-tier.mtaext",
-    "build:deploy": "npm run build && npm run build:mbt && npm run deploy",
-    "---DEPLOY PRIVATE---": "",
-    "deploy:private": "cf deploy mta_archives/saas-genai.mtar -e ./mtaext/tfe-private.mtaext",
-    "build:deploy:private": "npm run build && npm run build:mbt:private && npm run deploy:private"
+    "build:mbt": "mbt build -p=cf -t=./mta_archives --mtar=aisaas.mtar",
+    "deploy": "cf deploy mta_archives/aisaas.mtar -e ./mtaext/free-tier.mtaext",
+    "build:deploy": "npm run build && npm run build:mbt && npm run deploy"
   }
 }

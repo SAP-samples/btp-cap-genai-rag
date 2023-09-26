@@ -22,14 +22,6 @@
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
-        "[bas]": {
-            "multitenancy": false,
-            "extensibility": false,
-            "toggles": false,
-            "postgres": {
-                "kind": "postgresql-db"
-            }
-        },
         "[hybrid]": {
             "multitenancy": true,
             "extensibility": false,
@@ -42,6 +34,14 @@
                     }
                 ]
             },
+            "postgres": {
+                "kind": "postgresql-db"
+            }
+        },
+        "[bas]": {
+            "multitenancy": false,
+            "extensibility": false,
+            "toggles": false,
             "postgres": {
                 "kind": "postgresql-db"
             }
@@ -115,43 +115,39 @@
         "--- Auth Settings ---": "---",
         " --------------------": "---",
         "auth": {
+            "[hybrid]": {
+                "kind": "xsuaa"
+            },
             "[bas]": {
-                "kind": "mocked",
+                "kind": "basic",
                 "users": {
                     "alice": {
                         "tenant": "t1",
-                        "roles": ["Admin", "Member"]
+                        "roles": ["Admin", "cds.Subscriber"]
                     },
-                    "carol": {
+                    "bob": {
                         "roles": ["Member"]
                     }
                 }
             },
-            "[hybrid]": {
-                "kind": "xsuaa"
-            },
             "[local-with-mtx]": {
-                "kind": "mocked",
+                "kind": "basic",
                 "users": {
                     "alice": {
                         "tenant": "t1",
-                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
-                    },
-                    "carol": {
-                        "tenant": "t1",
-                        "roles": ["Member"]
+                        "roles": ["Admin", "cds.Subscriber"]
                     },
                     "bob": {
-                        "tenant": "t1-ext",
-                        "roles": ["Admin", "cds.Subscriber", "cds.ExtensionDeveloper"]
+                        "tenant": "t1",
+                        "roles": ["Member"]
                     }
                 }
             },
             "[development]": {
-                "kind": "mocked",
+                "kind": "basic",
                 "users": {
                     "alice": {
-                        "roles": ["Admin", "Member"]
+                        "roles": ["Admin"]
                     },
                     "carol": {
                         "roles": ["Member"]

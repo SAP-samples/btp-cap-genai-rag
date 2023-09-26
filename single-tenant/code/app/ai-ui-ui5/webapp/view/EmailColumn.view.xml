@@ -1,5 +1,5 @@
 <mvc:View
-	controllerName="aisaas.ui.controller.EmailColumn"
+	controllerName="ai.ui.controller.EmailColumn"
 	displayBlock="true"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
@@ -7,7 +7,7 @@
     xmlns:ux="sap.uxap"
 	xmlns:core="sap.ui.core"
 	core:require="{ formatter:
-	'aisaas/ui/model/formatter' }">
+	'ai/ui/model/formatter' }">
 
     <ux:ObjectPageLayout id="emailPage" showAnchorBarPopover="false" upperCaseAnchorBar="false" headerContentPinned="true" visible="{= ${/activeEmailId} !== null }">
 		<ux:headerTitle>
@@ -71,10 +71,9 @@
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.responsePreparation}">
 						<VBox class="sapUiTinyMargin">
 							<Title text="{i18n>email.title.additionalInfo}:"/>
-							<TextArea growing="true" width="100%" valueLiveUpdate="true" placeholder="{i18n>email.placeholder.additionalInfo}" value="{/additionalInfo}"
-								liveChange="onChangeAdditionalInfo"/>
+							<TextArea width="100%" growing="true" valueLiveUpdate="true" placeholder="{i18n>email.placeholder.additionalInfo}" value="{/additionalInfo}"/>
 							<HBox justifyContent="End">
-								<Button type="Emphasized" text="{i18n>email.label.generateButton}" enabled="{= ${/additionalInfo} !== null }"/>
+								<Button type="Emphasized" text="{i18n>email.label.generateButton}" press="onPressGenerate"/>
 							</HBox>
 						</VBox>
 					</ux:ObjectPageSubSection>
@@ -85,9 +84,16 @@
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.suggestedResponse}">
 						<VBox class="sapUiTinyMargin">
-							<TextArea growing="true" width="100%" valueLiveUpdate="true" value="{/potentialResponse}" liveChange="onChangeResponse"/>
+							<TextArea
+								width="100%"
+								growing="true"
+								valueLiveUpdate="true"
+								value="{/potentialResponse}"
+								showValueStateMessage="false"
+								valueState="{= ${/potentialResponse} !== ${api>mail/potentialResponse} ? 'Warning' : 'None' }"
+								liveChange="onChangeResponse"/>
 							<HBox justifyContent="End">
-								<Button type="Emphasized" text="{i18n>email.label.submitButton}" enabled="{= ${/potentialResponse} !== null }"/>
+								<Button type="Emphasized" text="{i18n>email.label.submitButton}" press="onPressSubmit"/>
 							</HBox>
 						</VBox>
 					</ux:ObjectPageSubSection>
@@ -100,15 +106,23 @@
 						<VBox class="sapUiTinyMargin">
 							<List
                                 id="similarEmailsList"
+								showSeparators="None"
                                 mode="SingleSelectMaster"
                                 noDataText="{i18n>email.list.label.noData}"
                                 items="{
 									path: '/similarEmails',
 									sorter: {path: 'similarity', descending: 'false'}
-								}"
-                                selectionChange="onSelectSimilarEmail">
-                                <CustomListItem selected="false">
-                                    <core:Fragment fragmentName="aisaas.ui.view.EmailWithSimilarityListItem" type="XML"/>
+								}">
+                                <CustomListItem>
+									<Panel
+										expandable="true"
+										expanded="false"
+										stickyHeader="true"
+										headerText="{mail/subject} | {i18n>email.list.label.similarity}: {path:'similarity', formatter:'formatter.getFormattedSimilarity'}%">
+                  						<content>
+                                    		<core:Fragment fragmentName="ai.ui.view.SimilarEmailListItem" type="XML"/>
+										</content>
+									</Panel>
                                 </CustomListItem>
                             </List>
 						</VBox>

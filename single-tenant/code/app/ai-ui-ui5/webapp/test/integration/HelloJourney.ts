@@ -10,7 +10,7 @@ opaTest("Should open the Hello dialog", function () {
 	// Arrangements
 	onTheMainPage.iStartMyUIComponent({
 		componentConfig: {
-			name: "aisaas.ui"
+			name: "ai.ui"
 		}
 	});
 
@@ -34,7 +34,7 @@ opaTest("Should close the Hello dialog", function () {
 	// Arrangements
 	onTheMainPage.iStartMyUIComponent({
 		componentConfig: {
-			name: "aisaas.ui"
+			name: "ai.ui"
 		}
 	});
 
