@@ -1,6 +1,6 @@
 using {aisaas.db} from '../../db/data-model';
 
-@requires: 'system-user'
+@(requires: ['system-user'])
 service ApiService @(
      path    : 'api/mail-insights',
      protocol: 'rest',

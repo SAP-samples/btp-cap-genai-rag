@@ -1,5 +1,5 @@
 @xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
-@btpXsuaaClient = sb-aisaas-dev-sap-demo!t12345
+@btpXsuaaClient = sb-aisaas-api-dev-sap-demo!b12345
 @btpXsuaaSecret = abcd1234abcd1234abcd1234
 
 
@@ -22,7 +22,6 @@ client_id={{btpXsuaaClient}}
 
 # @name addMails
 POST http://localhost:4005/rest/api/mail-insights/addMails
-# POST http://localhost:4004/odata/v4/mail-insights/addMails
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -53,8 +52,7 @@ Authorization: Bearer {{token}}
 
 ### GET MAILS
 # @name getMails
-GET http://localhost:4004/odata/v4/mail-insights/getMails()
-# GET http://localhost:4005/rest/api/mail-insights/getMails()
+GET http://localhost:4005/rest/api/mail-insights/getMails()
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -63,7 +61,6 @@ Authorization: Bearer {{token}}
 @id = {{getMails.response.body.$.value[0].ID}}
 
 # @name getMail
-GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
-# GET http://localhost:4005/rest/api/mail-insights/getMail(id={{id}})
+GET http://localhost:4005/rest/api/mail-insights/getMail(id={{id}})
 content-type: application/json
 Authorization: Bearer {{token}}

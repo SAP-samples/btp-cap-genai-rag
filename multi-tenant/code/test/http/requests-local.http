@@ -1,9 +1,12 @@
 ### ADD MAILS
 # @name addMails
-POST http://localhost:4004/odata/v4/mail-insights/addMails
-# POST http://localhost:4005/rest/api/mail-insights/addMails
+# POST http://localhost:4004/odata/v4/mail-insights/addMails
+# content-type: application/json
+# Authorization: Basic alice:
+
+POST http://localhost:4005/rest/api/mail-insights/addMails
 content-type: application/json
-Authorization: Basic alice:
+Authorization: Basic system-user:
 
 {
   "mails": [
@@ -32,17 +35,25 @@ Authorization: Basic alice:
 
 ### GET MAILS
 # @name getMails
-GET http://localhost:4004/odata/v4/mail-insights/getMails()
-# GET http://localhost:4005/rest/api/mail-insights/getMails()
+# GET http://localhost:4004/odata/v4/mail-insights/Mails
+# content-type: application/json
+# Authorization: Basic alice:
+
+GET http://localhost:4005/rest/api/mail-insights/getMails()
 content-type: application/json
-Authorization: Basic alice:
+Authorization: Basic system-user:
 
 
 ### GET MAIL
 @id = {{getMails.response.body.$.value[0].ID}}
 
 # @name getMail
-GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
-# GET http://localhost:4005/rest/api/mail-insights/getMail(id={{id}})
+# GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
+# content-type: application/json
+# Authorization: Basic alice:
+
+GET http://localhost:4005/rest/api/mail-insights/getMail(id={{id}})
 content-type: application/json
-Authorization: Basic alice:
+Authorization: Basic system-user:
+
+

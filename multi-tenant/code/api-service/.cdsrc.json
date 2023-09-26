@@ -90,36 +90,24 @@
             "[bas]": {
                 "kind": "basic",
                 "users": {
-                    "alice": {
-                        "tenant": "t1",
-                        "roles": ["Admin", "Member", "cds.Subscriber"]
-                    },
-                    "bob": {
-                        "roles": ["Member"]
-                    }
+                    "tenant": "t1",
+                    "roles": ["system-user"]
                 }
             },
             "[local-with-mtx]": {
                 "kind": "basic",
                 "users": {
-                    "alice": {
+                    "system-user": {
                         "tenant": "t1",
-                        "roles": ["Admin", "Member", "cds.Subscriber"]
-                    },
-                    "bob": {
-                        "tenant": "t1",
-                        "roles": ["Member"]
+                        "roles": ["system-user"]
                     }
                 }
             },
             "[development]": {
                 "kind": "basic",
                 "users": {
-                    "alice": {
-                        "roles": ["Admin", "Member"]
-                    },
-                    "carol": {
-                        "roles": ["Member"]
+                    "system-user": {
+                        "roles": ["system-user"]
                     }
                 }
             }

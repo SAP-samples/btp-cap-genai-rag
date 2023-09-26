@@ -3,7 +3,7 @@
 # @name addMails
 POST http://localhost:4004/odata/v4/mail-insights/addMails
 content-type: application/json
-Authorization: Basic alice:
+Authorization: Basic system-user:
 
 {
   "mails": [
@@ -26,7 +26,7 @@ Authorization: Basic alice:
         "subject": "需要协助安排多城欧洲之旅",
         "body": "你好，ThorTours团队，我计划在明年夏天进行一次欧洲多城市之旅，但我对如何预订机票和酒店感到困惑。你们能帮助我制定一个包括罗马、巴黎、柏林和巴塞罗那的行程吗？\n提前感谢你们，\n汤姆·戴维斯\n",
         "senderEmailAddress": "tom.davis@tttraveler.org"
-    }  
+    }
   ]
 }
 
@@ -34,7 +34,7 @@ Authorization: Basic alice:
 # @name getMails
 GET http://localhost:4004/odata/v4/mail-insights/getMails()
 content-type: application/json
-Authorization: Basic alice:
+Authorization: Basic system-user:
 
 
 ### GET MAIL
@@ -43,5 +43,5 @@ Authorization: Basic alice:
 # @name getMail
 GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
 content-type: application/json
-Authorization: Basic alice:
+Authorization: Basic system-user:
 

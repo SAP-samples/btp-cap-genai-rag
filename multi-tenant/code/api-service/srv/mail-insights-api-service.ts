@@ -10,7 +10,7 @@ import {
     SystemMessagePromptTemplate
 } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
-import { StructuredOutputParser } from "langchain/output_parsers";
+import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 import { getDestination } from "@sap-cloud-sdk/connectivity";
 import { BTPLLMContext } from "@sap/llm-commons";
@@ -101,6 +101,7 @@ export default class ApiService extends ApplicationService {
                               m.body;
                               m.category;
                               m.sender;
+                              m.translations;
                           })
                     : [];
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
@@ -158,7 +159,9 @@ export default class ApiService extends ApplicationService {
         const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
-            template: "Give insights about the incoming email.\n{format_instructions}",
+            template:
+                "Give insights about the incoming email.\n{format_instructions}\n" +
+                "Make sure to escape special characters by double slashes.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -166,21 +169,24 @@ export default class ApiService extends ApplicationService {
         const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
         const humanTemplate = "{subject}\n{body}";
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
-
         const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+
         const chain = new LLMChain({
             llm: llm,
-            prompt: chatPrompt
+            prompt: chatPrompt,
+            outputKey: "text",
+            outputParser: OutputFixingParser.fromLLM(llm, parser)
         });
 
         console.log("GENERATING INSIGHTS...");
         const mailsInsights = await Promise.all(
             mails.map(async (mail: IBaseMail): Promise<IProcessedMail> => {
-                const result = await chain.call({
-                    subject: mail.subject,
-                    body: mail.body
-                });
-                const insights = await parser.parse(fixJsonString(result.text));
+                const insights: z.infer<typeof mailInsightsSchemaWithCustomFields> = (
+                    await chain.call({
+                        subject: mail.subject,
+                        body: mail.body
+                    })
+                ).text;
                 const reducedInsights = (({ customFields, ...o }) => o)(insights);
                 const customFields = Object.entries(insights.customFields).map(
                     ([key, value]): { title?: string; value?: string } => ({
@@ -197,7 +203,7 @@ export default class ApiService extends ApplicationService {
     };
 
     private preparePotentialResponses = async (mails: Array<IBaseMail>, additionalInformation: String | "" = "") => {
-        let responseAdditionalInformation = additionalInformation ;
+        let responseAdditionalInformation = additionalInformation;
 
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
@@ -208,7 +214,9 @@ export default class ApiService extends ApplicationService {
 
         const systemPrompt = new PromptTemplate({
             template:
-                "Formulate a response to the original mail using given additional information. Address the sender appropriately.\n{format_instructions}",
+                "Formulate a response to the original mail using given additional information." +
+                "Address the sender appropriately.\n{format_instructions}\n" +
+                "Make sure to escape special characters by double slashes.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -216,23 +224,25 @@ export default class ApiService extends ApplicationService {
         const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
         const humanTemplate = "{sender}\n{subject}\n{body}\n{additionalInformation}";
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
-        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
 
         const chain = new LLMChain({
             llm: llm,
-            prompt: chatPrompt
+            prompt: chatPrompt,
+            outputKey: "text",
+            outputParser: OutputFixingParser.fromLLM(llm, parser)
         });
 
         const potentialResponses = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-                const result = await chain.call({
-                    sender: mail.senderEmailAddress,
-                    subject: mail.subject,
-                    body: mail.body,
-                    additionalInformation: responseAdditionalInformation
-                });
-                
-                const response = await parser.parse(fixJsonString(result.text));
+                const response: z.infer<typeof MAIL_RESPONSE_SCHEMA> = (
+                    await chain.call({
+                        sender: mail.senderEmailAddress,
+                        subject: mail.subject,
+                        body: mail.body,
+                        additionalInformation: responseAdditionalInformation
+                    })
+                ).text;
                 return { mail, response };
             })
         );
@@ -250,26 +260,31 @@ export default class ApiService extends ApplicationService {
         const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
-            template: "Extract the language related information.\n{format_instructions}",
+            template:
+                "Extract the language related information.\n{format_instructions}\n" +
+                "Make sure to escape special characters by double slashes.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
 
         const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{mail}");
-        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
 
         const chain = new LLMChain({
             llm: llm,
-            prompt: chatPrompt
+            prompt: chatPrompt,
+            outputKey: "text",
+            outputParser: OutputFixingParser.fromLLM(llm, parser)
         });
 
         const languageMatches = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-                const result = await chain.call({ mail: mail.body });
-
-                // Workaround - Add missing ',' for valid JSON
-                const languageMatch = await parser.parse(fixJsonString(result.text));
+                const languageMatch: z.infer<typeof MAIL_LANGUAGE_SCHEMA> = (
+                    await chain.call({
+                        mail: mail.body
+                    })
+                ).text;
 
                 return { mail, languageMatch };
             })
@@ -288,34 +303,39 @@ export default class ApiService extends ApplicationService {
         const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
-            template: "Translate the insights of the incoming json.\n{format_instructions}",
+            template:
+                "Translate the insights of the incoming json.\n{format_instructions}\n" +
+                "Make sure to escape special characters by double slashes.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
 
         const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{insights}");
-        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
 
         const chain = new LLMChain({
             llm: llm,
-            prompt: chatPrompt
+            prompt: chatPrompt,
+            outputKey: "text",
+            outputParser: OutputFixingParser.fromLLM(llm, parser)
         });
 
         const translations = await Promise.all(
             mails.map(async (mail: IProcessedMail) => {
                 if (!mail.insights.languageMatch) {
-                    const result = await chain.call({
-                        insights: JSON.stringify(
-                            filterForTranslation({
-                                ...mail.mail,
-                                ...mail.insights
-                            })
-                        )
-                    });
-                    const translations = [await parser.parse(fixJsonString(result.text))];
-                    
-                    return { ...mail, translations };
+                    const translations: z.infer<typeof MAIL_INSIGHTS_TRANSLATION_SCHEMA> = (
+                        await chain.call({
+                            insights: JSON.stringify(
+                                filterForTranslation({
+                                    ...mail.mail,
+                                    ...mail.insights
+                                })
+                            )
+                        })
+                    ).text;
+
+                    return { ...mail, translations: [translations] };
                 } else {
                     return { ...mail, translations: [] };
                 }
@@ -335,22 +355,30 @@ export default class ApiService extends ApplicationService {
         const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
-            template: "Translate the response of the incoming json.\n{format_instructions}",
+            template:
+                "Translate the response of the incoming json.\n{format_instructions}\n" +
+                "Make sure to escape special characters by double slashes.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
 
         const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{response}");
-        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
 
         const chain = new LLMChain({
             llm: llm,
-            prompt: chatPrompt
+            prompt: chatPrompt,
+            outputKey: "text",
+            outputParser: OutputFixingParser.fromLLM(llm, parser)
         });
 
-        const result = await chain.call({ response: JSON.stringify(responseBody)});
-        const translation = await parser.parse(fixJsonString(result.text));
+        const translation: z.infer<typeof MAIL_RESPONSE_TRANSLATION_SCHEMA> = (
+            await chain.call({
+                response: JSON.stringify(responseBody)
+            })
+        ).text;
+
         return translation;
     };
 
@@ -412,12 +440,14 @@ export default class ApiService extends ApplicationService {
                 ...mail,
                 responseBody: (
                     await this.preparePotentialResponses(
-                        [{
+                        [
+                            {
                                 ID: mail.ID,
                                 body: mail.body,
                                 senderEmailAddress: mail.senderEmailAddress,
                                 subject: mail.subject
-                        }],
+                            }
+                        ],
                         additionalInformation
                     )
                 )[0]?.response?.responseBody
@@ -432,11 +462,13 @@ export default class ApiService extends ApplicationService {
             translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
         }
 
-        const dbEntry = [{
+        const dbEntry = [
+            {
                 ...mail,
                 responseBody: processedMail.insights.responseBody,
                 translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
-        }];
+            }
+        ];
 
         cds.tx(async () => {
             const { Mails } = this.entities;
@@ -579,13 +611,14 @@ const getLLMAccessCredentials = async () => {
     };
 };
 
-const fixJsonString = (jsonString : String) => {
-    
-    return jsonString
-        // Workaround - Add missing ',' for valid JSON
-        .replace(/\"\s*\"/g, '", "')
-        // Workaround - Replace \n by \\n in property values
-        .replace(/"([^"]*)"/g, (match, capture) => {
-            return match.replace(/\n(?!\\n)/g, "\\n");
-        });
-}
+const fixJsonString = (jsonString: String) => {
+    return (
+        jsonString
+            // Workaround - Add missing ',' for valid JSON
+            .replace(/\"\s*\"/g, '", "')
+            // Workaround - Replace \n by \\n in property values
+            .replace(/"([^"]*)"/g, (match, capture) => {
+                return match.replace(/\n(?!\\n)/g, "\\n");
+            })
+    );
+};

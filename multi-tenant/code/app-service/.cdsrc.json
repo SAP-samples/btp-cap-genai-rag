@@ -123,7 +123,7 @@
                 "users": {
                     "alice": {
                         "tenant": "t1",
-                        "roles": ["Admin", "Member", "cds.Subscriber"]
+                        "roles": ["Admin", "cds.Subscriber"]
                     },
                     "bob": {
                         "roles": ["Member"]
@@ -135,7 +135,7 @@
                 "users": {
                     "alice": {
                         "tenant": "t1",
-                        "roles": ["Admin", "Member", "cds.Subscriber"]
+                        "roles": ["Admin", "cds.Subscriber"]
                     },
                     "bob": {
                         "tenant": "t1",
@@ -147,7 +147,7 @@
                 "kind": "basic",
                 "users": {
                     "alice": {
-                        "roles": ["Admin", "Member"]
+                        "roles": ["Admin"]
                     },
                     "carol": {
                         "roles": ["Member"]
