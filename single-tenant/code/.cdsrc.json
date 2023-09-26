@@ -3,7 +3,18 @@
         "auth": {
             "kind": "xsuaa",
             "[development]": {
-                "kind": "mocked"
+                "kind": "basic",
+                "users": {
+                    "alice": {
+                        "roles": ["Admin", "Member"]
+                    },
+                    "carol": {
+                        "roles": ["Member"]
+                    },
+                    "system-user": {
+                        "roles": ["system-user"]
+                    }
+                }
             }
         },
         "db": {

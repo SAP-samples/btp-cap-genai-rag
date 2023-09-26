@@ -37,9 +37,7 @@
             "kind": "hana-cloud",
             "vcap": {
                 "name": "hana",
-                "tags": [
-                    "hana"
-                ],
+                "tags": ["hana"],
                 "plan": "hdi-shared",
                 "label": "hana"
             }

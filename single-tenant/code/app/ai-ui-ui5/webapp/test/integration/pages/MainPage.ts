@@ -1,7 +1,7 @@
 import Opa5 from "sap/ui/test/Opa5";
 import Press from "sap/ui/test/actions/Press";
 
-const viewName = "aisaas.ui.view.Main";
+const viewName = "ai.ui.view.Main";
 
 export default class MainPage extends Opa5 {
 	// Actions

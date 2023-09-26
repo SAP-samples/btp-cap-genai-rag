@@ -1,21 +1,53 @@
 using {
-    cuid,
-    managed
+      cuid,
+      managed
 } from '@sap/cds/common';
 
-context db {
+context aisaas.db {
 
-    entity Mails : cuid, managed {
-        sender             : String;
-        subject            : String;
-        body               : LargeString;
-        category           : String;
-        sentiment          : Integer;
-        urgency            : Integer;
-        summary            : String;
-        translationSubject : String;
-        translationBody    : LargeString;
-        translationSummary : String;
-        potentialResponse  : LargeString;
-    }
+      type KeyFacts {
+            keyfact         : String;
+            keyfactcategory : String;
+      }
+
+      type CustomField {
+            title : String;
+            value : String
+      }
+
+      type Translation {
+            sender            :      String;
+            subject           :      String;
+            body              :      LargeString;
+            summary           :      String;
+            responseBody      :      LargeString;
+            customFields      : many CustomField;
+            keyFacts          : many KeyFacts;
+            requestedServices : many String;
+      }
+
+      entity Mails : cuid, managed {
+            subject                :      String;
+            body                   :      LargeString;
+            senderEmailAddress     :      String;
+            sender                 :      String;
+            category               :      String;
+            sentiment              :      Integer;
+            urgency                :      Integer;
+            summary                :      String;
+            responseBody           :      LargeString;
+            languageNameDetermined :      String;
+            languageMatch          :      Boolean;
+            requestedServices      : many String;
+            suggestedActions       : many String;
+            customFields           : many CustomField;
+            keyFacts               : many KeyFacts;
+            translations           : many Translation;
+      }
+
+      entity CustomFields {
+            title       : String;
+            isNumber    : Boolean;
+            description : String;
+      };
 }

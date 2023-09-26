@@ -12,7 +12,7 @@ context aisaas.db {
 
       type CustomField {
             title : String;
-            value : String
+            value : String;
       }
 
       type Translation {

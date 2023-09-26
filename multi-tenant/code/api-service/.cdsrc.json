@@ -1,5 +1,6 @@
 {
     "folders": {
+        "app": "../app",
         "db-sqlite": "../db/sqlite"
     },
     "requires": {
@@ -86,12 +87,30 @@
             "[hybrid]": {
                 "kind": "xsuaa"
             },
+            "[bas]": {
+                "kind": "basic",
+                "users": {
+                    "tenant": "t1",
+                    "roles": ["system-user"]
+                }
+            },
             "[local-with-mtx]": {
-                "kind": "mocked"
+                "kind": "basic",
+                "users": {
+                    "system-user": {
+                        "tenant": "t1",
+                        "roles": ["system-user"]
+                    }
+                }
             },
             "[development]": {
-                "kind": "mocked"
-            } 
-        }
+                "kind": "basic",
+                "users": {
+                    "system-user": {
+                        "roles": ["system-user"]
+                    }
+                }
+            }
+        } 
     }
 }

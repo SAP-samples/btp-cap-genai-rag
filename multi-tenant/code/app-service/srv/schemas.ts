@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const translationTargetLanguage = 'English'
+const translationTargetLanguage = "English";
 
 export {
     MAIL_LANGUAGE_SCHEMA,
@@ -8,7 +8,7 @@ export {
     MAIL_INSIGHTS_TRANSLATION_SCHEMA,
     MAIL_RESPONSE_TRANSLATION_SCHEMA,
     MAIL_RESPONSE_SCHEMA
-}
+};
 
 const MAIL_LANGUAGE_SCHEMA = z.object({
     languageNameDetermined: z
@@ -22,7 +22,7 @@ const MAIL_LANGUAGE_SCHEMA = z.object({
                 ", then return 'true', otherwise return 'false'"
         )
 }).describe(`You are supporting a travel agency which receives emails from customers all over the world. 
-Your task is to determine the language of the email in order to trigger translation if needed.`);
+             Your task is to determine the language of the email in order to trigger translation if needed.`);
 
 const MAIL_INSIGHTS_SCHEMA = z.object({
     category: z.string().describe(`Classify the email into one the following categories:
@@ -93,7 +93,7 @@ const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
     keyFacts: z.array(
         z.object({
             keyfact: z.string().optional(),
-            keyfactCategory: z.string().optional()
+            keyfactcategory: z.string().optional().nullable()
         })
     ),
     customFields: z.array(
@@ -106,12 +106,12 @@ const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
     responseBody: z.string()
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
       Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
-    
+
+
 const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
     responseBody: z.string()
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
         Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
-    
 
 const MAIL_RESPONSE_SCHEMA = z
     .object({

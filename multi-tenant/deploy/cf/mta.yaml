@@ -53,7 +53,7 @@ modules:
     path: ../../code/gen/srv
     build-parameters:
       builder: custom
-      ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
+      ignore: [".DS_Store", "manifest*.yml"]
       commands: 
        - npm ci
        - npx shx mkdir -p temp/llm-commons
@@ -230,7 +230,7 @@ modules:
       command: node ./node_modules/@sap/cds/bin/cds-serve
     build-parameters:
       builder: custom
-      ignore: [".DS_Store", "manifest*.yml", ".npmrc"]
+      ignore: [".DS_Store", "manifest*.yml"]
       commands: 
        - npm ci
        - npx shx mkdir -p temp/llm-commons
