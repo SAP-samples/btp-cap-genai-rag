@@ -1,8 +1,3 @@
-export interface FilterItem {
-    id: string,
-    label: string
-}
-
 export interface EmailObject {
     mail: Mail,
     closestMails: ClosestMail[]
@@ -25,10 +20,21 @@ export interface Mail {
     responseBody: string,
     languageNameDetermined: string,
     languageMatch: boolean,
+    keyFacts: KeyFact[],
     translations: Mail[]
+}
+
+export interface KeyFact {
+    keyfact: string,
+    keyfactcategory: string
 }
 
 export interface ClosestMail {
     similarity: number,
     mail: Mail
+}
+
+export interface FilterItem {
+    id: string,
+    label: string
 }

@@ -43,17 +43,8 @@
 		</ux:headerTitle>
 
 		<ux:headerContent>
-			<HBox wrap="Wrap" width="100%">
-				<Avatar
-					displaySize="L"
-					backgroundColor="Accent6"
-					initials="{path:'api>mail/sender', formatter:'formatter.getAvatarInitial'}"/>
-				<VBox class="sapUiMediumMarginBegin">
-					<Title text="{i18n>email.header.customerInformation}"/>
-					<Text text="{= !${/translationActivated} ? ${api>mail/sender} : ${api>mail/translations/0/sender} }"/>
-					<Text text="{api>mail/senderEmailAddress}"/>
-				</VBox>
-			</HBox>
+			<HBox id="headerContent" wrap="Wrap" visible="{= !${/translationActivated} }"/>
+			<HBox id="translatedHeaderContent" wrap="Wrap" visible="{/translationActivated}"/>
 		</ux:headerContent>
 
 		<ux:sections>

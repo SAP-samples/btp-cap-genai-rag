@@ -12,6 +12,11 @@ import List from "sap/m/List";
 import ListItemBase from "sap/m/ListItemBase";
 import CustomListItem from "sap/m/CustomListItem";
 import Button from "sap/m/Button";
+import HBox from "sap/m/HBox";
+import VBox from "sap/m/VBox";
+import Avatar from "sap/m/Avatar";
+import Title from "sap/m/Title";
+import Text from "sap/m/Text";
 import Panel from "sap/m/Panel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
@@ -19,7 +24,8 @@ import FilterType from "sap/ui/model/FilterType";
 import Sorter from "sap/ui/model/Sorter";
 import { ObjectBindingInfo } from "sap/ui/base/ManagedObject";
 
-import { FilterItem, EmailObject } from "../model/entities";
+import { EmailObject, Mail, KeyFact, FilterItem } from "../model/entities";
+import Formatter from "../model/formatter";
 
 export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
@@ -77,46 +83,6 @@ export default class Main extends BaseController {
 		} else this.setActiveEmail();
 	}
 
-	public setActiveEmail(id: string = null): void {
-		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailView: View = this.byId("emailColumn") as View;
-		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
-		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
-		const similarEmailsList: List = emailView.byId("similarEmailsList") as List;
-
-		localModel.setProperty("/activeEmailId", id);
-		emailPage.setSelectedSection(incomingMessageSection);
-		similarEmailsList.removeSelections(true);
-		similarEmailsList.getItems().map((listItem: ListItemBase) => ((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false));
-
-		if (id) {
-			const bindingInfo: ObjectBindingInfo = {
-				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
-				parameters: { $$updateGroupId: this.UPDATE_GROUP },
-				events: {
-					dataReceived: (event: Event) => this.onUpdateBindingInfo(event)
-				}
-			};
-			emailView.bindElement(bindingInfo);
-
-			const translationButton: Button = emailView.byId("translationButton") as Button;
-			translationButton.setText(this.getText("email.header.translationButton.translate"));
-			localModel.setProperty("/translationActivated", false);
-		}
-	}
-
-	private onUpdateBindingInfo(event: Event): void {
-		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
-
-		localModel.setProperty("/additionalInfo", null);
-		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
-		localModel.setProperty("/translatedResponseBody", emailObject.mail.translations.length > 0 && emailObject.mail.translations[0].responseBody);
-		localModel.setProperty("/similarEmails", emailObject.closestMails);
-
-		console.log(emailObject.mail);
-	}
-
 	private setTopEmail(): void {
 		if (this.getFilteredEmailIds().length > 0) this.setActiveEmail(this.getFilteredEmailIds()[0]);
 	}
@@ -148,16 +114,113 @@ export default class Main extends BaseController {
 		return ids
 	}
 
+	public setActiveEmail(id: string = null): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const emailView: View = this.byId("emailColumn") as View;
+		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
+		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
+		const similarEmailsList: List = emailView.byId("similarEmailsList") as List;
+
+		localModel.setProperty("/activeEmailId", id);
+		emailPage.setSelectedSection(incomingMessageSection);
+		similarEmailsList.removeSelections(true);
+		similarEmailsList.getItems().map((listItem: ListItemBase) => ((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false));
+
+		if (id) {
+			const bindingInfo: ObjectBindingInfo = {
+				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
+				parameters: { $$updateGroupId: this.UPDATE_GROUP },
+				events: {
+					dataReceived: (event: Event) => this.onUpdateEmailColumnBinding(event)
+				}
+			};
+			emailView.bindElement(bindingInfo);
+
+			const translationButton: Button = emailView.byId("translationButton") as Button;
+			translationButton.setText(this.getText("email.header.translationButton.translate"));
+			localModel.setProperty("/translationActivated", false);
+		}
+	}
+
+	private onUpdateEmailColumnBinding(event: Event): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
+
+		this.createEmailHeaderContent(emailObject.mail);
+		localModel.setProperty("/additionalInfo", null);
+		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
+		localModel.setProperty("/translatedResponseBody", emailObject.mail.translations.length > 0 && emailObject.mail.translations[0].responseBody);
+		localModel.setProperty("/similarEmails", emailObject.closestMails);
+
+		console.log(emailObject.mail);
+	}
+
+	private createEmailHeaderContent(mail: Mail): void {
+		const parentBox: HBox = (this.byId("emailColumn") as View).byId("headerContent") as HBox;
+		parentBox.removeAllItems();
+		this.createElementsWithAndWithoutTranslation(parentBox, mail, false);
+
+		if (mail.translations.length > 0) {
+			const parentBox: HBox = (this.byId("emailColumn") as View).byId("translatedHeaderContent") as HBox;
+			parentBox.removeAllItems();
+			this.createElementsWithAndWithoutTranslation(parentBox, mail, true);
+		}
+	}
+
+	private createElementsWithAndWithoutTranslation(parentBox: HBox, mail: Mail, withTranslatedContent: boolean): void {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+
+		const avatar: Avatar = new Avatar({
+			displaySize: 'L',
+			backgroundColor: 'Accent6',
+			initials: Formatter.getAvatarInitial(mail.sender)
+		});
+		avatar.addStyleClass("sapUiMediumMarginEnd");
+		parentBox.addItem(avatar);
+
+		const vBox: VBox = new VBox();
+		vBox.addStyleClass("sapUiMediumMarginEnd");
+		const infoTitle: Title = new Title({ text: this.getText("email.header.customerInformation") });
+		const senderText: Text = new Text({ text: !localModel.getProperty("/translationActivated") ? mail.sender : mail.translations[0].sender });
+		const emailAddressText: Text = new Text({ text: mail.senderEmailAddress as string });
+		vBox.addItem(infoTitle);
+		vBox.addItem(senderText);
+		vBox.addItem(emailAddressText);
+		parentBox.addItem(vBox);
+
+		const facts: KeyFact[] = !withTranslatedContent ? mail.keyFacts : mail.translations[0].keyFacts;
+		facts?.map((factItem: KeyFact) => {
+			const childBox: VBox = new VBox();
+			childBox.addStyleClass("sapUiMediumMarginEnd");
+
+			const title: Title = new Title({ text: factItem.keyfact });
+			const text: Text = new Text({ text: factItem.keyfactcategory, wrapping: true, width: factItem.keyfactcategory?.length > 32 ? '12.5rem' : '100%' });
+			childBox.addItem(title);
+			childBox.addItem(text);
+
+			parentBox.addItem(childBox);
+		});
+	}
+
 	public async onSearch(): Promise<void> {
 		if (this.hasResponseChanged()) {
-			await this.openConfirmationDialog(this.getText("confirmationDialog.message.mayBeLost"), this.applyFilter.bind(this), () => this.clearSearchFilter());
+			await this.openConfirmationDialog(this.getText("confirmationDialog.message.mayBeLost"), this.applyFilter.bind(this), () => this.restoreSearchFilter());
 		} else this.applyFilter();
 	}
 
-	private clearSearchFilter(): void {
+	private restoreSearchFilter(): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
+		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
+		let previousSearchKeyword: string = null;
 
-		localModel.setProperty("/searchKeyword", null);
+		if (binding.getFilters(FilterType.Application).length > 0) {
+			const currentFilters: Filter[] = binding.getFilters(FilterType.Application)[0].getFilters();
+			currentFilters.map((filter: Filter) =>
+				previousSearchKeyword = filter.getFilters().find((innerFilter: Filter) =>
+					innerFilter.getPath() === this.EMAIL_SUBJECT_PATH)?.getValue1());
+		}
+
+		localModel.setProperty("/searchKeyword", previousSearchKeyword);
 		this.applyFilter();
 	}
 
@@ -222,9 +285,9 @@ export default class Main extends BaseController {
 		const activeCategories: string[] = localModel.getProperty(`/${this.ACTIVE_CATEGORIES_PATH}`);
 		if (activeCategories.length > 0) {
 			const orFilter: Filter[] = [];
-			activeCategories.map((id: string) => orFilter
-				.push(this.getKeywordFilter(filtersModel.getProperty("/categories")
-					.find((category: FilterItem) => category.id === id).label, this.EMAIL_CATEGORY_PATH)));
+			activeCategories.map((id: string) =>
+				orFilter.push(this.getKeywordFilter(filtersModel.getProperty("/categories").find((category: FilterItem) =>
+					category.id === id).label, this.EMAIL_CATEGORY_PATH)));
 			andFilter.push(new Filter({ filters: orFilter, and: false }));
 		}
 
