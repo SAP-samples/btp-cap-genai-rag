@@ -168,8 +168,6 @@ export default class Main extends BaseController {
 	}
 
 	private createElementsWithAndWithoutTranslation(parentBox: HBox, mail: Mail, withTranslatedContent: boolean): void {
-		const localModel: JSONModel = this.getModel() as JSONModel;
-
 		const avatar: Avatar = new Avatar({
 			displaySize: 'L',
 			backgroundColor: 'Accent6',
@@ -181,7 +179,7 @@ export default class Main extends BaseController {
 		const vBox: VBox = new VBox();
 		vBox.addStyleClass("sapUiMediumMarginEnd");
 		const infoTitle: Title = new Title({ text: this.getText("email.header.customerInformation") });
-		const senderText: Text = new Text({ text: !localModel.getProperty("/translationActivated") ? mail.sender : mail.translations[0].sender });
+		const senderText: Text = new Text({ text: !withTranslatedContent ? mail.sender : mail.translations[0].sender });
 		const emailAddressText: Text = new Text({ text: mail.senderEmailAddress as string });
 		vBox.addItem(infoTitle);
 		vBox.addItem(senderText);
