@@ -10,6 +10,11 @@ context aisaas.db {
             keyfactcategory : String;
       }
 
+      type Action {
+            type  : String;
+            value : String;
+      }
+
       type CustomField {
             title : String;
             value : String;
@@ -39,7 +44,7 @@ context aisaas.db {
             languageNameDetermined :      String;
             languageMatch          :      Boolean;
             requestedServices      : many String;
-            suggestedActions       : many String;
+            suggestedActions       : many Action;
             customFields           : many CustomField;
             keyFacts               : many KeyFacts;
             translations           : many Translation;

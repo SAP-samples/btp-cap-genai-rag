@@ -16,7 +16,14 @@ import { getDestination } from "@sap-cloud-sdk/connectivity";
 import { BTPLLMContext } from "@sap/llm-commons";
 import { BTPOpenAIGPTChat } from "@sap/llm-commons/langchain/chat/openai";
 import { BTPOpenAIGPTEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
-import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail, CustomField } from "./types";
+import {
+    IBaseMail,
+    IProcessedMail,
+    ITranslatedMail,
+    IStoredMail,
+    CustomField,
+    ZodOptionalStringOrNumber
+} from "./types";
 import {
     MAIL_INSIGHTS_SCHEMA,
     MAIL_INSIGHTS_TRANSLATION_SCHEMA,
@@ -24,8 +31,6 @@ import {
     MAIL_LANGUAGE_SCHEMA,
     MAIL_RESPONSE_SCHEMA
 } from "./schemas";
-
-type ZodOptionalStringOrNumber = z.ZodString | z.ZodNumber | z.ZodOptional<z.ZodString | z.ZodNumber>;
 
 const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
 const DEFAULT_TABLE = "_main";

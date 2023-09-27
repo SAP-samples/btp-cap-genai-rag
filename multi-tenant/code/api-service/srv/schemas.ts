@@ -69,19 +69,24 @@ const MAIL_INSIGHTS_SCHEMA = z.object({
               - Car - if the email is reffering to rental car or other vehicle booking
               - Transfer - if the mail is referring to any sort of transfer, shuttle, taxi or similar
             `),
-    suggestedActions: z.array(z.string())
-        .describe(`Based on the email and the services the email is asking for, which of the following actions do you suggest, it can be multiple:
-                - Hotel Availability - check if the requested hotel is available and offer results to the sender
-                - Hotel Cancelation - cancel the previously booked hotel
-                - Hotel Fix - check the hotel booking and provide information to the sender
-                - Flight Availability - check if a flight is available according to the mail request and offer it to the sender
-                - Flight Cancelation - cancel the previously booked flight
-                - Flight Fix - check the flight booking and provide information to the sender
-                - Car Availability - check for a rental car offer available and offer results to the sender
-                - Car Cancelation - cancel the previously booked rental car
-                - Car Fix - check the rental car booking and provide information to the sender
-                - General Fix - if any other action is required
-          `)
+    suggestedActions: z.array(
+        z.object({
+            type: z.string().optional().describe("type of the action"),
+            value: z.string().optional().describe("value of the action")
+        })
+    ) .describe(`Based on the email and the services the email is asking for, which of the following action types and action values do you suggest.
+            The following actions are structured like "type of action - value of action - description of action". The result can contain multiple actions:
+            - Hotel - Check hotel availability - check if the requested hotel is available and offer results to the sender
+            - Hotel - Cancel hotel booking - cancel the previously booked hotel
+            - Hotel - Manage hotel booking - check the hotel booking and provide information to the sender
+            - Flight - Check flight availability - check if a flight is available according to the mail request and offer it to the sender
+            - Flight - Cancel flight booking - cancel the previously booked flight
+            - Flight - Manage flight booking - check the flight booking and provide information to the sender
+            - Car - Check car availability - check for a rental car offer available and offer results to the sender
+            - Car - Cancel car booking - cancel the previously booked rental car
+            - Car - Manage car booking - check the rental car booking and provide information to the sender
+            - General - Manage general booking - if any other action is required
+        `),
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
     Your task is to extract relevant insights out of the emails. Extract the information out of the email subject and body and return a clean and valid JSON format.`);
 

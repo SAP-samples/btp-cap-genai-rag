@@ -48,7 +48,7 @@ interface IInsights {
     customFields?: Array<ICustomField>;
     keyFacts?: Array<IKeyFacts>;
     requestedServices?: Array<String>;
-    suggestedActions?: Array<String>;
+    suggestedActions?: Array<IActions>;
     responseBody?: String;
     languageNameDetermined?: String;
     languageMatch?: Boolean;
@@ -62,4 +62,9 @@ interface ICustomField {
 interface IKeyFacts {
     keyfact?: string;
     keyfactcategory?: string;
+}
+
+interface IActions {
+    type?: string;
+    value?: string;
 }
