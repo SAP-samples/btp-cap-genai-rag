@@ -65,8 +65,8 @@ const MAIL_INSIGHTS_SCHEMA = z.object({
     requestedServices: z.array(z.string())
         .describe(`Extract an array of the following services which are referred in the email, it can be multiple.
               - Accommodation - if the email is referring booking of an accommodation or hotel or other type of stay
-              - Flight - if the email is reffering to flight booking
-              - Car - if the email is reffering to rental car or other vehicle booking
+              - Flight - if the email is referring to flight booking
+              - Car - if the email is referring to rental car or other vehicle booking
               - Transfer - if the mail is referring to any sort of transfer, shuttle, taxi or similar
             `),
     suggestedActions: z.array(
@@ -75,7 +75,8 @@ const MAIL_INSIGHTS_SCHEMA = z.object({
             value: z.string().optional().describe("value of the action")
         })
     ) .describe(`Based on the email and the services the email is asking for, which of the following action types and action values do you suggest.
-            The following actions are structured like "type of action - value of action - description of action". The result can contain multiple actions:
+            The following actions are structured like "type of action - value of action - description of action". 
+            Only use the values provided in the following list while the result can contain multiple actions:
             - Hotel - Check hotel availability - check if the requested hotel is available and offer results to the sender
             - Hotel - Cancel hotel booking - cancel the previously booked hotel
             - Hotel - Manage hotel booking - check the hotel booking and provide information to the sender
