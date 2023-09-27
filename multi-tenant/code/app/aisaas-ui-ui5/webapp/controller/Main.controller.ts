@@ -24,8 +24,9 @@ import FilterType from "sap/ui/model/FilterType";
 import Sorter from "sap/ui/model/Sorter";
 import { ObjectBindingInfo } from "sap/ui/base/ManagedObject";
 
-import { EmailObject, Mail, KeyFact, FilterItem } from "../model/entities";
+import { EmailObject, Mail, KeyFact, Action, FilterItem } from "../model/entities";
 import Formatter from "../model/formatter";
+import EmailController from "./EmailColumn.controller";
 
 export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
@@ -147,6 +148,7 @@ export default class Main extends BaseController {
 		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
 
 		this.createEmailHeaderContent(emailObject.mail);
+		this.createSuggestedActions(emailObject.mail.suggestedActions);
 		localModel.setProperty("/additionalInfo", null);
 		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
 		localModel.setProperty("/translatedResponseBody", emailObject.mail.translations.length > 0 && emailObject.mail.translations[0].responseBody);
@@ -177,7 +179,7 @@ export default class Main extends BaseController {
 		parentBox.addItem(avatar);
 
 		const vBox: VBox = new VBox();
-		vBox.addStyleClass("sapUiMediumMarginEnd");
+		vBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
 		const infoTitle: Title = new Title({ text: this.getText("email.header.customerInformation") });
 		const senderText: Text = new Text({ text: !withTranslatedContent ? mail.sender : mail.translations[0].sender });
 		const emailAddressText: Text = new Text({ text: mail.senderEmailAddress as string });
@@ -189,7 +191,7 @@ export default class Main extends BaseController {
 		const facts: KeyFact[] = !withTranslatedContent ? mail.keyFacts : mail.translations[0].keyFacts;
 		facts?.map((factItem: KeyFact) => {
 			const childBox: VBox = new VBox();
-			childBox.addStyleClass("sapUiMediumMarginEnd");
+			childBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
 
 			const title: Title = new Title({ text: factItem.keyfact });
 			const text: Text = new Text({ text: factItem.keyfactcategory, wrapping: true, width: factItem.keyfactcategory?.length > 32 ? '12.5rem' : '100%' });
@@ -198,6 +200,26 @@ export default class Main extends BaseController {
 
 			parentBox.addItem(childBox);
 		});
+	}
+
+	private createSuggestedActions(actions: Action[]): void {
+		const hBox: HBox = (this.byId("emailColumn") as View).byId("suggestedActionsBox") as HBox;
+		hBox.removeAllItems();
+
+		if (actions.length > 0) {
+			const emailController: EmailController = (this.byId("emailColumn") as View).getController() as EmailController;
+			actions.map((action: Action) => {
+				const button: Button = new Button({
+					text: action.value,
+					press: emailController.onPressAction.bind(this)
+				});
+				button.addStyleClass("sapUiSmallMarginEnd");
+				hBox.addItem(button);
+			});
+		} else {
+			const text: Text = new Text({ text: this.getText("email.text.noActions") });
+			hBox.addItem(text);
+		}
 	}
 
 	public async onSearch(): Promise<void> {

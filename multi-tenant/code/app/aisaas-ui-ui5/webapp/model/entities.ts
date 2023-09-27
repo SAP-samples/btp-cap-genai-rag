@@ -21,12 +21,18 @@ export interface Mail {
     languageNameDetermined: string,
     languageMatch: boolean,
     keyFacts: KeyFact[],
+    suggestedActions: Action[],
     translations: Mail[]
 }
 
 export interface KeyFact {
     keyfact: string,
     keyfactcategory: string
+}
+
+export interface Action {
+    type: string,
+    value: string
 }
 
 export interface ClosestMail {

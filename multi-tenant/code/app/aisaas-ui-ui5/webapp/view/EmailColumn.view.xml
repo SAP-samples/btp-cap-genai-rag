@@ -62,6 +62,10 @@
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.responsePreparation}">
 						<VBox class="sapUiTinyMargin">
+							<VBox class="sapUiMediumMarginBottom">
+								<Title text="{i18n>email.title.suggestedActions}:"/>
+								<HBox id="suggestedActionsBox"/>
+							</VBox>
 							<Title text="{i18n>email.title.additionalInfo}:"/>
 							<TextArea width="100%" growing="true" valueLiveUpdate="true" placeholder="{i18n>email.placeholder.additionalInfo}" value="{/additionalInfo}"/>
 							<HBox justifyContent="End">
@@ -95,7 +99,7 @@
 								valueState="{= ${/translatedResponseBody} !== ${api>mail/translations/0/responseBody} ? 'Warning' : 'None' }"
 								liveChange="onChangeResponse"/>
 							<HBox justifyContent="End">
-								<Button type="Emphasized" text="{i18n>email.label.submitButton}" press="onPressSubmit"/>
+								<Button type="Emphasized" text="{i18n>email.label.sendButton}" press="onPressSend"/>
 							</HBox>
 						</VBox>
 					</ux:ObjectPageSubSection>

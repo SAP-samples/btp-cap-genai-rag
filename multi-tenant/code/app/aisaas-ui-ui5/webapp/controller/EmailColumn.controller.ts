@@ -5,10 +5,23 @@ import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import MessageToast from "sap/m/MessageToast";
 
+import { EmailObject } from "../model/entities";
+
 export default class EmailColumn extends BaseController {
-	public onTranslate(event: Event): void {
+	public async onTranslate(event: Event): Promise<void> {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const button: Button = event.getSource();
+		const emailObject: EmailObject = button.getBindingContext("api").getObject() as EmailObject;
+
+		if (!emailObject.mail.languageMatch) {
+			if (!localModel.getProperty("/translationActivated")) {
+				if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody)
+					MessageToast.show(this.getText("email.header.switchTranslation.message"), { duration: 5000 });
+			} else {
+				if (localModel.getProperty("/translatedResponseBody") !== emailObject.mail.translations[0].responseBody)
+					MessageToast.show(this.getText("email.header.switchTranslation.message"), { duration: 5000 });
+			}
+		}
 
 		localModel.setProperty("/translationActivated", !localModel.getProperty("/translationActivated"));
 		button.setText(localModel.getProperty("/translationActivated") ?
@@ -16,8 +29,12 @@ export default class EmailColumn extends BaseController {
 			this.getText("email.header.translationButton.translate"));
 	}
 
+	public onPressAction(): void {
+		MessageToast.show("Not implemented!");
+	}
+
 	public onPressGenerate(): void {
-		MessageToast.show("not implemented!");
+		MessageToast.show("Not implemented!");
 	}
 
 	public onChangeResponse(event: Event): void {
@@ -29,7 +46,7 @@ export default class EmailColumn extends BaseController {
 		}
 	}
 
-	public onPressSubmit(event: Event): void {
+	public onPressSend(event: Event): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const button: Button = event.getSource();
 
@@ -37,6 +54,6 @@ export default class EmailColumn extends BaseController {
 			localModel.setProperty("/responseBody", button.getBindingContext("api").getProperty("mail/responseBody"));
 		else localModel.setProperty("/translatedResponseBody", button.getBindingContext("api").getProperty("mail/translations/0/responseBody"));
 
-		MessageToast.show("not implemented!");
+		MessageToast.show("Not implemented!");
 	}
 }
