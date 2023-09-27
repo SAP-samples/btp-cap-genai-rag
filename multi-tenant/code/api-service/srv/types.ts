@@ -1,3 +1,7 @@
+import { z } from "zod";
+
+export type ZodOptionalStringOrNumber = z.ZodString | z.ZodNumber | z.ZodOptional<z.ZodString | z.ZodNumber>
+
 export interface IBaseMail {
     ID: string;
     subject: string;
@@ -44,7 +48,7 @@ interface IInsights {
     customFields?: Array<ICustomField>;
     keyFacts?: Array<IKeyFacts>;
     requestedServices?: Array<String>;
-    suggestedActions?: Array<String>;
+    suggestedActions?: Array<IActions>;
     responseBody?: String;
     languageNameDetermined?: String;
     languageMatch?: Boolean;
@@ -58,4 +62,9 @@ interface ICustomField {
 interface IKeyFacts {
     keyfact?: string;
     keyfactcategory?: string;
+}
+
+interface IActions {
+    type?: string;
+    value?: string;
 }
