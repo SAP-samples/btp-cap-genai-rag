@@ -9,7 +9,8 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate
 } from "langchain/prompts";
-import { LLMChain } from "langchain/chains";
+import { Document } from "langchain/document";
+import { LLMChain, StuffDocumentsChain } from "langchain/chains";
 import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 import { getDestination } from "@sap-cloud-sdk/connectivity";
@@ -63,6 +64,7 @@ export default class ApiService extends ApplicationService {
         this.on("addMails", this.addMails);
         this.on("recalculateInsights", this.recalculateInsights);
         this.on("recalculateResponse", this.recalculateResponse);
+        this.on("recalculateResponseRag", this.recalculateResponseRag);
         this.on("deleteMail", this.deleteMail);
     }
 
@@ -129,11 +131,22 @@ export default class ApiService extends ApplicationService {
         return true;
     };
 
+    // Recalculate Responses (excl. RAG)
     private recalculateResponse = async (req: Request) => {
-        const { id, additionalInformation = "" } = req.data;
+        const { id, additionalInformation } = req.data;
         const { Mails } = this.entities;
         const mail = await SELECT.one.from(Mails, id);
         await this.upsertResponse(mail, additionalInformation);
+        return true;
+    };
+
+    // Recalculate Responses (incl. RAG)
+    private recalculateResponseRag = async (req: Request) => {
+        const { tenant } = req;
+        const { id, additionalInformation } = req.data;
+        const { Mails } = this.entities;
+        const mail = await SELECT.one.from(Mails, id);
+        await this.upsertResponseRag(mail, tenant, additionalInformation);
         return true;
     };
 
@@ -207,9 +220,8 @@ export default class ApiService extends ApplicationService {
         return mailsInsights;
     };
 
-    private preparePotentialResponses = async (mails: Array<IBaseMail>, additionalInformation: String | "" = "") => {
-        let responseAdditionalInformation = additionalInformation;
-
+    // Prepare Potential Responses (excl. RAG)
+    private preparePotentialResponses = async (mails: Array<IBaseMail>, additionalInformation?: string ) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
@@ -245,9 +257,68 @@ export default class ApiService extends ApplicationService {
                         sender: mail.senderEmailAddress,
                         subject: mail.subject,
                         body: mail.body,
-                        additionalInformation: responseAdditionalInformation
+                        additionalInformation: additionalInformation || ""
                     })
                 ).text;
+                return { mail, response };
+            })
+        );
+
+        return potentialResponses;
+    };
+
+    // Prepare Potential Responses (incl. RAG)
+    private preparePotentialResponsesRag = async (
+        mails: Array<IBaseMail>,
+        tenant?: string,
+        additionalInformation?: string,
+    ) => {
+
+        // prepare response
+        const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
+        const formatInstructions = parser.getFormatInstructions();
+
+        await initializeBTPContext();
+        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
+
+        const systemPrompt = new PromptTemplate({
+            template:
+                "Context information based on similar mail responses is given below." +
+                "---------------------{context}---------------------" +
+                "Formulate a response to the original mail given this context information." +
+                "Prefer the context information when generating your answer to any prior knowledge." +
+                "Also consider given additional information if available to enhance the response." +
+                "Address the sender appropriately.\n{format_instructions}\n" +
+                "Make sure to escape special characters by double slashes.",
+            inputVariables: ["context"],
+            partialVariables: { format_instructions: formatInstructions }
+        });
+
+        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+        const humanTemplate = "{sender}\n{subject}\n{body}\n{additionalInformation}";
+        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
+        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
+
+        const chain = new StuffDocumentsChain({
+            llmChain: new LLMChain({
+                llm: llm,
+                prompt: chatPrompt
+            })        
+        });
+
+        const potentialResponses = await Promise.all(
+            mails.map(async (mail: IBaseMail) => {
+                const closestMails = await getClosestMails(mail.ID, 5, {}, tenant);
+                const closestResponses = closestMails.length > 0 ? await this.closestResponses(closestMails) : []
+                
+                const result = await chain.call({
+                    sender: mail.senderEmailAddress,
+                    subject: mail.subject,
+                    body: mail.body,
+                    additionalInformation: additionalInformation || "",
+                    input_documents: closestResponses
+                });
+                const response = await parser.parse(fixJsonString(result.text));
                 return { mail, response };
             })
         );
@@ -351,7 +422,7 @@ export default class ApiService extends ApplicationService {
     };
 
     // Only translates the Potential Response
-    private translatePotentialResponse = async (responseBody: String) => {
+    private translatePotentialResponse = async (responseBody: string) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
@@ -438,7 +509,8 @@ export default class ApiService extends ApplicationService {
         return translatedMails;
     };
 
-    private upsertResponse = async (mail: IStoredMail, additionalInformation: String = "") => {
+    // Upsert Responses (excl. RAG)
+    private upsertResponse = async (mail: IStoredMail, additionalInformation?: string) => {
         const processedMail = {
             mail: { ...mail },
             insights: {
@@ -456,6 +528,51 @@ export default class ApiService extends ApplicationService {
                         additionalInformation
                     )
                 )[0]?.response?.responseBody
+            }
+        };
+
+        // insert mails with insights
+        console.log("UPDATE RESPONSE...");
+        let translation: String;
+
+        if (!mail.languageMatch) {
+            translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
+        }
+
+        const dbEntry = [
+            {
+                ...mail,
+                responseBody: processedMail.insights.responseBody,
+                translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+            }
+        ];
+
+        cds.tx(async () => {
+            const { Mails } = this.entities;
+            await UPSERT.into(Mails).entries(dbEntry);
+        });
+    };
+
+    // Upsert Responses (incl. RAG)
+    private upsertResponseRag = async (mail: IStoredMail, tenant?: string, additionalInformation?: string) => {
+        const processedMail = {
+            mail: { ...mail },
+            insights: {
+                ...mail,
+                responseBody: (
+                    await this.preparePotentialResponsesRag(
+                        [
+                            {
+                                ID: mail.ID,
+                                body: mail.body,
+                                senderEmailAddress: mail.senderEmailAddress,
+                                subject: mail.subject
+                            }
+                        ],
+                        tenant,
+                        additionalInformation
+                    )
+                )[0]?.response.responseBody
             }
         };
 
@@ -527,6 +644,29 @@ export default class ApiService extends ApplicationService {
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
         }
+    };
+
+    private closestResponses = async (
+        closestMails: Array<[TypeORMVectorStoreDocument, number]>
+    ): Promise<Array<[Document]>> => {
+        const { Mails } = this.entities;
+
+        const responses : Promise<Array<[Document]>> = (
+            await SELECT.from(Mails)
+                .where({
+                    ID: {
+                        in: closestMails.map(
+                            ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
+                        )
+                    }
+                })
+                .columns((m: any) => {
+                    m.ID;
+                    m.responseBody;
+                })
+        ).map((mail: any) => new Document({ metadata: { id: mail.id }, pageContent: mail.responseBody }));
+
+        return responses;
     };
 }
 
