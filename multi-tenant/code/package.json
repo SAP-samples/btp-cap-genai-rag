@@ -84,7 +84,7 @@
         "srv:mtx": "(cd app-service && cds-ts serve MailInsightsService,cds.xt.MTXServices --profile local-with-mtx)",
         "srv:hybrid": "(cd app-service && cds-ts bind --exec --profile hybrid npm run srv:hybrid:helper)",
         "srv:hybrid:helper": "(cd app-service && cds-ts serve MailInsightsService,cds.xt.MTXServices --profile hybrid)",
-        "srv:bas": "(cd app-service && cds-ts watch --profile bas)",
+        "srv:bas": "(cd app-service && cds-ts serve MailInsightsService --profile bas)",
         "---Service-Broker---": "",
         "broker:hybrid": "cds bind --exec npm run broker:run",
         "broker:run": "(cd broker && cds bind --exec --profile hybrid npm start)",
