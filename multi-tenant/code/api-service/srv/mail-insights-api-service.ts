@@ -1,6 +1,6 @@
 import cds, { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
 import {
@@ -64,8 +64,8 @@ export default class ApiService extends ApplicationService {
         this.on("addMails", this.addMails);
         this.on("recalculateInsights", this.recalculateInsights);
         this.on("recalculateResponse", this.recalculateResponse);
-        this.on("recalculateResponseRag", this.recalculateResponseRag);
         this.on("deleteMail", this.deleteMail);
+        this.on("syncWithOffice365", this.syncWithOffice365);
     }
 
     private getMails = async (_req: Request) => {
@@ -108,6 +108,7 @@ export default class ApiService extends ApplicationService {
                               m.body;
                               m.category;
                               m.sender;
+                              m.responseBody;
                               m.translations;
                           })
                     : [];
@@ -124,29 +125,22 @@ export default class ApiService extends ApplicationService {
         }
     };
 
-    private recalculateInsights = async (_req: Request) => {
+    private recalculateInsights = async (req: Request) => {
+        const { tenant } = req;
+        const { rag} = req.data;
         const { Mails } = this.entities;
         const mails = await SELECT.from(Mails);
-        await this.upsertInsights(mails);
+        await this.upsertInsights(mails, rag, tenant);
         return true;
     };
 
     // Recalculate Responses (excl. RAG)
     private recalculateResponse = async (req: Request) => {
-        const { id, additionalInformation } = req.data;
-        const { Mails } = this.entities;
-        const mail = await SELECT.one.from(Mails, id);
-        await this.upsertResponse(mail, additionalInformation);
-        return true;
-    };
-
-    // Recalculate Responses (incl. RAG)
-    private recalculateResponseRag = async (req: Request) => {
         const { tenant } = req;
-        const { id, additionalInformation } = req.data;
+        const { id, rag, additionalInformation } = req.data;
         const { Mails } = this.entities;
         const mail = await SELECT.one.from(Mails, id);
-        await this.upsertResponseRag(mail, tenant, additionalInformation);
+        await this.upsertResponse(mail, rag, tenant, additionalInformation);
         return true;
     };
 
@@ -220,8 +214,12 @@ export default class ApiService extends ApplicationService {
         return mailsInsights;
     };
 
-    // Prepare Potential Responses (excl. RAG)
-    private preparePotentialResponses = async (mails: Array<IBaseMail>, additionalInformation?: string ) => {
+    private preparePotentialResponses = async (
+        mails: Array<IBaseMail>,
+        rag: boolean = true,
+        tenant?: string,
+        additionalInformation?: string
+    ) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
@@ -231,10 +229,16 @@ export default class ApiService extends ApplicationService {
 
         const systemPrompt = new PromptTemplate({
             template:
-                "Formulate a response to the original mail using given additional information." +
+                (rag
+                    ? "Context information based on similar mail responses is given below." +
+                      "---------------------{context}---------------------" +
+                      "Formulate a response to the original mail given this context information." +
+                      "Prefer the context when generating your answer to any prior knowledge." +
+                      "Also consider given additional information if available to enhance the response."
+                    : "Formulate a response to the original mail using given additional information.") +
                 "Address the sender appropriately.\n{format_instructions}\n" +
                 "Make sure to escape special characters by double slashes.",
-            inputVariables: [],
+            inputVariables: rag ? ["context"] : [],
             partialVariables: { format_instructions: formatInstructions }
         });
 
@@ -243,83 +247,48 @@ export default class ApiService extends ApplicationService {
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
         const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
 
-        const chain = new LLMChain({
-            llm: llm,
-            prompt: chatPrompt,
-            outputKey: "text",
-            outputParser: OutputFixingParser.fromLLM(llm, parser)
-        });
+        const chain = rag
+            ? new StuffDocumentsChain({
+                  llmChain: new LLMChain({
+                      llm: llm,
+                      prompt: chatPrompt
+                  })
+              })
+            : new LLMChain({
+                  llm: llm,
+                  prompt: chatPrompt,
+                  outputKey: "text",
+                  outputParser: OutputFixingParser.fromLLM(llm, parser)
+              });
 
         const potentialResponses = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-                const response: z.infer<typeof MAIL_RESPONSE_SCHEMA> = (
-                    await chain.call({
+
+                if (rag) {
+                    const closestMails = await getClosestMails(mail.ID, 5, {}, tenant);
+                    const closestResponses = closestMails.length > 0 ? await this.closestResponses(closestMails) : [];
+
+                    const result = (await chain.call({
                         sender: mail.senderEmailAddress,
                         subject: mail.subject,
                         body: mail.body,
-                        additionalInformation: additionalInformation || ""
-                    })
-                ).text;
-                return { mail, response };
-            })
-        );
+                        additionalInformation: additionalInformation || "",
+                        input_documents: closestResponses
+                    })).text;
+                    const response = await parser.parse(fixJsonString(result));
 
-        return potentialResponses;
-    };
-
-    // Prepare Potential Responses (incl. RAG)
-    private preparePotentialResponsesRag = async (
-        mails: Array<IBaseMail>,
-        tenant?: string,
-        additionalInformation?: string,
-    ) => {
-
-        // prepare response
-        const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
-        const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-35-turbo", temperature: 0.0, maxTokens: 2000 });
-
-        const systemPrompt = new PromptTemplate({
-            template:
-                "Context information based on similar mail responses is given below." +
-                "---------------------{context}---------------------" +
-                "Formulate a response to the original mail given this context information." +
-                "Prefer the context information when generating your answer to any prior knowledge." +
-                "Also consider given additional information if available to enhance the response." +
-                "Address the sender appropriately.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
-            inputVariables: ["context"],
-            partialVariables: { format_instructions: formatInstructions }
-        });
-
-        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
-        const humanTemplate = "{sender}\n{subject}\n{body}\n{additionalInformation}";
-        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
-        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
-
-        const chain = new StuffDocumentsChain({
-            llmChain: new LLMChain({
-                llm: llm,
-                prompt: chatPrompt
-            })        
-        });
-
-        const potentialResponses = await Promise.all(
-            mails.map(async (mail: IBaseMail) => {
-                const closestMails = await getClosestMails(mail.ID, 5, {}, tenant);
-                const closestResponses = closestMails.length > 0 ? await this.closestResponses(closestMails) : []
-                
-                const result = await chain.call({
-                    sender: mail.senderEmailAddress,
-                    subject: mail.subject,
-                    body: mail.body,
-                    additionalInformation: additionalInformation || "",
-                    input_documents: closestResponses
-                });
-                const response = await parser.parse(fixJsonString(result.text));
-                return { mail, response };
+                    return { mail, response };
+                } else {
+                    const response: z.infer<typeof MAIL_RESPONSE_SCHEMA> = (
+                        await chain.call({
+                            sender: mail.senderEmailAddress,
+                            subject: mail.subject,
+                            body: mail.body,
+                            additionalInformation: additionalInformation || ""
+                        })
+                    ).text;
+                    return { mail, response };
+                }
             })
         );
 
@@ -458,14 +427,14 @@ export default class ApiService extends ApplicationService {
         return translation;
     };
 
-    private upsertInsights = async (mails: Array<IBaseMail>) => {
+    private upsertInsights = async (mails: Array<IBaseMail>, rag? : boolean, tenant?: string) => {
         // Add unique ID to mails if not existent
         mails = mails.map((mail) => {
             return { ...mail, ID: mail.ID || uuidv4() };
         });
 
         const generalInsights = await this.extractGeneralInsights(mails);
-        const potentialResponses = await this.preparePotentialResponses(mails);
+        const potentialResponses = await this.preparePotentialResponses(mails, rag, tenant);
         const languageMatches = await this.extractLanguageMatches(mails);
 
         const processedMails = mails.reduce((mails: Array<IProcessedMail>, mail: IBaseMail) => {
@@ -510,7 +479,12 @@ export default class ApiService extends ApplicationService {
     };
 
     // Upsert Responses (excl. RAG)
-    private upsertResponse = async (mail: IStoredMail, additionalInformation?: string) => {
+    private upsertResponse = async (
+        mail: IStoredMail,
+        rag?: boolean,
+        tenant?: string,
+        additionalInformation?: string
+    ) => {
         const processedMail = {
             mail: { ...mail },
             insights: {
@@ -525,54 +499,11 @@ export default class ApiService extends ApplicationService {
                                 subject: mail.subject
                             }
                         ],
-                        additionalInformation
-                    )
-                )[0]?.response?.responseBody
-            }
-        };
-
-        // insert mails with insights
-        console.log("UPDATE RESPONSE...");
-        let translation: String;
-
-        if (!mail.languageMatch) {
-            translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
-        }
-
-        const dbEntry = [
-            {
-                ...mail,
-                responseBody: processedMail.insights.responseBody,
-                translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
-            }
-        ];
-
-        cds.tx(async () => {
-            const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries(dbEntry);
-        });
-    };
-
-    // Upsert Responses (incl. RAG)
-    private upsertResponseRag = async (mail: IStoredMail, tenant?: string, additionalInformation?: string) => {
-        const processedMail = {
-            mail: { ...mail },
-            insights: {
-                ...mail,
-                responseBody: (
-                    await this.preparePotentialResponsesRag(
-                        [
-                            {
-                                ID: mail.ID,
-                                body: mail.body,
-                                senderEmailAddress: mail.senderEmailAddress,
-                                subject: mail.subject
-                            }
-                        ],
+                        rag,
                         tenant,
                         additionalInformation
                     )
-                )[0]?.response.responseBody
+                )[0]?.response?.responseBody
             }
         };
 
@@ -619,8 +550,8 @@ export default class ApiService extends ApplicationService {
     private addMails = async (req: Request) => {
         try {
             const { tenant } = req;
-            const { mails } = req.data;
-            const mailBatch = await this.upsertInsights(mails);
+            const { mails, rag } = req.data;
+            const mailBatch = await this.upsertInsights(mails, rag, tenant);
 
             // Embed mail bodies with IDs
             console.log("EMBED MAILS WITH IDs...");
@@ -651,7 +582,7 @@ export default class ApiService extends ApplicationService {
     ): Promise<Array<[Document]>> => {
         const { Mails } = this.entities;
 
-        const responses : Promise<Array<[Document]>> = (
+        const responses: Promise<Array<[Document]>> = (
             await SELECT.from(Mails)
                 .where({
                     ID: {
@@ -668,9 +599,51 @@ export default class ApiService extends ApplicationService {
 
         return responses;
     };
+
+    private syncWithOffice365 = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
+
+            const mails = (
+                await mailInbox.send({
+                    method: "GET",
+                    path: `messages?$select=id,sender,subject,body`
+                })
+            ).value?.map((mail: any) => {
+                return {
+                    ID: uuidv5(mail.id, uuidv5.URL),
+                    sender: mail.sender?.emailAddress?.address || "",
+                    subject: mail.subject || "",
+                    body: mail.body?.content || ""
+                };
+            });
+
+            const mailBatch = await this.upsertInsights(mails);
+
+            // embed mail bodies with IDs
+            console.log("EMBED MAILS WITH IDs...");
+            const typeormVectorStore = await getVectorStore(tenant);
+
+            const queryString = `DELETE from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ?| $1`;
+            await typeormVectorStore.appDataSource.query(queryString, [mails.map((mail: any) => mail.ID)]);
+
+            await typeormVectorStore.addDocuments(
+                mailBatch.map((mail: ITranslatedMail) => ({
+                    pageContent: mail.mail.body,
+                    metadata: { id: mail.mail.ID }
+                }))
+            );
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            req.error(`Error: Shared Inbox Sync Error: ${error?.message}`);
+        }
+    };
+
 }
 
-const getVectorStore = async (tenant: string) => {
+const getVectorStore = async (tenant?: string) => {
     await initializeBTPContext();
     const embeddings = new BTPOpenAIGPTEmbedding({
         deployment_id: "text-embedding-ada-002-v2"
@@ -681,7 +654,7 @@ const getVectorStore = async (tenant: string) => {
     return typeormVectorStore;
 };
 
-const getPostgresConnectionOptions = (tenant: string) => {
+const getPostgresConnectionOptions = (tenant?: string) => {
     // @ts-ignore
     const credentials = cds.env.requires?.postgres?.credentials;
     return {
@@ -709,7 +682,7 @@ const getClosestMails = async (
     id: string,
     k: number = 5,
     filter: any = {},
-    tenant: string = DEFAULT_TABLE
+    tenant?: string
 ): Promise<Array<[TypeORMVectorStoreDocument, number]>> => {
     const typeormVectorStore = await getVectorStore(tenant);
 

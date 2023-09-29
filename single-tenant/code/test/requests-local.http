@@ -38,10 +38,24 @@ Authorization: Basic system-user:
 
 
 ### GET MAIL
-@id = {{getMails.response.body.$.value[0].ID}}
+@id = {{getMails.response.body.$.[0].ID}}
 
 # @name getMail
 GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
 content-type: application/json
 Authorization: Basic system-user:
 
+### RECALCULATE RESPONSE 
+
+@id = {{getMails.response.body.$.[0].ID}}
+
+# @name recalculateResponse
+POST http://localhost:4004/odata/v4/mail-insights/recalculateResponse
+content-type: application/json
+Authorization: Basic system-user:
+
+{
+    "id": "{{id}}",
+    "rag": true,
+    "additionalInformation" : "Provide additional information on the climate situation in Europe"
+}

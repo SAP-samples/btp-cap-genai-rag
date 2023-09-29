@@ -1,7 +1,6 @@
 @xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
-@btpXsuaaClient = sb-aisaas-api-dev-sap-demo!b12345
+@btpXsuaaClient = sb-ai-dev-sap-demo!b12345
 @btpXsuaaSecret = abcd1234abcd1234abcd1234
-
 
 ### GET XSUAA TOKEN
 
@@ -17,16 +16,15 @@ client_id={{btpXsuaaClient}}
 
 
 ### ADD MAILS
-
 @token = {{getXsuaaToken.response.body.$.access_token}}
 
 # @name addMails
-POST http://localhost:4005/rest/api/mail-insights/addMails
+POST http://localhost:4004/odata/v4/mail-insights/addMails
 content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "mails": [
+    "mails":[
     {
         "subject": "Help Needed in Booking Family Suite in Rome",
         "body": "Dear Support Team, as a loyal customer I'm trying to book a family suite in Rome for my family of five. However, I can't seem to find a suitable one on your website. Can you help me find a hotel that can accommodate us comfortably? \nMany Thanks,  \nJane Smith ",
@@ -46,13 +44,13 @@ Authorization: Bearer {{token}}
         "subject": "需要协助安排多城欧洲之旅",
         "body": "你好，ThorTours团队，我计划在明年夏天进行一次欧洲多城市之旅，但我对如何预订机票和酒店感到困惑。你们能帮助我制定一个包括罗马、巴黎、柏林和巴塞罗那的行程吗？\n提前感谢你们，\n汤姆·戴维斯\n",
         "senderEmailAddress": "tom.davis@tttraveler.org"
-    }  
+    }
   ]
 }
 
 ### GET MAILS
 # @name getMails
-GET http://localhost:4005/rest/api/mail-insights/getMails()
+GET http://localhost:4004/odata/v4/mail-insights/getMails()
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -61,17 +59,16 @@ Authorization: Bearer {{token}}
 @id = {{getMails.response.body.$.[0].ID}}
 
 # @name getMail
-GET http://localhost:4005/rest/api/mail-insights/getMail(id={{id}})
+GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
 content-type: application/json
 Authorization: Bearer {{token}}
 
 
 ### RECALCULATE RESPONSE 
-
 @id = {{getMails.response.body.$.[0].ID}}
 
 # @name recalculateResponse
-POST http://localhost:4005/rest/api/mail-insights/recalculateResponse
+POST http://localhost:4004/odata/v4/mail-insights/recalculateResponse
 content-type: application/json
 Authorization: Bearer {{token}}
 

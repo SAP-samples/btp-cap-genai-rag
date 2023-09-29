@@ -67,12 +67,8 @@
             "toggles": false,
             "postgres": {
                 "kind": "postgres",
-                "credentials": {
-                    "hostname": "localhost",
-                    "port": 5432,
-                    "username": "postgres",
-                    "password": "postgres",
-                    "dbname": "postgres"
+                "postgres": {
+                    "kind": "postgresql-db"
                 }
             }
         },
@@ -153,6 +149,20 @@
                         "roles": ["Member"]
                     }
                 }
+            }
+        },
+        "db-ext": {
+            "[local-with-mtx]": {
+                "model": [
+                "../api-service/srv",
+                "../test"
+                ]
+            },
+            "[development]": {
+                "model": [
+                "../api-service/srv",
+                "../test"
+                ]
             }
         }
     }
