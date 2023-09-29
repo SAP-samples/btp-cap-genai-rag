@@ -67,8 +67,12 @@
             "toggles": false,
             "postgres": {
                 "kind": "postgres",
-                "postgres": {
-                    "kind": "postgresql-db"
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
                 }
             }
         },
