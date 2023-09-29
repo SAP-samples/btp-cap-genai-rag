@@ -58,10 +58,24 @@ Authorization: Bearer {{token}}
 
 
 ### GET MAIL
-@id = {{getMails.response.body.$.value[0].ID}}
+@id = {{getMails.response.body.$.[0].ID}}
 
 # @name getMail
 GET {{btpAppHostname}}/odata/v4/mail-insights/getMail(id={{id}})
 content-type: application/json
 Authorization: Bearer {{token}}
 
+
+### RECALCULATE RESPONSE 
+@id = {{getMails.response.body.$.[0].ID}}
+
+# @name recalculateResponse
+POST {{btpAppHostname}}/odata/v4/mail-insights/recalculateResponse
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "id": "{{id}}",
+    "rag": true,
+    "additionalInformation" : "Provide additional information on the climate situation in Europe"
+}

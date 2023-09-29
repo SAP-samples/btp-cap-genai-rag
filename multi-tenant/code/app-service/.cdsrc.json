@@ -154,6 +154,20 @@
                     }
                 }
             }
+        },
+        "db-ext": {
+            "[local-with-mtx]": {
+                "model": [
+                "../api-service/srv",
+                "../test"
+                ]
+            },
+            "[development]": {
+                "model": [
+                "../api-service/srv",
+                "../test"
+                ]
+            }
         }
     }
 }

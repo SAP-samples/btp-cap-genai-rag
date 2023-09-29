@@ -1,6 +1,5 @@
 {
     "folders": {
-        "app": "../app",
         "db-sqlite": "../db/sqlite"
     },
     "requires": {
@@ -25,8 +24,10 @@
         },
         "[local-with-mtx]": {
             "multitenancy": true,
-            "extensibility": false,
-            "toggles": false,
+            "cds.xt.ExtensibilityService": false,
+            "cds.xt.ModelProviderService": false,
+            "cds.xt.DeploymentService": false,
+            "cds.xt.SaasProvisioningService": false,
             "postgres": {
                 "kind": "postgres",
                 "credentials": {
@@ -90,8 +91,10 @@
             "[bas]": {
                 "kind": "basic",
                 "users": {
-                    "tenant": "t1",
-                    "roles": ["system-user"]
+                    "system-user": {
+                        "tenant": "t1",
+                        "roles": ["system-user"]
+                    }
                 }
             },
             "[local-with-mtx]": {
