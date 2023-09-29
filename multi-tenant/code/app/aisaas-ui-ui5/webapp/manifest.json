@@ -4,8 +4,8 @@
 	"sap.app": {
 		"id": "aisaas.ui",
 		"type": "application",
-		"title": "{{appTitle}}",
-		"description": "{{appDescription}}",
+		"title": "{appTitle}",
+		"description": "{appDescription}",
 		"applicationVersion": {
 			"version": "1.0.0"
 		},

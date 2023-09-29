@@ -120,15 +120,7 @@
 									sorter: {path: 'similarity', descending: 'false'}
 								}">
                                 <CustomListItem>
-									<Panel
-										expandable="true"
-										expanded="false"
-										stickyHeader="true"
-										headerText="{mail/subject} | {i18n>email.list.label.similarity}: {path:'similarity', formatter:'formatter.getFormattedSimilarity'}%">
-                  						<content>
-                                    		<core:Fragment fragmentName="aisaas.ui.view.SimilarEmailListItem" type="XML"/>
-										</content>
-									</Panel>
+									<core:Fragment fragmentName="aisaas.ui.view.SimilarEmailListItem" type="XML"/>
                                 </CustomListItem>
                             </List>
 						</VBox>

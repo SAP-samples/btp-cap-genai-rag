@@ -3,9 +3,28 @@
    xmlns:tnt="sap.tnt"
    xmlns:core="sap.ui.core"
    core:require="{ formatter: 'aisaas/ui/model/formatter' }">
-    <VBox class="sapUiMediumMarginBeginEnd sapUiTinyMarginTop sapUiMediumMarginBottom">
-        <Label text="{mail/sender}" wrapping="true"/>
-        <tnt:InfoLabel class="sapUiTinyMarginTop" displayOnly="true" text="{mail/category}"/>
-        <Text class="sapUiTinyMarginTop" text="{mail/body}"/>
-    </VBox>
+    <Panel
+        expandable="true"
+        expanded="false"
+        stickyHeader="true"
+        headerText="{mail/subject} | {i18n>email.similarEmail.title.similarity}: {path:'similarity', formatter:'formatter.getFormattedSimilarity'}%">
+        <VBox class="sapUiMediumMarginBeginEnd sapUiTinyMarginTop sapUiMediumMarginBottom">
+            <HBox>
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.type}:"/>
+                <tnt:InfoLabel displayOnly="true" text="{mail/category}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginTop">
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.sender}:"/>
+                <Text text="{mail/sender}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginTop">
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.body}:"/>
+                <Text text="{mail/body}"/>
+            </HBox>
+            <HBox class="sapUiSmallMarginTop">
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.response}:"/>
+                <Text text="{mail/responseBody}"/>
+            </HBox>
+        </VBox>
+    </Panel>
 </core:FragmentDefinition>
