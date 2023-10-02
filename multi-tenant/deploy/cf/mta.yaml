@@ -50,7 +50,7 @@ modules:
   - name: aisaas-srv
   # ------------------------------------------------------------
     type: nodejs
-    path: ../../code/gen/srv
+    path: ../../code/gen/app
     build-parameters:
       builder: custom
       ignore: [".DS_Store", "manifest*.yml"]
