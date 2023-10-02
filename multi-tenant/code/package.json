@@ -29,15 +29,18 @@
         "combined-stream": "^1.0.8",
         "cors": "^2.8.5",
         "express": "^4",
-        "openai": "~4.4.0",
         "langchain": "^0.0.153",
+        "module-alias": "^2.2.3",
         "node-fetch": "^2.6.7",
         "node-jose": "^2.1",
+        "openai": "~4.4.0",
         "passport": "^0.6.0",
         "pg": "^8.11.2",
         "typeorm": "^0.3.17"
     },
     "devDependencies": {
+        "common-app": "file:./srv/common",
+        "common-api": "file:./srv/common",
         "@babel/cli": "^7.22.15",
         "@sap/approuter": "^14.1.1",
         "@sap/cds-common-content": "1.0.1",
@@ -60,43 +63,43 @@
         "npm-run-all": "^4.1.5",
         "rimraf": "^5.0.1",
         "shx": "^0.3.4",
-        "sqlite3": "^5.1.6"
+        "sqlite3": "^5.1.6",
+        "tsc-alias": "^1.8.8",
+        "tsconfig-paths": "^4.2.0"
     },
     "scripts": {
         "start": "cds-serve",
-        "deploy": "(cd app-service && cds deploy --to sqlite:../db.sqlite --profile development)",
+        "deploy": "cds deploy --to sqlite",
         "----------------------": "",
         "-Local/Hybrid-Testing-": "",
         "/--------------------/": "",
         "test": "mocha --timeout 20000",
-        "hybrid:all": "npx --yes npm-run-all --npm-path npm --parallel srv:hybrid mock:hybrid ui5:watch",
-        "watch:all": "npx --yes npm-run-all --npm-path npm --parallel srv:watch ui5:watch",
-        "mtx:all": "npx --yes npm-run-all --npm-path npm --parallel srv:mtx ui5:watch",
+        "hybrid": "npx --yes npm-run-all --npm-path npm --parallel cap:hybrid mock:hybrid ui5:watch",
+        "dev": "npx --yes npm-run-all --npm-path npm --parallel cap:dev ui5:watch",
+        "mtx": "npx --yes npm-run-all --npm-path npm --parallel cap:mtx ui5:watch",
         "---UI5-App---": "",
         "ui5:init": "npm install --prefix ./app/aisaas-ui-ui5",
         "ui5:watch": "npm run start --prefix ./app/aisaas-ui-ui5",
-        "---API-Service---": "",
-        "api:watch": "(cd api-service && cds-ts watch --profile development --port 4005)",
-        "api:mtx": "(cd api-service && cds-ts watch --profile local-with-mtx --port 4005)",
-        "api:hybrid": "(cd api-service && cds-ts watch --profile hybrid --port 4005)",
-        "---Backend-Service---": "",
-        "srv:watch": "(export CDS_PROFILE='development' && cd app-service && cds-ts bind --exec --profile development npm run srv:helper)",
-        "srv:mtx": "(export CDS_PROFILE='local-with-mtx' && cd app-service && cds-ts bind --exec --profile local-with-mtx npm run srv:helper)",
-        "srv:hybrid": "(export CDS_PROFILE='hybrid' && cd app-service && cds-ts bind --exec --profile hybrid npm run srv:helper)",
-        "srv:bas": "(export CDS_PROFILE='bas' && cd app-service && cds-ts bind --exec --profile bas npm run srv:helper)",
-        "srv:helper": "(cd app-service && cds-ts serve MailInsightsService,cds.xt.MTXServices --profile process.env.CDS_PROFILE)",
+        "---CAP-Local---": "",
+        "cap:dev": "cds-ts watch --profile development",
+        "cap:mtx": "cds-ts watch --profile local-with-mtx",
+        "cap:bas": "cds-ts watch --profile bas",
+        "---CAP-Hybrid---": "",
+        "cap:hybrid": "npx --yes npm-run-all --npm-path npm --parallel srv:hybrid api:hybrid",
+        "srv:hybrid": "cds-ts bind --exec --profile hybrid npm run srv:hybrid:helper",
+        "api:hybrid": "cds-ts bind --exec --profile hybrid-api npm run api:hybrid:helper",
+        "---CAP-Helper---": "",
+        "srv:hybrid:helper": "(cds-ts serve MailInsightsService,cds.xt.MTXServices --profile hybrid)",
+        "api:hybrid:helper": "(cds-ts serve ApiService --profile hybrid-api --port 4005)",
         "---Service-Broker---": "",
-        "broker:hybrid": "cds bind --exec npm run broker:run",
-        "broker:run": "(cd broker && cds bind --exec --profile hybrid npm start)",
+        "broker:hybrid": "cds bind --exec --profile hybrid npm start",
         "---HTML5-Mock-Repo---": "",
-        "mock:hybrid": "cds bind --exec npm run mock:run:hybrid",
-        "mock:run:hybrid": "(cd router && cds bind --exec --profile hybrid node ../node_modules/@sap/html5-repo-mock/index.js)",
+        "mock:hybrid": "cds bind --exec --profile hybrid node ./node_modules/@sap/html5-repo-mock/index.js",
         "---Application-Router---": "",
-        "router:hybrid": "cds bind --exec npm run router:run",
-        "router:run": "(cd router && cds bind --exec --profile hybrid node ../node_modules/@sap/approuter/approuter.js)",
+        "router:hybrid": "cds bind --exec --profile hybrid node ./node_modules/@sap/approuter/approuter.js",
         "-Manual HTML5 Deployment-": "",
-        "deployer:run": "(cd app/html5-deployer && cds bind --exec --profile hybrid node ../../node_modules/@sap/html5-app-deployer/index.js)",
-        "deployer:hybrid": "cds bind --exec npm run deployer:run",
+        "deployer:hybrid": "cds bind --exec --profile hybrid npm run deployer:run",
+        "deployer:run": "(cd app/html5-deployer && node ../../node_modules/@sap/html5-app-deployer/index.js)",
         "---------------------": "",
         "-----PostgreSQL------": "",
         "/-------------------/": "",
@@ -106,7 +109,7 @@
         "--------BUILD-------": "",
         "/------------------/": "",
         "build": "npm run build:deps && npm run build:cds && npm run build:ts && npm run cleanup:ts",
-        "build:ts": "tsc -b app-service && tsc -b api-service",
+        "build:ts": "tsc && tsc-alias",
         "build:cds": "cds build --production",
         "build:deps": "npm i",
         "cleanup:ts": "npx shx rm -r './gen/**/*.{ts,tsconfig}'",
@@ -146,11 +149,6 @@
         "printWidth": 120
     },
     "cds": {
-        "folders": {
-            "db-sqlite": "db/sqlite",
-            "app-srv": "app-service/srv",
-            "api-srv": "api-service/srv"
-        },
         "build": {
             "tasks": [
                 {
@@ -159,36 +157,52 @@
                         "model": [
                             "db",
                             "db/hana",
-                            "api-service/srv",
-                            "app-service/srv",
+                            "srv/app-srv",
+                            "srv/api-srv",
                             "@sap/cds-mtxs/db/extensions"
                         ]
                     }
                 },
                 {
                     "for": "nodejs",
-                    "src": "app-service/srv",
-                    "dest": "srv",
+                    "src": "srv/app-srv",
+                    "dest": "app",
                     "options": {
                         "model": [
-                            "app-service/srv",
-                            "@sap/cds-mtxs/srv/bootstrap",
-                            "@sap/cds-mtxs/srv/extensibility-service"
+                            "srv/app-srv"
                         ]
                     }
                 },
                 {
                     "for": "nodejs",
-                    "src": "api-service/srv",
+                    "src": "srv/api-srv",
                     "dest": "api",
                     "options": {
-                        "model": "api-service/srv"
+                        "model": [
+                            "srv/api-srv"
+                        ]
+                    }
+                },
+                {
+                    "for": "nodejs",
+                    "src": "srv/common",
+                    "dest": "app",
+                    "options": {
+                        "model": "srv/common"
+                    }
+                },
+                {
+                    "for": "nodejs",
+                    "src": "srv/common",
+                    "dest": "api",
+                    "options": {
+                        "model": "srv/common"
                     }
                 },
                 {
                     "for": "mtx",
-                    "src": "app-service/srv",
-                    "dest": "srv"
+                    "src": "srv/app-srv",
+                    "dest": "app"
                 },
                 {
                     "for": "hana",
