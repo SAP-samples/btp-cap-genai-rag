@@ -5,8 +5,8 @@
   "license": "Apache License 2.0",
   "description": "AI SaaS",
   "scripts": {
-    "build": "npm run install && npm run build:cds && npm run build:ts && npm run cleanup:ts && npm run uninst",
-    "install": "npm i --install-links --prefix ../../code",
+    "build": "npm run inst && npm run build:cds && npm run build:ts && npm run cleanup:ts && npm run uninst",
+    "inst": "npm install --prefix ../../code",
     "build:cds": "npx -p @sap/cds-dk cds build -in ../../code --profile production",
     "build:ts": "tsc -p ../../code/tsconfig.json && tsc-alias -p ../../code/tsconfig.json",
     "cleanup:ts": "npx shx rm -r '../../code/gen/**/*.{ts,tsconfig}'",
