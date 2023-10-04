@@ -1,10 +1,6 @@
 ### ADD MAILS
 # @name addMails
-# POST http://localhost:4004/odata/v4/mail-insights/addMails
-# content-type: application/json
-# Authorization: Basic alice:
-
-POST http://localhost:4005/rest/api/mail-insights/addMails
+POST http://localhost:4004/rest/api/mail-insights/addMails
 content-type: application/json
 Authorization: Basic system-user:
 
@@ -37,22 +33,15 @@ Authorization: Basic system-user:
 # @name getMails
 GET http://localhost:4004/odata/v4/mail-insights/Mails
 content-type: application/json
-Authorization: Basic alice:
-
-# GET http://localhost:4005/rest/api/mail-insights/getMails()
-# content-type: application/json
-# Authorization: Basic system-user:
+Authorization: Basic system-user:
 
 
 ### GET MAIL
+
 @id = {{getMails.response.body.$.[0].ID}}
 
 # @name getMail
-# GET http://localhost:4004/odata/v4/mail-insights/getMail(id={{id}})
-# content-type: application/json
-# Authorization: Basic alice:
-
-GET http://localhost:4005/rest/api/mail-insights/getMail(id={{id}})
+GET http://localhost:4004/rest/api/mail-insights/getMail(id={{id}})
 content-type: application/json
 Authorization: Basic system-user:
 
@@ -62,16 +51,12 @@ Authorization: Basic system-user:
 @id = {{getMails.response.body.$.[0].ID}}
 
 # @name recalculateResponse
-# POST http://localhost:4004/odata/v4/mail-insights/recalculateResponse
-# content-type: application/json
-# Authorization: Basic alice:
-
-POST http://localhost:4005/rest/api/mail-insights/recalculateResponse
+POST http://localhost:4004/rest/api/mail-insights/recalculateResponse
 content-type: application/json
 Authorization: Basic system-user:
 
 {
     "id": "{{id}}",
-    "rag": true,
+    "rag": false,
     "additionalInformation" : "Provide additional information on the climate situation in Europe"
 }
