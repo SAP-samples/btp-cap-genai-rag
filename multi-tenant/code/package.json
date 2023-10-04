@@ -64,8 +64,7 @@
         "rimraf": "^5.0.1",
         "shx": "^0.3.4",
         "sqlite3": "^5.1.6",
-        "tsc-alias": "^1.8.8",
-        "tsconfig-paths": "^4.2.0"
+        "tsc-alias": "^1.8.8"
     },
     "scripts": {
         "start": "cds-serve",
@@ -108,11 +107,14 @@
         "--------------------": "",
         "--------BUILD-------": "",
         "/------------------/": "",
-        "build": "npm run build:deps && npm run build:cds && npm run build:ts && npm run cleanup:ts",
+        "build": "npm run inst && npm run build:cds && npm run build:ts && npm run cleanup:ts && npm run uninst",
+        "inst": "npm install",
+        "build:cds": "npx -p @sap/cds-dk cds build --profile production",
         "build:ts": "tsc && tsc-alias",
-        "build:cds": "cds build --production",
-        "build:deps": "npm i",
         "cleanup:ts": "npx shx rm -r './gen/**/*.{ts,tsconfig}'",
+        "uninst": "npm run uninst:app && npm run uninst:api",
+        "uninst:app": "npm rm common-app common-api --prefix ./gen/app --package-lock-only",
+        "uninst:api": "npm rm common-app common-api --prefix ./gen/api --package-lock-only",
         "cds2types": "cd app-service && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },
     "eslintConfig": {
