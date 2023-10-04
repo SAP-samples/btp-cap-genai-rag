@@ -59,18 +59,21 @@ const filterForTranslation = ({
     responseBody
 });
 
-export default class MailInsights extends ApplicationService {
+export default class CommonMailInsights extends ApplicationService {
     async init() {
         await super.init();
         this.on("getMails", this.getMails);
         this.on("getMail", this.getMail);
-        this.on("addMails", this.addMails);
         this.on("recalculateInsights", this.recalculateInsights);
         this.on("recalculateResponse", this.recalculateResponse);
+        this.on("addMails", this.addMails);
         this.on("deleteMail", this.deleteMail);
         this.on("syncWithOffice365", this.syncWithOffice365);
     }
 
+    // ######## Handler Methods #########
+
+    // Get all Mails excl. closest Mails
     private getMails = async (_req: Request) => {
         try {
             const { Mails } = this.entities;
@@ -89,6 +92,7 @@ export default class MailInsights extends ApplicationService {
         }
     };
 
+    // Get a single Mail incl. closest Mails
     private getMail = async (req: Request) => {
         try {
             const { tenant } = req;
@@ -131,16 +135,17 @@ export default class MailInsights extends ApplicationService {
         }
     };
 
+    // Recalculate Insights for all available Mails
     private recalculateInsights = async (req: Request) => {
         const { tenant } = req;
-        const { rag} = req.data;
+        const { rag } = req.data;
         const { Mails } = this.entities;
         const mails = await SELECT.from(Mails);
         await this.upsertInsights(mails, rag, tenant);
         return true;
     };
 
-    // Recalculate Responses
+    // Recalculate Potential Response for a single Mail
     private recalculateResponse = async (req: Request) => {
         const { tenant } = req;
         const { id, rag, additionalInformation } = req.data;
@@ -150,6 +155,204 @@ export default class MailInsights extends ApplicationService {
         return response;
     };
 
+    // (Re-)Generate Insights, Response(s) and Translation(s) for single or multiple Mail(s)
+    private upsertInsights = async (mails: Array<IBaseMail>, rag?: boolean, tenant?: string) => {
+        // Add unique ID to mails if not existent
+        mails = mails.map((mail) => {
+            return { ...mail, ID: mail.ID || uuidv4() };
+        });
+
+        const [generalInsights, potentialResponses, languageMatches] = await Promise.all([
+            this.extractGeneralInsights(mails),
+            this.preparePotentialResponses(mails, rag, tenant),
+            this.extractLanguageMatches(mails)
+        ]);
+
+        const processedMails = mails.reduce((acc, mail) => {
+            const generalInsight = generalInsights.find((res) => res.mail.ID === mail.ID)?.insights;
+            const potentialResponse = potentialResponses.find((res) => res.mail.ID === mail.ID)?.response;
+            const languageMatch = languageMatches.find((res) => res.mail.ID === mail.ID)?.languageMatch;
+
+            acc.push({
+                mail,
+                insights: {
+                    ...generalInsight,
+                    ...potentialResponse,
+                    ...languageMatch
+                }
+            });
+
+            return acc;
+        }, [] as IProcessedMail[]);
+
+        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails);
+
+        // insert mails with insights
+        console.log("UPDATE MAILS WITH INSIGHTS...");
+
+        const dbEntries = translatedMails.map((mail) => {
+            return {
+                ...mail.mail,
+                ...mail.insights,
+                translations: mail.translations
+            };
+        });
+
+        cds.tx(async () => {
+            const { Mails } = this.entities;
+            await UPSERT.into(Mails).entries(dbEntries);
+        });
+
+        return translatedMails;
+    };
+
+    // Upsert Response for a single Mail
+    private upsertResponse = async (
+        mail: IStoredMail,
+        rag?: boolean,
+        tenant?: string,
+        additionalInformation?: string
+    ): Promise<IStoredMail> => {
+        const processedMail = {
+            mail: { ...mail },
+            insights: {
+                ...mail,
+                responseBody: (
+                    await this.preparePotentialResponses(
+                        [
+                            {
+                                ID: mail.ID,
+                                body: mail.body,
+                                senderEmailAddress: mail.senderEmailAddress,
+                                subject: mail.subject
+                            }
+                        ],
+                        rag,
+                        tenant,
+                        additionalInformation
+                    )
+                )[0]?.response?.responseBody
+            }
+        };
+
+        // insert mails with insights
+        console.log("UPDATE RESPONSE...");
+        let translation: String;
+
+        if (!mail.languageMatch) {
+            translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
+        }
+
+        const dbEntry = {
+            ...mail,
+            responseBody: processedMail.insights.responseBody,
+            translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+        };
+
+        cds.tx(async () => {
+            const { Mails } = this.entities;
+            await UPSERT.into(Mails).entries([dbEntry]);
+        });
+
+        return dbEntry;
+    };
+
+    // Process single or multiple new Mail(s)
+    private addMails = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const { mails, rag } = req.data;
+            const mailBatch = await this.upsertInsights(mails, rag, tenant);
+
+            // Embed mail bodies with IDs
+            console.log("EMBED MAILS WITH IDs...");
+            const typeormVectorStore = await getVectorStore(tenant);
+            await typeormVectorStore.addDocuments(
+                mailBatch.map((mail: any) => ({
+                    pageContent: mail.mail.body,
+                    // add category, services, actions to metadata
+                    metadata: { id: mail.mail.ID }
+                }))
+            );
+
+            // Return array of added Mails
+            return mailBatch.map((mail) => {
+                return {
+                    ...mail.mail,
+                    ...mail.insights,
+                    translations: mail.translations
+                };
+            });
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+        }
+    };
+
+    // Delete single Mail from SAP HANA Cloud and PostgreSQL
+    private deleteMail = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const { id } = req.data;
+            const { Mails } = this.entities;
+
+            await DELETE.from(Mails, id);
+
+            const typeormVectorStore = await getVectorStore(tenant);
+            const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
+
+            await typeormVectorStore.appDataSource.query(queryString, [id]);
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+        }
+    };
+
+    // Sync with Office 365
+    private syncWithOffice365 = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
+
+            const mails = (
+                await mailInbox.send({
+                    method: "GET",
+                    path: `messages?$select=id,sender,subject,body`
+                })
+            ).value?.map((mail: any) => {
+                return {
+                    ID: uuidv5(mail.id, uuidv5.URL),
+                    sender: mail.sender?.emailAddress?.address || "",
+                    subject: mail.subject || "",
+                    body: mail.body?.content || ""
+                };
+            });
+
+            const mailBatch = await this.upsertInsights(mails);
+
+            // embed mail bodies with IDs
+            console.log("EMBED MAILS WITH IDs...");
+            const typeormVectorStore = await getVectorStore(tenant);
+
+            const queryString = `DELETE from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ?| $1`;
+            await typeormVectorStore.appDataSource.query(queryString, [mails.map((mail: any) => mail.ID)]);
+
+            await typeormVectorStore.addDocuments(
+                mailBatch.map((mail: ITranslatedMail) => ({
+                    pageContent: mail.mail.body,
+                    metadata: { id: mail.mail.ID }
+                }))
+            );
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            req.error(`Error: Shared Inbox Sync Error: ${error?.message}`);
+        }
+    };
+
+
+    // ######## LLM Methods #########
+
+    // Extract Insights for Mail(s) using LLM
     private extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
         const { CustomFields } = this.entities;
         const customFields = await SELECT.from(CustomFields);
@@ -221,6 +424,7 @@ export default class MailInsights extends ApplicationService {
         return mailsInsights;
     };
 
+    // Generate potential Response(s) using LLM
     private preparePotentialResponses = async (
         mails: Array<IBaseMail>,
         rag: boolean = true,
@@ -270,18 +474,19 @@ export default class MailInsights extends ApplicationService {
 
         const potentialResponses = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-
                 if (rag) {
                     const closestMails = await getClosestMails(mail.ID, 5, {}, tenant);
                     const closestResponses = closestMails.length > 0 ? await this.closestResponses(closestMails) : [];
 
-                    const result = (await chain.call({
-                        sender: mail.senderEmailAddress,
-                        subject: mail.subject,
-                        body: mail.body,
-                        additionalInformation: additionalInformation || "",
-                        input_documents: closestResponses
-                    })).text;
+                    const result = (
+                        await chain.call({
+                            sender: mail.senderEmailAddress,
+                            subject: mail.subject,
+                            body: mail.body,
+                            additionalInformation: additionalInformation || "",
+                            input_documents: closestResponses
+                        })
+                    ).text;
                     const response = await parser.parse(fixJsonString(result));
 
                     return { mail, response };
@@ -302,7 +507,7 @@ export default class MailInsights extends ApplicationService {
         return potentialResponses;
     };
 
-    // Extract Language Matches
+    // Extract Language Match(es) using LLM
     private extractLanguageMatches = async (mails: Array<IBaseMail>) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_LANGUAGE_SCHEMA);
@@ -345,7 +550,7 @@ export default class MailInsights extends ApplicationService {
         return languageMatches;
     };
 
-    // Translates all insights
+    // Translates Insight(s) using LLM
     private translateInsights = async (mails: Array<IProcessedMail>) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_TRANSLATION_SCHEMA);
@@ -397,7 +602,7 @@ export default class MailInsights extends ApplicationService {
         return translations;
     };
 
-    // Only translates the Potential Response
+    // Translates a single Potential Response using LLM
     private translatePotentialResponse = async (responseBody: string) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
@@ -434,156 +639,9 @@ export default class MailInsights extends ApplicationService {
         return translation;
     };
 
-    private upsertInsights = async (mails: Array<IBaseMail>, rag? : boolean, tenant?: string) => {
-        // Add unique ID to mails if not existent
-        mails = mails.map((mail) => {
-            return { ...mail, ID: mail.ID || uuidv4() };
-        });
+    // ######## Helper Methods #########
 
-        const generalInsights = await this.extractGeneralInsights(mails);
-        const potentialResponses = await this.preparePotentialResponses(mails, rag, tenant);
-        const languageMatches = await this.extractLanguageMatches(mails);
-
-        const processedMails = mails.reduce((mails: Array<IProcessedMail>, mail: IBaseMail) => {
-            return [
-                ...mails,
-                {
-                    mail: { ...mail },
-                    insights: {
-                        ...generalInsights.filter(
-                            (res: { mail: IBaseMail; insights: any }) => res.mail.ID === mail.ID
-                        )[0].insights,
-                        ...potentialResponses.filter(
-                            (res: { mail: IBaseMail; response: any }) => res.mail.ID === mail.ID
-                        )[0].response,
-                        ...languageMatches.filter(
-                            (res: { mail: IBaseMail; languageMatch: any }) => res.mail.ID === mail.ID
-                        )[0].languageMatch
-                    }
-                }
-            ];
-        }, new Array<IProcessedMail>());
-
-        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails);
-
-        // insert mails with insights
-        console.log("UPDATE MAILS WITH INSIGHTS...");
-
-        const dbEntries = translatedMails.map((translatedMail) => {
-            return {
-                ...translatedMail.mail,
-                ...translatedMail.insights,
-                translations: translatedMail.translations
-            };
-        });
-
-        cds.tx(async () => {
-            const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries(dbEntries);
-        });
-
-        return translatedMails;
-    };
-
-    // Upsert Responses
-    private upsertResponse = async (
-        mail: IStoredMail,
-        rag?: boolean,
-        tenant?: string,
-        additionalInformation?: string
-    ) : Promise<IStoredMail> => {
-        const processedMail = {
-            mail: { ...mail },
-            insights: {
-                ...mail,
-                responseBody: (
-                    await this.preparePotentialResponses(
-                        [
-                            {
-                                ID: mail.ID,
-                                body: mail.body,
-                                senderEmailAddress: mail.senderEmailAddress,
-                                subject: mail.subject
-                            }
-                        ],
-                        rag,
-                        tenant,
-                        additionalInformation
-                    )
-                )[0]?.response?.responseBody
-            }
-        };
-
-        // insert mails with insights
-        console.log("UPDATE RESPONSE...");
-        let translation: String;
-
-        if (!mail.languageMatch) {
-            translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
-        }
-
-        const dbEntry = {
-            ...mail,
-            responseBody: processedMail.insights.responseBody,
-            translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
-        };
-
-        cds.tx(async () => {
-            const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries([dbEntry]);
-        });
-
-        return dbEntry;
-    };
-
-    private deleteMail = async (req: Request) => {
-        try {
-            const { tenant } = req;
-            const { id } = req.data;
-            const { Mails } = this.entities;
-
-            await DELETE.from(Mails, id);
-
-            const typeormVectorStore = await getVectorStore(tenant);
-            const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
-
-            await typeormVectorStore.appDataSource.query(queryString, [id]);
-            return true;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-        }
-    };
-
-    private addMails = async (req: Request) => {
-        try {
-            const { tenant } = req;
-            const { mails, rag } = req.data;
-            const mailBatch = await this.upsertInsights(mails, rag, tenant);
-
-            // Embed mail bodies with IDs
-            console.log("EMBED MAILS WITH IDs...");
-            const typeormVectorStore = await getVectorStore(tenant);
-            await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: any) => ({
-                    pageContent: mail.mail.body,
-                    // add category, services, actions to metadata
-                    metadata: { id: mail.mail.ID }
-                }))
-            );
-
-            // Return array of added Mails
-            return mailBatch.map((mail) => {
-                return {
-                    ...mail.mail,
-                    ...mail.insights,
-                    translations: mail.translations
-                };
-            });
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-        }
-    };
-
+    // Get responses of x closest Mails
     private closestResponses = async (
         closestMails: Array<[TypeORMVectorStoreDocument, number]>
     ): Promise<Array<[Document]>> => {
@@ -606,48 +664,6 @@ export default class MailInsights extends ApplicationService {
 
         return responses;
     };
-
-    private syncWithOffice365 = async (req: Request) => {
-        try {
-            const { tenant } = req;
-            const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
-
-            const mails = (
-                await mailInbox.send({
-                    method: "GET",
-                    path: `messages?$select=id,sender,subject,body`
-                })
-            ).value?.map((mail: any) => {
-                return {
-                    ID: uuidv5(mail.id, uuidv5.URL),
-                    sender: mail.sender?.emailAddress?.address || "",
-                    subject: mail.subject || "",
-                    body: mail.body?.content || ""
-                };
-            });
-
-            const mailBatch = await this.upsertInsights(mails);
-
-            // embed mail bodies with IDs
-            console.log("EMBED MAILS WITH IDs...");
-            const typeormVectorStore = await getVectorStore(tenant);
-
-            const queryString = `DELETE from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ?| $1`;
-            await typeormVectorStore.appDataSource.query(queryString, [mails.map((mail: any) => mail.ID)]);
-
-            await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: ITranslatedMail) => ({
-                    pageContent: mail.mail.body,
-                    metadata: { id: mail.mail.ID }
-                }))
-            );
-            return true;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            req.error(`Error: Shared Inbox Sync Error: ${error?.message}`);
-        }
-    };
-
 }
 
 const getVectorStore = async (tenant?: string) => {
