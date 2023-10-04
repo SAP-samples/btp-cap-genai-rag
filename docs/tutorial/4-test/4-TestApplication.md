@@ -2,7 +2,7 @@
 
 In this part of the tutorial, you will learn how to test the AI Sample application.
 
-1. In a multitenant context, please ensure that you subscribed to the AI Sample application as described in the previous chapters ([click here](./1-CreateSubscription.md)). 
+1. In a **multitenant** context, please ensure that you subscribed to the AI Sample application as described in the previous chapters ([click here](./1-CreateSubscription.md)). 
    
    > **Hint** - Ideally, you also used the SaaS API to upload and process our sample e-mails as described in the previous chapter ([click here](./3-PushSampleMails.md)).
 

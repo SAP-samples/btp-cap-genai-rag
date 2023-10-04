@@ -1,6 +1,7 @@
 # Assign Entitlements
 
-Assign the following **"non-default"** entitlements to your Provider Subaccount. All required entitlements except for the **LLM-Access Service** offer **free** service plans or plans that come with no additional costs (e.g., broker, hdi-shared, toos, central). 
+Assign the following **"non-default"** entitlements to your Provider Subaccount. All required entitlements except for the **LLM-Access Service** offer **free** service plans or plans that come with no additional costs (e.g., broker, hdi-shared, toos, central). #
+
 The **LLM-Access Service** will result in a minor fee, based on the tokens consumed by your application. Please check the latest pricing details within the SAP Discovery Center ([click here](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-core?region=all&tab=service_plan)).
 
 > **Important** - This setup assumes, that you will create a new SAP HANA Cloud instance in the respective Provider Subaccount. In case you are sharing an existing SAP HANA Cloud instance, please skip the **SAP HANA Cloud** entitlements and only assign the **hdi-shared** service plan

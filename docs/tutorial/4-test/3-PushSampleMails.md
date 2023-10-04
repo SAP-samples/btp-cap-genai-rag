@@ -47,12 +47,12 @@ In this chapter you will learn, how SaaS Subscribers can push sample e-mails to 
 
     {
         "mails":[
-    {
-        "subject": "Disney World trip",
-        "body": "Hello. I'm trying to book a flight and hotel package ....Lisa Brown",
-        "sender": "lisa.brown@example.org"
-    },
-    ...
+            {
+                "subject": "Disney World trip",
+                "body": "Hello. I'm trying to book a flight and hotel package ....Lisa Brown",
+                "sender": "lisa.brown@example.org"
+            },
+        ...
     ```
 
 6. Once the sample e-mails have been processes successfully, you should see them within your SaaS application. Furthermore, check the chapter on **Extending** the solution to learn how to check the processed e-mails within your PostgreSQL database. 
