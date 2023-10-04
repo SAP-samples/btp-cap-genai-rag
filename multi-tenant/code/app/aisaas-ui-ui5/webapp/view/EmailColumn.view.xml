@@ -58,7 +58,7 @@
 				</ux:subSections>
 			</ux:ObjectPageSection>
 
-			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.label.responsePreparation}">
+			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.label.responsePreparation}" visible="{= !${api>mail/responded} }">
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.responsePreparation}">
 						<VBox class="sapUiTinyMargin">
@@ -67,7 +67,12 @@
 								<HBox id="suggestedActionsBox"/>
 							</VBox>
 							<Title text="{i18n>email.title.additionalInfo}:"/>
-							<TextArea width="100%" growing="true" valueLiveUpdate="true" placeholder="{i18n>email.placeholder.additionalInfo}" value="{/additionalInfo}"/>
+							<TextArea
+								width="100%"
+								growing="true"
+								valueLiveUpdate="true"
+								placeholder="{i18n>email.placeholder.additionalInfo}"
+								value="{/additionalInfo}"/>
 							<HBox justifyContent="End">
 								<Button type="Emphasized" text="{i18n>email.label.generateButton}" press="onPressGenerate"/>
 							</HBox>
@@ -76,15 +81,16 @@
 				</ux:subSections>
 			</ux:ObjectPageSection>
 
-			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.tabs.label.suggestedResponse}">
+			<ux:ObjectPageSection id="suggestedResponseSection" titleUppercase="false" title="{i18n>email.tabs.label.suggestedResponse}">
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.tabs.label.suggestedResponse}">
-						<VBox class="sapUiTinyMargin">
+						<VBox class="sapUiTinyMargin" visible="{= !${api>mail/responded} }">
 							<TextArea
 								width="100%"
 								growing="true"
 								visible="{= !${/translationActivated} }"
 								valueLiveUpdate="true"
+								placeholder="{i18n>email.placeholder.suggestedResponse}"
 								value="{/responseBody}"
 								showValueStateMessage="false"
 								valueState="{= ${/responseBody} !== ${api>mail/responseBody} ? 'Warning' : 'None' }"
@@ -94,6 +100,7 @@
 								growing="true"
 								visible="{= ${/translationActivated} }"
 								valueLiveUpdate="true"
+								placeholder="{i18n>email.placeholder.suggestedResponse}"
 								value="{/translatedResponseBody}"
 								showValueStateMessage="false"
 								valueState="{= ${/translatedResponseBody} !== ${api>mail/translations/0/responseBody} ? 'Warning' : 'None' }"
@@ -101,6 +108,9 @@
 							<HBox justifyContent="End">
 								<Button type="Emphasized" text="{i18n>email.label.sendButton}" press="onPressSend"/>
 							</HBox>
+						</VBox>
+						<VBox class="sapUiTinyMargin" visible="{= ${api>mail/responded} }">
+							<Text text="{= !${/translationActivated} ? ${/responseBody} : ${/translatedResponseBody} }"/>
 						</VBox>
 					</ux:ObjectPageSubSection>
 				</ux:subSections>

@@ -20,6 +20,24 @@
                                 <Title text="{i18n>filters.title.filterBy}:"/>
                                 <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.requestState}"/>
+                                        <ToolbarSpacer/>
+                                        <Link id="requestStatesClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeRequestStates}.length > 0 }" press="onPressClear"/>
+                                    </Toolbar>
+                                    <List
+                                        id="requestStatesList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/requestStates}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter">
+                                        <StandardListItem title="{filters>label}" selected="{= ${/activeRequestStates}.includes(${filters>id}) }"/>
+                                    </List>
+                                </Panel>
+
+                                <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
+                                    <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.requestType}"/>
                                         <ToolbarSpacer/>
                                         <Link id="categoryClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onPressClear"/>
@@ -108,7 +126,10 @@
                                     }
                                 }"
                                 selectionChange="onSelectEmail">
-                                <CustomListItem tooltip="{api>subject}" selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${/activeEmailId} }">
+                                <CustomListItem
+                                    tooltip="{api>subject}"
+                                    highlight="{= !${path: 'api>responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? 'Information' : 'None' }"
+                                    selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${/activeEmailId} }">
                                     <core:Fragment fragmentName="aisaas.ui.view.EmailListItem" type="XML"/>
                                 </CustomListItem>
                             </List>

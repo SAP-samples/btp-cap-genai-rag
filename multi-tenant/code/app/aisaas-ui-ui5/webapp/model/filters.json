@@ -1,4 +1,14 @@
 {
+    "requestStates": [
+        {
+            "id": "00",
+            "label": "Unanswered"
+        },
+        {
+            "id": "01",
+            "label": "Answered"
+        }
+    ],
     "categories": [
         {
             "id": "00",

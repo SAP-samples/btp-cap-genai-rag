@@ -9,10 +9,11 @@ export interface Mail {
     createdBy: null,
     modifiedAt: Date,
     modifiedBy: string,
-    sender: string,
-    senderEmailAddress: String,
     subject: string,
     body: string,
+    senderEmailAddress: String,
+    sender: string,
+    responded: boolean,
     category: string,
     sentiment: number,
     urgency: number,
@@ -20,19 +21,19 @@ export interface Mail {
     responseBody: string,
     languageNameDetermined: string,
     languageMatch: boolean,
-    keyFacts: KeyFact[],
     suggestedActions: Action[],
+    keyFacts: KeyFact[],
     translations: Mail[]
-}
-
-export interface KeyFact {
-    keyfact: string,
-    keyfactcategory: string
 }
 
 export interface Action {
     type: string,
     value: string
+}
+
+export interface KeyFact {
+    keyfact: string,
+    keyfactcategory: string
 }
 
 export interface ClosestMail {

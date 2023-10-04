@@ -32,12 +32,14 @@ export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
 	protected readonly ACTIVE_URGENCIES_PATH: string = "activeUrgencies";
 	protected readonly ACTIVE_SENTIMENTS_PATH: string = "activeSentiments";
+	protected readonly ACTIVE_REQUEST_STATES_PATH: string = "activeRequestStates";
 	protected readonly EMAIL_CATEGORY_PATH: string = "category";
 	protected readonly EMAIL_URGENCY_PATH: string = "urgency";
 	protected readonly EMAIL_SENTIMENT_PATH: string = "sentiment";
 	protected readonly EMAIL_SENDER_PATH: string = "sender";
 	protected readonly EMAIL_SUBJECT_PATH: string = "subject";
 	protected readonly EMAIL_BODY_PATH: string = "body";
+	protected readonly EMAIL_RESPONDED_PATH: string = "responded";
 	protected readonly EMAIL_MODIFIED_AT_PATH: string = "modifiedAt";
 	protected readonly EMAIL_ENTITY_PATH: string = "api>/getMail";
 	protected readonly UPDATE_GROUP: string = "UPDATE_GROUP_" + Math.random().toString(36).substring(2);
@@ -50,6 +52,7 @@ export default class Main extends BaseController {
 			activeCategories: [],
 			activeUrgencies: [],
 			activeSentiments: [],
+			activeRequestStates: [],
 			searchKeyword: null,
 			emailsCount: 0,
 			sortDescending: false,
@@ -119,11 +122,15 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailView: View = this.byId("emailColumn") as View;
 		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
+		const suggestedResponseSection: ObjectPageSection = emailView.byId("suggestedResponseSection") as ObjectPageSection;
 		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
 		const similarEmailsList: List = emailView.byId("similarEmailsList") as List;
 
 		localModel.setProperty("/activeEmailId", id);
-		emailPage.setSelectedSection(incomingMessageSection);
+		setTimeout(() => {
+			emailPage.setSelectedSection(suggestedResponseSection);
+			emailPage.setSelectedSection(incomingMessageSection);
+		}, 300);
 		similarEmailsList.removeSelections(true);
 		similarEmailsList.getItems().map((listItem: ListItemBase) => ((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false));
 
@@ -294,6 +301,7 @@ export default class Main extends BaseController {
 		if (componentId.includes("category")) return this.ACTIVE_CATEGORIES_PATH
 		else if (componentId.includes("urgency")) return this.ACTIVE_URGENCIES_PATH
 		else if (componentId.includes("sentiment")) return this.ACTIVE_SENTIMENTS_PATH
+		else if (componentId.includes("requestStates")) return this.ACTIVE_REQUEST_STATES_PATH
 	}
 
 	private applyFilter(): void {
@@ -322,6 +330,13 @@ export default class Main extends BaseController {
 		if (activeSentiments.length > 0) {
 			const orFilter: Filter[] = [];
 			activeSentiments.map((id: string) => orFilter.push(this.getSentimentFilter(id, this.EMAIL_SENTIMENT_PATH)));
+			andFilter.push(new Filter({ filters: orFilter, and: false }));
+		}
+
+		const activeRequestStates: string[] = localModel.getProperty(`/${this.ACTIVE_REQUEST_STATES_PATH}`);
+		if (activeRequestStates.length > 0) {
+			const orFilter: Filter[] = [];
+			activeRequestStates.map((id: string) => orFilter.push(this.getRequestStatesFilter(id, this.EMAIL_RESPONDED_PATH)));
 			andFilter.push(new Filter({ filters: orFilter, and: false }));
 		}
 
@@ -357,6 +372,11 @@ export default class Main extends BaseController {
 		if (id === "00") return new Filter(filterPath, FilterOperator.GT, 5)
 		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 0, 5)
 		else return new Filter(filterPath, FilterOperator.LT, 0)
+	}
+
+	private getRequestStatesFilter(id: string, filterPath: string): Filter {
+		if (id === "00") return new Filter(filterPath, FilterOperator.EQ, false)
+		else return new Filter(filterPath, FilterOperator.EQ, true)
 	}
 
 	public onSortEmailsList(): void {
