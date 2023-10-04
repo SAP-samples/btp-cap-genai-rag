@@ -1,0 +1,24 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:mvc="sap.ui.core.mvc">
+
+    <Dialog
+        id="confirmationDialog"
+        type="Message"
+        title="{i18n>confirmationDialog.title}">
+
+        <content>
+            <Label id="messageLabel" wrapping="true"/>
+        </content>
+
+        <beginButton>
+            <Button text="{i18n>confirmationDialog.button.ok}" type="Emphasized" press="onConfirmPress"/>
+        </beginButton>
+
+        <endButton>
+            <Button text="{i18n>confirmationDialog.button.cancel}" press="onCancelPress"/>
+        </endButton>
+    </Dialog>
+
+</core:FragmentDefinition>

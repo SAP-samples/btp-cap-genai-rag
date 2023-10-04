@@ -1,0 +1,24 @@
+<mvc:View
+	controllerName="aisaas.ui.controller.App"
+	displayBlock="true"
+	xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc">
+
+	<l:FixFlex>
+        <l:fixContent>
+            <Toolbar>
+				<HBox class="sapUiLargeMarginBegin">
+					<Image height="32px" src="images/sap-logo.svg"/>
+					<VBox justifyContent="Center">
+						<Title text="{i18n>appTitle}"/>
+					</VBox>
+				</HBox>
+			</Toolbar>
+        </l:fixContent>
+        <l:flexContent>
+            <App id="app"/>
+        </l:flexContent>
+    </l:FixFlex>
+
+</mvc:View>

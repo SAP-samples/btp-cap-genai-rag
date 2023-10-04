@@ -1,0 +1,62 @@
+### ADD MAILS
+# @name addMails
+POST http://localhost:4004/rest/api/mail-insights/addMails
+content-type: application/json
+Authorization: Basic system-user:
+
+{
+  "mails": [
+    {
+        "subject": "Help Needed in Booking Family Suite in Rome",
+        "body": "Dear Support Team, as a loyal customer I'm trying to book a family suite in Rome for my family of five. However, I can't seem to find a suitable one on your website. Can you help me find a hotel that can accommodate us comfortably? \nMany Thanks,  \nJane Smith ",
+        "senderEmailAddress": "jane.smith@tttraveler.org"
+    },
+    {
+        "subject": "Help Needed in Booking President Suite in Singapore",
+        "body": "Dear Support Team, I'm trying to book a president suite in Singapore for my team of fifty. However, I can't seem to find a suitable one on your website. Can you help me find a hotel that can accommodate us comfortably? \nMany Thanks,  \nJordan Belford ",
+        "senderEmailAddress": "jordan.belford@stratton-oakmont.org"
+    },
+    {
+        "subject": "ヨーロッパ複数都市ツアーの支援が必要です",
+        "body": "こんにちは、ThorToursチームの皆様、来年の夏にヨーロッパで複数の都市を巡るツアーを計画しており、飛行機やホテルの予約方法について最適な方法が分からずにいます。ローマ、パリ、ベルリン、バルセロナを含む旅程を作成するお手伝いをしていただけますか？\nよろしくお願いいたします。\nトム・デイビス\n",
+        "senderEmailAddress": "tom.davis@tttraveler.org"
+    },
+    {
+        "subject": "需要协助安排多城欧洲之旅",
+        "body": "你好，ThorTours团队，我计划在明年夏天进行一次欧洲多城市之旅，但我对如何预订机票和酒店感到困惑。你们能帮助我制定一个包括罗马、巴黎、柏林和巴塞罗那的行程吗？\n提前感谢你们，\n汤姆·戴维斯\n",
+        "senderEmailAddress": "tom.davis@tttraveler.org"
+    }  
+  ]
+}
+
+### GET MAILS
+# @name getMails
+GET http://localhost:4004/odata/v4/mail-insights/Mails
+content-type: application/json
+Authorization: Basic system-user:
+
+
+### GET MAIL
+
+@id = {{getMails.response.body.$.[0].ID}}
+
+# @name getMail
+GET http://localhost:4004/rest/api/mail-insights/getMail(id={{id}})
+content-type: application/json
+Authorization: Basic system-user:
+
+
+### RECALCULATE RESPONSE 
+
+@id = {{getMails.response.body.$.[0].ID}}
+
+# @name recalculateResponse
+POST http://localhost:4004/rest/api/mail-insights/recalculateResponse
+content-type: application/json
+Authorization: Basic system-user:
+
+{
+    "id": "{{id}}",
+    "rag": false,
+    "additionalInformation" : "Provide additional information on the climate situation in Europe"
+}

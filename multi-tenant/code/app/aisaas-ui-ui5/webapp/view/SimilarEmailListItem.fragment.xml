@@ -1,0 +1,11 @@
+<core:FragmentDefinition
+   xmlns="sap.m"
+   xmlns:tnt="sap.tnt"
+   xmlns:core="sap.ui.core"
+   core:require="{ formatter: 'aisaas/ui/model/formatter' }">
+    <VBox class="sapUiMediumMarginBeginEnd sapUiTinyMarginTop sapUiMediumMarginBottom">
+        <Label text="{mail/sender}" wrapping="true"/>
+        <tnt:InfoLabel class="sapUiTinyMarginTop" displayOnly="true" text="{mail/category}"/>
+        <Text class="sapUiTinyMarginTop" text="{mail/body}"/>
+    </VBox>
+</core:FragmentDefinition>

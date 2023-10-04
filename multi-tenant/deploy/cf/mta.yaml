@@ -1,0 +1,544 @@
+_schema-version: "3.2"
+ID: aisaas
+version: 0.0.1
+
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+  autoscalerMinInstance: 1
+  autoscalerMaxInstance: 2
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm run build
+
+modules:
+  # --------------------- APPROUTER MODULE ---------------------
+  - name: aisaas
+  # ------------------------------------------------------------
+    type: approuter.nodejs
+    path: ../../code/router
+    build-parameters:
+      builder: npm
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    parameters:
+      api-name: aisaas-api-${space}
+      app-name: aisaas-${space}
+      disk-quota: 256MB
+      memory: 128MB
+      tenant-separator: "-"
+      app-domain: ${app-name}.${default-domain}
+      keep-existing-routes: true
+    properties:
+      TENANT_HOST_PATTERN: "^(.*)${tenant-separator}${app-domain}"
+    requires:
+      - name: aisaas-destination
+      - name: aisaas-uaa
+      - name: aisaas-srv-api
+      - name: aisaas-html5-repo-runtime
+    provides:
+      - name: aisaas-approuter
+        properties:
+          app-url: ${default-url}
+          application: ${app-name}
+          api: ${api-name}
+          tenant-separator: ${tenant-separator}
+          app-domain: ${app-domain}
+
+  # --------------------- SERVER MODULE ------------------------
+  - name: aisaas-srv
+  # ------------------------------------------------------------
+    type: nodejs
+    path: ../../code/gen/app
+    build-parameters:
+      builder: custom
+      ignore: [".DS_Store", "manifest*.yml"]
+      commands: 
+       - npm ci
+       - npx shx mkdir -p temp/llm-commons
+       - npx shx mv node_modules/@sap/llm-commons temp/
+       - npx shx rm -r node_modules
+       - npx shx mkdir -p node_modules/@sap/llm-commons
+       - npx shx mv temp/llm-commons node_modules/@sap/
+       - npx shx rm -r temp
+    parameters:
+      app-name: aisaas-srv-${space}
+      memory: 256MB
+      disk-quota: 1024MB
+      command: node ./node_modules/@sap/cds/bin/cds-serve
+    properties:
+      tenantSeparator: ~{aisaas-approuter/tenant-separator}
+      appDomain: ~{aisaas-approuter/app-domain}
+      brokerName: ~{aisaas-api-sb-srv/app-name}
+      srvUrl: "https://${app-name}.${default-domain}"
+      brokerUrl: ~{aisaas-api-sb-srv/srv-url}
+      approuterUrl: ~{aisaas-approuter/app-url}
+      appName: ~{aisaas-approuter/application}
+    requires:
+      - name: aisaas-uaa
+      - name: aisaas-credstore
+        parameters:
+          config:
+            authorization:
+              default_permissions:
+                - read
+                - decrypt
+                - encrypt
+                - list
+      - name: aisaas-logging
+      - name: aisaas-aicore
+      - name: aisaas-postgresql-db
+      - name: aisaas-registry
+      - name: aisaas-service-manager
+      - name: aisaas-service-manager-admin
+      - name: aisaas-html5-repo-runtime
+      - name: aisaas-destination
+      - name: aisaas-api-sb-srv
+      - name: aisaas-approuter
+      - name: aisaas-autoscaler
+        parameters:
+          config:
+            instance_min_count: 1
+            instance_max_count: 2
+            scaling_rules:
+              - {
+                  "metric_type": "memoryutil",
+                  "threshold": 80,
+                  "operator": ">=",
+                  "adjustment": "+1",
+                }
+              - {
+                  "metric_type": "memoryutil",
+                  "threshold": 60,
+                  "operator": "<",
+                  "adjustment": "-1",
+                }
+              - {
+                  "metric_type": "cpu",
+                  "threshold": 80,
+                  "operator": ">=",
+                  "adjustment": "+1",
+                }
+              - {
+                  "metric_type": "cpu",
+                  "threshold": 30,
+                  "operator": "<",
+                  "adjustment": "-1",
+                }
+      - name: aisaas-com-hdi-container
+        group: SERVICE_REPLACEMENTS
+        properties:
+          key: com-hdi-container
+          service: "~{com-container-name}"
+    provides:
+      - name: aisaas-srv-api
+        properties:
+          srv-url: ${default-url}
+  
+  # --------------------- UI MODULE ----------------------------
+  - name: aisaas-ui
+  # ------------------------------------------------------------
+    type: html5
+    path: ../../code/app/aisaas-ui-ui5
+    build-parameters:
+      build-result: dist
+      builder: custom
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+      commands:
+        - npm run build
+        - npm run copy
+      supported-platforms: []
+
+  # ------------------- HTML5 APP DEPLOYER ---------------------
+  - name: aisaas-app-deployer
+  # ------------------------------------------------------------
+    type: com.sap.html5.application-content
+    path: ../../code/app/html5-deployer
+    build-parameters:
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    requires:
+      - name: aisaas-html5-repo-host
+
+  # --------------------- COMMON DB MODULE ---------------------
+  - name: aisaas-db-com
+  # ------------------------------------------------------------
+    type: hdb
+    path: ../../code/gen/db-com
+    build-parameters:
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    parameters:
+      app-name: aisaas-db-com-${space}
+      memory: 256MB
+      disk-quota: 1024MB
+    requires:
+      - name: aisaas-com-hdi-container
+
+  # ----------- BROKER MODULE (OSBAPI Implementation) ----------
+  - name: aisaas-api-sb
+  # ------------------------------------------------------------
+    type: nodejs
+    path: ../../code/broker/
+    build-parameters:
+      builder: npm
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    parameters:
+      app-name: aisaas-api-sb-${space}
+      memory: 128MB
+      disk-quota: 512MB
+    properties:
+      SBF_ENABLE_AUDITLOG: false
+      SBF_CATALOG_FILE: ./catalog.json
+      SBF_CATALOG_SUFFIX: ${space}-${org}
+      SBF_SERVICE_CONFIG:
+        aisaas-api:
+          extend_credentials:
+            shared:
+              apiUrl: ~{aisaas-api-srv-api/srv-url}
+          extend_xssecurity:
+            per_plan:
+              trial:
+                authorities:
+                  - $XSMASTERAPPNAME.plan_trial
+              default:
+                authorities:
+                  - $XSMASTERAPPNAME.plan_default
+              premium:
+                authorities:
+                  - $XSMASTERAPPNAME.plan_premium
+          extend_catalog:
+            metadata:
+              displayName: AI SaaS API ${space}
+    requires:
+      - name: aisaas-api-uaa
+      - name: aisaas-api-srv-api
+    provides:
+      - name: aisaas-api-sb-srv
+        properties:
+          app-name: ${app-name}
+          srv-url: ${default-url}
+
+  # --------------------- API MODULE ---------------------------
+  - name: aisaas-api-srv
+  # ------------------------------------------------------------
+    type: nodejs
+    path: ../../code/gen/api
+    parameters:
+      app-name: aisaas-api-srv-${space}
+      memory: 256MB
+      disk-quota: 1024MB
+      command: node ./node_modules/@sap/cds/bin/cds-serve
+    build-parameters:
+      builder: custom
+      ignore: [".DS_Store", "manifest*.yml"]
+      commands: 
+       - npm ci
+       - npx shx mkdir -p temp/llm-commons
+       - npx shx mv node_modules/@sap/llm-commons temp/
+       - npx shx rm -r node_modules
+       - npx shx mkdir -p node_modules/@sap/llm-commons
+       - npx shx mv temp/llm-commons node_modules/@sap/
+       - npx shx rm -r temp
+    requires:
+      - name: aisaas-service-manager
+      - name: aisaas-api-uaa
+      - name: aisaas-destination
+      - name: aisaas-postgresql-db
+    provides:
+      - name: aisaas-api-srv-api
+        properties:
+          srv-url: ${default-url}
+
+resources:
+  # ----------------------- UAA SERVICE ------------------------
+  - name: aisaas-uaa
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    properties:
+      xsuaa-app: ${xsuaa-app}
+      XSAPPNAME: ${xsuaa-app}
+    parameters:
+      service: xsuaa
+      service-name: ${space}-aisaas-uaa
+      service-plan: application
+      xsuaa-app: aisaas-${space}-${org}
+      config:
+        xsappname: ${xsuaa-app}
+        role-collections:
+          - name: AI SaaS Member (${space})
+            description: Member Access
+            role-template-references:
+              - "$XSAPPNAME.Member"
+              - "$XSAPPNAME.Token_Exchange"
+          - name: AI SaaS Administrator (${space})
+            description: Administrator Access
+            role-template-references:
+              - "$XSAPPNAME.Admin"
+              - "$XSAPPNAME.SaaSAdmin"
+              - "$XSAPPNAME.UserManagementAdmin"
+              - "$XSAPPNAME.Token_Exchange"
+          - name: AI SaaS Extension Developer (${space})
+            description: Extension Developer Access
+            role-template-references:
+              - "$XSAPPNAME.ExtensionDeveloper"
+              - "$XSAPPNAME.Token_Exchange"
+        scopes:
+          - name: "$XSAPPNAME.mtcallback"
+            description: SaaS Provisioning
+            grant-as-authority-to-apps:
+              - "$XSAPPNAME(application,sap-provisioning,tenant-onboarding)"
+          - name: "$XSAPPNAME.mtdeployment"
+            description: SaaS Model Upgrade
+          - name: "$XSAPPNAME.MtxDiagnose"
+            description: SaaS Diagnose
+          - name: uaa.user
+            description: UAA
+          - name: "$XSAPPNAME.Member"
+            description: Member
+          - name: "$XSAPPNAME.Admin"
+            description: Administrator
+          - name: "$XSAPPNAME.cds.ExtensionDeveloper"
+            description: Develop Extensions
+        attributes: []
+        role-templates:
+          - name: Token_Exchange
+            description: UAA Token Exchange
+            scope-references: ["uaa.user"]
+          - name: Member
+            description: Member
+            scope-references: ["$XSAPPNAME.Member"]
+          - name: Admin
+            description: Administrator
+            scope-references:
+              - "$XSAPPNAME.Admin"
+              - xs_authorization.read
+              - xs_authorization.write
+              - xs_user.read
+              - xs_user.write
+              - xs_idp.read
+              - xs_idp.write
+          - name: SaaSAdmin
+            description: SaaS Administrator
+            scope-references:
+              - "$XSAPPNAME.mtcallback"
+              - "$XSAPPNAME.mtdeployment"
+              - "$XSAPPNAME.MtxDiagnose"
+          - name: ExtensionDeveloper
+            description: Extension Developer
+            scope-references: ["$XSAPPNAME.cds.ExtensionDeveloper"]
+          - name: UserManagementAdmin
+            description: Manage authorizations, trusted identity providers, and users.
+            default-role-name: User and Role Administrator
+            scope-references:
+              - xs_authorization.read
+              - xs_authorization.write
+              - xs_user.read
+              - xs_user.write
+              - xs_idp.read
+              - xs_idp.write
+          - name: UserManagementAuditor
+            description: Read-only access for authorizations, trusted identity providers, and users.
+            default-role-name: User and Role Auditor
+            scope-references:
+              - xs_authorization.read
+              - xs_user.read
+              - xs_idp.read
+        foreign-scope-references:
+          - xs_authorization.read
+          - xs_authorization.write
+          - xs_user.read
+          - xs_user.write
+          - xs_idp.read
+          - xs_idp.write
+        authorities:
+          - "$XSAPPNAME.mtcallback"
+          - "$XSAPPNAME.mtdeployment"
+          - "$XSAPPNAME.MtxDiagnose"
+          - "$XSAPPNAME.cds.ExtensionDeveloper"
+          - "$XSAPPNAME.cds.Subscriber"
+          - "$XSAPPNAME.cds.UIFlexDeveloper"
+        oauth2-configuration:
+          token-validity: 900
+          redirect-uris:
+            - http*://*.cfapps.*.hana.ondemand.com/**
+            - http://*.localhost:5000/**
+            - http://localhost:5000/**
+          credential-types:
+            - binding-secret
+            - x509
+
+  # ----------------- CREDENTIAL STORE  -----------------------
+  - name: aisaas-credstore
+  # -----------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: credstore
+      service-name: ${space}-aisaas-credstore
+      service-plan: free
+      config:
+        authentication:
+          type: basic
+
+  # --------------------- REGISTRY SERVICE ---------------------
+  - name: aisaas-registry
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: aisaas-uaa
+      - name: aisaas-srv-api
+      - name: aisaas-approuter
+    parameters:
+      service: saas-registry
+      service-name: ${space}-aisaas-registry
+      service-plan: application
+      config:
+        xsappname: ~{aisaas-uaa/xsuaa-app}
+        appName: ~{aisaas-uaa/xsuaa-app}
+        displayName: AI SaaS ${space}
+        description: AI SaaS Application
+        category: SaaS Multitenant Apps
+        appUrls:
+          onSubscription: ~{aisaas-srv-api/srv-url}/-/cds/saas-provisioning/tenant/{tenantId}
+          onSubscriptionAsync: false
+          onUnSubscriptionAsync: false
+          getDependencies: ~{aisaas-srv-api/srv-url}/-/cds/saas-provisioning/dependencies
+        appPlans:
+          - name: trial
+            description: AI SaaS trial plan
+          - name: default
+            description: AI SaaS default plan
+          - name: premium
+            description: AI SaaS premium plan
+
+  # ------------------- SERVICE MANAGER SERVICE ----------------
+  - name: aisaas-service-manager
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: aisaas-uaa
+    parameters:
+      service: service-manager
+      service-name: ${space}-aisaas-service-manager
+      service-plan: container
+      polling_timeout_seconds: 240
+      config:
+        acquireTimeoutMillis: max
+        polling_timeout_seconds: 480
+
+  # -------------- SERVICE MANAGER SERVICE ADMIN ---------------
+  - name: aisaas-service-manager-admin
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: service-manager
+      service-name: ${space}-aisaas-service-manager-admin
+      service-plan: subaccount-admin
+
+  # ---------------- APPLICATION LOGGING SERVICE ---------------
+  - name: aisaas-logging
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: application-logs
+      service-name: ${space}-aisaas-logging
+      service-plan: lite
+
+  # ----------------- COMMON DB HDI CONAINER -------------------
+  - name: aisaas-com-hdi-container
+  # ------------------------------------------------------------
+    type: com.sap.xs.hdi-container
+    parameters:
+      service-name: ${space}-aisaas-com-hdi-container
+    properties:
+      com-container-name: "${service-name}"
+
+  # ----------------- DESTINATION SERVICE ----------------------
+  - name: aisaas-destination
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: aisaas-srv-api
+    parameters:
+      service-plan: lite
+      service-name: ${space}-aisaas-destination
+      service: destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: aisaas-srv-api
+                Description: AI SaaS Service API
+                URL: ~{aisaas-srv-api/srv-url}
+                Type: HTTP
+                ProxyType: Internet
+                Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                forwardAuthToken: true
+
+  # ----------------- AUTOSCALER  ------------------------------------
+  - name: aisaas-autoscaler
+  # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-name: ${space}-aisaas-autoscaler
+      service-plan: standard
+
+  # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------
+  - name: aisaas-html5-repo-host
+  # -----------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-host
+      service-name: ${space}-aisaas-html5-repo-host
+      service: html5-apps-repo
+      config:
+        sizeLimit: 2
+
+  # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
+  - name: aisaas-html5-repo-runtime
+  # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-runtime
+      service-name: ${space}-aisaas-html5-repo-runtime
+      service: html5-apps-repo
+
+  # ----------------- POSTGRESQL -------------------------------------
+  - name: aisaas-postgresql-db
+  # ------------------------------------------------------------------
+    active: true
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: postgresql-db
+      service-name: ${space}-aisaas-postgresql-db
+      service-plan: free
+      config:
+        engine_version: "13"
+
+  # ----------------- XSUAA - BROKER ---------------------------------
+  - name: aisaas-api-uaa
+  # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-name: ${space}-aisaas-api-uaa
+      service-plan: broker
+      xsuaa-app: aisaas-api-${space}-${org}
+      config:
+        xsappname: ${xsuaa-app}
+    properties:
+      xsuaa-app: ${xsuaa-app}
+
+  # ---------------- CORE AI SERVICE ---------------------------
+  - name: aisaas-aicore
+  # ------------------------------------------------------------
+    active: false
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: aicore
+      service-name: ${space}-aisaas-aicore
+      service-plan: standard

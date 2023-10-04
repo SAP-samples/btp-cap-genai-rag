@@ -1,0 +1,56 @@
+{
+    "categories": [
+        {
+            "id": "00",
+            "label": "Booking Assistance"
+        },
+        {
+            "id": "01",
+            "label": "Cancellation"
+        },
+        {
+            "id": "02",
+            "label": "Problem During Travel"
+        },
+        {
+            "id": "03",
+            "label": "Post-Trip Complaint"
+        },
+        {
+            "id": "04",
+            "label": "General Inquiry"
+        },
+        {
+            "id": "05",
+            "label": "Special Requests"
+        }
+    ],
+    "urgency": [
+        {
+            "id": "00",
+            "label": "Low"
+        },
+        {
+            "id": "01",
+            "label": "Medium"
+        },
+        {
+            "id": "02",
+            "label": "High"
+        }
+    ],
+    "sentiment": [
+        {
+            "id": "00",
+            "label": "Calm"
+        },
+        {
+            "id": "01",
+            "label": "Worried"
+        },
+        {
+            "id": "02",
+            "label": "Agitated"
+        }
+    ]
+}

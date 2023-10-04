@@ -1,0 +1,39 @@
+<core:FragmentDefinition
+   xmlns="sap.m"
+   xmlns:tnt="sap.tnt"
+   xmlns:core="sap.ui.core"
+   core:require="{ formatter: 'ai/ui/model/formatter' }">
+    <HBox class="sapUiSmallMargin" justifyContent="SpaceBetween">
+        <HBox justifyContent="Center">
+            <Avatar
+                displaySize="M"
+                backgroundColor="Accent6"
+                initials="{path:'api>sender', formatter:'formatter.getAvatarInitial'}"/>
+        </HBox>
+        <VBox width="calc(100% - 5rem)">
+            <HBox justifyContent="SpaceBetween">
+                <Label text="{api>sender}" wrapping="true"/>
+                <Label text="{path: 'api>modifiedAt', formatter: 'formatter.formatDate'}" wrapping="true"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
+                <tnt:InfoLabel displayOnly="true" text="{api>category}"/>
+                <HBox justifyContent="End">
+                    <ObjectStatus
+                        icon="sap-icon://high-priority"
+                        state="{path:'api>urgency', formatter:'formatter.getUrgencyState'}"/>
+                </HBox>
+            </HBox>
+            <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
+                <VBox width="calc(100% - 1.5rem)">
+                    <Title text="{api>subject}"/>
+                    <Text maxLines="2" text="{api>body}"/>
+                </VBox>
+                <VBox>
+                    <ObjectStatus
+                        icon="{path:'api>sentiment', formatter:'formatter.getSentimentIcon'}"
+                        state="{path:'api>sentiment', formatter:'formatter.getSentimentState'}"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </HBox>
+</core:FragmentDefinition>

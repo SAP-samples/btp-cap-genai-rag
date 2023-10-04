@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "lib": ["es2017", "dom"],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "allowJs": false,
+        "strict": true,
+        "strictNullChecks": false,
+        "strictPropertyInitialization": false,
+        "esModuleInterop": true,
+        "noEmit": false,
+        "noEmitOnError": false,
+        "resolveJsonModule": true,
+        "baseUrl": ".",
+        "rootDir": "./gen",
+        "outDir": "./gen",
+        "paths": {
+            "common-app/*": ["./gen/app/srv/*"],
+            "common-api/*": ["./gen/api/srv/*"]
+        }
+    },
+    "ts-node": {
+        "swc": true
+    },
+    "include": ["./gen/**/*.ts"],
+    "exclude": ["./gen/node_modules/**/*"]
+}
