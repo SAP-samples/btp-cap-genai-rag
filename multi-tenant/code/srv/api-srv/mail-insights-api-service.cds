@@ -25,6 +25,6 @@ service ApiService @(
 
      function deleteMail(id : UUID)                                                                   returns Boolean;
      action   addMails(mails : array of IBaseMail, rag : Boolean null)                                returns array of Mails;
+     action   recalculateResponse(id : UUID, rag : Boolean null, additionalInformation : String null) returns Mails;
      action   recalculateInsights(rag : Boolean null)                                                 returns Boolean;
-     action   recalculateResponse(id : UUID, rag : Boolean null, additionalInformation : String null) returns Boolean;
 }

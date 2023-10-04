@@ -36,6 +36,7 @@ context aisaas.db {
             body                   :      LargeString;
             senderEmailAddress     :      String;
             sender                 :      String;
+            responded              :      Boolean default false;
             category               :      String;
             sentiment              :      Integer;
             urgency                :      Integer;
