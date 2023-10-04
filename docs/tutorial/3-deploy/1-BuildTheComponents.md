@@ -6,7 +6,7 @@ Depending on your target runtime, different build and deployment steps are requi
 
 [SAP BTP, Cloud Foundry Runtime](#multitenant) (Multi-Tenant)
 
-[SAP BTP, Kyma Runtime](#multitenant-1) (Single-Tenant)
+[SAP BTP, Kyma Runtime](#single-tenant-1) (Single-Tenant)
 
 [SAP BTP, Kyma Runtime](#multitenant-1) (Multi-Tenant)
 
@@ -27,23 +27,30 @@ Depending on your target runtime, different build and deployment steps are requi
     cd single-tenant/deploy/cf 
     ```
 
-3. Run the following command to build the CAP components of your application. 
+3. Make sure you have the required TypeScript dependencies installed globally. 
+
+    ```sh
+    npm i -g typescript ts-node
+    ```
+
+4. Run the following command to build the CAP components of your application. 
 
     ```sh
     # Run in ./single-tenant/deploy/cf # 
     npm run build
     ```
 
-4. Please duplicate the **free-tier.mtaext** file in the **single-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
+5. Please duplicate the **free-tier.mtaext** file in the **single-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
 
-5. Please run the following command to build your **mtar** file. 
+6. Please run the following command to build your **mtar** file. 
 
     ```sh
     # Run in ./single-tenant/deploy/cf # 
     npm run build:mbt
     ```
 
-6. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application. 
+7. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application. 
+
 
 
 ### Multitenant
@@ -60,14 +67,20 @@ Depending on your target runtime, different build and deployment steps are requi
     cd multi-tenant/deploy/cf
     ```
 
-3. Run the following command to build the CAP components of your application. 
+3. Make sure you have the required TypeScript dependencies installed globally. 
+
+    ```sh
+    npm i -g typescript ts-node
+    ```
+
+4. Run the following command to build the CAP components of your application. 
 
     ```sh
     # Run in ./multi-tenant/deploy/cf # 
     npm run build
     ```
 
-4. Run the following command to generate unique Service Plan Ids for your Service Broker. 
+5. Run the following command to generate unique Service Plan Ids for your Service Broker. 
 
     >**Hint** - Using the **-private** file name extension, these Ids will not be committed to GitHub. 
 
@@ -77,16 +90,16 @@ Depending on your target runtime, different build and deployment steps are requi
     npx --yes -p @sap/sbf gen-catalog-ids ../../code/broker/catalog-private.json
     ```
 
-5. Run the following password to create a new Service Broker password. Please copy the generated plaintext password and hashed credentials and store them in a secure place!
+6. Run the following password to create a new Service Broker password. Please copy the generated plaintext password and hashed credentials and store them in a secure place!
 
     ```sh
     # Run in ./multi-tenant/deploy/cf # 
     npx --yes -p @sap/sbf hash-broker-password -b
     ```
 
-6. Please duplicate the **free-tier.mtaext** file in the **multi-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
+7. Please duplicate the **free-tier.mtaext** file in the **multi-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
 
-7. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago. Your file should look similar to the following. 
+8. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago. Your file should look similar to the following. 
 
     ```yaml
     ID: aisaas.freetier
@@ -103,14 +116,14 @@ Depending on your target runtime, different build and deployment steps are requi
             }
     ```
 
-8. Please run the following command to build your **mtar** file. 
+9. Please run the following command to build your **mtar** file. 
 
     ```sh
     # Run in ./multi-tenant/deploy/cf # 
     npm run build:mbt
     ```
 
-9. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application. 
+10. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application. 
 
 
 ## SAP BTP, Kyma Runtime
@@ -118,6 +131,7 @@ Depending on your target runtime, different build and deployment steps are requi
 In Kyma, you must build container images for the components of this sample scenario before. Please make sure you have the respective tools installed in your development environment such as **helm**, **Docker** and **kubectl**. 
 
 > **Hint** - In this tutorial we assume a basic understanding of the Kyma deployment process. If you are not familiar with deployment of Kyma solutions, please refer to our [Multitenant SaaS Sample Scenario](https://github.com/SAP-samples/btp-cap-multitenant-saas/#readme) or follow the respective [SAP Developer Journey](https://learning.sap.com/learning-journey/deliver-side-by-side-extensibility-based-on-sap-btp-kyma-runtime) to learn the basics and get your setup ready.
+
 
 ### Single Tenant
 
@@ -133,21 +147,27 @@ In Kyma, you must build container images for the components of this sample scena
     cd single-tenant/deploy/kyma
     ```
 
-3. Run the following command to build the CAP components of your application. 
+3. Make sure you have the required TypeScript dependencies installed globally. 
+
+    ```sh
+    npm i -g typescript ts-node
+    ```
+
+4. Run the following command to build the CAP components of your application. 
 
     ```sh
     # Run in ./single-tenant/deploy/kyma # 
     npm run build
     ```
 
-4. Please run the following command to build the SAPUI5 app components. 
+5. Please run the following command to build the SAPUI5 app components. 
 
     ```sh
     # Run in ./single-tenant/deploy/kyma # 
     npm run ui:apps
     ```
 
-5. Please run the following command to build the Container Images. Please set your Container Image Prefix as depicted below. 
+6. Please run the following command to build the Container Images. Please set your Container Image Prefix as depicted below. 
 
     > **Hint** - If you use e.g. DockerHub as a Container Registry, please put in your **username** (e.g., johndoe) as Container Image Prefix placeholder. If you use the GitHub Container Registry, the prefix will look similar to **ghcr.io/\<namespace>** (e.g. ghcr.io/johndoe). All generated Docker Images will be automatically prefixed with this label!
 
@@ -161,7 +181,7 @@ In Kyma, you must build container images for the components of this sample scena
     npx cross-env IMAGE_PREFIX=sap-demo npm run build:all
     ```
 
-6. Once your Container Images are built, you can continue deploying your application. 
+7. Once your Container Images are built, you can continue deploying your application. 
 
 
 ### Multitenant
@@ -178,21 +198,27 @@ In Kyma, you must build container images for the components of this sample scena
     cd multi-tenant/deploy/kyma
     ```
 
-3. Run the following command to build the CAP components of your application. 
+3. Make sure you have the required TypeScript dependencies installed globally. 
+
+    ```sh
+    npm i -g typescript ts-node
+    ```
+
+4. Run the following command to build the CAP components of your application. 
 
     ```sh
     # Run in ./multi-tenant/deploy/kyma # 
     npm run build
     ```
 
-4. Please run the following command to build the SAPUI5 app components. 
+5. Please run the following command to build the SAPUI5 app components. 
 
     ```sh
     # Run in ./multi-tenant/deploy/kyma # 
     npm run ui:apps
     ```
 
-5. Please run the following command to build the Container Images. Please set your Container Image Prefix as depicted below. 
+6. Please run the following command to build the Container Images. Please set your Container Image Prefix as depicted below. 
 
     > **Hint** - If you use e.g. DockerHub as a Container Registry, please put in your **username** (e.g., johndoe) as Container Image Prefix placeholder. If you use the GitHub Container Registry, the prefix will look similar to **ghcr.io/\<namespace>** (e.g. ghcr.io/johndoe). All generated Docker Images will be automatically prefixed with this label!
 
@@ -206,4 +232,4 @@ In Kyma, you must build container images for the components of this sample scena
     npx cross-env IMAGE_PREFIX=sap-demo npm run build:all
     ```
 
-6. Once your Container Images are built, you can continue deploying your application. 
+7. Once your Container Images are built, you can continue deploying your application. 
