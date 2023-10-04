@@ -85,7 +85,7 @@
         "cap:bas": "cds-ts watch --profile bas",
         "---CAP-Hybrid---": "",
         "cap:hybrid": "npx --yes npm-run-all --npm-path npm --parallel srv:hybrid api:hybrid",
-        "srv:hybrid": "cds-ts bind --exec --profile hybrid npm run srv:hybrid:helper",
+        "srv:hybrid": "cds-ts bind --exec --profile hybrid-app npm run srv:hybrid:helper",
         "api:hybrid": "cds-ts bind --exec --profile hybrid-api npm run api:hybrid:helper",
         "---CAP-Helper---": "",
         "srv:hybrid:helper": "(cds-ts serve MailInsightsService,cds.xt.MTXServices --profile hybrid)",
