@@ -79,6 +79,7 @@ export default class MailInsights extends ApplicationService {
                 m.subject;
                 m.body;
                 m.category;
+                m.responded;
                 m.sender;
             });
             return mails;
@@ -111,6 +112,7 @@ export default class MailInsights extends ApplicationService {
                               m.body;
                               m.category;
                               m.sender;
+                              m.responded;
                               m.responseBody;
                               m.translations;
                           })
@@ -138,14 +140,14 @@ export default class MailInsights extends ApplicationService {
         return true;
     };
 
-    // Recalculate Responses (excl. RAG)
+    // Recalculate Responses
     private recalculateResponse = async (req: Request) => {
         const { tenant } = req;
         const { id, rag, additionalInformation } = req.data;
         const { Mails } = this.entities;
         const mail = await SELECT.one.from(Mails, id);
-        await this.upsertResponse(mail, rag, tenant, additionalInformation);
-        return true;
+        const response = await this.upsertResponse(mail, rag, tenant, additionalInformation);
+        return response;
     };
 
     private extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
@@ -483,13 +485,13 @@ export default class MailInsights extends ApplicationService {
         return translatedMails;
     };
 
-    // Upsert Responses (excl. RAG)
+    // Upsert Responses
     private upsertResponse = async (
         mail: IStoredMail,
         rag?: boolean,
         tenant?: string,
         additionalInformation?: string
-    ) => {
+    ) : Promise<IStoredMail> => {
         const processedMail = {
             mail: { ...mail },
             insights: {
@@ -520,19 +522,18 @@ export default class MailInsights extends ApplicationService {
             translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
         }
 
-        const dbEntry = [
-            {
-                ...mail,
-                responseBody: processedMail.insights.responseBody,
-                //@ts-ignore
-                translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
-            }
-        ];
+        const dbEntry = {
+            ...mail,
+            responseBody: processedMail.insights.responseBody,
+            translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+        };
 
         cds.tx(async () => {
             const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries(dbEntry);
+            await UPSERT.into(Mails).entries([dbEntry]);
         });
+
+        return dbEntry;
     };
 
     private deleteMail = async (req: Request) => {
