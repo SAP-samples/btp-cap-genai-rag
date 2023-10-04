@@ -2,10 +2,40 @@
 
 Depending on your favorite runtime, you need to apply two Post-Deployment Actions. In a single-tenant setup, Post-Deployment actions are required in the Kyma runtime only. 
 
-[SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime-multitenant-only) (Multitenant only)
+- [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime) (Single and Multitenant) <br>
+- [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime-multitenant-only) (Multitenant only)
 
-[SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
+## SAP BTP, Kyma Runtime (Single and Multitenant)
 
+In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is reachable by your workloads, by providing your PostgreSQL Service Instance with the Egress Cluster IP addresses of your Kyma Cluster. Please follow the steps below to fulfill this requirement. 
+
+1. Please get the **Shell** or **PowerShell** scripts provided in the following SAP-Samples repository. 
+
+    [SAP-Samples | Kyma Runtime Extension Samples](https://github.com/SAP-samples/kyma-runtime-extension-samples/tree/main/get-egress-ips)
+
+2. By running these scripts in your development environment, you will get the egress IP addresses of your Kyma Cluster.
+   
+   > **Important** - These are just sample values! Make sure you run the script and determine your Cluster IP addresses!
+
+    ```sh
+    sh ./get-egress-ips.sh
+
+    71.243.207.219
+    4.99.180.193
+    62.178.21.40
+    ```
+
+3. Please go to your **Kyma Dashboard** using the SAP BTP Cockpit, select your PostgreSQL Service Instance and click on **Edit**. 
+
+    [<img src="./images/PDEP_KymaIPgSql.png" width="200"/>](./images/PDEP_KymaIPgSql.png?raw=true)
+
+4. In the **Instance Parameters** section, please add a new parameter called **allow_access**. Add the Egress IPs of your Kyma Cluster as comma-separated string. 
+
+    > **Hint** - If you are planning to setup a hybrid testing setup, please also add your own IP address to the list of IP addresses. Keep in mind your private IP address is likely to change on a daily basis, so make sure to update that value from time to time. You can get your latest current IP address by using a website like [http://ifconfig.me/ip](http://ifconfig.me/ip).
+
+    [<img src="./images/PDEP_KymaIPs.png" width="200"/>](./images/PDEP_KymaIPs.png?raw=true)
+
+5. Once you updated the settings, please click on **Update**. After a few minutes your PostgreSQL database should be reachable by your applications hosted in your Kyma Cluster.
 
 ## SAP BTP, Cloud Foundry Runtime (Multitenant only)
 
@@ -48,35 +78,3 @@ In Cloud Foundry, our SaaS sample application requires the usage of a Credential
 
 6. This is it, you successfully configured the Credential Store values as part of the **Post-Deployment Actions**. You can now continue testing the Application. 
 
-
-## SAP BTP, Kyma Runtime
-
-In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is reachable by your workloads, by providing your PostgreSQL Service Instance with the Egress Cluster IP addresses of your Kyma Cluster. Please follow the steps below to fulfill this requirement. 
-
-1. Please get the **Shell** or **PowerShell** scripts provided in the following SAP-Samples repository. 
-
-    [SAP-Samples | Kyma Runtime Extension Samples](https://github.com/SAP-samples/kyma-runtime-extension-samples/tree/main/get-egress-ips)
-
-2. By running these scripts in your development environment, you will get the egress IP addresses of your Kyma Cluster.
-   
-   > **Important** - These are just sample values! Make sure you run the script and determine your Cluster IP addresses!
-
-    ```sh
-    sh ./get-egress-ips.sh
-
-    71.243.207.219
-    4.99.180.193
-    62.178.21.40
-    ```
-
-3. Please go to your **Kyma Dashboard** using the SAP BTP Cockpit, select your PostgreSQL Service Instance and click on **Edit**. 
-
-    [<img src="./images/PDEP_KymaIPgSql.png" width="200"/>](./images/PDEP_KymaIPgSql.png?raw=true)
-
-4. In the **Instance Parameters** section, please add a new parameter called **allow_access**. Add the Egress IPs of your Kyma Cluster as comma-separated string. 
-
-    > **Hint** - If you are planning to setup a hybrid testing setup, please also add your own IP address to the list of IP addresses. Keep in mind your private IP address is likely to change on a daily basis, so make sure to update that value from time to time. You can get your latest current IP address by using a website like [http://ifconfig.me/ip](http://ifconfig.me/ip).
-
-    [<img src="./images/PDEP_KymaIPs.png" width="200"/>](./images/PDEP_KymaIPs.png?raw=true)
-
-5. Once you updated the settings, please click on **Update**. After a few minutes your PostgreSQL database should be reachable by your applications hosted in your Kyma Cluster.

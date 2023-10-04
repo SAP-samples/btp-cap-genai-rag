@@ -1,8 +1,8 @@
-# Push sample emails
+# Push sample mails
 
-In this chapter you will learn, how SaaS Subscribers can push sample e-mails to their SaaS instance using the SaaS API. 
+In this chapter you will learn, how SaaS Subscribers can push sample mails to their SaaS instance using the SaaS API. 
 
-1. Find the provided **http** sample file **requests-btp.http** ([click here](../../../code/test/http/requests-btp.http)), containing a few test e-mails for processing. 
+1. Find the provided **http** sample file **requests-btp.http** ([click here](../../../code/test/http/requests-btp.http)), containing a few test mails for processing. 
    
 2. Cope and rename the file to **requests-btp-private.http** to ensure that your credentials are not accidentally being committed to GitHub. 
 
@@ -41,7 +41,6 @@ In this chapter you will learn, how SaaS Subscribers can push sample e-mails to 
 
     # @name addMails
     POST {{btpAppHostname}}/rest/api/addMails
-    # POST {{btpAppHostname}}/odata/v4/mail-insights/addMails
     content-type: application/json
     Authorization: Bearer {{token}}
 
@@ -49,7 +48,7 @@ In this chapter you will learn, how SaaS Subscribers can push sample e-mails to 
         "mails":[
             {
                 "subject": "Disney World trip",
-                "body": "Hello. I'm trying to book a flight and hotel package ....Lisa Brown",
+                "body": "Hello. I'm trying to book ...Lisa Brown",
                 "sender": "lisa.brown@example.org"
             },
         ...

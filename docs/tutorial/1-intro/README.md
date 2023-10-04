@@ -1,3 +1,3 @@
 # Overview
 
-This documentation will introduce you the AI Sample solution.
+This documentation will introduce you the AI sample application.
