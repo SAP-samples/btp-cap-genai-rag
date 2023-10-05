@@ -5,19 +5,15 @@ import Context from "sap/ui/model/odata/v4/Context";
 import ODataListBinding from "sap/ui/model/odata/v4/ODataListBinding";
 import ODataContextBinding from "sap/ui/model/odata/v4/ODataContextBinding";
 import View from "sap/ui/core/mvc/View";
-import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
-import ObjectPageSection from "sap/uxap/ObjectPageSection";
 import Link from "sap/m/Link";
 import List from "sap/m/List";
 import ListItemBase from "sap/m/ListItemBase";
-import CustomListItem from "sap/m/CustomListItem";
 import Button from "sap/m/Button";
 import HBox from "sap/m/HBox";
 import VBox from "sap/m/VBox";
 import Avatar from "sap/m/Avatar";
 import Title from "sap/m/Title";
 import Text from "sap/m/Text";
-import Panel from "sap/m/Panel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
@@ -43,6 +39,8 @@ export default class Main extends BaseController {
 	protected readonly EMAIL_MODIFIED_AT_PATH: string = "modifiedAt";
 	protected readonly EMAIL_ENTITY_PATH: string = "api>/getMail";
 	protected readonly UPDATE_GROUP: string = "UPDATE_GROUP_" + Math.random().toString(36).substring(2);
+	protected emailView: View = null;
+	protected emailController: EmailController = null;
 
 	public onInit(): void {
 		super.onInit();
@@ -70,6 +68,9 @@ export default class Main extends BaseController {
 	protected onRouteMatched(): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/sortText", this.getText("inbox.sort.label.newest"));
+
+		this.emailView = this.byId("emailColumn") as View;
+		this.emailController = this.emailView.getController() as EmailController;
 	}
 
 	public onUpdateEmailsList(event: Event): void {
@@ -119,21 +120,10 @@ export default class Main extends BaseController {
 	}
 
 	public setActiveEmail(id: string = null): void {
+		this.emailController.resetEmailPageState();
+
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailView: View = this.byId("emailColumn") as View;
-		const emailPage: ObjectPageLayout = emailView.byId("emailPage") as ObjectPageLayout;
-		const suggestedResponseSection: ObjectPageSection = emailView.byId("suggestedResponseSection") as ObjectPageSection;
-		const incomingMessageSection: ObjectPageSection = emailView.byId("incomingMessageSection") as ObjectPageSection;
-		const similarEmailsList: List = emailView.byId("similarEmailsList") as List;
-
 		localModel.setProperty("/activeEmailId", id);
-		setTimeout(() => {
-			emailPage.setSelectedSection(suggestedResponseSection);
-			emailPage.setSelectedSection(incomingMessageSection);
-		}, 300);
-		similarEmailsList.removeSelections(true);
-		similarEmailsList.getItems().map((listItem: ListItemBase) => ((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false));
-
 		if (id) {
 			const bindingInfo: ObjectBindingInfo = {
 				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
@@ -142,9 +132,9 @@ export default class Main extends BaseController {
 					dataReceived: (event: Event) => this.onUpdateEmailColumnBinding(event)
 				}
 			};
-			emailView.bindElement(bindingInfo);
+			this.emailView.bindElement(bindingInfo);
 
-			const translationButton: Button = emailView.byId("translationButton") as Button;
+			const translationButton: Button = this.emailView.byId("translationButton") as Button;
 			translationButton.setText(this.getText("email.header.translationButton.translate"));
 			localModel.setProperty("/translationActivated", false);
 		}
@@ -214,11 +204,10 @@ export default class Main extends BaseController {
 		hBox.removeAllItems();
 
 		if (actions.length > 0) {
-			const emailController: EmailController = (this.byId("emailColumn") as View).getController() as EmailController;
 			actions.map((action: Action) => {
 				const button: Button = new Button({
 					text: action.value,
-					press: emailController.onPressAction.bind(this)
+					press: this.emailController.onPressAction.bind(this)
 				});
 				button.addStyleClass("sapUiSmallMarginEnd");
 				hBox.addItem(button);

@@ -1,6 +1,12 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Event from "sap/ui/base/Event";
+import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
+import ObjectPageSection from "sap/uxap/ObjectPageSection";
+import List from "sap/m/List";
+import ListItemBase from "sap/m/ListItemBase";
+import CustomListItem from "sap/m/CustomListItem";
+import Panel from "sap/m/Panel";
 import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import MessageToast from "sap/m/MessageToast";
@@ -8,6 +14,28 @@ import MessageToast from "sap/m/MessageToast";
 import { EmailObject } from "../model/entities";
 
 export default class EmailColumn extends BaseController {
+	public resetEmailPageState(): void {
+		this.scrollToFirstSection();
+		this.resetSimilarEmailsListState();
+	}
+
+	private scrollToFirstSection(): void {
+		const page: ObjectPageLayout = this.byId("emailPage") as ObjectPageLayout;
+		const suggestedResponseSection: ObjectPageSection = this.byId("suggestedResponseSection") as ObjectPageSection;
+		const incomingMessageSection: ObjectPageSection = this.byId("incomingMessageSection") as ObjectPageSection;
+
+		setTimeout(() => { //to correct the scrolling
+			page.setSelectedSection(suggestedResponseSection);
+			page.setSelectedSection(incomingMessageSection);
+		}, 300);
+	}
+
+	private resetSimilarEmailsListState(): void {
+		const similarEmailsList: List = this.byId("similarEmailsList") as List;
+		similarEmailsList.removeSelections(true);
+		similarEmailsList.getItems().map((listItem: ListItemBase) => ((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false));
+	}
+
 	public async onTranslate(event: Event): Promise<void> {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const button: Button = event.getSource();
