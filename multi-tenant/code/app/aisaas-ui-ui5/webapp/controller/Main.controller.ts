@@ -9,19 +9,13 @@ import Link from "sap/m/Link";
 import List from "sap/m/List";
 import ListItemBase from "sap/m/ListItemBase";
 import Button from "sap/m/Button";
-import HBox from "sap/m/HBox";
-import VBox from "sap/m/VBox";
-import Avatar from "sap/m/Avatar";
-import Title from "sap/m/Title";
-import Text from "sap/m/Text";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
 import Sorter from "sap/ui/model/Sorter";
 import { ObjectBindingInfo } from "sap/ui/base/ManagedObject";
 
-import { EmailObject, Mail, KeyFact, Action, FilterItem } from "../model/entities";
-import Formatter from "../model/formatter";
+import { EmailObject, FilterItem } from "../model/entities";
 import EmailController from "./EmailColumn.controller";
 
 export default class Main extends BaseController {
@@ -144,78 +138,14 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
 
-		this.createEmailHeaderContent(emailObject.mail);
-		this.createSuggestedActions(emailObject.mail.suggestedActions);
+		this.emailController.createEmailHeaderContent(emailObject.mail);
+		this.emailController.createSuggestedActions(emailObject.mail.suggestedActions);
 		localModel.setProperty("/additionalInfo", null);
 		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
 		localModel.setProperty("/translatedResponseBody", emailObject.mail.translations.length > 0 && emailObject.mail.translations[0].responseBody);
 		localModel.setProperty("/similarEmails", emailObject.closestMails);
 
 		console.log(emailObject.mail);
-	}
-
-	private createEmailHeaderContent(mail: Mail): void {
-		const parentBox: HBox = (this.byId("emailColumn") as View).byId("headerContent") as HBox;
-		parentBox.removeAllItems();
-		this.createElementsWithAndWithoutTranslation(parentBox, mail, false);
-
-		if (mail.translations.length > 0) {
-			const parentBox: HBox = (this.byId("emailColumn") as View).byId("translatedHeaderContent") as HBox;
-			parentBox.removeAllItems();
-			this.createElementsWithAndWithoutTranslation(parentBox, mail, true);
-		}
-	}
-
-	private createElementsWithAndWithoutTranslation(parentBox: HBox, mail: Mail, withTranslatedContent: boolean): void {
-		const avatar: Avatar = new Avatar({
-			displaySize: 'L',
-			backgroundColor: 'Accent6',
-			initials: Formatter.getAvatarInitial(mail.sender)
-		});
-		avatar.addStyleClass("sapUiMediumMarginEnd");
-		parentBox.addItem(avatar);
-
-		const vBox: VBox = new VBox();
-		vBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
-		const infoTitle: Title = new Title({ text: this.getText("email.header.customerInformation") });
-		const senderText: Text = new Text({ text: !withTranslatedContent ? mail.sender : mail.translations[0].sender });
-		const emailAddressText: Text = new Text({ text: mail.senderEmailAddress as string });
-		vBox.addItem(infoTitle);
-		vBox.addItem(senderText);
-		vBox.addItem(emailAddressText);
-		parentBox.addItem(vBox);
-
-		const facts: KeyFact[] = !withTranslatedContent ? mail.keyFacts : mail.translations[0].keyFacts;
-		facts?.map((factItem: KeyFact) => {
-			const childBox: VBox = new VBox();
-			childBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
-
-			const title: Title = new Title({ text: factItem.keyfact });
-			const text: Text = new Text({ text: factItem.keyfactcategory, wrapping: true, width: factItem.keyfactcategory?.length > 32 ? '12.5rem' : '100%' });
-			childBox.addItem(title);
-			childBox.addItem(text);
-
-			parentBox.addItem(childBox);
-		});
-	}
-
-	private createSuggestedActions(actions: Action[]): void {
-		const hBox: HBox = (this.byId("emailColumn") as View).byId("suggestedActionsBox") as HBox;
-		hBox.removeAllItems();
-
-		if (actions.length > 0) {
-			actions.map((action: Action) => {
-				const button: Button = new Button({
-					text: action.value,
-					press: this.emailController.onPressAction.bind(this)
-				});
-				button.addStyleClass("sapUiSmallMarginEnd");
-				hBox.addItem(button);
-			});
-		} else {
-			const text: Text = new Text({ text: this.getText("email.text.noActions") });
-			hBox.addItem(text);
-		}
 	}
 
 	public async onSearch(): Promise<void> {
