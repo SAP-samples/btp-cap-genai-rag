@@ -151,7 +151,7 @@ export default class CommonMailInsights extends ApplicationService {
         const { id, rag, additionalInformation } = req.data;
         const { Mails } = this.entities;
         const mail = await SELECT.one.from(Mails, id);
-        const response = await this.upsertResponse(mail, rag, tenant, additionalInformation);
+        const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
         return response;
     };
 
@@ -206,8 +206,8 @@ export default class CommonMailInsights extends ApplicationService {
         return translatedMails;
     };
 
-    // Upsert Response for a single Mail
-    private upsertResponse = async (
+    // (Re-)Generate Response for a single Mail
+    private regenerateResponse = async (
         mail: IStoredMail,
         rag?: boolean,
         tenant?: string,
@@ -235,26 +235,19 @@ export default class CommonMailInsights extends ApplicationService {
             }
         };
 
-        // insert mails with insights
-        console.log("UPDATE RESPONSE...");
         let translation: String;
 
         if (!mail.languageMatch) {
             translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
         }
 
-        const dbEntry = {
+        const suggestedResponse = {
             ...mail,
             responseBody: processedMail.insights.responseBody,
             translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
         };
 
-        cds.tx(async () => {
-            const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries([dbEntry]);
-        });
-
-        return dbEntry;
+        return suggestedResponse;
     };
 
     // Process single or multiple new Mail(s)
