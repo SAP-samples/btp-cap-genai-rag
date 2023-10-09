@@ -11,6 +11,7 @@
 		"copy": "shx mkdir -p ../html5-deployer/resources/ && shx cp -rf ./dist/*.zip ../html5-deployer/resources/",
 		"start": "ui5 serve --port 8081 -o index.html",
 		"start-cdn": "ui5 serve --port 8081 -o index-cdn.html",
+		"start:hybrid": "ui5 serve --port 8081",
 		"start:dist": "npm start -- --config ui5-dist.yaml",
 		"start:dist-cdn": "npm run start-cdn -- --config ui5-dist.yaml",
 		"ts-typecheck": "tsc --noEmit",

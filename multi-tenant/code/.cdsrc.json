@@ -50,7 +50,7 @@
                 }
             }
         },
-        "[hybrid-srv]": {
+        "[hybrid-app]": {
             "multitenancy": true,
             "extensibility": true,
             "toggles": false,
@@ -127,7 +127,7 @@
                     "plan": "container"
                 }
             },
-            "[hybrid-srv]": {
+            "[hybrid-app]": {
                 "kind": "hana",
                 "impl": "@sap/cds-hana",
                 "deploy-format": "hdbtable",
@@ -171,7 +171,7 @@
             "[production]": {
                 "kind": "xsuaa"
             },
-            "[hybrid-srv]": {
+            "[hybrid-app]": {
                 "kind": "xsuaa"
             },
             "[hybrid-api]": {

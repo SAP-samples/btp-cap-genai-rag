@@ -2,15 +2,7 @@ import { z } from "zod";
 
 const translationTargetLanguage = "English";
 
-export {
-    MAIL_LANGUAGE_SCHEMA,
-    MAIL_INSIGHTS_SCHEMA,
-    MAIL_INSIGHTS_TRANSLATION_SCHEMA,
-    MAIL_RESPONSE_TRANSLATION_SCHEMA,
-    MAIL_RESPONSE_SCHEMA
-};
-
-const MAIL_LANGUAGE_SCHEMA = z.object({
+export const MAIL_LANGUAGE_SCHEMA = z.object({
     languageNameDetermined: z
         .string()
         .describe("Determine the language in the email. Return a full name of the language."),
@@ -24,7 +16,7 @@ const MAIL_LANGUAGE_SCHEMA = z.object({
 }).describe(`You are supporting a travel agency which receives emails from customers all over the world. 
              Your task is to determine the language of the email in order to trigger translation if needed.`);
 
-const MAIL_INSIGHTS_SCHEMA = z.object({
+export const MAIL_INSIGHTS_SCHEMA = z.object({
     category: z.string().describe(`Classify the email into one the following categories:
         - Booking Assistance - if the email is asking for help in the process of booking of a travel or hotel stay,
         - Cancellation or Change - if the email is referring to an existing booking and asks for the booking to be changed or canceled,
@@ -91,7 +83,7 @@ const MAIL_INSIGHTS_SCHEMA = z.object({
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
     Your task is to extract relevant insights out of the emails. Extract the information out of the email subject and body and return a clean and valid JSON format.`);
 
-const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
+export const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
     subject: z.string(),
     body: z.string(),
     sender: z.string(),
@@ -113,18 +105,14 @@ const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
       Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
 
-
-const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
+export const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
     responseBody: z.string()
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
         Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
 
-const MAIL_RESPONSE_SCHEMA = z
-    .object({
-        responseBody: z.string()
-            .describe(`Formulate a response to the mail acting as customer service, include the additional information given in this text.
-                   Formulate the response in the same language as the original. The signature of the response will be "Your ThorTours Team".`)
-    })
-    .describe(
-        `You are working on an incoming mail addressing a travel agency. Formulate a response. Return a clean and valid JSON format.`
-    );
+export const MAIL_RESPONSE_SCHEMA = z.object({
+    responseBody: z.string()
+        .describe(`Formulate a response to the mail acting as customer service, include the additional information given in this text.
+                Formulate the response in the same language as the original. The signature of the response will be "Your ThorTours Team".`)
+
+    }).describe(`You are working on an incoming mail addressing a travel agency. Formulate a response. Return a clean and valid JSON format.`);

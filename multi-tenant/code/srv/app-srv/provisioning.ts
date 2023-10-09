@@ -4,7 +4,7 @@ import { Request } from "@sap/cds/apis/services";
 
 //@ts-ignore
 import Automator from "common-app/utils/automator";
-import * as aiCore from "common-app/tooling/ai-core-tooling";
+import * as aiCore from "common-app/utils/ai-core";
 
 const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
 

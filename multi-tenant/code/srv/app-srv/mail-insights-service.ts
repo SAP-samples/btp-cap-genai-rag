@@ -1,3 +1,3 @@
-import MailInsights from "common-app/handler/mail-insights";
+import CommonMailInsights from "common-app/handlers/common-mail-insights";
 
-export default class MailInsightsService extends MailInsights {}
+export default class MailInsightsService extends CommonMailInsights {}
