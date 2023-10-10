@@ -62,19 +62,12 @@ const filterForTranslation = ({
 export default class CommonMailInsights extends ApplicationService {
     async init() {
         await super.init();
-        this.on("getMails", this.getMails);
-        this.on("getMail", this.getMail);
-        this.on("recalculateInsights", this.recalculateInsights);
-        this.on("recalculateResponse", this.recalculateResponse);
-        this.on("addMails", this.addMails);
-        this.on("deleteMail", this.deleteMail);
-        this.on("syncWithOffice365", this.syncWithOffice365);
     }
 
     // ######## Handler Methods #########
 
     // Get all Mails excl. closest Mails
-    private getMails = async (_req: Request) => {
+    public getMails = async (_req: Request) => {
         try {
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails).columns((m: any) => {
@@ -93,7 +86,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Get a single Mail incl. closest Mails
-    private getMail = async (req: Request) => {
+    public getMail = async (req: Request) => {
         try {
             const { tenant } = req;
             const { id } = req.data;
@@ -136,7 +129,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Recalculate Insights for all available Mails
-    private recalculateInsights = async (req: Request) => {
+    public recalculateInsights = async (req: Request) => {
         const { tenant } = req;
         const { rag } = req.data;
         const { Mails } = this.entities;
@@ -146,7 +139,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Recalculate Potential Response for a single Mail
-    private recalculateResponse = async (req: Request) => {
+    public recalculateResponse = async (req: Request) => {
         const { tenant } = req;
         const { id, rag, additionalInformation } = req.data;
         const { Mails } = this.entities;
@@ -235,7 +228,7 @@ export default class CommonMailInsights extends ApplicationService {
             }
         };
 
-        let translation: String;
+        let translation: String | null = null;
 
         if (!mail.languageMatch) {
             translation = (await this.translatePotentialResponse(processedMail.insights.responseBody)).responseBody;
@@ -244,6 +237,7 @@ export default class CommonMailInsights extends ApplicationService {
         const suggestedResponse = {
             ...mail,
             responseBody: processedMail.insights.responseBody,
+            //@ts-ignore 
             translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
         };
 
@@ -251,7 +245,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Process single or multiple new Mail(s)
-    private addMails = async (req: Request) => {
+    public addMails = async (req: Request) => {
         try {
             const { tenant } = req;
             const { mails, rag } = req.data;
@@ -282,7 +276,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Delete single Mail from SAP HANA Cloud and PostgreSQL
-    private deleteMail = async (req: Request) => {
+    public deleteMail = async (req: Request) => {
         try {
             const { tenant } = req;
             const { id } = req.data;
@@ -301,7 +295,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Sync with Office 365
-    private syncWithOffice365 = async (req: Request) => {
+    public syncWithOffice365 = async (req: Request) => {
         try {
             const { tenant } = req;
             const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");

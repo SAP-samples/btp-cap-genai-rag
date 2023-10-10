@@ -3,8 +3,8 @@ import xsenv from "@sap/xsenv";
 import { Request } from "@sap/cds/apis/services";
 
 //@ts-ignore
-import Automator from "common-app/utils/automator";
-import * as aiCore from "common-app/utils/ai-core";
+import Automator from "../common/utils/automator";
+import * as aiCore from "../common/utils/ai-core";
 
 const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
 

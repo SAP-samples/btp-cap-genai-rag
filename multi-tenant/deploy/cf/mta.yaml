@@ -52,21 +52,13 @@ modules:
     type: nodejs
     path: ../../code/gen/app
     build-parameters:
-      builder: custom
-      ignore: [".DS_Store", "manifest*.yml"]
-      commands: 
-       - npm ci
-       - npx shx mkdir -p temp/llm-commons
-       - npx shx mv node_modules/@sap/llm-commons temp/
-       - npx shx rm -r node_modules
-       - npx shx mkdir -p node_modules/@sap/llm-commons
-       - npx shx mv temp/llm-commons node_modules/@sap/
-       - npx shx rm -r temp
+      builder: npm
+      ignore: [".DS_Store", "manifest*.yml", "node_modules/"]
     parameters:
       app-name: aisaas-srv-${space}
       memory: 256MB
       disk-quota: 1024MB
-      command: node ./node_modules/@sap/cds/bin/cds-serve
+      command: node ./node_modules/@sap/cds/bin/cds-serve --with srv/mail-insights-service.js
     properties:
       tenantSeparator: ~{aisaas-approuter/tenant-separator}
       appDomain: ~{aisaas-approuter/app-domain}
@@ -227,18 +219,10 @@ modules:
       app-name: aisaas-api-srv-${space}
       memory: 256MB
       disk-quota: 1024MB
-      command: node ./node_modules/@sap/cds/bin/cds-serve
+      command: node ./node_modules/@sap/cds/bin/cds-serve --with srv/mail-insights-api-service.js
     build-parameters:
-      builder: custom
-      ignore: [".DS_Store", "manifest*.yml"]
-      commands: 
-       - npm ci
-       - npx shx mkdir -p temp/llm-commons
-       - npx shx mv node_modules/@sap/llm-commons temp/
-       - npx shx rm -r node_modules
-       - npx shx mkdir -p node_modules/@sap/llm-commons
-       - npx shx mv temp/llm-commons node_modules/@sap/
-       - npx shx rm -r temp
+      builder: npm
+      ignore: [".DS_Store", "manifest*.yml", "node_modules/"]
     requires:
       - name: aisaas-service-manager
       - name: aisaas-api-uaa

@@ -1,7 +1,7 @@
 import cds from "@sap/cds";
 import express from "express";
 import cors from "cors";
-import 'module-alias/register';
+
 import { handleTenantSubscription } from "./provisioning";
 
 cds.on("bootstrap", (app: express.Application) => {
