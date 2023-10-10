@@ -10,7 +10,7 @@
         "@sap-cloud-sdk/util": "^3.2.0",
         "@sap/cds": "^7.2.0",
         "@sap/cds-hana": "^2",
-        "@sap/llm-commons": "^0.8.1",
+        "@sap/llm-commons": "file:./srv/llm-commons-0.8.1.tgz",
         "@sap/xssec": "^3.2.17",
         "cors": "^2.8.5",
         "express": "^4",
