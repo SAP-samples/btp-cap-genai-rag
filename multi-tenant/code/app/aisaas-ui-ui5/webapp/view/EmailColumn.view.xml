@@ -21,7 +21,7 @@
 								class="sapUiTinyMarginBegin"
 								inverted="true"
 								icon="sap-icon://high-priority"
-								text="{parts: ['filters>/urgency', 'api>mail/urgency'], formatter:'formatter.getUrgencyText'}"
+								text="{parts: ['filters>/urgency', 'api>mail/urgency'], formatter:'formatter.getUrgencyText'} {i18n>filters.titles.urgency}"
 								state="{path:'api>mail/urgency', formatter:'formatter.getUrgencyState'}"/>
 							<ObjectStatus
 								class="sapUiTinyMarginBegin"

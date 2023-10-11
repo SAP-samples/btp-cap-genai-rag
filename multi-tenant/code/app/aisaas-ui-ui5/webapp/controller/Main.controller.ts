@@ -289,14 +289,14 @@ export default class Main extends BaseController {
 	}
 
 	private getUrgencyFilter(id: string, filterPath: string): Filter {
-		if (id === "00") return new Filter(filterPath, FilterOperator.LT, 4)
-		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 4, 6)
-		else return new Filter(filterPath, FilterOperator.GT, 6)
+		if (id === "00") return new Filter(filterPath, FilterOperator.LT, 2)
+		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 2, 3)
+		else return new Filter(filterPath, FilterOperator.GT, 3)
 	}
 
 	private getSentimentFilter(id: string, filterPath: string): Filter {
-		if (id === "00") return new Filter(filterPath, FilterOperator.GT, 5)
-		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 0, 5)
+		if (id === "00") return new Filter(filterPath, FilterOperator.GT, 0)
+		else if (id === "01") return new Filter(filterPath, FilterOperator.EQ, 0)
 		else return new Filter(filterPath, FilterOperator.LT, 0)
 	}
 
