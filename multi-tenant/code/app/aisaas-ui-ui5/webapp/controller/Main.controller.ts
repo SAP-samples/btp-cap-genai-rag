@@ -85,27 +85,26 @@ export default class Main extends BaseController {
 	}
 
 	private setTopEmail(): void {
-		if (this.getFilteredEmailIds().length > 0) this.setActiveEmail(this.getFilteredEmailIds()[0]);
+		const filteredEmailsIds: string[] = this.getFilteredEmailsIds();
+		if (filteredEmailsIds.length > 0) this.setActiveEmail(filteredEmailsIds[0]);
 	}
 
 	private isActiveEmailInFilteredEmails(): boolean {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const filteredEmailIds: string[] = this.getFilteredEmailIds();
-
-		return filteredEmailIds.some((id: string) => id === localModel.getProperty("/activeEmailId"))
+		return this.getFilteredEmailsIds().some((id: string) => id === localModel.getProperty("/activeEmailId"))
 	}
 
 	private scrollToActiveEmail(index: number = null): void {
 		const emailsList: List = this.byId("emailsList") as List;
 		if (!index) {
 			const localModel: JSONModel = this.getModel() as JSONModel;
-			const filteredEmailIds: string[] = this.getFilteredEmailIds();
-			const activeEmailIndex: number = filteredEmailIds.indexOf(filteredEmailIds.find((id: string) => id === localModel.getProperty("/activeEmailId")));
+			const filteredEmailsIds: string[] = this.getFilteredEmailsIds();
+			const activeEmailIndex: number = filteredEmailsIds.indexOf(filteredEmailsIds.find((id: string) => id === localModel.getProperty("/activeEmailId")));
 			emailsList.scrollToIndex(activeEmailIndex);
 		} else emailsList.scrollToIndex(index);
 	}
 
-	private getFilteredEmailIds(): string[] {
+	private getFilteredEmailsIds(): string[] {
 		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
 		const currentContexts: Context[] = binding.getAllCurrentContexts();
 		const ids: string[] = [];
@@ -152,7 +151,11 @@ export default class Main extends BaseController {
 
 	public async onSearch(): Promise<void> {
 		if (this.hasResponseChanged()) {
-			await this.openConfirmationDialog(this.getText("confirmationDialog.texts.mayBeLostMessage"), this.applyFilter.bind(this), () => this.restoreSearchFilter());
+			await this.openConfirmationDialog(
+				this.getText("confirmationDialog.texts.mayBeLostMessage"),
+				this.applyFilter.bind(this),
+				() => this.restoreSearchFilter()
+			);
 		} else this.applyFilter();
 	}
 

@@ -33,7 +33,7 @@ export default class EmailColumn extends BaseController {
 		setTimeout(() => { //to correct the scrolling
 			page.setSelectedSection(suggestedResponseSection);
 			page.setSelectedSection(incomingMessageSection);
-		}, 300);
+		}, 400);
 	}
 
 	private resetSimilarEmailsListState(): void {
