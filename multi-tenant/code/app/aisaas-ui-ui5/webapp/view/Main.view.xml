@@ -9,20 +9,19 @@
 	core:require="{ formatter:
 	'aisaas/ui/model/formatter' }">
 
-	<Page showHeader="false">
+	<Page showHeader="false" busy="{/busy}" busyIndicatorDelay="0">
         <content>
             <l:Splitter>
                 <l:FixFlex>
                     <l:layoutData><l:SplitterLayoutData size="16%"/></l:layoutData>
                     <l:flexContent>
                         <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
-                            <VBox class="sapUiSmallMarginTopBottom sapUiLargeMarginBegin">
-                                <Title text="{i18n>filters.title.filterBy}:"/>
-                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
+                            <VBox class="sapUiTinyMarginTopBottom sapUiLargeMarginBegin">
+                                <Panel class="sapUiNoContentPadding">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.requestState}"/>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.requestState}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="requestStatesClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeRequestStates}.length > 0 }" press="onPressClear"/>
+                                        <Link id="requestStatesClearLink" text="{i18n>filters.link.clear}" enabled="{= ${/activeRequestStates}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="requestStatesList"
@@ -38,9 +37,9 @@
 
                                 <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.requestType}"/>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.requestType}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="categoryClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onPressClear"/>
+                                        <Link id="categoryClearLink" text="{i18n>filters.link.clear}" enabled="{= ${/activeCategories}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="categoryList"
@@ -56,9 +55,9 @@
 
                                 <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.urgency}"/>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.urgency}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="urgencyClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeUrgencies}.length > 0 }" press="onPressClear"/>
+                                        <Link id="urgencyClearLink" text="{i18n>filters.link.clear}" enabled="{= ${/activeUrgencies}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="urgencyList"
@@ -74,9 +73,9 @@
 
                                 <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.title.sentiment}"/>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.sentiment}"/>
                                         <ToolbarSpacer/>
-                                        <Link id="sentimentClearLink" text="{i18n>filters.label.clear}" enabled="{= ${/activeSentiments}.length > 0 }" press="onPressClear"/>
+                                        <Link id="sentimentClearLink" text="{i18n>filters.link.clear}" enabled="{= ${/activeSentiments}.length > 0 }" press="onPressClear"/>
                                     </Toolbar>
                                     <List
                                         id="sentimentList"
@@ -101,9 +100,9 @@
                             <VBox width="100%" class="sapUiTinyMargin">
                                 <SearchField value="{/searchKeyword}" placeholder="{i18n>inbox.searchField.placeholder}" search="onSearch"/>
                                 <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
-                                    <Title text="{i18n>inbox.list.label.title} ({/emailsCount})" titleStyle="H4"/>
+                                    <Title text="{i18n>inbox.list.title} ({/emailsCount})" titleStyle="H4"/>
                                     <VBox justifyContent="Center">
-                                        <Link text="{i18n>inbox.sort.label.sortBy} {/sortText}" press="onSortEmailsList"/>
+                                        <Link text="{i18n>inbox.link.sortBy} {/sortText}" press="onSortEmailsList"/>
                                     </VBox>
                                 </HBox>
                             </VBox>
@@ -115,7 +114,7 @@
                             <List
                                 id="emailsList"
                                 mode="SingleSelectMaster"
-                                noDataText="{i18n>inbox.list.label.noData}"
+                                noDataText="{i18n>inbox.list.noData}"
                                 items="{
                                     path: 'api>/Mails',
                                     parameters: {

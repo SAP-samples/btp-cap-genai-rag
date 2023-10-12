@@ -13,11 +13,11 @@
         </content>
 
         <beginButton>
-            <Button text="{i18n>confirmationDialog.button.yes}" type="Emphasized" press="onConfirmPress"/>
+            <Button text="{i18n>confirmationDialog.buttons.yes}" type="Emphasized" press="onConfirmPress"/>
         </beginButton>
 
         <endButton>
-            <Button text="{i18n>confirmationDialog.button.no}" press="onCancelPress"/>
+            <Button text="{i18n>confirmationDialog.buttons.no}" press="onCancelPress"/>
         </endButton>
     </Dialog>
 

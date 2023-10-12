@@ -41,6 +41,7 @@ export default class Main extends BaseController {
 		this.getRouter().attachRouteMatched(this.onRouteMatched, this);
 
 		const model: JSONModel = new JSONModel({
+			busy: false,
 			activeCategories: [],
 			activeUrgencies: [],
 			activeSentiments: [],
@@ -52,6 +53,7 @@ export default class Main extends BaseController {
 			activeEmailId: null,
 			translationActivated: false,
 			additionalInfo: null,
+			submittedResponsesIncluded: false,
 			responseBody: null,
 			translatedResponseBody: null,
 			similarEmails: []
@@ -61,7 +63,7 @@ export default class Main extends BaseController {
 
 	protected onRouteMatched(): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		localModel.setProperty("/sortText", this.getText("inbox.sort.label.newest"));
+		localModel.setProperty("/sortText", this.getText("inbox.link.newest"));
 
 		this.emailView = this.byId("emailColumn") as View;
 		this.emailController = this.emailView.getController() as EmailController;
@@ -83,28 +85,26 @@ export default class Main extends BaseController {
 	}
 
 	private setTopEmail(): void {
-		if (this.getFilteredEmailIds().length > 0) this.setActiveEmail(this.getFilteredEmailIds()[0]);
+		const filteredEmailsIds: string[] = this.getFilteredEmailsIds();
+		if (filteredEmailsIds.length > 0) this.setActiveEmail(filteredEmailsIds[0]);
 	}
 
 	private isActiveEmailInFilteredEmails(): boolean {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const filteredEmailIds: string[] = this.getFilteredEmailIds();
-
-		return filteredEmailIds.some((id: string) => id === localModel.getProperty("/activeEmailId"))
+		return this.getFilteredEmailsIds().some((id: string) => id === localModel.getProperty("/activeEmailId"))
 	}
 
 	private scrollToActiveEmail(index: number = null): void {
 		const emailsList: List = this.byId("emailsList") as List;
-
 		if (!index) {
 			const localModel: JSONModel = this.getModel() as JSONModel;
-			const filteredEmailIds: string[] = this.getFilteredEmailIds();
-			const activeEmailIndex: number = filteredEmailIds.indexOf(filteredEmailIds.find((id: string) => id === localModel.getProperty("/activeEmailId")));
+			const filteredEmailsIds: string[] = this.getFilteredEmailsIds();
+			const activeEmailIndex: number = filteredEmailsIds.indexOf(filteredEmailsIds.find((id: string) => id === localModel.getProperty("/activeEmailId")));
 			emailsList.scrollToIndex(activeEmailIndex);
 		} else emailsList.scrollToIndex(index);
 	}
 
-	private getFilteredEmailIds(): string[] {
+	private getFilteredEmailsIds(): string[] {
 		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
 		const currentContexts: Context[] = binding.getAllCurrentContexts();
 		const ids: string[] = [];
@@ -129,7 +129,7 @@ export default class Main extends BaseController {
 			this.emailView.bindElement(bindingInfo);
 
 			const translationButton: Button = this.emailView.byId("translationButton") as Button;
-			translationButton.setText(this.getText("email.header.translationButton.translate"));
+			translationButton.setText(this.getText("email.buttons.translate"));
 			localModel.setProperty("/translationActivated", false);
 		}
 	}
@@ -141,8 +141,9 @@ export default class Main extends BaseController {
 		this.emailController.createEmailHeaderContent(emailObject.mail);
 		this.emailController.createSuggestedActions(emailObject.mail.suggestedActions);
 		localModel.setProperty("/additionalInfo", null);
+		localModel.setProperty("/submittedResponsesIncluded", true);
 		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
-		localModel.setProperty("/translatedResponseBody", emailObject.mail.translations.length > 0 && emailObject.mail.translations[0].responseBody);
+		localModel.setProperty("/translatedResponseBody", !emailObject.mail.languageMatch && emailObject.mail.translations[0].responseBody);
 		localModel.setProperty("/similarEmails", emailObject.closestMails);
 
 		console.log(emailObject.mail);
@@ -150,7 +151,11 @@ export default class Main extends BaseController {
 
 	public async onSearch(): Promise<void> {
 		if (this.hasResponseChanged()) {
-			await this.openConfirmationDialog(this.getText("confirmationDialog.message.mayBeLost"), this.applyFilter.bind(this), () => this.restoreSearchFilter());
+			await this.openConfirmationDialog(
+				this.getText("confirmationDialog.texts.mayBeLostMessage"),
+				this.applyFilter.bind(this),
+				() => this.restoreSearchFilter()
+			);
 		} else this.applyFilter();
 	}
 
@@ -179,7 +184,7 @@ export default class Main extends BaseController {
 
 		if (this.hasResponseChanged()) {
 			await this.openConfirmationDialog(
-				this.getText("confirmationDialog.message.mayBeLost"),
+				this.getText("confirmationDialog.texts.mayBeLostMessage"),
 				() => this.applySelectedFilter(this.getActivePath(list.getId()), selectedIds),
 				() => this.restoreFilter(list.getId())
 			);
@@ -229,6 +234,13 @@ export default class Main extends BaseController {
 		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
 		const andFilter: Filter[] = [];
 
+		const activeRequestStates: string[] = localModel.getProperty(`/${this.ACTIVE_REQUEST_STATES_PATH}`);
+		if (activeRequestStates.length > 0) {
+			const orFilter: Filter[] = [];
+			activeRequestStates.map((id: string) => orFilter.push(this.getRequestStatesFilter(id, this.EMAIL_RESPONDED_PATH)));
+			andFilter.push(new Filter({ filters: orFilter, and: false }));
+		}
+
 		const activeCategories: string[] = localModel.getProperty(`/${this.ACTIVE_CATEGORIES_PATH}`);
 		if (activeCategories.length > 0) {
 			const orFilter: Filter[] = [];
@@ -252,13 +264,6 @@ export default class Main extends BaseController {
 			andFilter.push(new Filter({ filters: orFilter, and: false }));
 		}
 
-		const activeRequestStates: string[] = localModel.getProperty(`/${this.ACTIVE_REQUEST_STATES_PATH}`);
-		if (activeRequestStates.length > 0) {
-			const orFilter: Filter[] = [];
-			activeRequestStates.map((id: string) => orFilter.push(this.getRequestStatesFilter(id, this.EMAIL_RESPONDED_PATH)));
-			andFilter.push(new Filter({ filters: orFilter, and: false }));
-		}
-
 		const keyword: string = localModel.getProperty("/searchKeyword");
 		if (keyword) {
 			const orFilter: Filter[] = [];
@@ -272,6 +277,11 @@ export default class Main extends BaseController {
 		binding.refresh();
 	}
 
+	private getRequestStatesFilter(id: string, filterPath: string): Filter {
+		if (id === "00") return new Filter(filterPath, FilterOperator.EQ, false)
+		else return new Filter(filterPath, FilterOperator.EQ, true)
+	}
+
 	private getKeywordFilter(keyword: string, filterPath: string): Filter {
 		return new Filter({
 			path: filterPath,
@@ -282,28 +292,23 @@ export default class Main extends BaseController {
 	}
 
 	private getUrgencyFilter(id: string, filterPath: string): Filter {
-		if (id === "00") return new Filter(filterPath, FilterOperator.LT, 4)
-		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 4, 6)
-		else return new Filter(filterPath, FilterOperator.GT, 6)
+		if (id === "00") return new Filter(filterPath, FilterOperator.LT, 2)
+		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 2, 3)
+		else return new Filter(filterPath, FilterOperator.GT, 3)
 	}
 
 	private getSentimentFilter(id: string, filterPath: string): Filter {
-		if (id === "00") return new Filter(filterPath, FilterOperator.GT, 5)
-		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 0, 5)
+		if (id === "00") return new Filter(filterPath, FilterOperator.GT, 0)
+		else if (id === "01") return new Filter(filterPath, FilterOperator.EQ, 0)
 		else return new Filter(filterPath, FilterOperator.LT, 0)
-	}
-
-	private getRequestStatesFilter(id: string, filterPath: string): Filter {
-		if (id === "00") return new Filter(filterPath, FilterOperator.EQ, false)
-		else return new Filter(filterPath, FilterOperator.EQ, true)
 	}
 
 	public onSortEmailsList(): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/sortDescending", !localModel.getProperty("/sortDescending"));
-		localModel.setProperty("/sortText", localModel.getProperty("/sortText") === this.getText("inbox.sort.label.newest") ?
-			this.getText("inbox.sort.label.oldest") :
-			this.getText("inbox.sort.label.newest"));
+		localModel.setProperty("/sortText", localModel.getProperty("/sortText") === this.getText("inbox.link.newest") ?
+			this.getText("inbox.link.oldest") :
+			this.getText("inbox.link.newest"));
 
 		const sorter = new Sorter(this.EMAIL_MODIFIED_AT_PATH, localModel.getProperty("/sortDescending"));
 		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
@@ -319,7 +324,7 @@ export default class Main extends BaseController {
 		if (this.hasResponseChanged()) {
 			const activeListItem: ListItemBase = emailsList.getItems().find((item: ListItemBase) => item.getBindingContext("api").getProperty("ID") === localModel.getProperty("/activeEmailId"));
 			emailsList.setSelectedItem(activeListItem);
-			await this.openConfirmationDialog(this.getText("confirmationDialog.message.willBeLost"), () => this.setActiveEmail(selectedId));
+			await this.openConfirmationDialog(this.getText("confirmationDialog.texts.willBeLostMessage"), () => this.setActiveEmail(selectedId));
 		} else this.setActiveEmail(selectedId);
 	}
 

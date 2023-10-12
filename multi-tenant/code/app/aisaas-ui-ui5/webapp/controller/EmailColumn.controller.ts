@@ -33,7 +33,7 @@ export default class EmailColumn extends BaseController {
 		setTimeout(() => { //to correct the scrolling
 			page.setSelectedSection(suggestedResponseSection);
 			page.setSelectedSection(incomingMessageSection);
-		}, 300);
+		}, 400);
 	}
 
 	private resetSimilarEmailsListState(): void {
@@ -45,16 +45,16 @@ export default class EmailColumn extends BaseController {
 	public createEmailHeaderContent(mail: Mail): void {
 		const parentBox: HBox = this.byId("headerContent") as HBox;
 		parentBox.removeAllItems();
-		this.createElementsWithAndWithoutTranslation(parentBox, mail, false);
+		this.createElementsWithOrWithoutTranslation(parentBox, mail, false);
 
-		if (mail.translations.length > 0) {
+		if (!mail.languageMatch) {
 			const parentBox: HBox = this.byId("translatedHeaderContent") as HBox;
 			parentBox.removeAllItems();
-			this.createElementsWithAndWithoutTranslation(parentBox, mail, true);
+			this.createElementsWithOrWithoutTranslation(parentBox, mail, true);
 		}
 	}
 
-	private createElementsWithAndWithoutTranslation(parentBox: HBox, mail: Mail, withTranslatedContent: boolean): void {
+	private createElementsWithOrWithoutTranslation(parentBox: HBox, mail: Mail, withTranslatedContent: boolean): void {
 		const avatar: Avatar = new Avatar({
 			displaySize: 'L',
 			backgroundColor: 'Accent6',
@@ -66,7 +66,7 @@ export default class EmailColumn extends BaseController {
 		const vBox: VBox = new VBox();
 		vBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
 
-		const infoTitle: Title = new Title({ text: this.getText("email.header.customerInformation") });
+		const infoTitle: Title = new Title({ text: this.getText("email.titles.customerInformation") });
 		const senderText: Text = new Text({ text: !withTranslatedContent ? mail.sender : mail.translations[0].sender });
 		const emailAddressText: Text = new Text({ text: mail.senderEmailAddress as string });
 		vBox.addItem(infoTitle);
@@ -102,7 +102,7 @@ export default class EmailColumn extends BaseController {
 				hBox.addItem(button);
 			});
 		} else {
-			const text: Text = new Text({ text: this.getText("email.text.noActions") });
+			const text: Text = new Text({ text: this.getText("email.texts.noActions") });
 			hBox.addItem(text);
 		}
 	}
@@ -113,32 +113,57 @@ export default class EmailColumn extends BaseController {
 		const emailObject: EmailObject = button.getBindingContext("api").getObject() as EmailObject;
 
 		if (!emailObject.mail.languageMatch) {
-			if (!localModel.getProperty("/translationActivated")) {
-				if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody)
-					MessageToast.show(this.getText("email.header.switchTranslation.message"), { duration: 5000 });
-			} else {
-				if (localModel.getProperty("/translatedResponseBody") !== emailObject.mail.translations[0].responseBody)
-					MessageToast.show(this.getText("email.header.switchTranslation.message"), { duration: 5000 });
+			if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody ||
+				localModel.getProperty("/translatedResponseBody") !== emailObject.mail.translations[0].responseBody) {
+				MessageToast.show(this.getText("email.texts.switchTranslationMessage"), { duration: 5000 });
 			}
 		}
 
 		localModel.setProperty("/translationActivated", !localModel.getProperty("/translationActivated"));
 		button.setText(localModel.getProperty("/translationActivated") ?
-			this.getText("email.header.translationButton.original") :
-			this.getText("email.header.translationButton.translate"));
+			this.getText("email.buttons.original") :
+			this.getText("email.buttons.translate"));
 	}
 
 	public onPressAction(): void {
 		MessageToast.show("Not implemented!");
 	}
 
-	public onPressGenerate(): void {
-		MessageToast.show("Not implemented!");
+	public onChangeAdditionalInfo(event: Event): void {
+		const value: string = (event.getSource() as TextArea).getValue();
+		if (value.replace(/[^A-Z0-9]+/ig, '') === '') {
+			const localModel: JSONModel = this.getModel() as JSONModel;
+			localModel.setProperty("/additionalInfo", null);
+		}
+	}
+
+	public async onPressGenerate(): Promise<void> {
+		const localModel: JSONModel = this.getModel() as JSONModel;
+		localModel.setProperty("/busy", true);
+
+		await fetch("api/odata/v4/mail-insights/recalculateResponse", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				id: localModel.getProperty("/activeEmailId"),
+				rag: localModel.getProperty("/submittedResponsesIncluded"),
+				additionalInformation: localModel.getProperty("/additionalInfo")
+			})
+		})
+			.then((response: Response) => { return response.json() })
+			.then((result: Mail) => {
+				localModel.setProperty("/responseBody", result.responseBody);
+				!result.languageMatch && localModel.setProperty("/translatedResponseBody", result.translations[0].responseBody);
+
+				localModel.setProperty("/busy", false);
+				MessageToast.show(this.getText("email.texts.generateResponseMessage"));
+			}).catch((error: Error) => console.log(error))
 	}
 
 	public onChangeResponse(event: Event): void {
 		const value: string = (event.getSource() as TextArea).getValue();
-
 		if (value.replace(/[^A-Z0-9]+/ig, '') === '') {
 			const localModel: JSONModel = this.getModel() as JSONModel;
 			localModel.setProperty(!localModel.getProperty("/translationActivated") ? "/responseBody" : "/translatedResponseBody", null);

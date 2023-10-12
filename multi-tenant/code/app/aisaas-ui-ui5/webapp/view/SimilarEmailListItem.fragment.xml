@@ -7,22 +7,22 @@
         expandable="true"
         expanded="false"
         stickyHeader="true"
-        headerText="{mail/subject} | {i18n>email.similarEmail.title.similarity}: {path:'similarity', formatter:'formatter.getFormattedSimilarity'}%">
+        headerText="{mail/subject} | {i18n>email.texts.similarity}: {path:'similarity', formatter:'formatter.getFormattedSimilarity'}%">
         <VBox class="sapUiMediumMarginBeginEnd sapUiTinyMarginTop sapUiMediumMarginBottom">
             <HBox>
-                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.type}:"/>
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.type}:"/>
                 <tnt:InfoLabel displayOnly="true" text="{mail/category}"/>
             </HBox>
             <HBox class="sapUiTinyMarginTop">
-                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.sender}:"/>
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.sender}:"/>
                 <Text text="{mail/sender}"/>
             </HBox>
             <HBox class="sapUiTinyMarginTop">
-                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.body}:"/>
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.message}:"/>
                 <Text text="{mail/body}"/>
             </HBox>
             <HBox class="sapUiSmallMarginTop">
-                <Title width="6rem" titleStyle="H6" text="{i18n>email.similarEmail.title.response}:"/>
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.response}:"/>
                 <Text text="{mail/responseBody}"/>
             </HBox>
         </VBox>
