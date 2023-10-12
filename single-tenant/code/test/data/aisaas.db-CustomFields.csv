@@ -1,3 +1,0 @@
-title,isNumber,description
-location,false,Extract the geo location for the trip the email is about. The location can also be a continent. The location can have multiple values separated by a comma. Return the location or null if unsure. 
-returningCustomer,false,Extract if the email was sent by an existing customer. Make sure that evidence from the body is given. Return true or false or null if unsure. 

@@ -2,15 +2,7 @@ import { z } from "zod";
 
 const translationTargetLanguage = "English";
 
-export {
-    MAIL_LANGUAGE_SCHEMA,
-    MAIL_INSIGHTS_SCHEMA,
-    MAIL_INSIGHTS_TRANSLATION_SCHEMA,
-    MAIL_RESPONSE_TRANSLATION_SCHEMA,
-    MAIL_RESPONSE_SCHEMA
-};
-
-const MAIL_LANGUAGE_SCHEMA = z.object({
+export const MAIL_LANGUAGE_SCHEMA = z.object({
     languageNameDetermined: z
         .string()
         .describe("Determine the language in the email. Return a full name of the language."),
@@ -24,7 +16,7 @@ const MAIL_LANGUAGE_SCHEMA = z.object({
 }).describe(`You are supporting a travel agency which receives emails from customers all over the world. 
              Your task is to determine the language of the email in order to trigger translation if needed.`);
 
-const MAIL_INSIGHTS_SCHEMA = z.object({
+export const MAIL_INSIGHTS_SCHEMA = z.object({
     category: z.string().describe(`Classify the email into one the following categories:
         - Booking Assistance - if the email is asking for help in the process of booking of a travel or hotel stay,
         - Cancellation or Change - if the email is referring to an existing booking and asks for the booking to be changed or canceled,
@@ -38,14 +30,14 @@ const MAIL_INSIGHTS_SCHEMA = z.object({
             'Extract the name of the customer from the mail body as the name of the sender. If not found, return "X"'
         ),
     sentiment: z
-        .number()
+        .number().transform((number) => Math.round(number)) 
         .describe(
-            "Determine the sentiment of the mail on a scale from -2 (very negative) via 0 (neutral) up to 2 (very positive) as an integer."
+            "Determine the sentiment of the mail on a scale from -1 (negative) via 0 (neutral) up to 1 (positive) as an integer. "
         ),
     urgency: z
-        .number()
+        .number().transform((number) => Math.round(number)) 
         .describe(
-            "What level of urgency does the email express? Give your answer as an integer from 0 (lowest urgency) to 5 (very high urgency)."
+            "What level of urgency does the email express? Give your answer as an integer from 0 (lowest urgency) to 2 (high urgency)."
         ),
     summary: z.string().describe("Summarize the email, use maximum 10 words, in the language of the body."),
     keyFacts: z.array(
@@ -74,7 +66,8 @@ const MAIL_INSIGHTS_SCHEMA = z.object({
             type: z.string().optional().describe("type of the action"),
             value: z.string().optional().describe("value of the action")
         })
-    ) .describe(`Based on the email and the services the email is asking for, which of the following action types and action values do you suggest.
+    )
+        .describe(`Based on the email and the services the email is asking for, which of the following action types and action values do you suggest.
             The following actions are structured like "type of action - value of action - description of action". 
             Only use the values provided in the following list while the result can contain multiple actions:
             - Hotel - Check hotel availability - check if the requested hotel is available and offer results to the sender
@@ -87,11 +80,11 @@ const MAIL_INSIGHTS_SCHEMA = z.object({
             - Car - Cancel car booking - cancel the previously booked rental car
             - Car - Manage car booking - check the rental car booking and provide information to the sender
             - General - Manage general booking - if any other action is required
-        `),
+        `)
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
     Your task is to extract relevant insights out of the emails. Extract the information out of the email subject and body and return a clean and valid JSON format.`);
 
-const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
+export const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
     subject: z.string(),
     body: z.string(),
     sender: z.string(),
@@ -102,28 +95,22 @@ const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
             keyfactcategory: z.string().optional().nullable()
         })
     ),
-    customFields: z.array(
-        z.object({
-            title: z.string().optional(),
-            value: z.string().optional().nullable()
-        })
-    ),
     requestedServices: z.array(z.string()),
     responseBody: z.string()
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
       Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
 
-
-const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
+export const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
     responseBody: z.string()
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
-        Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
+        Your task is to translate the values for this schema into the explicitly provided language or into 
+        ${translationTargetLanguage} if no other language is provided. Return a clean and valid JSON format`);
 
-const MAIL_RESPONSE_SCHEMA = z
+export const MAIL_RESPONSE_SCHEMA = z
     .object({
         responseBody: z.string()
             .describe(`Formulate a response to the mail acting as customer service, include the additional information given in this text.
-                   Formulate the response in the same language as the original. The signature of the response will be "Your ThorTours Team".`)
+                Formulate the response in the same language as the original. The signature of the response will be "Your ThorTours Team".`)
     })
     .describe(
         `You are working on an incoming mail addressing a travel agency. Formulate a response. Return a clean and valid JSON format.`

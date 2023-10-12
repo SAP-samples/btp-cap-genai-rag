@@ -5,7 +5,7 @@ using {
 
 context aisaas.db {
 
-      type KeyFacts {
+      type KeyFact {
             keyfact         : String;
             keyfactcategory : String;
       }
@@ -15,10 +15,11 @@ context aisaas.db {
             value : String;
       }
 
-      type CustomField {
-            title : String;
-            value : String;
-      }
+      type BaseMail {
+          subject            : String;
+          body               : String;
+          senderEmailAddress : String;
+     }
 
       type Translation {
             sender            :      String;
@@ -26,8 +27,7 @@ context aisaas.db {
             body              :      LargeString;
             summary           :      String;
             responseBody      :      LargeString;
-            customFields      : many CustomField;
-            keyFacts          : many KeyFacts;
+            keyFacts          : many KeyFact;
             requestedServices : many String;
       }
 
@@ -36,23 +36,18 @@ context aisaas.db {
             body                   :      LargeString;
             senderEmailAddress     :      String;
             sender                 :      String;
+            responded              :      Boolean default false;
             category               :      String;
             sentiment              :      Integer;
             urgency                :      Integer;
             summary                :      String;
             responseBody           :      LargeString;
+            responseModified       :      Boolean;
             languageNameDetermined :      String;
             languageMatch          :      Boolean;
             requestedServices      : many String;
             suggestedActions       : many Action;
-            customFields           : many CustomField;
-            keyFacts               : many KeyFacts;
+            keyFacts               : many KeyFact;
             translations           : many Translation;
       }
-
-      entity CustomFields {
-            title       : String;
-            isNumber    : Boolean;
-            description : String;
-      };
 }

@@ -15,11 +15,11 @@ export interface IProcessedMail {
 }
 
 export interface ITranslatedMail extends IProcessedMail {
-    translations? : Array<ITranslatedInsights> | {};
+    translations? : Array<ITranslatedInsight> | {};
 }
 
 export interface IStoredMail extends IBaseMail, IInsights {
-    translations? : Array<ITranslatedInsights> | [];
+    translations? : Array<ITranslatedInsight> | [];
 }
 
 export interface CustomField {
@@ -28,13 +28,12 @@ export interface CustomField {
     description?: string;
 }
 
-interface ITranslatedInsights {
+interface ITranslatedInsight {
     subject?: String;
     body?: String;
     sender?: String;
     summary?: String;
-    keyFacts?: Array<IKeyFacts>;
-    customFields?: Array<ICustomField>;
+    keyFacts?: Array<IKeyFact>;
     requestedServices?: Array<String>;
     responseBody?: String;
 }
@@ -45,26 +44,20 @@ interface IInsights {
     sender? : string;
     urgency?: number;
     summary?: string;
-    customFields?: Array<ICustomField>;
-    keyFacts?: Array<IKeyFacts>;
+    keyFacts?: Array<IKeyFact>;
     requestedServices?: Array<String>;
-    suggestedActions?: Array<IActions>;
+    suggestedActions?: Array<IAction>;
     responseBody?: String;
     languageNameDetermined?: String;
     languageMatch?: Boolean;
 }
 
-interface ICustomField {
-    title?: string;
-    value?: string;
-}
-
-interface IKeyFacts {
+interface IKeyFact {
     keyfact?: string;
     keyfactcategory?: string;
 }
 
-interface IActions {
+interface IAction {
     type?: string;
     value?: string;
 }
