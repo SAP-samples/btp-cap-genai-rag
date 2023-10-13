@@ -51,7 +51,7 @@ export default class Main extends BaseController {
 			sortDescending: false,
 			sortText: null,
 			activeEmailId: null,
-			translationActivated: false,
+			originalLanguageDisplayed: false,
 			additionalInfo: null,
 			submittedResponsesIncluded: false,
 			responseBody: null,
@@ -114,10 +114,9 @@ export default class Main extends BaseController {
 	}
 
 	public setActiveEmail(id: string = null): void {
-		this.emailController.resetEmailPageState();
-
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/activeEmailId", id);
+
 		if (id) {
 			const bindingInfo: ObjectBindingInfo = {
 				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
@@ -127,10 +126,11 @@ export default class Main extends BaseController {
 				}
 			};
 			this.emailView.bindElement(bindingInfo);
+			this.emailController.resetEmailPageState();
 
 			const translationButton: Button = this.emailView.byId("translationButton") as Button;
 			translationButton.setText(this.getText("email.buttons.translate"));
-			localModel.setProperty("/translationActivated", false);
+			localModel.setProperty("/originalLanguageDisplayed", true);
 		}
 	}
 
@@ -332,7 +332,7 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
 
-		if (!localModel.getProperty("/translationActivated")) {
+		if (localModel.getProperty("/originalLanguageDisplayed")) {
 			if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody && localModel.getProperty("/emailsCount") > 0) return true
 			else return false
 		} else {
