@@ -1,6 +1,8 @@
 import cds from "@sap/cds";
 import express from "express";
 
+cds.env.requires["toggles"] = false;
+cds.env.requires["extensibility"] = false;
 cds.env.requires["cds.xt.ModelProviderService"] = false;
 cds.env.requires["cds.xt.DeploymentService"] = false;
 cds.env.requires["cds.xt.SaasProvisioningService"] = false;

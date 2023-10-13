@@ -58,7 +58,7 @@ modules:
       app-name: aisaas-srv-${space}
       memory: 256MB
       disk-quota: 1024MB
-      command: node ./node_modules/@sap/cds/bin/cds-serve --with srv/mail-insights-service.js
+      command: node ./node_modules/@sap/cds/bin/cds-serve
     properties:
       tenantSeparator: ~{aisaas-approuter/tenant-separator}
       appDomain: ~{aisaas-approuter/app-domain}
@@ -219,7 +219,7 @@ modules:
       app-name: aisaas-api-srv-${space}
       memory: 256MB
       disk-quota: 1024MB
-      command: node ./node_modules/@sap/cds/bin/cds-serve --with srv/mail-insights-api-service.js
+      command: node ./node_modules/@sap/cds/bin/cds-serve
     build-parameters:
       builder: npm
       ignore: [".DS_Store", "manifest*.yml", "node_modules/"]
