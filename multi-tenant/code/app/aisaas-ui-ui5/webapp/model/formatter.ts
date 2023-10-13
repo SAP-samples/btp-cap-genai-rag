@@ -15,6 +15,11 @@ export default {
 		return (dateString) ? dateFormatter.format(new Date(dateString)) : null;
 	},
 
+	getUrgencyIcon: (value: number) => {
+		if (value && value > 3) return "sap-icon://high-priority"
+		else return null
+	},
+
 	getUrgencyText: (urgencies: FilterItem[], value: number) => {
 		if (value) {
 			if (value < 2) return urgencies.find((urgency: FilterItem) => urgency.id === "00").label

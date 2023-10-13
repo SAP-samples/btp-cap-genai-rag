@@ -51,7 +51,7 @@ export default class Main extends BaseController {
 			sortDescending: false,
 			sortText: null,
 			activeEmailId: null,
-			originalLanguageDisplayed: false,
+			translationOn: false,
 			additionalInfo: null,
 			submittedResponsesIncluded: false,
 			responseBody: null,
@@ -130,7 +130,7 @@ export default class Main extends BaseController {
 
 			const translationButton: Button = this.emailView.byId("translationButton") as Button;
 			translationButton.setText(this.getText("email.buttons.translate"));
-			localModel.setProperty("/originalLanguageDisplayed", true);
+			localModel.setProperty("/translationOn", false);
 		}
 	}
 
@@ -332,7 +332,7 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
 
-		if (localModel.getProperty("/originalLanguageDisplayed")) {
+		if (!localModel.getProperty("/translationOn")) {
 			if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody && localModel.getProperty("/emailsCount") > 0) return true
 			else return false
 		} else {
