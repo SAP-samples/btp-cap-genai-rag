@@ -13,10 +13,11 @@ import { Document } from "langchain/document";
 import { LLMChain, StuffDocumentsChain } from "langchain/chains";
 import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
-import { getDestination } from "@sap-cloud-sdk/connectivity";
-import { BTPLLMContext } from "@sap/llm-commons";
-import { BTPOpenAIGPTChat } from "@sap/llm-commons/langchain/chat/openai";
-import { BTPOpenAIGPTEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
+
+import * as aiCore from "../utils/ai-core";
+import BTPLLM from "../utils/langchain/BTPLLM";
+import BTPEmbedding from "../utils/langchain/BTPEmbedding";
+
 import {
     IBaseMail,
     IProcessedMail,
@@ -278,9 +279,7 @@ export default class CommonMailInsights extends ApplicationService {
     public extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPLLM(aiCore.completion, undefined, { temperature: 0.0, max_tokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -328,9 +327,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPLLM(aiCore.completion, undefined, { temperature: 0.0, max_tokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -406,9 +403,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_LANGUAGE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPLLM(aiCore.completion, undefined, { temperature: 0.0, max_tokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -449,9 +444,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPLLM(aiCore.completion, undefined, { temperature: 0.0, max_tokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -504,9 +497,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPLLM(aiCore.completion, undefined, { temperature: 0.0, max_tokens: 2000 });
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -561,10 +552,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     public getVectorStore = async (tenant?: string) => {
-        await initializeBTPContext();
-        const embeddings = new BTPOpenAIGPTEmbedding({
-            deployment_id: "text-embedding-ada-002-v2"
-        });
+        const embeddings = new BTPEmbedding(aiCore.embed, undefined, {});
         const args = getPostgresConnectionOptions(tenant);
         const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
         await typeormVectorStore.ensureTableInDatabase();
@@ -624,29 +612,6 @@ const getPostgresConnectionOptions = (tenant?: string) => {
     };
 };
 
-const initializeBTPContext = async () => {
-    // get from LLM Proxy binding
-    const credentials = await getLLMAccessCredentials();
-    await BTPLLMContext.init({
-        oauthClientId: credentials.clientId,
-        oauthClientSecret: credentials.clientSecret,
-        oauthTokenUrl: credentials.tokenServiceUrl, // the Auth URL ending `ondemand.com`
-        llmProxyBaseUrl: credentials.url // the service URL ending `ondemand.com`
-    });
-};
-
-const getLLMAccessCredentials = async () => {
-    //@ts-ignore
-    const { clientId, clientSecret, url, tokenServiceUrl } = await getDestination({
-        destinationName: LLM_SERVICE_DESTINATION
-    });
-    return {
-        clientId,
-        clientSecret,
-        url,
-        tokenServiceUrl: tokenServiceUrl.replace("/oauth/token", "")
-    };
-};
 
 const fixJsonString = (jsonString: String) => {
     return (
