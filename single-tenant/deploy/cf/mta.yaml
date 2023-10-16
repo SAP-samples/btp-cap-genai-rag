@@ -45,16 +45,8 @@ modules:
     type: nodejs
     path: ../../code/gen/srv
     build-parameters:
-      builder: custom
-      ignore: [".DS_Store", "manifest*.yml"]
-      commands: 
-       - npm ci
-       - npx shx mkdir -p temp/llm-commons
-       - npx shx mv node_modules/@sap/llm-commons temp/
-       - npx shx rm -r node_modules
-       - npx shx mkdir -p node_modules/@sap/llm-commons
-       - npx shx mv temp/llm-commons node_modules/@sap/
-       - npx shx rm -r temp
+      builder: npm
+      ignore: [".DS_Store", "manifest*.yml", "node_modules/"]
     parameters:
       app-name: ai-srv-${space}
       memory: 256MB

@@ -148,7 +148,7 @@ export default class EmailDetails extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/busy", true);
 
-		await fetch("api/odata/v4/mail-insights/recalculateResponse", {
+		await fetch("api/odata/v4/mail-insights/regenerateResponse", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"

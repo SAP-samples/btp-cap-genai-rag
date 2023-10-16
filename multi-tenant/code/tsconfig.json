@@ -17,11 +17,7 @@
         "resolveJsonModule": true,
         "baseUrl": ".",
         "rootDir": "./gen",
-        "outDir": "./gen",
-        "paths": {
-            "common-app/*": ["./gen/app/srv/*"],
-            "common-api/*": ["./gen/api/srv/*"]
-        }
+        "outDir": "./gen"
     },
     "ts-node": {
         "swc": true

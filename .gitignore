@@ -25,10 +25,10 @@ _out
 .che/
 .gen/
 .DS_Store
-# added by cds bind
 .cdsrc-private.json
 brokerpass.txt
 *.sqlite
 *.sqlite-*
-
 .$*
+
+!/multi-tenant/code/db.sqlite

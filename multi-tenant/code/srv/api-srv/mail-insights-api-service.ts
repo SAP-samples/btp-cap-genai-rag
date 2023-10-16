@@ -1,3 +1,5 @@
-import CommonMailInsights from "common-app/handlers/common-mail-insights";
+import CommonMailInsights from "../common/handlers/common-mail-insights";
 
-export default class ApiService extends CommonMailInsights {}
+export default class MailInsightsApiService extends CommonMailInsights { 
+    // Shared handlers (getMails, getMail, addMails, deleteMail)
+}
