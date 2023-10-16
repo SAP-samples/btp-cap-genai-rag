@@ -9,7 +9,7 @@ export default class MailInsightsService extends CommonMailInsights {
     async init() {
         // Shared handlers (getMails, getMail, addMails, deleteMail)
         await super.init();
-        // Additional handlers 
+        // Additional handlers
         this.on("submitResponse", this.onSubmitResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
@@ -28,7 +28,7 @@ export default class MailInsightsService extends CommonMailInsights {
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -43,7 +43,7 @@ export default class MailInsightsService extends CommonMailInsights {
             return response;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -55,39 +55,51 @@ export default class MailInsightsService extends CommonMailInsights {
             const mail = await SELECT.one.from(Mails, id);
             const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
             return translation;
-
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
     // Submit response for single Mail
+    // Response always passed in user's working language
     private onSubmitResponse = async (req: Request) => {
         try {
-            const { id, response, translation, modified } = req.data;
+            const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
 
+            let translation: string | undefined;
+
+            // Translate working language response to recipient's original language
+            if (!mail.insights?.languageMatch) {
+                translation = (await this.translateResponse(response, mail.insights?.languageNameDetermined))
+                    .responseBody;
+            }
+
+            // Store working language response in translation response Body
+            // Store either working language or original language in translation responseBody 
             const dbEntry = [
                 Object.assign(
                     {
                         ...mail,
                         responded: true,
-                        responseModified: modified || false,
-                        translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+                        translations: [Object.assign(mail.translations[0], { responseBody: response })]
                     },
-                    response ? { responseBody: response } : {}
+                    {
+                        responseBody: translation || response
+                    }
                 )
             ];
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
-            
+            // Send the working language response + target language translation + AI Translation Disclaimer
+
             await UPSERT.into(Mails).entries(dbEntry);
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -129,8 +141,7 @@ export default class MailInsightsService extends CommonMailInsights {
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
-    
- }
+}

@@ -475,7 +475,7 @@ export default class CommonMailInsights extends ApplicationService {
 
         const translations = await Promise.all(
             mails.map(async (mail: IProcessedMail) => {
-                if (!mail.insights.languageMatch) {
+                if (!mail.insights?.languageMatch) {
                     const translations: z.infer<typeof MAIL_INSIGHTS_TRANSLATION_SCHEMA> = (
                         await chain.call({
                             insights: JSON.stringify(
