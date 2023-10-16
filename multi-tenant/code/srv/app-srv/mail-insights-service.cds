@@ -23,16 +23,15 @@ service MailInsightsService @(
     };
 
     // Delete a single mail
-    function deleteMail(id : UUID)                                                                             returns Boolean;
+    function deleteMail(id : UUID)                                                                              returns Boolean;
     // Add new mails
-    action   addMails(mails : array of db.BaseMail, rag : Boolean null)                                        returns array of Mails;
+    action   addMails(mails : array of db.BaseMail, rag : Boolean null)                                         returns array of Mails;
     // Regenerate a single response
-    action   regenerateResponse(id : UUID, rag : Boolean null, additionalInformation : String null)           returns Mails;
+    action   regenerateResponse(id : UUID, rag : Boolean null, additionalInformation : String null)             returns Mails;
     // Regenerate insights of all mails
-    action   regenerateInsights(rag : Boolean null)                                                           returns Boolean;
+    action   regenerateInsights(rag : Boolean null)                                                             returns Boolean;
     // Translates response to original language
-    action   translateResponse(id : UUID, response : String)                                                   returns String;
-    // Submits response (incl. translation and modification indicator)
-    // (modified = true if response was modified before sending)
-    action   submitResponse(id : UUID, response : String, translation : String null, modified : Boolean null) returns Boolean;
+    action   translateResponse(id : UUID, response : String)                                                    returns String;
+    // Submits response in working language
+    action   submitResponse(id : UUID, response : String)                                                       returns Boolean;
 };
