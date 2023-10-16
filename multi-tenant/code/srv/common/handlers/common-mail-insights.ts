@@ -67,7 +67,7 @@ export default class CommonMailInsights extends ApplicationService {
     }
 
     // Get all Mails excl. closest Mails
-    private onGetMails = async (_req: Request) => {
+    private onGetMails = async (req: Request) => {
         try {
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails).columns((m: any) => {
@@ -81,7 +81,7 @@ export default class CommonMailInsights extends ApplicationService {
             return mails;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return {};
+            return req.error(`Error: ${error?.message}`)
         }
     };
 
@@ -124,7 +124,7 @@ export default class CommonMailInsights extends ApplicationService {
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return {};
+            return req.error(`Error: ${error?.message}`)
         }
     };
 
@@ -156,6 +156,7 @@ export default class CommonMailInsights extends ApplicationService {
             });
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`)
         }
     };
 
@@ -175,6 +176,7 @@ export default class CommonMailInsights extends ApplicationService {
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`)
         }
     };
 
@@ -267,7 +269,6 @@ export default class CommonMailInsights extends ApplicationService {
         const suggestedResponse = {
             ...mail,
             responseBody: processedMail.insights.responseBody,
-            //@ts-ignore
             translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
         };
 
@@ -488,7 +489,15 @@ export default class CommonMailInsights extends ApplicationService {
 
                     return { ...mail, translations: [translations] };
                 } else {
-                    return { ...mail, translations: [] };
+                    return { ...mail, translations: [{
+                        subject: mail.mail?.subject || '',
+                        body: mail.mail?.body || '',
+                        sender: mail.insights?.sender || '',
+                        summary: mail.insights?.summary || '',
+                        keyFacts: mail.insights?.keyFacts || '',
+                        requestedServices: mail.insights?.requestedServices || '',
+                        responseBody: mail.insights?.responseBody || ''
+                    }]};
                 }
             })
         );
@@ -501,39 +510,45 @@ export default class CommonMailInsights extends ApplicationService {
         response: string,
         language? : string
         ) => {
-        // prepare response
-        const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
-        const formatInstructions = parser.getFormatInstructions();
+        try {
+            // prepare response
+            const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
+            const formatInstructions = parser.getFormatInstructions();
 
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+            await initializeBTPContext();
+            const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
 
-        const systemPrompt = new PromptTemplate({
-            template:
-                "Translate the response of the incoming json" + (language ? ` into ${language}` : '') + ".\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
-            inputVariables: [],
-            partialVariables: { format_instructions: formatInstructions }
-        });
+            const systemPrompt = new PromptTemplate({
+                template:
+                    "Translate the response of the incoming json" + (language ? ` into ${language}` : '') + ".\n{format_instructions}\n" +
+                    "Make sure to escape special characters by double slashes.",
+                inputVariables: [],
+                partialVariables: { format_instructions: formatInstructions }
+            });
 
-        const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
-        const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{response}");
-        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
+            const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
+            const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate("{response}");
+            const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
 
-        const chain = new LLMChain({
-            llm: llm,
-            prompt: chatPrompt,
-            outputKey: "text",
-            outputParser: OutputFixingParser.fromLLM(llm, parser)
-        });
+            const chain = new LLMChain({
+                llm: llm,
+                prompt: chatPrompt,
+                outputKey: "text",
+                outputParser: OutputFixingParser.fromLLM(llm, parser)
+            });
 
-        const translation: z.infer<typeof MAIL_RESPONSE_TRANSLATION_SCHEMA> = (
-            await chain.call({
-                response: JSON.stringify(response)
-            })
-        ).text;
+            const translation: z.infer<typeof MAIL_RESPONSE_TRANSLATION_SCHEMA> = (
+                await chain.call({
+                    response: JSON.stringify(response)
+                })
+            ).text;
 
-        return translation;
+            return translation;
+        }catch(error){
+            return {
+                responseBody : response || ''
+            }
+        }
     };
 
     // Get responses of x closest Mails

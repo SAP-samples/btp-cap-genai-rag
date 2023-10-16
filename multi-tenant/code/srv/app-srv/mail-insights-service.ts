@@ -7,7 +7,9 @@ import { ITranslatedMail } from "../common/handlers/types";
 
 export default class MailInsightsService extends CommonMailInsights {
     async init() {
+        // Shared handlers (getMails, getMail, addMails, deleteMail)
         await super.init();
+        // Additional handlers 
         this.on("submitResponse", this.onSubmitResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
@@ -17,31 +19,47 @@ export default class MailInsightsService extends CommonMailInsights {
 
     // Regenerate Insights for all available Mails
     private onRegenerateInsights = async (req: Request) => {
-        const { tenant } = req;
-        const { rag } = req.data;
-        const { Mails } = this.entities;
-        const mails = await SELECT.from(Mails);
-        await this.regenerateInsights(mails, rag, tenant);
-        return true;
+        try {
+            const { tenant } = req;
+            const { rag } = req.data;
+            const { Mails } = this.entities;
+            const mails = await SELECT.from(Mails);
+            await this.regenerateInsights(mails, rag, tenant);
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`)
+        }
     };
 
     // Regenerate Response for a single Mail
     private onRegenerateResponse = async (req: Request) => {
-        const { tenant } = req;
-        const { id, rag, additionalInformation } = req.data;
-        const { Mails } = this.entities;
-        const mail = await SELECT.one.from(Mails, id);
-        const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
-        return response;
+        try {
+            const { tenant } = req;
+            const { id, rag, additionalInformation } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id);
+            const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
+            return response;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`)
+        }
     };
 
     // Translate Response to original e-mail language
     private onTranslateResponse = async (req: Request) => {
-        const { id, response } = req.data;
-        const { Mails } = this.entities;
-        const mail = await SELECT.one.from(Mails, id);
-        const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
-        return translation;
+        try {
+            const { id, response } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id);
+            const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
+            return translation;
+
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`)
+        }
     };
 
     // Submit response for single Mail
@@ -69,6 +87,7 @@ export default class MailInsightsService extends CommonMailInsights {
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`)
         }
     };
 
@@ -110,7 +129,7 @@ export default class MailInsightsService extends CommonMailInsights {
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            req.error(`Error: Shared Inbox Sync Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`)
         }
     };
     
