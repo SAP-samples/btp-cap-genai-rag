@@ -1,5 +1,5 @@
 <mvc:View
-	controllerName="aisaas.ui.controller.EmailColumn"
+	controllerName="aisaas.ui.controller.EmailDetails"
 	displayBlock="true"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"

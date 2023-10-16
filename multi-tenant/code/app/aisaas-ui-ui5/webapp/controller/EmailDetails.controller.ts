@@ -19,7 +19,7 @@ import MessageToast from "sap/m/MessageToast";
 import { EmailObject, Mail, KeyFact, Action } from "../model/entities";
 import Formatter from "../model/formatter";
 
-export default class EmailColumn extends BaseController {
+export default class EmailDetails extends BaseController {
 	public resetEmailPageState(): void {
 		this.scrollToFirstSection();
 		this.resetSimilarEmailsListState();

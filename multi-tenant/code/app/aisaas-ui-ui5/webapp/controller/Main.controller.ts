@@ -16,7 +16,7 @@ import Sorter from "sap/ui/model/Sorter";
 import { ObjectBindingInfo } from "sap/ui/base/ManagedObject";
 
 import { EmailObject, FilterItem } from "../model/entities";
-import EmailController from "./EmailColumn.controller";
+import EmailController from "./EmailDetails.controller";
 
 export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
@@ -65,7 +65,7 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/sortText", this.getText("inbox.link.newest"));
 
-		this.emailView = this.byId("emailColumn") as View;
+		this.emailView = this.byId("emailDetails") as View;
 		this.emailController = this.emailView.getController() as EmailController;
 	}
 
@@ -122,7 +122,7 @@ export default class Main extends BaseController {
 				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
 				parameters: { $$updateGroupId: this.UPDATE_GROUP },
 				events: {
-					dataReceived: (event: Event) => this.onUpdateEmailColumnBinding(event)
+					dataReceived: (event: Event) => this.onUpdateEmailDetailsBinding(event)
 				}
 			};
 			this.emailView.bindElement(bindingInfo);
@@ -134,7 +134,7 @@ export default class Main extends BaseController {
 		}
 	}
 
-	private onUpdateEmailColumnBinding(event: Event): void {
+	private onUpdateEmailDetailsBinding(event: Event): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
 
@@ -330,7 +330,7 @@ export default class Main extends BaseController {
 
 	private hasResponseChanged(): boolean {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+		const emailObject: EmailObject = this.emailView.getBindingContext("api").getObject() as EmailObject;
 
 		if (!localModel.getProperty("/translationOn")) {
 			if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody && localModel.getProperty("/emailsCount") > 0) return true
