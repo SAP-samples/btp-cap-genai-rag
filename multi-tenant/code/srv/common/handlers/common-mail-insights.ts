@@ -111,7 +111,7 @@ export default class CommonMailInsights extends ApplicationService {
                               m.sender;
                               m.responded;
                               m.responseBody;
-                              m.translations;
+                              m.translation;
                           })
                     : [];
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
@@ -135,25 +135,27 @@ export default class CommonMailInsights extends ApplicationService {
             const { mails, rag } = req.data;
             const mailBatch = await this.regenerateInsights(mails, rag, tenant);
 
+            // insert mails with insights
+            console.log("UPDATE MAILS WITH INSIGHTS...");
+
+            cds.tx(async () => {
+                const { Mails } = this.entities;
+                await INSERT.into(Mails).entries(mailBatch);
+            });
+
             // Embed mail bodies with IDs
             console.log("EMBED MAILS WITH IDs...");
+            
             const typeormVectorStore = await this.getVectorStore(tenant);
             await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: any) => ({
-                    pageContent: mail.mail.body,
-                    // add category, services, actions to metadata
-                    metadata: { id: mail.mail.ID }
+                mailBatch.map((mail: IStoredMail) => ({
+                    pageContent: mail.body,
+                    metadata: { id: mail.ID }
                 }))
             );
 
             // Return array of added Mails
-            return mailBatch.map((mail) => {
-                return {
-                    ...mail.mail,
-                    ...mail.insights,
-                    translations: mail.translations
-                };
-            });
+            return mailBatch;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`)
@@ -182,6 +184,7 @@ export default class CommonMailInsights extends ApplicationService {
 
     // (Re-)Generate Insights, Response(s) and Translation(s) for single or multiple Mail(s)
     public regenerateInsights = async (mails: Array<IBaseMail>, rag?: boolean, tenant?: string) => {
+        
         // Add unique ID to mails if not existent
         mails = mails.map((mail) => {
             return { ...mail, ID: mail.ID || uuidv4() };
@@ -212,23 +215,13 @@ export default class CommonMailInsights extends ApplicationService {
 
         const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails);
 
-        // insert mails with insights
-        console.log("UPDATE MAILS WITH INSIGHTS...");
-
-        const dbEntries = translatedMails.map((mail) => {
+        return translatedMails.map((mail) => {
             return {
                 ...mail.mail,
                 ...mail.insights,
-                translations: mail.translations
+                translation: mail.translation[0]
             };
         });
-
-        cds.tx(async () => {
-            const { Mails } = this.entities;
-            await UPSERT.into(Mails).entries(dbEntries);
-        });
-
-        return translatedMails;
     };
 
     // (Re-)Generate Response for a single Mail
@@ -238,41 +231,36 @@ export default class CommonMailInsights extends ApplicationService {
         tenant?: string,
         additionalInformation?: string
     ): Promise<IStoredMail> => {
-        const processedMail = {
-            mail: { ...mail },
-            insights: {
-                ...mail,
-                responseBody: (
-                    await this.preparePotentialResponses(
-                        [
-                            {
-                                ID: mail.ID,
-                                body: mail.body,
-                                senderEmailAddress: mail.senderEmailAddress,
-                                subject: mail.subject
-                            }
-                        ],
-                        rag,
-                        tenant,
-                        additionalInformation
-                    )
-                )[0]?.response?.responseBody
-            }
-        };
+        const { Translations } = this.entities;
+        const regeneratedResponse = ( await this.preparePotentialResponses(
+                [
+                    {
+                        ID: mail.ID,
+                        body: mail.body,
+                        senderEmailAddress: mail.senderEmailAddress,
+                        subject: mail.subject
+                    }
+                ],
+                rag,
+                tenant,
+                additionalInformation
+            )
+        )[0]?.response?.responseBody
 
-        let translation: String | null = null;
+        //@ts-ignore
+        const translation = await SELECT.one.from(Translations, mail.translation_ID );
 
         if (!mail.languageMatch) {
-            translation = (await this.translateResponse(processedMail.insights.responseBody)).responseBody;
+            translation.responseBody = (await this.translateResponse(regeneratedResponse)).responseBody;
+        }else{
+            translation.responseBody = regeneratedResponse;
         }
 
-        const suggestedResponse = {
+        return {
             ...mail,
-            responseBody: processedMail.insights.responseBody,
-            translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+            responseBody: regeneratedResponse,
+            translation: translation
         };
-
-        return suggestedResponse;
     };
     
     // Extract Insights for Mail(s) using LLM
@@ -476,7 +464,7 @@ export default class CommonMailInsights extends ApplicationService {
         const translations = await Promise.all(
             mails.map(async (mail: IProcessedMail) => {
                 if (!mail.insights?.languageMatch) {
-                    const translations: z.infer<typeof MAIL_INSIGHTS_TRANSLATION_SCHEMA> = (
+                    const translation: z.infer<typeof MAIL_INSIGHTS_TRANSLATION_SCHEMA> = (
                         await chain.call({
                             insights: JSON.stringify(
                                 filterForTranslation({
@@ -487,9 +475,9 @@ export default class CommonMailInsights extends ApplicationService {
                         })
                     ).text;
 
-                    return { ...mail, translations: [translations] };
+                    return { ...mail, translation: [translation] };
                 } else {
-                    return { ...mail, translations: [{
+                    return { ...mail, translation: [{
                         subject: mail.mail?.subject || '',
                         body: mail.mail?.body || '',
                         sender: mail.insights?.sender || '',
