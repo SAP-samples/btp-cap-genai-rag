@@ -23,7 +23,7 @@ export interface Mail {
     languageMatch: boolean,
     suggestedActions: Action[],
     keyFacts: KeyFact[],
-    translations: Mail[]
+    translation: Mail
 }
 
 export interface Action {
@@ -32,8 +32,8 @@ export interface Action {
 }
 
 export interface KeyFact {
-    keyfact: string,
-    keyfactcategory: string
+    category: string,
+    fact: string
 }
 
 export interface ClosestMail {

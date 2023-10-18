@@ -7,7 +7,7 @@
         expandable="true"
         expanded="false"
         stickyHeader="true"
-        headerText="{mail/subject} | {i18n>email.texts.similarity}: {path:'similarity', formatter:'formatter.getFormattedSimilarity'}%">
+        headerText="{parts: ['', 'i18n>email.texts.similarity', '/translationOn'], formatter:'formatter.getSimilarEmailHeader'}">
         <VBox class="sapUiMediumMarginBeginEnd sapUiTinyMarginTop sapUiMediumMarginBottom">
             <HBox>
                 <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.type}:"/>
@@ -15,14 +15,17 @@
             </HBox>
             <HBox class="sapUiTinyMarginTop">
                 <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.sender}:"/>
+                <!-- <Text text="{= !${/translationOn} ? ${mail/sender} : ${mail/translation/sender} }"/> -->
                 <Text text="{mail/sender}"/>
             </HBox>
             <HBox class="sapUiTinyMarginTop">
                 <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.message}:"/>
+                <!-- <Text text="{= !${/translationOn} ? ${mail/body} : ${mail/translation/body} }"/> -->
                 <Text text="{mail/body}"/>
             </HBox>
             <HBox class="sapUiSmallMarginTop">
                 <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.response}:"/>
+                <!-- <Text text="{= !${/translationOn} ? ${mail/responseBody} : ${mail/translation/responseBody} }"/> -->
                 <Text text="{mail/responseBody}"/>
             </HBox>
         </VBox>

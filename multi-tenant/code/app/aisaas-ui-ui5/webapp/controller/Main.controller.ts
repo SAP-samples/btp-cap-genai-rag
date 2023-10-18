@@ -8,7 +8,6 @@ import View from "sap/ui/core/mvc/View";
 import Link from "sap/m/Link";
 import List from "sap/m/List";
 import ListItemBase from "sap/m/ListItemBase";
-import Button from "sap/m/Button";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import FilterType from "sap/ui/model/FilterType";
@@ -29,9 +28,13 @@ export default class Main extends BaseController {
 	protected readonly EMAIL_SENDER_PATH: string = "sender";
 	protected readonly EMAIL_SUBJECT_PATH: string = "subject";
 	protected readonly EMAIL_BODY_PATH: string = "body";
+	protected readonly EMAIL_TRANSLATED_SENDER_PATH: string = "translation/sender";
+	protected readonly EMAIL_TRANSLATED_SUBJECT_PATH: string = "translation/subject";
+	protected readonly EMAIL_TRANSLATED_BODY_PATH: string = "translation/body";
 	protected readonly EMAIL_RESPONDED_PATH: string = "responded";
 	protected readonly EMAIL_MODIFIED_AT_PATH: string = "modifiedAt";
 	protected readonly EMAIL_ENTITY_PATH: string = "api>/getMail";
+	protected readonly EMAIL_ENTITY_TRANSLATION_EXPANSION: string = "?$expand=translation";
 	protected readonly UPDATE_GROUP: string = "UPDATE_GROUP_" + Math.random().toString(36).substring(2);
 	protected emailView: View = null;
 	protected emailController: EmailController = null;
@@ -67,6 +70,7 @@ export default class Main extends BaseController {
 
 		this.emailView = this.byId("emailDetails") as View;
 		this.emailController = this.emailView.getController() as EmailController;
+		this.applyFilter();
 	}
 
 	public onUpdateEmailsList(event: Event): void {
@@ -119,6 +123,7 @@ export default class Main extends BaseController {
 
 		if (id) {
 			const bindingInfo: ObjectBindingInfo = {
+				// path: `${this.EMAIL_ENTITY_PATH}(id=${id})${this.EMAIL_ENTITY_TRANSLATION_EXPANSION}`,
 				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
 				parameters: { $$updateGroupId: this.UPDATE_GROUP },
 				events: {
@@ -127,10 +132,6 @@ export default class Main extends BaseController {
 			};
 			this.emailView.bindElement(bindingInfo);
 			this.emailController.resetEmailPageState();
-
-			const translationButton: Button = this.emailView.byId("translationButton") as Button;
-			translationButton.setText(this.getText("email.buttons.translate"));
-			localModel.setProperty("/translationOn", false);
 		}
 	}
 
@@ -143,16 +144,18 @@ export default class Main extends BaseController {
 		localModel.setProperty("/additionalInfo", null);
 		localModel.setProperty("/submittedResponsesIncluded", true);
 		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
-		localModel.setProperty("/translatedResponseBody", !emailObject.mail.languageMatch && emailObject.mail.translations[0].responseBody);
+		// localModel.setProperty("/translatedResponseBody", emailObject.mail.translation.responseBody);
+		localModel.setProperty("/translatedResponseBody", emailObject.mail.responseBody);
 		localModel.setProperty("/similarEmails", emailObject.closestMails);
 
 		console.log(emailObject.mail);
 	}
 
 	public async onSearch(): Promise<void> {
-		if (this.hasResponseChanged()) {
+		// if (this.hasResponseChanged()) {
+		if (false) {
 			await this.openConfirmationDialog(
-				this.getText("confirmationDialog.texts.mayBeLostMessage"),
+				this.getText("confirmationDialog.texts.triggerFilterMessage"),
 				this.applyFilter.bind(this),
 				() => this.restoreSearchFilter()
 			);
@@ -182,9 +185,10 @@ export default class Main extends BaseController {
 		const selectedIds: string[] = [];
 		selectedListItems.map((selectedListItem: ListItemBase) => selectedIds.push(selectedListItem.getBindingContext("filters").getProperty("id")));
 
-		if (this.hasResponseChanged()) {
+		// if (this.hasResponseChanged()) {
+		if (false) {
 			await this.openConfirmationDialog(
-				this.getText("confirmationDialog.texts.mayBeLostMessage"),
+				this.getText("confirmationDialog.texts.triggerFilterMessage"),
 				() => this.applySelectedFilter(this.getActivePath(list.getId()), selectedIds),
 				() => this.restoreFilter(list.getId())
 			);
@@ -267,6 +271,9 @@ export default class Main extends BaseController {
 		const keyword: string = localModel.getProperty("/searchKeyword");
 		if (keyword) {
 			const orFilter: Filter[] = [];
+			// orFilter.push(this.getKeywordFilter(keyword, localModel.getProperty("/translationOn") ? this.EMAIL_TRANSLATED_SENDER_PATH : this.EMAIL_SENDER_PATH));
+			// orFilter.push(this.getKeywordFilter(keyword, localModel.getProperty("/translationOn") ? this.EMAIL_TRANSLATED_SUBJECT_PATH : this.EMAIL_SUBJECT_PATH));
+			// orFilter.push(this.getKeywordFilter(keyword, localModel.getProperty("/translationOn") ? this.EMAIL_TRANSLATED_BODY_PATH : this.EMAIL_BODY_PATH));
 			orFilter.push(this.getKeywordFilter(keyword, this.EMAIL_SENDER_PATH));
 			orFilter.push(this.getKeywordFilter(keyword, this.EMAIL_SUBJECT_PATH));
 			orFilter.push(this.getKeywordFilter(keyword, this.EMAIL_BODY_PATH));
@@ -321,10 +328,11 @@ export default class Main extends BaseController {
 		const selectedId: string = selectedEmailContext.getProperty("ID");
 		const localModel: JSONModel = this.getModel() as JSONModel;
 
-		if (this.hasResponseChanged()) {
+		// if (this.hasResponseChanged()) {
+		if (false) {
 			const activeListItem: ListItemBase = emailsList.getItems().find((item: ListItemBase) => item.getBindingContext("api").getProperty("ID") === localModel.getProperty("/activeEmailId"));
 			emailsList.setSelectedItem(activeListItem);
-			await this.openConfirmationDialog(this.getText("confirmationDialog.texts.willBeLostMessage"), () => this.setActiveEmail(selectedId));
+			await this.openConfirmationDialog(this.getText("confirmationDialog.texts.selectEmailMessage"), () => this.setActiveEmail(selectedId));
 		} else this.setActiveEmail(selectedId);
 	}
 
@@ -332,12 +340,7 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailObject: EmailObject = this.emailView.getBindingContext("api").getObject() as EmailObject;
 
-		if (!localModel.getProperty("/translationOn")) {
-			if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody && localModel.getProperty("/emailsCount") > 0) return true
-			else return false
-		} else {
-			if (localModel.getProperty("/translatedResponseBody") !== emailObject.mail.translations[0].responseBody && localModel.getProperty("/emailsCount") > 0) return true
-			else return false
-		}
+		if (localModel.getProperty("/translatedResponseBody") !== emailObject.mail.translation.responseBody && localModel.getProperty("/emailsCount") > 0) return true
+		else return false
 	}
 }
