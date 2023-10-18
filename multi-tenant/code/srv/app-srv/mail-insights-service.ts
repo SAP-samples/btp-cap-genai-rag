@@ -3,7 +3,7 @@ import { Request } from "@sap/cds/apis/services";
 import { v5 as uuidv5 } from "uuid";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
-import { ITranslatedMail } from "../common/handlers/types";
+import { IStoredMail, ITranslatedMail } from "../common/handlers/types";
 
 export default class MailInsightsService extends CommonMailInsights {
     async init() {
@@ -24,7 +24,16 @@ export default class MailInsightsService extends CommonMailInsights {
             const { rag } = req.data;
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails);
-            await this.regenerateInsights(mails, rag, tenant);
+            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+
+            // insert mails with insights
+            console.log("UPDATE MAILS WITH INSIGHTS...");
+
+            cds.tx(async () => {
+                const { Mails } = this.entities;
+                await UPSERT.into(Mails).entries(mailBatch);
+            });
+
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -85,7 +94,7 @@ export default class MailInsightsService extends CommonMailInsights {
                     {
                         ...mail,
                         responded: true,
-                        translations: [Object.assign(mail.translations[0], { responseBody: response })]
+                        translations: Object.assign(mail.translations[0], { responseBody: response })
                     },
                     {
                         responseBody: translation || response
@@ -139,9 +148,9 @@ export default class MailInsightsService extends CommonMailInsights {
             await typeormVectorStore.appDataSource.query(queryString, [mails.map((mail: any) => mail.ID)]);
 
             await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: ITranslatedMail) => ({
-                    pageContent: mail.mail.body,
-                    metadata: { id: mail.mail.ID }
+                mailBatch.map((mail: IStoredMail) => ({
+                    pageContent: mail.body,
+                    metadata: { id: mail.ID }
                 }))
             );
             return true;

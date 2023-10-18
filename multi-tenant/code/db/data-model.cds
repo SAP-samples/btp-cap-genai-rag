@@ -6,8 +6,8 @@ using {
 context aisaas.db {
 
       type KeyFact {
-            keyfact         : String;
-            keyfactcategory : String;
+            fact         : String;
+            category     : String;
       }
 
       type Action {
@@ -16,12 +16,12 @@ context aisaas.db {
       }
 
       type BaseMail {
-          subject            : String;
-          body               : String;
-          senderEmailAddress : String;
-     }
+            subject            : String;
+            body               : String;
+            senderEmailAddress : String;
+      }
 
-      type Translation {
+      entity Translations : cuid {
             sender            :      String;
             subject           :      String;
             body              :      LargeString;
@@ -31,7 +31,7 @@ context aisaas.db {
             requestedServices : many String;
       }
 
-      entity Mails : cuid, managed {
+      entity Mails : cuid {
             subject                :      String;
             body                   :      LargeString;
             senderEmailAddress     :      String;
@@ -45,9 +45,9 @@ context aisaas.db {
             responseModified       :      Boolean;
             languageNameDetermined :      String;
             languageMatch          :      Boolean;
+            translation            :      Composition of Translations;
             requestedServices      : many String;
             suggestedActions       : many Action;
             keyFacts               : many KeyFact;
-            translations           : many Translation;
       }
 }

@@ -44,13 +44,17 @@ export const MAIL_INSIGHTS_SCHEMA = z.object({
     summary: z.string().describe("Summarize the email, use maximum 10 words, in the language of the body."),
     keyFacts: z.array(
         z.object({
+<<<<<<< HEAD
             value: z
                 .string()
                 .optional()
                 .describe("value of the fact (for the category) which should be unique, maximum 2 words"),
+=======
+            fact: z.string().optional().describe("fact (for the respective category) which should be unique, maximum 2 words"),
+>>>>>>> main
             category: z.string().optional().describe("category of the fact")
         })
-    )
+    ).max(5)
         .describe(`Extract some relevant known facts ouf of the mail in a structured array, each fact needs a category classifying the fact.
             The categories of the facts can be one of the following:
             - Travelers - who is traveling, family, group, couple
