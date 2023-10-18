@@ -65,6 +65,7 @@ export default class MailInsightsService extends CommonMailInsights {
     // Response always passed in user's working language
     private onSubmitResponse = async (req: Request) => {
         try {
+            const { tenant } = req;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
@@ -78,7 +79,7 @@ export default class MailInsightsService extends CommonMailInsights {
             }
 
             // Store working language response in translation response Body
-            // Store either working language or original language in translation responseBody 
+            // Store either working language or original language in translation responseBody
             const dbEntry = [
                 Object.assign(
                     {
@@ -96,6 +97,11 @@ export default class MailInsightsService extends CommonMailInsights {
             // Send the working language response + target language translation + AI Translation Disclaimer
 
             await UPSERT.into(Mails).entries(dbEntry);
+
+            const typeormVectorStore = await this.getVectorStore(tenant);
+            const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ?| $1`;
+            await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
+
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);

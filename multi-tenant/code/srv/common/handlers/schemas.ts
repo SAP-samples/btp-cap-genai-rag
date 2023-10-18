@@ -30,20 +30,25 @@ export const MAIL_INSIGHTS_SCHEMA = z.object({
             'Extract the name of the customer from the mail body as the name of the sender. If not found, return "X"'
         ),
     sentiment: z
-        .number().transform((number) => Math.round(number)) 
+        .number()
+        .transform((number) => Math.round(number))
         .describe(
             "Determine the sentiment of the mail on a scale from -1 (negative) via 0 (neutral) up to 1 (positive) as an integer. "
         ),
     urgency: z
-        .number().transform((number) => Math.round(number)) 
+        .number()
+        .transform((number) => Math.round(number))
         .describe(
             "What level of urgency does the email express? Give your answer as an integer from 0 (lowest urgency) to 2 (high urgency)."
         ),
     summary: z.string().describe("Summarize the email, use maximum 10 words, in the language of the body."),
     keyFacts: z.array(
         z.object({
-            keyfact: z.string().optional().describe("key for the fact which should be unique, maximum 2 words"),
-            keyfactcategory: z.string().optional().describe("category of the fact")
+            value: z
+                .string()
+                .optional()
+                .describe("value of the fact (for the category) which should be unique, maximum 2 words"),
+            category: z.string().optional().describe("category of the fact")
         })
     )
         .describe(`Extract some relevant known facts ouf of the mail in a structured array, each fact needs a category classifying the fact.

@@ -17,12 +17,7 @@ import { getDestination } from "@sap-cloud-sdk/connectivity";
 import { BTPLLMContext } from "@sap/llm-commons";
 import { BTPOpenAIGPTChat } from "@sap/llm-commons/langchain/chat/openai";
 import { BTPOpenAIGPTEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
-import {
-    IBaseMail,
-    IProcessedMail,
-    ITranslatedMail,
-    IStoredMail
-} from "./types";
+import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail } from "./types";
 import {
     MAIL_INSIGHTS_SCHEMA,
     MAIL_INSIGHTS_TRANSLATION_SCHEMA,
@@ -81,7 +76,7 @@ export default class CommonMailInsights extends ApplicationService {
             return mails;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -92,7 +87,7 @@ export default class CommonMailInsights extends ApplicationService {
             const { id } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
-            const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
+            const closestMailsIDs = await this.getClosestMails(id, 3, { submitted: true }, tenant);
             const closestMails =
                 closestMailsIDs.length > 0
                     ? await SELECT.from(Mails)
@@ -124,7 +119,7 @@ export default class CommonMailInsights extends ApplicationService {
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -142,7 +137,7 @@ export default class CommonMailInsights extends ApplicationService {
                 mailBatch.map((mail: any) => ({
                     pageContent: mail.mail.body,
                     // add category, services, actions to metadata
-                    metadata: { id: mail.mail.ID }
+                    metadata: { id: mail.mail.ID, submitted: false }
                 }))
             );
 
@@ -156,7 +151,7 @@ export default class CommonMailInsights extends ApplicationService {
             });
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -171,12 +166,12 @@ export default class CommonMailInsights extends ApplicationService {
 
             const typeormVectorStore = await this.getVectorStore(tenant);
             const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
-
             await typeormVectorStore.appDataSource.query(queryString, [id]);
+
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -274,7 +269,7 @@ export default class CommonMailInsights extends ApplicationService {
 
         return suggestedResponse;
     };
-    
+
     // Extract Insights for Mail(s) using LLM
     public extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_SCHEMA);
@@ -489,15 +484,20 @@ export default class CommonMailInsights extends ApplicationService {
 
                     return { ...mail, translations: [translations] };
                 } else {
-                    return { ...mail, translations: [{
-                        subject: mail.mail?.subject || '',
-                        body: mail.mail?.body || '',
-                        sender: mail.insights?.sender || '',
-                        summary: mail.insights?.summary || '',
-                        keyFacts: mail.insights?.keyFacts || '',
-                        requestedServices: mail.insights?.requestedServices || '',
-                        responseBody: mail.insights?.responseBody || ''
-                    }]};
+                    return {
+                        ...mail,
+                        translations: [
+                            {
+                                subject: mail.mail?.subject || "",
+                                body: mail.mail?.body || "",
+                                sender: mail.insights?.sender || "",
+                                summary: mail.insights?.summary || "",
+                                keyFacts: mail.insights?.keyFacts || "",
+                                requestedServices: mail.insights?.requestedServices || "",
+                                responseBody: mail.insights?.responseBody || ""
+                            }
+                        ]
+                    };
                 }
             })
         );
@@ -506,10 +506,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Translates a single response using LLM
-    public translateResponse = async (
-        response: string,
-        language? : string
-        ) => {
+    public translateResponse = async (response: string, language?: string) => {
         try {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
@@ -520,7 +517,9 @@ export default class CommonMailInsights extends ApplicationService {
 
             const systemPrompt = new PromptTemplate({
                 template:
-                    "Translate the response of the incoming json" + (language ? ` into ${language}` : '') + ".\n{format_instructions}\n" +
+                    "Translate the response of the incoming json" +
+                    (language ? ` into ${language}` : "") +
+                    ".\n{format_instructions}\n" +
                     "Make sure to escape special characters by double slashes.",
                 inputVariables: [],
                 partialVariables: { format_instructions: formatInstructions }
@@ -544,10 +543,10 @@ export default class CommonMailInsights extends ApplicationService {
             ).text;
 
             return translation;
-        }catch(error){
+        } catch (error) {
             return {
-                responseBody : response || ''
-            }
+                responseBody: response || ""
+            };
         }
     };
 
@@ -593,7 +592,7 @@ export default class CommonMailInsights extends ApplicationService {
         tenant?: string
     ): Promise<Array<[TypeORMVectorStoreDocument, number]>> => {
         const typeormVectorStore = await this.getVectorStore(tenant);
-    
+
         const queryString = `
         SELECT x.id, x."pageContent", x.metadata, x.embedding <=> focus.embedding as _distance from ${typeormVectorStore.tableName} as x
         join (SELECT * from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ? $1) as focus
@@ -601,7 +600,8 @@ export default class CommonMailInsights extends ApplicationService {
         WHERE x.metadata @> $2
         ORDER BY _distance LIMIT $3;
         `;
-    
+
+        // TODO: add similarity threshold
         const documents = await typeormVectorStore.appDataSource.query(queryString, [id, filter, k]);
         const results: Array<[TypeORMVectorStoreDocument, number]> = [];
         for (const doc of documents) {
