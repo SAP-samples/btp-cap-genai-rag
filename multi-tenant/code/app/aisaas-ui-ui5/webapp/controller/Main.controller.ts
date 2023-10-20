@@ -16,7 +16,7 @@ import Sorter from "sap/ui/model/Sorter";
 import { ObjectBindingInfo } from "sap/ui/base/ManagedObject";
 
 import { EmailObject, FilterItem } from "../model/entities";
-import EmailController from "./EmailColumn.controller";
+import EmailController from "./EmailDetails.controller";
 
 export default class Main extends BaseController {
 	protected readonly ACTIVE_CATEGORIES_PATH: string = "activeCategories";
@@ -51,7 +51,7 @@ export default class Main extends BaseController {
 			sortDescending: false,
 			sortText: null,
 			activeEmailId: null,
-			translationActivated: false,
+			translationOn: false,
 			additionalInfo: null,
 			submittedResponsesIncluded: false,
 			responseBody: null,
@@ -65,7 +65,7 @@ export default class Main extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/sortText", this.getText("inbox.link.newest"));
 
-		this.emailView = this.byId("emailColumn") as View;
+		this.emailView = this.byId("emailDetails") as View;
 		this.emailController = this.emailView.getController() as EmailController;
 	}
 
@@ -114,27 +114,27 @@ export default class Main extends BaseController {
 	}
 
 	public setActiveEmail(id: string = null): void {
-		this.emailController.resetEmailPageState();
-
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		localModel.setProperty("/activeEmailId", id);
+
 		if (id) {
 			const bindingInfo: ObjectBindingInfo = {
 				path: `${this.EMAIL_ENTITY_PATH}(id=${id})`,
 				parameters: { $$updateGroupId: this.UPDATE_GROUP },
 				events: {
-					dataReceived: (event: Event) => this.onUpdateEmailColumnBinding(event)
+					dataReceived: (event: Event) => this.onUpdateEmailDetailsBinding(event)
 				}
 			};
 			this.emailView.bindElement(bindingInfo);
+			this.emailController.resetEmailPageState();
 
 			const translationButton: Button = this.emailView.byId("translationButton") as Button;
 			translationButton.setText(this.getText("email.buttons.translate"));
-			localModel.setProperty("/translationActivated", false);
+			localModel.setProperty("/translationOn", false);
 		}
 	}
 
-	private onUpdateEmailColumnBinding(event: Event): void {
+	private onUpdateEmailDetailsBinding(event: Event): void {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const emailObject: EmailObject = (event.getSource() as ODataContextBinding).getBoundContext().getObject() as EmailObject;
 
@@ -292,9 +292,9 @@ export default class Main extends BaseController {
 	}
 
 	private getUrgencyFilter(id: string, filterPath: string): Filter {
-		if (id === "00") return new Filter(filterPath, FilterOperator.LT, 2)
-		else if (id === "01") return new Filter(filterPath, FilterOperator.BT, 2, 3)
-		else return new Filter(filterPath, FilterOperator.GT, 3)
+		if (id === "00") return new Filter(filterPath, FilterOperator.LT, 1)
+		else if (id === "01") return new Filter(filterPath, FilterOperator.EQ, 1)
+		else return new Filter(filterPath, FilterOperator.GT, 1)
 	}
 
 	private getSentimentFilter(id: string, filterPath: string): Filter {
@@ -330,9 +330,9 @@ export default class Main extends BaseController {
 
 	private hasResponseChanged(): boolean {
 		const localModel: JSONModel = this.getModel() as JSONModel;
-		const emailObject: EmailObject = this.byId("emailColumn").getBindingContext("api").getObject() as EmailObject;
+		const emailObject: EmailObject = this.emailView.getBindingContext("api").getObject() as EmailObject;
 
-		if (!localModel.getProperty("/translationActivated")) {
+		if (!localModel.getProperty("/translationOn")) {
 			if (localModel.getProperty("/responseBody") !== emailObject.mail.responseBody && localModel.getProperty("/emailsCount") > 0) return true
 			else return false
 		} else {

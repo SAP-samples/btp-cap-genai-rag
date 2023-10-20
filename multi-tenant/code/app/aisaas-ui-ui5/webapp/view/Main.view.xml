@@ -136,7 +136,7 @@
                     </l:flexContent>
                 </l:FixFlex>
                 
-                <mvc:XMLView id="emailColumn" viewName="aisaas.ui.view.EmailColumn"/>
+                <mvc:XMLView id="emailDetails" viewName="aisaas.ui.view.EmailDetails"/>
             </l:Splitter>
         </content>
     </Page>

@@ -6,6 +6,7 @@ import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { OpenAI as OpenAIClient } from "openai";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "../vendor/AI_CORE_API";
+import { BaseMessage, ChatGeneration, ChatResult } from "langchain/dist/schema";
 
 enum Tasks {
     CHAT = "gpt-4-32k-config",
@@ -20,31 +21,37 @@ interface AICoreApiHeaders extends Record<string, string> {
 
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
 const SCENARIO_ID = "foundation-models";
-const EXECUTABLE_ID = "azure-openai";
+const EXECUTABLE_ID = "aicore-azure-openai";
 const VERSION_ID = "0.0.1";
 
 const configurations = [
     {
         name: "gpt-4-32k-config",
-        parameters: [{
-            title : "modelName",
-            value : "gpt-4-32k"
-        },{
-            title : "modelVersion",
-            value : "0314"
-        }]
+        parameters: [
+            {
+                key: "modelName",
+                value: "gpt-4-32k"
+            },
+            {
+                key: "modelVersion",
+                value: "0613"
+            }
+        ]
     },
     {
         name: "text-embedding-ada-002-config",
-        parameters: [{
-            title : "modelName",
-            value : "text-embedding-ada-002"
-        },{
-            title : "modelVersion",
-            value : "2"
-        }]
+        parameters: [
+            {
+                key: "modelName",
+                value: "text-embedding-ada-002"
+            },
+            {
+                key: "modelVersion",
+                value: "2"
+            }
+        ]
     }
-]
+];
 
 const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
     ? {
@@ -53,6 +60,9 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
       }
     : { selectionStrategy: DestinationSelectionStrategies.alwaysProvider, destinationName: AI_CORE_DESTINATION };
 
+// *******************************
+// COMPLETION & EMBED HANDLING
+// *******************************
 
 /**
  * Use the chat completion api from Azure OpenAI services to make a completion call
@@ -98,22 +108,15 @@ export const completion = async (prompt: string, tenant?: string, LLMParams: {} 
  * @param tenant the tenant for which the completion is being made
  * @returns the text completion
  */
-export const chatCompletion = async (
-    request: | OpenAIClient.Chat.ChatCompletionCreateParamsStreaming
-             | OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
-    tenant?: string
-): Promise<
-    | AsyncIterable<OpenAIClient.Chat.Completions.ChatCompletionChunk>
-    | OpenAIClient.Chat.Completions.ChatCompletion
-    > => {
+export const chatCompletion = async (messages: BaseMessage[], tenant?: string): Promise<ChatResult> => {
     const appName = getAppName();
     const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
         const payload: any = {
-            messages: request.messages.map((value: OpenAIClient.Chat.Completions.ChatCompletionMessage) => ({
-                role: value.role,
+            messages: messages.map((value: BaseMessage) => ({
+                role: value.name,
                 content: value.content
             })),
             max_tokens: 2000,
@@ -123,13 +126,26 @@ export const chatCompletion = async (
             stop: "null"
         };
         const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-        const response: any = await aiCoreService.send({
+        const response: OpenAIClient.Chat.Completions.ChatCompletion = await aiCoreService.send({
             // @ts-ignore
             query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=2023-05-15`,
-            data: request,
+            data: payload,
             headers: headers
         });
-        return response;
+
+        const generations = response.choices.map(
+            (value: OpenAIClient.Chat.Completions.ChatCompletion.Choice) =>
+                ({
+                    message: {
+                        name: value.message.role,
+                        content: value.message.content || "",
+                        text: value.message.content || ""
+                    }
+                }) as ChatGeneration
+        );
+        return {
+            generations
+        };
     } else {
         // @ts-ignore
         return null;
@@ -139,7 +155,7 @@ export const chatCompletion = async (
 export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
     const appName = getAppName();
     const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
-    
+
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -174,6 +190,10 @@ const getAppName = () => {
     return appName;
 };
 
+// *******************
+// AI API
+// *******************
+
 /**
  * get the running deploymentId for the resource group
  * @returns deploymentId
@@ -186,13 +206,13 @@ export const getDeploymentId = async (resourceGroupId: string, task: Tasks = Tas
             .skipCsrfTokenFetching()
             .addCustomHeaders(headers)
             .execute({ destinationName: AI_CORE_DESTINATION });
-        
-        const configurationId = responseConfigurationQuery.resources?.find((configuration) => 
-            configuration.name === task
+
+        const configurationId = responseConfigurationQuery.resources?.find(
+            (configuration) => configuration.name === task
         );
-        
+
         const responseDeploymentQuery = await DeploymentApi.deploymentQuery({
-            scenarioId : configurationId.scenarioId,
+            scenarioId: configurationId.scenarioId,
             status: "RUNNING",
             configurationId: configurationId.id,
             $top: 1
@@ -259,13 +279,14 @@ export const getResourceGroups = async () => {
 
 /**
  * CREATE CONFIGURATIONS IN RESOURCE GROUP
- * @param configurationId
+ * @param configuration
  * @param headers
+ * @returns
  */
 export const createConfigurations = async (configuration: ConfigurationBaseData, headers: AICoreApiHeaders) => {
     const responseConfigurationCreation = Promise.all(
-        configurations.map(config => {
-           return ConfigurationApi.configurationCreate({
+        configurations.map((config) => {
+            return ConfigurationApi.configurationCreate({
                 // @ts-ignore
                 name: config.name,
                 // @ts-ignore
@@ -274,22 +295,23 @@ export const createConfigurations = async (configuration: ConfigurationBaseData,
                 scenarioId: SCENARIO_ID,
                 versionId: VERSION_ID,
                 ...configuration,
-                parameterBindings: config.parameters?.map((parameter) => {
-                    return {
-                        key : parameter.title,
-                        value: parameter.value
-                    }
-                })
+                parameterBindings: config.parameters
             })
-            .skipCsrfTokenFetching()
-            .addCustomHeaders(headers)
-            .execute(aiCoreDestination)
+                .skipCsrfTokenFetching()
+                .addCustomHeaders(headers)
+                .execute(aiCoreDestination);
         })
     );
 
     return responseConfigurationCreation;
 };
 
+/**
+ *
+ * @param configurationId
+ * @param headers
+ * @returns
+ */
 export const createDeployment = async (configurationId: string, headers: AICoreApiHeaders) => {
     const responseDeploymentCreation = await DeploymentApi.deploymentCreate({
         configurationId: configurationId
@@ -311,10 +333,13 @@ export const createDeployment = async (configurationId: string, headers: AICoreA
     return responseDeploymentCreation;
 };
 
+// *******************
+// DESTINATION HANDLING
+// *******************
+
 /**
  * CREATE DESTINATION FROM AI CORE SERVICE BINDING
  * @param service
- * @param options
  */
 async function aicoreBindingToDestination(service: Service): Promise<Destination> {
     /*

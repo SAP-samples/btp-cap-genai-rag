@@ -3,11 +3,13 @@ import { Request } from "@sap/cds/apis/services";
 import { v5 as uuidv5 } from "uuid";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
-import { ITranslatedMail } from "../common/handlers/types";
+import { IStoredMail, ITranslatedMail } from "../common/handlers/types";
 
 export default class MailInsightsService extends CommonMailInsights {
     async init() {
+        // Shared handlers (getMails, getMail, addMails, deleteMail)
         await super.init();
+        // Additional handlers
         this.on("submitResponse", this.onSubmitResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
@@ -17,58 +19,96 @@ export default class MailInsightsService extends CommonMailInsights {
 
     // Regenerate Insights for all available Mails
     private onRegenerateInsights = async (req: Request) => {
-        const { tenant } = req;
-        const { rag } = req.data;
-        const { Mails } = this.entities;
-        const mails = await SELECT.from(Mails);
-        await this.regenerateInsights(mails, rag, tenant);
-        return true;
+        try {
+            const { tenant } = req;
+            const { rag } = req.data;
+            const { Mails } = this.entities;
+            const mails = await SELECT.from(Mails);
+            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+
+            // insert mails with insights
+            console.log("UPDATE MAILS WITH INSIGHTS...");
+
+            cds.tx(async () => {
+                const { Mails } = this.entities;
+                await UPSERT.into(Mails).entries(mailBatch);
+            });
+
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
     };
 
     // Regenerate Response for a single Mail
     private onRegenerateResponse = async (req: Request) => {
-        const { tenant } = req;
-        const { id, rag, additionalInformation } = req.data;
-        const { Mails } = this.entities;
-        const mail = await SELECT.one.from(Mails, id);
-        const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
-        return response;
+        try {
+            const { tenant } = req;
+            const { id, rag, additionalInformation } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id);
+            const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
+            return response;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
     };
 
     // Translate Response to original e-mail language
     private onTranslateResponse = async (req: Request) => {
-        const { id, response } = req.data;
-        const { Mails } = this.entities;
-        const mail = await SELECT.one.from(Mails, id);
-        const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
-        return translation;
+        try {
+            const { id, response } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id);
+            const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
+            return translation;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
     };
 
     // Submit response for single Mail
+    // Response always passed in user's working language
     private onSubmitResponse = async (req: Request) => {
         try {
-            const { id, response, translation, modified } = req.data;
+            const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
 
+            let translation: string | undefined;
+
+            // Translate working language response to recipient's original language
+            if (!mail.insights?.languageMatch) {
+                translation = (await this.translateResponse(response, mail.insights?.languageNameDetermined))
+                    .responseBody;
+            }
+
+            // Store working language response in translation response Body
+            // Store either working language or original language in translation responseBody 
             const dbEntry = [
                 Object.assign(
                     {
                         ...mail,
                         responded: true,
-                        responseModified: modified || false,
-                        translations: translation ? [Object.assign(mail.translations[0], { responseBody: translation })] : []
+                        translations: Object.assign(mail.translations[0], { responseBody: response })
                     },
-                    response ? { responseBody: response } : {}
+                    {
+                        responseBody: translation || response
+                    }
                 )
             ];
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
-            
+            // Send the working language response + target language translation + AI Translation Disclaimer
+
             await UPSERT.into(Mails).entries(dbEntry);
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -102,16 +142,15 @@ export default class MailInsightsService extends CommonMailInsights {
             await typeormVectorStore.appDataSource.query(queryString, [mails.map((mail: any) => mail.ID)]);
 
             await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: ITranslatedMail) => ({
-                    pageContent: mail.mail.body,
-                    metadata: { id: mail.mail.ID }
+                mailBatch.map((mail: IStoredMail) => ({
+                    pageContent: mail.body,
+                    metadata: { id: mail.ID }
                 }))
             );
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            req.error(`Error: Shared Inbox Sync Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
         }
     };
-    
- }
+}

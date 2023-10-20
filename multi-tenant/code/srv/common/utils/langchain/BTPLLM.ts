@@ -7,13 +7,13 @@ export default class BTPLLM extends LLM {
 
     constructor(
         completion: (prompt: string, tenant?: string) => Promise<string>,
-        tenant?: string,
+        tenant: string = "_main",
         LLMParams: {} = {},
         params: BaseLLMParams = {}
     ) {
         super(params);
         this.completion = completion;
-        //@ts-ignore
+
         this.tenant = tenant;
         this.LLMParams = LLMParams;
     }

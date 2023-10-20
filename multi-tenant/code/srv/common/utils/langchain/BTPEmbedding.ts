@@ -7,13 +7,12 @@ export default class BTPAzureOpenAIEmbedding extends Embeddings {
 
     constructor(
         embed: (documents: string[], tenant?: string) => Promise<number[][]>,
-        tenant?: string,
+        tenant: string = "_main",
         EmbeddingParams: {} = {},
         params: EmbeddingsParams = {}
     ) {
         super(params);
         this.embed = embed;
-        //@ts-ignore
         this.tenant = tenant;
         this.EmbeddingParams = EmbeddingParams;
     }

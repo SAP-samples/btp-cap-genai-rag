@@ -16,19 +16,16 @@
                 <Label text="{path: 'api>modifiedAt', formatter: 'formatter.formatDate'}" wrapping="true"/>
             </HBox>
             <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
-                <tnt:InfoLabel displayOnly="true" text="{api>category}"/>
-                <HBox justifyContent="End">
-                    <ObjectStatus
-                        icon="sap-icon://high-priority"
-                        state="{path:'api>urgency', formatter:'formatter.getUrgencyState'}"/>
-                </HBox>
-            </HBox>
-            <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
-                <VBox width="calc(100% - 1.5rem)">
-                    <Title text="{api>subject}"/>
+                <VBox width="calc(100% - 2rem)">
+                    <tnt:InfoLabel displayOnly="true" text="{api>category}"/>
+                    <Title class="sapUiTinyMarginTop" text="{api>subject}"/>
                     <Text maxLines="2" text="{api>body}"/>
                 </VBox>
                 <VBox>
+                    <ObjectStatus
+                        class="sapUiTinyMarginBottom"
+                        icon="{path:'api>urgency', formatter:'formatter.getUrgencyIcon'}"
+                        state="{path:'api>urgency', formatter:'formatter.getUrgencyState'}"/>
                     <ObjectStatus
                         icon="{path:'api>sentiment', formatter:'formatter.getSentimentIcon'}"
                         state="{path:'api>sentiment', formatter:'formatter.getSentimentState'}"/>

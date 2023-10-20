@@ -19,7 +19,7 @@ import MessageToast from "sap/m/MessageToast";
 import { EmailObject, Mail, KeyFact, Action } from "../model/entities";
 import Formatter from "../model/formatter";
 
-export default class EmailColumn extends BaseController {
+export default class EmailDetails extends BaseController {
 	public resetEmailPageState(): void {
 		this.scrollToFirstSection();
 		this.resetSimilarEmailsListState();
@@ -45,16 +45,16 @@ export default class EmailColumn extends BaseController {
 	public createEmailHeaderContent(mail: Mail): void {
 		const parentBox: HBox = this.byId("headerContent") as HBox;
 		parentBox.removeAllItems();
-		this.createElementsWithOrWithoutTranslation(parentBox, mail, false);
+		this.createHeaderElements(parentBox, mail, false);
 
 		if (!mail.languageMatch) {
 			const parentBox: HBox = this.byId("translatedHeaderContent") as HBox;
 			parentBox.removeAllItems();
-			this.createElementsWithOrWithoutTranslation(parentBox, mail, true);
+			this.createHeaderElements(parentBox, mail, true);
 		}
 	}
 
-	private createElementsWithOrWithoutTranslation(parentBox: HBox, mail: Mail, withTranslatedContent: boolean): void {
+	private createHeaderElements(parentBox: HBox, mail: Mail, inTranslatedLanguage: boolean): void {
 		const avatar: Avatar = new Avatar({
 			displaySize: 'L',
 			backgroundColor: 'Accent6',
@@ -63,18 +63,25 @@ export default class EmailColumn extends BaseController {
 		avatar.addStyleClass("sapUiMediumMarginEnd");
 		parentBox.addItem(avatar);
 
-		const vBox: VBox = new VBox();
-		vBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
-
+		const infoBox: VBox = new VBox();
+		infoBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
 		const infoTitle: Title = new Title({ text: this.getText("email.titles.customerInformation") });
-		const senderText: Text = new Text({ text: !withTranslatedContent ? mail.sender : mail.translations[0].sender });
+		const senderText: Text = new Text({ text: !inTranslatedLanguage ? mail.sender : mail.translations[0].sender });
 		const emailAddressText: Text = new Text({ text: mail.senderEmailAddress as string });
-		vBox.addItem(infoTitle);
-		vBox.addItem(senderText);
-		vBox.addItem(emailAddressText);
-		parentBox.addItem(vBox);
+		infoBox.addItem(infoTitle);
+		infoBox.addItem(senderText);
+		infoBox.addItem(emailAddressText);
+		parentBox.addItem(infoBox);
 
-		const facts: KeyFact[] = !withTranslatedContent ? mail.keyFacts : mail.translations[0].keyFacts;
+		const languageBox: VBox = new VBox();
+		languageBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
+		const languageTitle: Title = new Title({ text: this.getText("email.titles.originalLanguage") });
+		const languageText: Text = new Text({ text: mail.languageNameDetermined });
+		languageBox.addItem(languageTitle);
+		languageBox.addItem(languageText);
+		parentBox.addItem(languageBox);
+
+		const facts: KeyFact[] = !inTranslatedLanguage ? mail.keyFacts : mail.translations[0].keyFacts;
 		facts?.map((factItem: KeyFact) => {
 			const childBox: VBox = new VBox();
 			childBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
@@ -119,8 +126,8 @@ export default class EmailColumn extends BaseController {
 			}
 		}
 
-		localModel.setProperty("/translationActivated", !localModel.getProperty("/translationActivated"));
-		button.setText(localModel.getProperty("/translationActivated") ?
+		localModel.setProperty("/translationOn", !localModel.getProperty("/translationOn"));
+		button.setText(localModel.getProperty("/translationOn") ?
 			this.getText("email.buttons.original") :
 			this.getText("email.buttons.translate"));
 	}
@@ -166,7 +173,7 @@ export default class EmailColumn extends BaseController {
 		const value: string = (event.getSource() as TextArea).getValue();
 		if (value.replace(/[^A-Z0-9]+/ig, '') === '') {
 			const localModel: JSONModel = this.getModel() as JSONModel;
-			localModel.setProperty(!localModel.getProperty("/translationActivated") ? "/responseBody" : "/translatedResponseBody", null);
+			localModel.setProperty(!localModel.getProperty("/translationOn") ? "/responseBody" : "/translatedResponseBody", null);
 		}
 	}
 
@@ -174,7 +181,7 @@ export default class EmailColumn extends BaseController {
 		const localModel: JSONModel = this.getModel() as JSONModel;
 		const button: Button = event.getSource();
 
-		if (!localModel.getProperty("/translationActivated"))
+		if (!localModel.getProperty("/translationOn"))
 			localModel.setProperty("/responseBody", button.getBindingContext("api").getProperty("mail/responseBody"));
 		else localModel.setProperty("/translatedResponseBody", button.getBindingContext("api").getProperty("mail/translations/0/responseBody"));
 
