@@ -3,7 +3,7 @@ import { Request } from "@sap/cds/apis/services";
 import { v5 as uuidv5 } from "uuid";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
-import { IStoredMail, ITranslatedMail } from "../common/handlers/types";
+import { IStoredMail } from "../common/handlers/types";
 
 export default class MailInsightsService extends CommonMailInsights {
     async init() {
@@ -108,7 +108,7 @@ export default class MailInsightsService extends CommonMailInsights {
             await UPSERT.into(Mails).entries(dbEntry);
 
             const typeormVectorStore = await this.getVectorStore(tenant);
-            const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ?| $1`;
+            const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb = $1`;
             await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
 
             return true;
