@@ -6,7 +6,7 @@ import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { OpenAI as OpenAIClient } from "openai";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "../vendor/AI_CORE_API";
-import { BaseMessage, ChatGeneration, ChatResult } from "langchain/dist/schema";
+import { BaseMessage, ChatGeneration, ChatResult } from "langchain/schema";
 
 enum Tasks {
     CHAT = "gpt-4-32k-config",
@@ -19,9 +19,9 @@ interface AICoreApiHeaders extends Record<string, string> {
     "AI-Resource-Group": string;
 }
 
-const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION";
+const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_HUB";
 const SCENARIO_ID = "foundation-models";
-const EXECUTABLE_ID = "aicore-azure-openai";
+const EXECUTABLE_ID = "azure-openai";
 const VERSION_ID = "0.0.1";
 
 const configurations = [
@@ -73,7 +73,7 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
  */
 export const completion = async (prompt: string, tenant?: string, LLMParams: {} = {}) => {
     const appName = getAppName();
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
 
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.COMPLETION);
     if (deploymentId) {
@@ -110,13 +110,13 @@ export const completion = async (prompt: string, tenant?: string, LLMParams: {} 
  */
 export const chatCompletion = async (messages: BaseMessage[], tenant?: string): Promise<ChatResult> => {
     const appName = getAppName();
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
         const payload: any = {
             messages: messages.map((value: BaseMessage) => ({
-                role: value.name,
+                role: value.name ?? "user",
                 content: value.content
             })),
             max_tokens: 2000,
@@ -154,7 +154,7 @@ export const chatCompletion = async (messages: BaseMessage[], tenant?: string): 
 
 export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
     const appName = getAppName();
-    const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
 
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
@@ -208,7 +208,7 @@ export const getDeploymentId = async (resourceGroupId: string, task: Tasks = Tas
             .execute({ destinationName: AI_CORE_DESTINATION });
 
         const configurationId = responseConfigurationQuery.resources?.find(
-            (configuration) => configuration.name === task
+            (configuration : any) => configuration.name === task
         );
 
         const responseDeploymentQuery = await DeploymentApi.deploymentQuery({

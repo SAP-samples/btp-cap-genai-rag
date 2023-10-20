@@ -1,7 +1,7 @@
-import { CallbackManagerForLLMRun } from "langchain/dist/callbacks";
-import { BaseMessage, ChatResult } from "langchain/dist/schema";
+import { CallbackManagerForLLMRun } from "langchain/callbacks";
+import { BaseMessage, ChatResult } from "langchain/schema";
 import * as aiCore from "../ai-core";
-import { BaseChatModel, BaseChatModelCallOptions } from "langchain/dist/chat_models/base";
+import { BaseChatModel, BaseChatModelCallOptions } from "langchain/chat_models/base";
 
 export default class BTPChatModel extends BaseChatModel {
     private chatCompletion: (messages: BaseMessage[], tenant?: string) => Promise<ChatResult>;

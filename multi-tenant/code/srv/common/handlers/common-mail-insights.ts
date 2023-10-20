@@ -218,7 +218,7 @@ export default class CommonMailInsights extends ApplicationService {
             return {
                 ...mail.mail,
                 ...mail.insights,
-                translation: mail.translation[0]
+                translation: mail.translation
             };
         });
     };
