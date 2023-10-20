@@ -16,7 +16,7 @@
             }
         },
         "aicore": {
-            "createResourceGroups": false
+            "createResourceGroups": true
         },
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
