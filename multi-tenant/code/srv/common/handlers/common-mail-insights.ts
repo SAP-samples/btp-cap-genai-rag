@@ -561,7 +561,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     public getVectorStore = async (tenant?: string) => {
-        const embeddings = new BTPEmbedding(aiCore.embed, undefined, {});
+        const embeddings = new BTPEmbedding(aiCore.embed, tenant);
         const args = getPostgresConnectionOptions(tenant);
         const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
         await typeormVectorStore.ensureTableInDatabase();
