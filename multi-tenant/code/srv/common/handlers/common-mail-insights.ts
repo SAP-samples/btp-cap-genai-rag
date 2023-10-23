@@ -13,16 +13,12 @@ import { Document } from "langchain/document";
 import { LLMChain, StuffDocumentsChain } from "langchain/chains";
 import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
 import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
-import { getDestination } from "@sap-cloud-sdk/connectivity";
-import { BTPLLMContext } from "@sap/llm-commons";
-import { BTPOpenAIGPTChat } from "@sap/llm-commons/langchain/chat/openai";
-import { BTPOpenAIGPTEmbedding } from "@sap/llm-commons/langchain/embedding/openai";
-import {
-    IBaseMail,
-    IProcessedMail,
-    ITranslatedMail,
-    IStoredMail
-} from "./types";
+
+import * as aiCore from "../utils/ai-core";
+import BTPEmbedding from "../utils/langchain/BTPEmbedding";
+import BTPAzureOpenAIChatLLM from "../utils/langchain/BTPAzureOpenAIChatLLM";
+
+import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail } from "./types";
 import {
     MAIL_INSIGHTS_SCHEMA,
     MAIL_INSIGHTS_TRANSLATION_SCHEMA,
@@ -35,7 +31,7 @@ import {
 const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
 
 // Default table used in PostgreSQL
-const DEFAULT_TABLE = "_main";
+const DEFAULT_TENANT = "_main";
 
 const filterForTranslation = ({
     subject,
@@ -81,7 +77,7 @@ export default class CommonMailInsights extends ApplicationService {
             return mails;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -124,7 +120,7 @@ export default class CommonMailInsights extends ApplicationService {
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -145,7 +141,7 @@ export default class CommonMailInsights extends ApplicationService {
 
             // Embed mail bodies with IDs
             console.log("EMBED MAILS WITH IDs...");
-            
+
             const typeormVectorStore = await this.getVectorStore(tenant);
             await typeormVectorStore.addDocuments(
                 mailBatch.map((mail: IStoredMail) => ({
@@ -158,7 +154,7 @@ export default class CommonMailInsights extends ApplicationService {
             return mailBatch;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
@@ -178,22 +174,25 @@ export default class CommonMailInsights extends ApplicationService {
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`)
+            return req.error(`Error: ${error?.message}`);
         }
     };
 
     // (Re-)Generate Insights, Response(s) and Translation(s) for single or multiple Mail(s)
-    public regenerateInsights = async (mails: Array<IBaseMail>, rag?: boolean, tenant?: string) => {
-        
+    public regenerateInsights = async (
+        mails: Array<IBaseMail>,
+        rag: boolean = false,
+        tenant: string = DEFAULT_TENANT
+    ) => {
         // Add unique ID to mails if not existent
         mails = mails.map((mail) => {
             return { ...mail, ID: mail.ID || uuidv4() };
         });
 
         const [generalInsights, potentialResponses, languageMatches] = await Promise.all([
-            this.extractGeneralInsights(mails),
+            this.extractGeneralInsights(mails, tenant),
             this.preparePotentialResponses(mails, rag, tenant),
-            this.extractLanguageMatches(mails)
+            this.extractLanguageMatches(mails, tenant)
         ]);
 
         const processedMails = mails.reduce((acc, mail) => {
@@ -213,13 +212,13 @@ export default class CommonMailInsights extends ApplicationService {
             return acc;
         }, [] as IProcessedMail[]);
 
-        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails);
+        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails, tenant);
 
         return translatedMails.map((mail) => {
             return {
                 ...mail.mail,
                 ...mail.insights,
-                translation: mail.translation[0]
+                translation: mail.translation
             };
         });
     };
@@ -227,12 +226,13 @@ export default class CommonMailInsights extends ApplicationService {
     // (Re-)Generate Response for a single Mail
     public regenerateResponse = async (
         mail: IStoredMail,
-        rag?: boolean,
-        tenant?: string,
+        rag: boolean = false,
+        tenant: string = DEFAULT_TENANT,
         additionalInformation?: string
     ): Promise<IStoredMail> => {
         const { Translations } = this.entities;
-        const regeneratedResponse = ( await this.preparePotentialResponses(
+        const regeneratedResponse = (
+            await this.preparePotentialResponses(
                 [
                     {
                         ID: mail.ID,
@@ -245,14 +245,14 @@ export default class CommonMailInsights extends ApplicationService {
                 tenant,
                 additionalInformation
             )
-        )[0]?.response?.responseBody
+        )[0]?.response?.responseBody;
 
         //@ts-ignore
-        const translation = await SELECT.one.from(Translations, mail.translation_ID );
+        const translation = await SELECT.one.from(Translations, mail.translation_ID);
 
         if (!mail.languageMatch) {
-            translation.responseBody = (await this.translateResponse(regeneratedResponse)).responseBody;
-        }else{
+            translation.responseBody = (await this.translateResponse(regeneratedResponse, tenant)).responseBody;
+        } else {
             translation.responseBody = regeneratedResponse;
         }
 
@@ -262,14 +262,15 @@ export default class CommonMailInsights extends ApplicationService {
             translation: translation
         };
     };
-    
+
     // Extract Insights for Mail(s) using LLM
-    public extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
+    public extractGeneralInsights = async (
+        mails: Array<IBaseMail>,
+        tenant: string = DEFAULT_TENANT
+    ): Promise<Array<IProcessedMail>> => {
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -310,16 +311,14 @@ export default class CommonMailInsights extends ApplicationService {
     // Generate potential Response(s) using LLM
     public preparePotentialResponses = async (
         mails: Array<IBaseMail>,
-        rag: boolean = true,
-        tenant?: string,
+        rag: boolean = false,
+        tenant: string = DEFAULT_TENANT,
         additionalInformation?: string
     ) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -391,13 +390,11 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Extract Language Match(es) using LLM
-    public extractLanguageMatches = async (mails: Array<IBaseMail>) => {
+    public extractLanguageMatches = async (mails: Array<IBaseMail>, tenant: string = DEFAULT_TENANT) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_LANGUAGE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -434,13 +431,11 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Translates Insight(s) using LLM
-    public translateInsights = async (mails: Array<IProcessedMail>) => {
+    public translateInsights = async (mails: Array<IProcessedMail>, tenant: string = DEFAULT_TENANT) => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-
-        await initializeBTPContext();
-        const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -477,15 +472,20 @@ export default class CommonMailInsights extends ApplicationService {
 
                     return { ...mail, translation: [translation] };
                 } else {
-                    return { ...mail, translation: [{
-                        subject: mail.mail?.subject || '',
-                        body: mail.mail?.body || '',
-                        sender: mail.insights?.sender || '',
-                        summary: mail.insights?.summary || '',
-                        keyFacts: mail.insights?.keyFacts || '',
-                        requestedServices: mail.insights?.requestedServices || '',
-                        responseBody: mail.insights?.responseBody || ''
-                    }]};
+                    return {
+                        ...mail,
+                        translation: [
+                            {
+                                subject: mail.mail?.subject || "",
+                                body: mail.mail?.body || "",
+                                sender: mail.insights?.sender || "",
+                                summary: mail.insights?.summary || "",
+                                keyFacts: mail.insights?.keyFacts || "",
+                                requestedServices: mail.insights?.requestedServices || "",
+                                responseBody: mail.insights?.responseBody || ""
+                            }
+                        ]
+                    };
                 }
             })
         );
@@ -494,21 +494,18 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Translates a single response using LLM
-    public translateResponse = async (
-        response: string,
-        language? : string
-        ) => {
+    public translateResponse = async (response: string, tenant: string = DEFAULT_TENANT, language?: string) => {
         try {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
             const formatInstructions = parser.getFormatInstructions();
-
-            await initializeBTPContext();
-            const llm = new BTPOpenAIGPTChat({ deployment_id: "gpt-4-32k", temperature: 0.0, maxTokens: 2000 });
+            const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
             const systemPrompt = new PromptTemplate({
                 template:
-                    "Translate the response of the incoming json" + (language ? ` into ${language}` : '') + ".\n{format_instructions}\n" +
+                    "Translate the response of the incoming json" +
+                    (language ? ` into ${language}` : "") +
+                    ".\n{format_instructions}\n" +
                     "Make sure to escape special characters by double slashes.",
                 inputVariables: [],
                 partialVariables: { format_instructions: formatInstructions }
@@ -532,10 +529,10 @@ export default class CommonMailInsights extends ApplicationService {
             ).text;
 
             return translation;
-        }catch(error){
+        } catch (error) {
             return {
-                responseBody : response || ''
-            }
+                responseBody: response || ""
+            };
         }
     };
 
@@ -564,10 +561,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     public getVectorStore = async (tenant?: string) => {
-        await initializeBTPContext();
-        const embeddings = new BTPOpenAIGPTEmbedding({
-            deployment_id: "text-embedding-ada-002-v2"
-        });
+        const embeddings = new BTPEmbedding(aiCore.embed, undefined, {});
         const args = getPostgresConnectionOptions(tenant);
         const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
         await typeormVectorStore.ensureTableInDatabase();
@@ -581,7 +575,7 @@ export default class CommonMailInsights extends ApplicationService {
         tenant?: string
     ): Promise<Array<[TypeORMVectorStoreDocument, number]>> => {
         const typeormVectorStore = await this.getVectorStore(tenant);
-    
+
         const queryString = `
         SELECT x.id, x."pageContent", x.metadata, x.embedding <=> focus.embedding as _distance from ${typeormVectorStore.tableName} as x
         join (SELECT * from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ? $1) as focus
@@ -589,7 +583,7 @@ export default class CommonMailInsights extends ApplicationService {
         WHERE x.metadata @> $2
         ORDER BY _distance LIMIT $3;
         `;
-    
+
         const documents = await typeormVectorStore.appDataSource.query(queryString, [id, filter, k]);
         const results: Array<[TypeORMVectorStoreDocument, number]> = [];
         for (const doc of documents) {
@@ -623,31 +617,7 @@ const getPostgresConnectionOptions = (tenant?: string) => {
                 : false
         } as DataSourceOptions,
 
-        tableName: tenant ? "_" + tenant.replace(/-/g, "") : DEFAULT_TABLE
-    };
-};
-
-const initializeBTPContext = async () => {
-    // get from LLM Proxy binding
-    const credentials = await getLLMAccessCredentials();
-    await BTPLLMContext.init({
-        oauthClientId: credentials.clientId,
-        oauthClientSecret: credentials.clientSecret,
-        oauthTokenUrl: credentials.tokenServiceUrl, // the Auth URL ending `ondemand.com`
-        llmProxyBaseUrl: credentials.url // the service URL ending `ondemand.com`
-    });
-};
-
-const getLLMAccessCredentials = async () => {
-    //@ts-ignore
-    const { clientId, clientSecret, url, tokenServiceUrl } = await getDestination({
-        destinationName: LLM_SERVICE_DESTINATION
-    });
-    return {
-        clientId,
-        clientSecret,
-        url,
-        tokenServiceUrl: tokenServiceUrl.replace("/oauth/token", "")
+        tableName: tenant ? "_" + tenant.replace(/-/g, "") : DEFAULT_TENANT
     };
 };
 
