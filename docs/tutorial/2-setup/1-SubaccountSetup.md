@@ -1,7 +1,9 @@
 # Subaccount Setup
 
-Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider Subaccount. Please consider the following infos before creating a subaccount in a concrete region (as of September 2023). This mission can not be deployed to **Trial** environments, as some of the services are not available in **Trial** landscapes. 
+Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider Subaccount. Please consider the following infos before creating a subaccount in any SAP BTP region. 
 
+> **Important** - This mission can not be deployed to **Trial** environments, as some of the services are not available in **Trial** landscapes. 
+> 
 
 ## SAP BTP PostgreSQL, Hyperscaler Option
 
