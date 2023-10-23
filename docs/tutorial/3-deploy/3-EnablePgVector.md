@@ -8,7 +8,7 @@ Once the application was successfully deployed, you need to enable the **pgvecto
 
 ## SAP BTP, Kyma Runtime
 
-Further details can be found in the official SAP Help documentation. The **PostgreSQL on SAP BTP, hyperscaler option** as well as the Extension API endpoints are available for Kyma instances in AWS regions only (as of September 2023).
+Further details can be found in the official SAP Help documentation. The **PostgreSQL on SAP BTP, hyperscaler option** as well as the Extension API endpoints are available for Kyma instances in **AWS-regions** only (as of September 2023).
 
 [SAP Help | Using the ‘PostgreSQL, Hyperscaler Option’ Extension APIs for Kyma](https://help.sap.com/docs/postgresql-hyperscaler-option/postgresql-on-sap-btp-hyperscaler-option/using-postgresql-hyperscaler-option-extension-apis-for-kyma?locale=en-US)
 
@@ -125,4 +125,4 @@ Further details can be found in the official SAP Help documentation.
       --header 'Authorization: <BearerToken>' \
       --header 'Content-Type: application/json' \
       --data-raw '{"database": "<DatabaseName>"}'
-
+    ```

@@ -2,20 +2,20 @@
 
 Depending on your favorite runtime, you need to apply two Post-Deployment Actions. In a single-tenant setup, Post-Deployment actions are required in the Kyma runtime only. 
 
-- [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime) (Single and Multitenant) <br>
+- [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime) <br>
 - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime-multitenant-only) (Multitenant only)
 
 ## SAP BTP, Kyma Runtime (Single and Multitenant)
 
 In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is reachable by your workloads, by providing your PostgreSQL Service Instance with the Egress Cluster IP addresses of your Kyma Cluster. Please follow the steps below to fulfill this requirement. 
 
-1. Please get the **Shell** or **PowerShell** scripts provided in the following SAP-Samples repository. 
+1. Please download or copy the **Shell** or **PowerShell** scripts provided in the following SAP-Samples repository. 
 
     [SAP-Samples | Kyma Runtime Extension Samples](https://github.com/SAP-samples/kyma-runtime-extension-samples/tree/main/get-egress-ips)
 
 2. By running these scripts in your development environment, you will get the egress IP addresses of your Kyma Cluster.
    
-   > **Important** - These are just sample values! Make sure you run the script and determine your Cluster IP addresses!
+   > **Important** - The values below are just sample values! Make sure you run the script and determine your Cluster IP addresses!
 
     ```sh
     sh ./get-egress-ips.sh
@@ -39,7 +39,9 @@ In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is re
 
 ## SAP BTP, Cloud Foundry Runtime (Multitenant only)
 
-In Cloud Foundry, our SaaS sample application requires the usage of a Credential Store instance to securely store a SAP BTP Subaccount Admin user as well as the API Service Broker credentials. 
+In Cloud Foundry, the SaaS sample application requires the usage of a Credential Store instance to securely store a SAP BTP Subaccount Admin user as well as the API Service Broker credentials. 
+
+> **Important** - This is only required for the multitenant setup of the sample application.
 
 1. In your Provider Subaccount, please go to the **Instances and Subscriptions** menu and click on your **\<Space>-aisaas-credstore** instance or use the **Manage Instance** button. 
 

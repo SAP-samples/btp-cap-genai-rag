@@ -7,12 +7,13 @@ Depending on your target runtime, different deployment steps are required. Pleas
 
 ##  SAP BTP, Kyma Runtime
 
-The deployment process in Kyma requires you to use a helm-based deployment approach. Please ensure you have the respective command line tools installed in your development environment such as **helm**, **Docker** and **kubectl** before you proceed!
+The deployment process in Kyma requires you to use a helm-based deployment approach. 
+
+> **Important** - Please ensure you have the respective command line tools installed in your development environment such as **helm**, **Docker** and **kubectl** before you proceed!
 
 > **Hint** - In this tutorial we assume a basic understanding of the Kyma deployment process. If you are not familiar with deployment of Kyma solutions, please refer to our [Multitenant SaaS Sample Scenario](https://github.com/SAP-samples/btp-cap-multitenant-saas/#readme) or follow the respective [SAP Developer Journey](https://learning.sap.com/learning-journey/deliver-side-by-side-extensibility-based-on-sap-btp-kyma-runtime) to learn the basics and get your setup ready.
 
-1. Before you start the deployment, please copy and rename to provided **values-private.sample.yaml** file to **values-private.yaml**. This will ensure that your configuration details are not being committed to GitHub by accident.  
-
+1. Before you start the deployment, please copy and rename to provided **values-private.sample.yaml** file ((single/multi)-tenant/deploy/kyma/charts) to **values-private.yaml**. This will ensure that your configuration details are not being committed to GitHub by accident.  
 
 2. Pease provide values for the following parameters in your **values-private.yaml** file, based on your own environment and the Container Registry being used. 
 
@@ -118,7 +119,10 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
     </details>
     <br>
 
+
 3.  Please double-check that your Container Images have been successfully pushed to your Container Registry and deploy the application to your Kyma Cluster by running the following command. 
+
+    > **Important** - Please ensure you are connected to the correct Kyma Cluster by running *kubectl cluster-info*.
 
     ```sh
     # Run in ./(multi/single)-tenant/deploy/kyma # 
@@ -128,21 +132,22 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
     helm install aisaas ./charts -f ./charts/values-private.yaml -n default
     ```
 
-4. This will take a while, as especially creating the **PostgreSQL on SAP BTP, hyperscaler option** service instance might take up to 30mins. Wait for the process to finish successfully and also check in the **Kyma Dashboard** if all service instances have been created successfully. 
+
+4. This will take a while, as especially creating the **PostgreSQL on SAP BTP, hyperscaler option** service instance might take up to 30 mins. Wait for the process to finish successfully and also check in the **Kyma Dashboard** if all service instances have been created successfully. 
    
-    > **Important** - Ensure to update your **values-private.yaml** file in case you want to use an existing PostgreSQL instance as depicted below! The respective service instance must exist in the Kyma target namespace. 
+    > **Important** - Ensure to update your **values-private.yaml** file in case you want to use **an existing PostgreSQL instance** as depicted below! The respective service instance must exist in the Kyma namespace before deployment. 
     > ```yaml
     > # Bind existing instance
     > srv:
     >   bindings:
     >      postgresql-db:
     >        serviceInstanceName: 
-    >        serviceInstanceFullname: existing-pgsql-instance-name
+    >        serviceInstanceFullname: my-postgresql-instance
     >
     > # Disable instance creation
     > postgresql_db:
     >   enabled: false
-    > ```
+
     > A similar setup can be achieved with an existing Credential Store instance if required.
 
     [<img src="./images/DEP_KymaSuccess.png" width="400"/>](./images/DEP_KymaSuccess.png?raw=true)
@@ -157,9 +162,11 @@ As the application components are part of the deployment archive in the Cloud Fo
 
 1. Once your Multi-Target Application Archive is built, please ensure you are logged in to your target Cloud Foundry Space by running the following command. (Re-)Login if required. 
 
+    > **Hint** - In this tutorial we assume a basic understanding of the Cloud Foundry deployment process. Please make sure you successfully installed the **Cloud Foundry CLI** in your development environment before you continue. 
+
     ```sh
     # Check target Org and Space #
-    cf t
+    cf target
 
     # (Re-)Login if required #
     cf login -a "https://api.cf.<Region>.hana.ondemand.com"
@@ -167,29 +174,13 @@ As the application components are part of the deployment archive in the Cloud Fo
 
 2. Start the deployment to Cloud Foundry, by running the following command. 
 
-    > **Important** - Ensure to update your **free-tier-private.mtaext** file in case you want to use an **existing PostgreSQL instance** as depicted below! 
-    > ```yaml
-    > resources:
-    >    - name: ai-postgresql-db
-    >      # Reuse existing instance
-    >      type: org.cloudfoundry.existing-service
-    >      parameters:
-    >        service-name: ${space}-aisaas-postgresql-db
-    >        service-plan: free
-    >        config:
-    >          engine_version: "13"
-    > ```
-    > A similar setup can also be achieved with an existing Credential Store Service instance. 
-
     ```sh
     # Run in ./(multi/single)-tenant/deploy/cf # 
     npm run deploy
     ```
 
 3. The deployment process will take a while, as especially creating the **PostgreSQL on SAP BTP, hyperscaler option** service instance might take up to 30mins. Wait for the process to finish successfully and also check in the **SAP BTP Cockpit** if all service instances have been created successfully. 
-   
-   > **Important** - Ensure to update your **mtaext** file in case you want to use an existing PostgreSQL instance! 
-   
+      
    [<img src="./images/DEP_CfSuccess.png" width="400"/>](./images/DEP_CfSuccess.png?raw=true)
 
 

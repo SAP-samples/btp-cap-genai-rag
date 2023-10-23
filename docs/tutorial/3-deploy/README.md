@@ -3,10 +3,10 @@
 In the following steps, you will learn how to build and deploy the AI sample application in your own SAP BTP environment. 
 
 - [Build the components](./1-BuildTheComponents.md)
-  - [Single-Tenant - SAP BTP, Kyma Runtime](./1-BuildTheComponents.md#single-tenant-1)
-  - [Multitenant - SAP BTP, Kyma Runtime](./1-BuildTheComponents.md#multitenant-1)
-  - [Single-Tenant - SAP BTP, Cloud Foundry Runtime](./1-BuildTheComponents.md#single-tenant)
-  - [Multitenant - SAP BTP, Cloud Foundry Runtime](./1-BuildTheComponents.md#multitenant)
+  - [SAP BTP, Kyma Runtime](./1-BuildTheComponents.md#sap-btp-kyma-runtime)
+  - [SAP BTP, Cloud Foundry Runtime](./1-BuildTheComponents.md#sap-btp-cloud-foundry-runtime)
+    - [Multitenant](./1-BuildTheComponents.md#multitenant)
+    - [Single-Tenant (Work in progress)](./1-BuildTheComponents.md#single-tenant-work-in-progress)
 - [Deploy the application](./2-DeployTheApplication.md)
   - [SAP BTP, Kyma Runtime](./2-DeployTheApplication#sap-btp-kyma-runtime.md)
   - [SAP BTP, Cloud Foundry Runtime](./2-DeployTheApplication.md#sap-btp-cloud-foundry-runtime)
