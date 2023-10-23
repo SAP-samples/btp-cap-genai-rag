@@ -108,17 +108,17 @@ export const completion = async (prompt: string, tenant?: string, LLMParams: {} 
  * @param tenant the tenant for which the completion is being made
  * @returns the text completion
  */
-export const chatCompletion = async (messages: BaseMessage[], tenant?: string): Promise<ChatResult> => {
+export const chatCompletion = async (
+    request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
+    tenant?: string
+): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
     const appName = getAppName();
     const resourceGroupId = tenant ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
         const payload: any = {
-            messages: messages.map((value: BaseMessage) => ({
-                role: value.name,
-                content: value.content
-            })),
+            messages: request.messages,
             max_tokens: 2000,
             temperature: 0.0,
             frequency_penalty: 0,
@@ -133,19 +133,7 @@ export const chatCompletion = async (messages: BaseMessage[], tenant?: string): 
             headers: headers
         });
 
-        const generations = response.choices.map(
-            (value: OpenAIClient.Chat.Completions.ChatCompletion.Choice) =>
-                ({
-                    message: {
-                        name: value.message.role,
-                        content: value.message.content || "",
-                        text: value.message.content || ""
-                    }
-                }) as ChatGeneration
-        );
-        return {
-            generations
-        };
+        return response;
     } else {
         // @ts-ignore
         return null;

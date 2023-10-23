@@ -16,7 +16,7 @@ import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vector
 
 import * as aiCore from "../utils/ai-core";
 import BTPEmbedding from "../utils/langchain/BTPEmbedding";
-import BTPChatModel from "../utils/langchain/BTPChatModel";
+import BTPAzureOpenAIChatLLM from "../utils/langchain/BTPAzureOpenAIChatLLM";
 
 import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail } from "./types";
 import {
@@ -270,7 +270,7 @@ export default class CommonMailInsights extends ApplicationService {
     ): Promise<Array<IProcessedMail>> => {
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPChatModel(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -318,7 +318,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPChatModel(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -394,7 +394,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_LANGUAGE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPChatModel(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -435,7 +435,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPChatModel(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -499,7 +499,7 @@ export default class CommonMailInsights extends ApplicationService {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
             const formatInstructions = parser.getFormatInstructions();
-            const llm = new BTPChatModel(aiCore.chatCompletion, tenant);
+            const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
             const systemPrompt = new PromptTemplate({
                 template:
