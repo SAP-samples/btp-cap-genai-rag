@@ -19,6 +19,12 @@
                             <VBox class="sapUiTinyMarginTopBottom sapUiLargeMarginBegin">
                                 <Panel class="sapUiNoContentPadding">
                                     <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.settings}"/>
+                                    </Toolbar>
+                                    <CheckBox text="{i18n>filters.texts.workIn}" selected="{/translationOn}"/>
+                                </Panel>
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
+                                    <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.requestState}"/>
                                         <ToolbarSpacer/>
                                         <Link id="requestStatesClearLink" text="{i18n>filters.link.clear}" enabled="{= ${/activeRequestStates}.length > 0 }" press="onPressClear"/>
@@ -35,7 +41,7 @@
                                     </List>
                                 </Panel>
 
-                                <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.requestType}"/>
                                         <ToolbarSpacer/>
@@ -53,7 +59,7 @@
                                     </List>
                                 </Panel>
 
-                                <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.urgency}"/>
                                         <ToolbarSpacer/>
@@ -71,7 +77,7 @@
                                     </List>
                                 </Panel>
 
-                                <Panel class="sapUiNoContentPadding sapUiMediumMarginTop">
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
                                         <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.sentiment}"/>
                                         <ToolbarSpacer/>
@@ -102,7 +108,7 @@
                                 <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
                                     <Title text="{i18n>inbox.list.title} ({/emailsCount})" titleStyle="H4"/>
                                     <VBox justifyContent="Center">
-                                        <Link text="{i18n>inbox.link.sortBy} {/sortText}" press="onSortEmailsList"/>
+                                        <!-- <Link text="{i18n>inbox.link.sortBy} {/sortText}" press="onSortEmailsList"/> -->
                                     </VBox>
                                 </HBox>
                             </VBox>
@@ -118,7 +124,8 @@
                                 items="{
                                     path: 'api>/Mails',
                                     parameters: {
-                                        $count: true
+                                        $count: true,
+                                        $expand: 'translation'
                                     },
                                     events: {
                                         dataReceived: '.onUpdateEmailsList'
@@ -126,7 +133,7 @@
                                 }"
                                 selectionChange="onSelectEmail">
                                 <CustomListItem
-                                    tooltip="{api>subject}"
+                                    tooltip="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"
                                     highlight="{= !${path: 'api>responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? 'Information' : 'None' }"
                                     selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${/activeEmailId} }">
                                     <core:Fragment fragmentName="aisaas.ui.view.EmailListItem" type="XML"/>
