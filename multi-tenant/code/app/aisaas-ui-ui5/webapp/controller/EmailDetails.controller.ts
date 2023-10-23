@@ -15,6 +15,8 @@ import Text from "sap/m/Text";
 import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import MessageToast from "sap/m/MessageToast";
+import ContextV4 from "sap/ui/model/odata/v4/Context";
+
 
 import { Mail, KeyFact, Action } from "../model/entities";
 import Formatter from "../model/formatter";
@@ -179,20 +181,32 @@ export default class EmailDetails extends BaseController {
         }
     }
 
-    public onPressSend(): void {
+    /* To submit response for finalization */
+    public async onPressSend(): Promise<void> {
         const localModel: JSONModel = this.getModel() as JSONModel;
-        if (!localModel.getProperty("/translationOn"))
-            localModel.setProperty(
-                "/responseBody",
-                this.getView().getBindingContext("api").getProperty("mail/responseBody")
-            );
-        // else localModel.setProperty("/translatedResponseBody", this.getView().getBindingContext("api").getProperty("mail/translation/responseBody"));
-        else
-            localModel.setProperty(
-                "/translatedResponseBody",
-                this.getView().getBindingContext("api").getProperty("mail/responseBody")
-            );
+        const responseToSend = localModel.getProperty("/translatedResponseBody") as string;
+        const idMail = localModel.getProperty("/activeEmailId") as string;
 
-        MessageToast.show("Not implemented!");
+        try {
+            localModel.setProperty("/busy", true);
+            const response = await fetch("api/odata/v4/mail-insights/submitResponse", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ id: idMail, response: responseToSend })
+            });
+            if (response.ok) {
+                localModel.setProperty("/busy", false);
+                MessageToast.show(this.getText("email.texts.responseSubmittedMessage"));
+                // refresh model to show active email as answered now
+                this.getModel("api").refresh();
+            } else {
+                MessageToast.show(this.getText("email.texts.genericErrorMessage"));
+            }
+        } catch (error) {
+            console.log(error);
+            MessageToast.show(this.getText("email.texts.genericErrorMessage"));
+        }
     }
 }
