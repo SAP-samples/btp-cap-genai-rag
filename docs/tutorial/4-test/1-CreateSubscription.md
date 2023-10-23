@@ -1,8 +1,9 @@
 # Create a Subscription (Multitenant only)
 
+> **Important** - This chapter is only relevant for the **multitenant version** of our GenAI Mail Insights Sample Scenario. In a single tenant setup, you can directly access your application using the Cloud Foundry Route or Virtual Service created for your Application Router. 
+
 > **Hint** - The application has been renamed to **GenAI Mail Insights** - Screenshots will be updated soon!
 
-> **Important** - This chapter is only relevant for the multitenant version of our GenAI Mail Insights Sample Scenario. In a single tenant setup, you can directly access your application using the Cloud Foundry Route or Virtual Service created for your Application Router. 
 
 1. Create a new Subscriber Subaccount in the same SAP BTP region where your Provider Subaccount is allocated. 
 

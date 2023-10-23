@@ -1,8 +1,5 @@
 ## Table of Contents
 
-Basics
-Hands-On
-
 <!-- disco-toc-start -->
 - Intro
     - [Scenario](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/1-intro/1-Scenario.md)<!-- dc-card: {"label": ["Basics"]} dc-card -->
@@ -17,8 +14,8 @@ Hands-On
     - [Enable pgvector extension](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/3-deploy/3-EnablePgVector.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
     - [Post-Deployment Actions](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/3-deploy/4-PostDeployActions.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
 - Test
-    - [Create Subscription (Multitenant only)](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/1-CreateSubscription.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
-    - [Create API Service Instance (Multitenant only)](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/2-CreateAPIService.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
+    - [Create Subscription](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/1-CreateSubscription.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
+    - [Create API Service Instance](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/2-CreateAPIService.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
     - [Push sample mails](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/3-PushSampleMails.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
     - [Test the Application](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/4-TestApplication.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
 - Extend
