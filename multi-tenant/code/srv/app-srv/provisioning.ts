@@ -50,14 +50,18 @@ abstract class Provisioning {
 
                 await delay(10000);
                 const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-                const responseConfigurationCreation = await aiCore.createConfiguration({}, headers);
-                if (responseConfigurationCreation.id) {
-                    await delay(5000);
-                    await aiCore.createDeployment(responseConfigurationCreation.id, headers);
-                    console.log("Success: Onboarding completed!");
-                } else {
-                    console.log("Failed: Error during onboarding - Configuration not created well!");
-                }
+                const responseConfigurationCreation = await aiCore.createConfigurations({}, headers);
+                
+                responseConfigurationCreation.forEach(async(configuration) => {
+                    if (configuration.id) {
+                        await delay(5000);
+                        await aiCore.createDeployment(configuration.id, headers);
+                        console.log("Success: Onboarding completed!");
+                    } else {
+                        console.log("Failed: Error during onboarding - Configuration not created well!");
+                    }
+                })
+            
             }else{
                 console.log("Info: AI Core Resource Groups will not be created");
                 console.log("Success: Onboarding completed!");

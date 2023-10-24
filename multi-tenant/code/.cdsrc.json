@@ -3,10 +3,11 @@
         "db-sqlite": "db/sqlite"
     },
     "requires": {
-        "PROVIDER_AI_CORE_DESTINATION": {
+        "PROVIDER_AI_CORE_DESTINATION_HUB": {
             "kind": "rest",
             "credentials": {
-                "destination": "PROVIDER_AI_CORE_DESTINATION"
+                "destination": "PROVIDER_AI_CORE_DESTINATION_HUB",
+                "requestTimeout": "120000"
             }
         },
         "SUBSCRIBER_OFFICE365_DESTINATION": {
@@ -16,7 +17,7 @@
             }
         },
         "aicore": {
-            "createResourceGroups": false
+            "createResourceGroups": true
         },
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
