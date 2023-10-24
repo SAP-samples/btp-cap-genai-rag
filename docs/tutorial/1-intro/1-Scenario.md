@@ -1,7 +1,6 @@
 # Scenario
 
-This part of the tutorial contains a general introduction to the scenario covered by this step-by-step tutorial as well as some technical highlights of our sample scenario. 
-
+This part of the tutorial offers a comprehensive overview of the scenario addressed in this step-by-step guide, along with key technical highlights of our sample scenario.
 
 ## Introduction
 
@@ -20,16 +19,28 @@ If needed, there is also a **single-tenant** version of the application availabl
 
 ## Technical Highlights
 
-The major highlight differentiating our GenAI Mail Insights sample scenario from existing SAP BTP sample scenarios consists in the usage of the generative AI hub in SAP AI Core. This applies for the single-tenant as well as the multitenant scenario. In this short intro, we will highlight the use-specifics that go beyond a standard CAP-based multitenant SAPUI5 application. 
+The standout feature that distinguishes our GenAI Mail Insights sample scenario from existing SAP BTP sample scenarios is its utilization of the generative AI hub within SAP AI Core. This application extends its functionality to both single-tenant and multi-tenant scenarios. In this concise introduction, we aim to explain the unique aspects that set it apart from standard CAP-based multi-tenant SAPUI5 applications.
 
-> **Hint** If you are new to the topic of multitenancy in SAP BTP, we highly suggest to check the following GitHub repository, to learn more about deploying a CAP-based multitenant application in the SAP BTP, Kyma Runtime as well as the SAP BTP, Cloud Foundry Runtime. 
+> **Insight:** If the concept of multitenancy in SAP BTP is new to you, we strongly suggest perusing the following GitHub repository to gain a deeper understanding of deploying a CAP-based multitenant application in the SAP BTP, Kyma Runtime, as well as the SAP BTP, Cloud Foundry Runtime.
 > 
->[Develop a multitenant Software as a Service application in SAP BTP using CAP](https://github.com/SAP-samples/btp-cap-multitenant-saas) 
+> [Explore the development of a multitenant Software as a Service application in SAP BTP using CAP](https://github.com/SAP-samples/btp-cap-multitenant-saas)
 
 **Vector Store**
 
-In this sample scenario, a Vector database is required to store so-called embeddings generated from the incoming emails. Those **embeddings** allow a similarity search to identify similar emails when generating new response suggestions. Until a native support for storing vectors/embeddings in SAP HANA Cloud, a PostgreSQL database is used to store the respective embeddings. The integration within the app is handled via features provided by LangChain, making the process a breeze. 
+Within this sample scenario, a Vector database plays a pivotal role, serving as the repository for embeddings generated from incoming emails. These embeddings, in turn, facilitate a similarity search for identifying analogous emails when generating novel response suggestions. In the absence of native support for storing vectors or embeddings in SAP HANA Cloud, we employ a PostgreSQL database for this purpose. The integration into the application is seamless, using features provided by LangChain.
+
+**SAP AI Core**
+
+SAP AI Core is a service within the SAP Business Technology Platform that is designed to manage the execution and operations of your AI assets in a standardized, scalable, and cloud-agnostic manner. Beyond its compatibility with third-party offerings, such as the OpenAI Large Language Model services, SAP AI Core offers the flexibility to deploy custom workloads. 
 
 **generative AI hub**
 
-The generative AI hub is part of the SAP AI Core offering and allows customer and partners to use generative AI offerings provided by SAP or Large Language Models hosted by Azure (OpenAI) and other third party vendors. 
+A fundamental component of the SAP AI Core offering, the generative AI hub empowers customers and partners to leverage generative AI solutions provided by SAP, Large Language Models hosted by Azure (OpenAI), and other reputable third-party vendors. Please note that, as of the present, there is no free tier offering available for the generative AI hub service plan, and charges are incurred based on the tokens consumed.
+
+**SAP AI Launchpad**
+
+The SAP AI Launchpad provides a user-friendly graphical interface for seamless interaction with SAP AI Core offerings, including the generative AI hub. Users can conveniently create the necessary configurations and deployments directly within the SAP AI Launchpad. Alternatively, the corresponding SAP AI Core APIs, integral to our multi-tenant setup, are also at your disposal.
+
+**Resource Groups**
+
+SAP AI Core introduces the concept of "Resource Groups", used for tenant segregation within our sample setup. Future releases of SAP AI Core have plans to introduce a metering feature based on resource-groups (subject to change — please consult the official roadmap). While in a single-tenant scenario, a default resource group suffices, in a multitenant context, unique resource groups are used for each tenant. Configurations and Deployments are automatically generated within a new resource group upon tenant subscription.
