@@ -86,29 +86,36 @@ export default class CommonMailInsights extends ApplicationService {
         try {
             const { tenant } = req;
             const { id } = req.data;
-            const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id);
+            const { Mails, Translations } = this.entities;
+
+            const mail = await SELECT.from(Mails, (m) => {
+                m`.*`;
+                m.translation((t) => {
+                    t`.*`;
+                });
+            }).where(`ID = '${id}'`);
+
             const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
             const closestMails =
                 closestMailsIDs.length > 0
-                    ? await SELECT.from(Mails)
-                          .where({
-                              ID: {
-                                  in: closestMailsIDs.map(
-                                      ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
-                                  )
-                              }
-                          })
-                          .columns((m: any) => {
-                              m.ID;
-                              m.subject;
-                              m.body;
-                              m.category;
-                              m.sender;
-                              m.responded;
-                              m.responseBody;
-                              m.translation;
-                          })
+                    ? await SELECT.from(Mails, (m) => {
+                          m.ID;
+                          m.subject;
+                          m.body;
+                          m.category;
+                          m.sender;
+                          m.responded;
+                          m.responseBody;
+                          m.translation((t) => {
+                              t`.*`;
+                          });
+                      }).where({
+                          ID: {
+                              in: closestMailsIDs.map(
+                                  ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
+                              )
+                          }
+                      })
                     : [];
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
                 //@ts-ignore
@@ -561,7 +568,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     public getVectorStore = async (tenant?: string) => {
-        const embeddings = new BTPEmbedding(aiCore.embed, tenant);
+        const embeddings = new BTPEmbedding(aiCore.embed, undefined, {});
         const args = getPostgresConnectionOptions(tenant);
         const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
         await typeormVectorStore.ensureTableInDatabase();
