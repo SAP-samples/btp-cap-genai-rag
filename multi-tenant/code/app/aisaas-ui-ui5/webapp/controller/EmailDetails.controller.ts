@@ -1,6 +1,6 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import ODataModel from "sap/ui/model/odata/v4/ODataModel"; 
+import ODataModel from "sap/ui/model/odata/v4/ODataModel";
 import Event from "sap/ui/base/Event";
 import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 import ObjectPageSection from "sap/uxap/ObjectPageSection";
@@ -139,11 +139,11 @@ export default class EmailDetails extends BaseController {
     }
 
     public async onPressRegenerate(): Promise<void> {
-        const oDataModel = this.getModel('api') as ODataModel;
-		const localModel: JSONModel = this.getModel() as JSONModel;
+        const oDataModel = this.getModel("api") as ODataModel;
+        const localModel: JSONModel = this.getModel() as JSONModel;
         localModel.setProperty("/busy", true);
-        
-		const httpHeaders: any = oDataModel.getHttpHeaders();
+
+        const httpHeaders: any = oDataModel.getHttpHeaders();
 
         await fetch("api/odata/v4/mail-insights/regenerateResponse", {
             method: "POST",
@@ -188,7 +188,6 @@ export default class EmailDetails extends BaseController {
         const localModel: JSONModel = this.getModel() as JSONModel;
         const responseToSend = localModel.getProperty("/translatedResponseBody") as string;
         const idMail = localModel.getProperty("/activeEmailId") as string;
-
         try {
             localModel.setProperty("/busy", true);
             const response = await fetch("api/odata/v4/mail-insights/submitResponse", {
@@ -199,7 +198,6 @@ export default class EmailDetails extends BaseController {
                 body: JSON.stringify({ id: idMail, response: responseToSend })
             });
             if (response.ok) {
-                localModel.setProperty("/busy", false);
                 MessageToast.show(this.getText("email.texts.responseSubmittedMessage"));
                 // refresh model to show active email as answered now
                 this.getModel("api").refresh();
@@ -209,6 +207,8 @@ export default class EmailDetails extends BaseController {
         } catch (error) {
             console.log(error);
             MessageToast.show(this.getText("email.texts.genericErrorMessage"));
+        } finally {
+            localModel.setProperty("/busy", false);
         }
     }
 }

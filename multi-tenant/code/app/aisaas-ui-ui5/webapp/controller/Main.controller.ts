@@ -150,8 +150,7 @@ export default class Main extends BaseController {
     }
 
     public async onSearch(): Promise<void> {
-        // if (this.hasResponseChanged()) {
-        if (false) {
+        if (this.hasResponseChanged()) {
             await this.openConfirmationDialog(
                 this.getText("confirmationDialog.texts.triggerFilterMessage"),
                 this.applyFilter.bind(this),
@@ -189,8 +188,7 @@ export default class Main extends BaseController {
             selectedIds.push(selectedListItem.getBindingContext("filters").getProperty("id"))
         );
 
-        // if (this.hasResponseChanged()) {
-        if (false) {
+        if (this.hasResponseChanged()) {
             await this.openConfirmationDialog(
                 this.getText("confirmationDialog.texts.triggerFilterMessage"),
                 () => this.applySelectedFilter(this.getActivePath(list.getId()), selectedIds),
@@ -359,8 +357,7 @@ export default class Main extends BaseController {
         const selectedId: string = selectedEmailContext.getProperty("ID");
         const localModel: JSONModel = this.getModel() as JSONModel;
 
-        // if (this.hasResponseChanged()) {
-        if (false) {
+        if (this.hasResponseChanged()) {
             const activeListItem: ListItemBase = emailsList
                 .getItems()
                 .find(
