@@ -91,7 +91,8 @@ export default class CommonMailInsights extends ApplicationService {
             const { tenant } = req;
             const { id } = req.data;
             const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id);
+            // expand nested translation part with projection function
+            const mail = await SELECT.one.from(Mails, id, (mail: any) => { mail("*"), mail.translation ((t: any) => t("*")) });
             const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
             const closestMails =
                 closestMailsIDs.length > 0

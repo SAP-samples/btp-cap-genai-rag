@@ -14,8 +14,7 @@
 			<ux:ObjectPageDynamicHeaderTitle>
 				<ux:heading>
 					<VBox>
-						<!-- <Title wrapping="true" text="{= !${/translationOn} ? ${api>mail/subject} : ${api>mail/translation/subject} }"/> -->
-						<Title wrapping="true" text="{api>mail/subject}"/>
+						<Title wrapping="true" text="{= !${/translationOn} ? ${api>mail/subject} : ${api>mail/translation/subject} }"/>
 						<HBox>
 							<!-- <Label vAlign="Middle" text="{path: 'api>mail/modifiedAt', formatter: 'formatter.formatDate'}"/> -->
 							<ObjectStatus
@@ -54,8 +53,7 @@
 					<ux:ObjectPageSubSection
 						title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.incomingMessage} : ${i18n>email.titles.message} }">
 						<VBox class="sapUiTinyMargin">
-							<!-- <Text text="{= !${/translationOn} ? ${api>mail/body} : ${api>mail/translation/body} }"/> -->
-							<Text text="{api>mail/body}"/>
+							<Text text="{= !${/translationOn} ? ${api>mail/body} : ${api>mail/translation/body} }"/>
 						</VBox>
 					</ux:ObjectPageSubSection>
 				</ux:subSections>
@@ -110,7 +108,6 @@
 								placeholder="{i18n>email.textAreas.placeholders.suggestedResponse}"
 								value="{/translatedResponseBody}"
 								showValueStateMessage="false"
-								valueState="None"
 								liveChange="onChangeResponse"/>
 								<!-- valueState="{= ${/translatedResponseBody} !== ${api>mail/translation/responseBody} ? 'Warning' : 'None' }" -->
 							<HBox justifyContent="End">

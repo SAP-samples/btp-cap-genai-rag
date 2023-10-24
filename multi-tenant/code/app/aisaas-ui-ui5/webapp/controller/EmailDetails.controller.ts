@@ -15,8 +15,6 @@ import Text from "sap/m/Text";
 import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import MessageToast from "sap/m/MessageToast";
-import ContextV4 from "sap/ui/model/odata/v4/Context";
-
 
 import { Mail, KeyFact, Action } from "../model/entities";
 import Formatter from "../model/formatter";
@@ -71,8 +69,7 @@ export default class EmailDetails extends BaseController {
         const infoBox: VBox = new VBox();
         infoBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
         const infoTitle: Title = new Title({ text: this.getText("email.titles.customerInformation") });
-        // const senderText: Text = new Text({ text: !inTranslatedLanguage ? mail.sender : mail.translation.sender });
-        const senderText: Text = new Text({ text: mail.sender });
+        const senderText: Text = new Text({ text: !inTranslatedLanguage ? mail.sender : mail.translation.sender });
         const emailAddressText: Text = new Text({ text: mail.senderEmailAddress as string });
         infoBox.addItem(infoTitle);
         infoBox.addItem(senderText);
@@ -87,8 +84,7 @@ export default class EmailDetails extends BaseController {
         languageBox.addItem(languageText);
         parentBox.addItem(languageBox);
 
-        // const facts: KeyFact[] = !inTranslatedLanguage ? mail.keyFacts : mail.translation.keyFacts;
-        const facts: KeyFact[] = mail.keyFacts;
+        const facts: KeyFact[] = !inTranslatedLanguage ? mail.keyFacts : mail.translation.keyFacts;
         facts?.map((factItem: KeyFact) => {
             const childBox: VBox = new VBox();
             childBox.addStyleClass("sapUiTinyMarginTop sapUiMediumMarginEnd");
@@ -161,9 +157,10 @@ export default class EmailDetails extends BaseController {
             })
             .then((result: Mail) => {
                 localModel.setProperty("/responseBody", result.responseBody);
-                // localModel.setProperty("/translatedResponseBody", !result.languageMatch ? result.translation.responseBody : result.responseBody);
-                localModel.setProperty("/translatedResponseBody", result.responseBody);
-
+                localModel.setProperty(
+                    "/translatedResponseBody",
+                    !result.languageMatch ? result.translation.responseBody : result.responseBody
+                );
                 localModel.setProperty("/busy", false);
                 MessageToast.show(this.getText("email.texts.generateResponseMessage"));
             })
