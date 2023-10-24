@@ -1,5 +1,6 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import ODataModel from "sap/ui/model/odata/v4/ODataModel"; 
 import Event from "sap/ui/base/Event";
 import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 import ObjectPageSection from "sap/uxap/ObjectPageSection";
@@ -142,12 +143,16 @@ export default class EmailDetails extends BaseController {
     }
 
     public async onPressRegenerate(): Promise<void> {
-        const localModel: JSONModel = this.getModel() as JSONModel;
+        const oDataModel = this.getModel('api') as ODataModel;
+		const localModel: JSONModel = this.getModel() as JSONModel;
         localModel.setProperty("/busy", true);
+        
+		const httpHeaders: any = oDataModel.getHttpHeaders();
 
         await fetch("api/odata/v4/mail-insights/regenerateResponse", {
             method: "POST",
             headers: {
+                "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({

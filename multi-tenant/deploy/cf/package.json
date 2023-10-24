@@ -6,17 +6,16 @@
   "license": "Apache License 2.0",
   "scripts": {
     "---BUILD---": "",
-    "build": "npm run inst && npm run build:cds && npm run copy:common && npm run copy:packages && npm run build:ts && npm run replace:paths && npm run cleanup:ts",
+    "build": "npm run inst && npm run build:cds && npm run copy:common && npm run build:ts && npm run replace:paths && npm run cleanup:ts",
     "inst": "npm i --prefix ../../code",
     "build:cds": "npx -p @sap/cds-dk cds build -in ../../code --profile production",
     "copy:common": "npx shx cp -r ../../code/srv/common ../../code/gen/api && npx shx cp -r ../../code/srv/common ../../code/gen/app",
-    "copy:packages": "npx shx cp -r ../../code/packages ../../code/gen/api && npx shx cp -r ../../code/packages ../../code/gen/app",
     "build:ts": "tsc -p ../../code/tsconfig.json",
     "replace:paths": "npx shx sed -i \"s/(srv\\/api-srv|srv\\/app-srv)/srv/g\" ../../code/gen/**/csn.json",
     "cleanup:ts": "npx shx rm -r '../../code/gen/**/*.{ts,tsconfig}'",
     "---DEPLOY---": "",
-    "build:mbt": "mbt build -p=cf -t=./mta_archives --mtar=aisaas.mtar",
-    "deploy": "cf deploy mta_archives/aisaas.mtar -e ./mtaext/free-tier.mtaext",
-    "build:deploy": "npm run build && npm run build:mbt && npm run deploy"
+    "build:mbt": "mbt build -e ./mtaext/free-tier-private.mtaext",
+    "deploy": "cf deploy mta_archives/aisaas_0.0.1.mtar",
+    "build:deploy": "npm run build:mbt && npm run deploy"
   }
 }
