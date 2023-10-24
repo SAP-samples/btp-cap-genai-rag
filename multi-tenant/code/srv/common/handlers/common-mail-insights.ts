@@ -88,7 +88,7 @@ export default class CommonMailInsights extends ApplicationService {
             const { id } = req.data;
             const { Mails, Translations } = this.entities;
 
-            const mail = await SELECT.from(Mails, (m) => {
+            const mail = await SELECT.one.from(Mails, (m) => {
                 m`.*`;
                 m.translation((t) => {
                     t`.*`;
