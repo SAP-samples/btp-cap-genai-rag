@@ -10,7 +10,6 @@ cds.env.requires["cds.xt.ExtensibilityService"] = false;
 
 cds.on('bootstrap', async (app : express.Application) => {
     app.get('/healthz', (_, res) => { res.status(200).send('OK') })
-    app.use(express.json({ limit: '50MB' }))
 });
 
 export default cds.server;

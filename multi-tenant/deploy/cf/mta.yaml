@@ -79,7 +79,6 @@ modules:
                 - encrypt
                 - list
       - name: aisaas-logging
-      - name: aisaas-aicore
       - name: aisaas-postgresql-db
       - name: aisaas-registry
       - name: aisaas-service-manager
@@ -200,7 +199,7 @@ modules:
                   - $XSMASTERAPPNAME.plan_premium
           extend_catalog:
             metadata:
-              displayName: AI SaaS API ${space}
+              displayName: GenAI Mail Insights API ${space}
     requires:
       - name: aisaas-api-uaa
       - name: aisaas-api-srv-api
@@ -228,6 +227,7 @@ modules:
       - name: aisaas-api-uaa
       - name: aisaas-destination
       - name: aisaas-postgresql-db
+      - name: aisaas-registry
     provides:
       - name: aisaas-api-srv-api
         properties:
@@ -249,19 +249,19 @@ resources:
       config:
         xsappname: ${xsuaa-app}
         role-collections:
-          - name: AI SaaS Member (${space})
+          - name: GenAI Mail Insights Member (${space})
             description: Member Access
             role-template-references:
               - "$XSAPPNAME.Member"
               - "$XSAPPNAME.Token_Exchange"
-          - name: AI SaaS Administrator (${space})
+          - name: GenAI Mail Insights Administrator (${space})
             description: Administrator Access
             role-template-references:
               - "$XSAPPNAME.Admin"
               - "$XSAPPNAME.SaaSAdmin"
               - "$XSAPPNAME.UserManagementAdmin"
               - "$XSAPPNAME.Token_Exchange"
-          - name: AI SaaS Extension Developer (${space})
+          - name: GenAI Mail Insights Extension Developer (${space})
             description: Extension Developer Access
             role-template-references:
               - "$XSAPPNAME.ExtensionDeveloper"
@@ -378,8 +378,8 @@ resources:
       config:
         xsappname: ~{aisaas-uaa/xsuaa-app}
         appName: ~{aisaas-uaa/xsuaa-app}
-        displayName: AI SaaS ${space}
-        description: AI SaaS Application
+        displayName: GenAI Mail Insights ${space}
+        description: GenAI Mail Insights Application
         category: SaaS Multitenant Apps
         appUrls:
           onSubscription: ~{aisaas-srv-api/srv-url}/-/cds/saas-provisioning/tenant/{tenantId}
@@ -388,11 +388,11 @@ resources:
           getDependencies: ~{aisaas-srv-api/srv-url}/-/cds/saas-provisioning/dependencies
         appPlans:
           - name: trial
-            description: AI SaaS trial plan
+            description: GenAI Mail Insights trial plan
           - name: default
-            description: AI SaaS default plan
+            description: GenAI Mail Insights default plan
           - name: premium
-            description: AI SaaS premium plan
+            description: GenAI Mail Insights premium plan
 
   # ------------------- SERVICE MANAGER SERVICE ----------------
   - name: aisaas-service-manager
@@ -454,12 +454,13 @@ resources:
             existing_destinations_policy: update
             destinations:
               - Name: aisaas-srv-api
-                Description: AI SaaS Service API
+                Description: GenAI Mail Insights Service API
                 URL: ~{aisaas-srv-api/srv-url}
                 Type: HTTP
                 ProxyType: Internet
                 Authentication: NoAuthentication
                 HTML5.DynamicDestination: true
+                HTML5.Timeout: 120000
                 forwardAuthToken: true
 
   # ----------------- AUTOSCALER  ------------------------------------
@@ -516,13 +517,3 @@ resources:
         xsappname: ${xsuaa-app}
     properties:
       xsuaa-app: ${xsuaa-app}
-
-  # ---------------- CORE AI SERVICE ---------------------------
-  - name: aisaas-aicore
-  # ------------------------------------------------------------
-    active: false
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: aicore
-      service-name: ${space}-aisaas-aicore
-      service-plan: standard

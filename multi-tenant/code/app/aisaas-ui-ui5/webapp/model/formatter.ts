@@ -1,5 +1,5 @@
 import DateFormat from "sap/ui/core/format/DateFormat";
-import { FilterItem } from "./entities";
+import { FilterItem, ClosestMail } from "./entities";
 
 export default {
 	formatValue: (value: string) => {
@@ -60,7 +60,10 @@ export default {
 		} else return null
 	},
 
-	getFormattedSimilarity: (value: number) => {
-		return Math.trunc(value * 100)
+	getSimilarEmailHeader: (similarEmail: ClosestMail, similarityText: string, translationOn: boolean) => {
+		const similarity: number = Math.trunc(similarEmail.similarity * 100);
+		if (!translationOn) return `${similarEmail.mail.subject} | ${similarityText}: ${similarity}%`
+		// else return `${similarEmail.mail.translation.subject} | ${similarityText}: ${similarity}%`
+		else return `${similarEmail.mail.subject} | ${similarityText}: ${similarity}%`
 	}
 };

@@ -12,14 +12,14 @@
         </HBox>
         <VBox width="calc(100% - 5rem)">
             <HBox justifyContent="SpaceBetween">
-                <Label text="{api>sender}" wrapping="true"/>
-                <Label text="{path: 'api>modifiedAt', formatter: 'formatter.formatDate'}" wrapping="true"/>
+                <Label text="{= !${/translationOn} ? ${api>sender} : ${api>translation/sender} }" wrapping="true"/>
+                <!-- <Label text="{path: 'api>modifiedAt', formatter: 'formatter.formatDate'}" wrapping="true"/> -->
             </HBox>
             <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
                 <VBox width="calc(100% - 2rem)">
                     <tnt:InfoLabel displayOnly="true" text="{api>category}"/>
-                    <Title class="sapUiTinyMarginTop" text="{api>subject}"/>
-                    <Text maxLines="2" text="{api>body}"/>
+                    <Title class="sapUiTinyMarginTop" text="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"/>
+                    <Text maxLines="2" text="{= !${/translationOn} ? ${api>body} : ${api>translation/body} }"/>
                 </VBox>
                 <VBox>
                     <ObjectStatus

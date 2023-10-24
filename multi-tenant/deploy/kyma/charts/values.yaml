@@ -87,6 +87,8 @@ api:
       serviceInstanceName: destination
     postgresql-db:
       serviceInstanceName: postgresql-db
+    saas-registry:
+      serviceInstanceName: saas-registry
   image:
     # Provide your API Service Docker Image repository
     repository: 
@@ -125,20 +127,20 @@ broker:
     # Leave empty to generate new ID on Helm installation
     # ! Should be static in productive scenarios !
     serviceId: 
-    displayName: AI SaaS API
+    displayName: GenAI Mail Insights API
     plans:
       - name: default
-        description: Standard Plan
+        description: GenAI Mail Insights default plan
         # Leave empty to generate new ID on Helm installation
         # ! Should be static in productive scenarios !
         planId:  
       - name: premium
-        description: Premium Plan
+        description: GenAI Mail Insights premium plan
         # Leave empty to generate new ID on Helm installation
         # ! Should be static in productive scenarios !
         planId:
       - name: trial
-        description: Trial Plan
+        description: GenAI Mail Insights trial plan
         # Leave empty to generate new ID on Helm installation
         # ! Should be static in productive scenarios !
         planId:
@@ -195,19 +197,19 @@ xsuaa:
     # Role collections names have to be unique in the same subaccount
     # Therefore a unique identifer has to be utilized 
     role-collections:
-      - name: 'AI SaaS Member ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'GenAI Mail Insights Member ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Member Access
         role-template-references: 
           - '$XSAPPNAME.Member'
           - '$XSAPPNAME.Token_Exchange'
-      - name: 'AI SaaS Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'GenAI Mail Insights Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Administrator Access
         role-template-references: 
           - '$XSAPPNAME.Admin'
           - '$XSAPPNAME.SaaSAdmin'
           - '$XSAPPNAME.UserManagementAdmin'
           - '$XSAPPNAME.Token_Exchange'
-      - name: 'AI SaaS Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'GenAI Mail Insights Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Extension Developer Access
         role-template-references: 
           - '$XSAPPNAME.ExtensionDeveloper'
@@ -306,11 +308,11 @@ xsuaa_api:
     # xsappname has to be unique in the same subaccount
     xsappname: '{{.Release.Name}}-api-{{.Release.Namespace}}'
     scopes:
-      - description: Default Plan
+      - description: GenAI Mail Insights default plan
         name: $XSAPPNAME.plan_default
-      - description: Trial Plan
+      - description: GenAI Mail Insights trial plan
         name: $XSAPPNAME.trial_default
-      - description: Premium Plan
+      - description: GenAI Mail Insights premium plan
         name: $XSAPPNAME.plan_premium
   
 
@@ -324,11 +326,11 @@ saas_registry:
   # The following setup provides an option to define a custom domain
   parameters:
     appPlans:
-      - description: AI SaaS default plan
+      - description: GenAI Mail Insights default plan
         name: default
-      - description: AI SaaS trial plan
+      - description: GenAI Mail Insights trial plan
         name: trial
-      - description: AI SaaS premium plan
+      - description: GenAI Mail Insights premium plan
         name: premium
     propagateParams: true
     paramsSchema: 
@@ -393,15 +395,6 @@ com_hdi_container:
   servicePlanName: hdi-shared
 
 
-# PostgreSQL Database
-# Required for storing vectors
-postgresql_db:
-  serviceOfferingName: postgresql-db
-  servicePlanName: free
-  parameters:
-    engine_version: "13"
-
-
 # SAP HTML5 Application Repository
 # Storing the SaaS application UI modules
 html5_repo_host:
@@ -414,3 +407,12 @@ html5_repo_host:
 html5_repo_runtime:
   serviceOfferingName: html5-apps-repo
   servicePlanName: app-runtime
+
+
+# PostgreSQL Database
+# Required for storing vectors
+postgresql_db:
+  serviceOfferingName: postgresql-db
+  servicePlanName: free
+  parameters:
+    engine_version: "13"

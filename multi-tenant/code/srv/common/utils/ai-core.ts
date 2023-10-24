@@ -6,7 +6,11 @@ import { decodeJwt } from "@sap-cloud-sdk/connectivity";
 import { OpenAI as OpenAIClient } from "openai";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "../vendor/AI_CORE_API";
-import { BaseMessage, ChatGeneration, ChatResult } from "langchain/schema";
+
+interface AICoreApiHeaders extends Record<string, string> {
+    "Content-Type": string;
+    "AI-Resource-Group": string;
+}
 
 enum Tasks {
     CHAT = "gpt-4-32k-config",
@@ -14,17 +18,12 @@ enum Tasks {
     EMBEDDING = "text-embedding-ada-002-config"
 }
 
-interface AICoreApiHeaders extends Record<string, string> {
-    "Content-Type": string;
-    "AI-Resource-Group": string;
-}
-
 const AI_CORE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_HUB";
 const SCENARIO_ID = "foundation-models";
 const EXECUTABLE_ID = "azure-openai";
 const VERSION_ID = "0.0.1";
-
-const configurations = [
+const API_VERSION = "2023-05-15";
+const CONFIGURATIONS = [
     {
         name: "gpt-4-32k-config",
         parameters: [
@@ -90,7 +89,7 @@ export const completion = async (prompt: string, tenant?: string, LLMParams: {} 
         const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
         const response: any = await aiCoreService.send({
             // @ts-ignore
-            query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=2023-05-15`,
+            query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=${API_VERSION}`,
             data: payload,
             headers: headers
         });
@@ -113,6 +112,7 @@ export const chatCompletion = async (
     tenant?: string
 ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
     const appName = getAppName();
+    
     const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
@@ -128,7 +128,7 @@ export const chatCompletion = async (
         const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
         const response: OpenAIClient.Chat.Completions.ChatCompletion = await aiCoreService.send({
             // @ts-ignore
-            query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=2023-05-15`,
+            query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=${API_VERSION}`,
             data: payload,
             headers: headers
         });
@@ -142,6 +142,7 @@ export const chatCompletion = async (
 
 export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
     const appName = getAppName();
+    
     const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
 
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
@@ -157,7 +158,7 @@ export const embed = async (texts: Array<string>, tenant?: string, EmbeddingPara
                 const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
                 const response: any = await aiCoreService.send({
                     // @ts-ignore
-                    query: `POST /inference/deployments/${deploymentId}/embeddings?api-version=2023-05-15`,
+                    query: `POST /inference/deployments/${deploymentId}/embeddings?api-version=${API_VERSION}`,
                     data: payload,
                     headers: headers
                 });
@@ -174,7 +175,7 @@ export const embed = async (texts: Array<string>, tenant?: string, EmbeddingPara
 const getAppName = () => {
     const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
     // @ts-ignore
-    const appName = services?.registry?.appName;
+    const appName = services[0]?.credentials?.appName;
     return appName;
 };
 
@@ -189,20 +190,19 @@ const getAppName = () => {
 export const getDeploymentId = async (resourceGroupId: string, task: Tasks = Tasks.COMPLETION) => {
     try {
         const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-
         const responseConfigurationQuery = await ConfigurationApi.configurationQuery()
             .skipCsrfTokenFetching()
             .addCustomHeaders(headers)
             .execute({ destinationName: AI_CORE_DESTINATION });
 
-        const configurationId = responseConfigurationQuery.resources?.find(
+        const configuration = responseConfigurationQuery.resources?.find(
             (configuration: any) => configuration.name === task
         );
 
         const responseDeploymentQuery = await DeploymentApi.deploymentQuery({
-            scenarioId: configurationId.scenarioId,
+            scenarioId: configuration.scenarioId,
             status: "RUNNING",
-            configurationId: configurationId.id,
+            configurationId: configuration.id,
             $top: 1
         })
             .skipCsrfTokenFetching()
@@ -273,7 +273,7 @@ export const getResourceGroups = async () => {
  */
 export const createConfigurations = async (configuration: ConfigurationBaseData, headers: AICoreApiHeaders) => {
     const responseConfigurationCreation = Promise.all(
-        configurations.map((config) => {
+        CONFIGURATIONS.map((config) => {
             return ConfigurationApi.configurationCreate({
                 // @ts-ignore
                 name: config.name,
