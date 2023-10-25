@@ -58,10 +58,28 @@ const filterForTranslation = ({
 export default class CommonMailInsights extends ApplicationService {
     async init() {
         await super.init();
+        const { Mails } = cds.entities;
+        this.after("READ", Mails, this.onAfterReadMails);
         this.on("getMails", this.onGetMails);
         this.on("getMail", this.onGetMail);
         this.on("addMails", this.onAddMails);
         this.on("deleteMail", this.onDeleteMail);
+    }
+
+    private onAfterReadMails = async (mails : any) => {
+        // Add default descriptions for actions
+        mails.forEach((mail : any) => {
+            if(mail.suggestedActions){
+                mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                    return {
+                        ...suggestedAction,
+                        descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                    };
+                });
+            }
+        })
+
+        return mails;
     }
 
     // Get all Mails excl. closest Mails
@@ -90,18 +108,20 @@ export default class CommonMailInsights extends ApplicationService {
             const { id } = req.data;
             const { Mails, Translations } = this.entities;
 
-            const mail = await SELECT.one.from(Mails, (m) => {
-                m`.*`;
-                m.translation((t) => {
-                    t`.*`;
-                });
-            }).where(`ID = '${id}'`);
+            const mail = await SELECT.one
+                .from(Mails, (m) => {
+                    m`.*`;
+                    m.translation((t) => {
+                        t`.*`;
+                    });
+                })
+                .where(`ID = '${id}'`);
 
             // Add default descriptions for actions
-            mail.suggestedActions = mail.suggestedActions?.map((action: any) => {
+            mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
                 return {
-                    ...action,
-                    descr: actions.find((action) => action.value === action.value)?.descr || ""
+                    ...suggestedAction,
+                    descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
                 };
             });
 
@@ -144,6 +164,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Process single or multiple new Mail(s)
     private onAddMails = async (req: Request) => {
         try {
+            const { Mails } = this.entities;
             const { tenant } = req;
             const { mails, rag } = req.data;
             const mailBatch = await this.regenerateInsights(mails, rag, tenant);
@@ -152,7 +173,6 @@ export default class CommonMailInsights extends ApplicationService {
             console.log("UPDATE MAILS WITH INSIGHTS...");
 
             cds.tx(async () => {
-                const { Mails } = this.entities;
                 await INSERT.into(Mails).entries(mailBatch);
             });
 
@@ -167,8 +187,25 @@ export default class CommonMailInsights extends ApplicationService {
                 }))
             );
 
-            // Return array of added Mails
-            return mailBatch;
+            const insertedMails = await SELECT.from(Mails, (m : any) => {
+                m`.*`;
+                m.translation((t : any) => {  t`.*` });
+            }).where({
+                ID: { in: mailBatch.map((mail: any) => mail.ID)}
+            });
+
+            // Add default descriptions for actions
+            insertedMails.forEach((mail) => {
+                mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                    return {
+                        ...suggestedAction,
+                        descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                    };
+                });
+            })
+
+            return insertedMails;
+
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -274,10 +311,10 @@ export default class CommonMailInsights extends ApplicationService {
         }
 
         // Add default descriptions for actions
-        mail.suggestedActions = mail.suggestedActions?.map((action: any) => {
+        mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
             return {
-                ...action,
-                descr: actions.find((action) => action.value === action.value)?.descr || ""
+                ...suggestedAction,
+                descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
             };
         });
 

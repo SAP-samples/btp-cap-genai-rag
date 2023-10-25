@@ -91,24 +91,24 @@ export const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
     summary: z.string(),
     keyFacts: z.array(
         z.object({
-            keyfact: z.string().optional(),
-            keyfactcategory: z.string().optional().nullable()
+            fact: z.string().optional(),
+            category: z.string().optional().nullable()
         })
     ),
     requestedServices: z.array(z.string()),
-    responseBody: z.string()
+    responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, '\n')) 
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
       Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
 
 export const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
-    responseBody: z.string()
+    responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, '\n')) 
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
         Your task is to translate the values for this schema into the explicitly provided language or into 
         ${translationTargetLanguage} if no other language is provided. Return a clean and valid JSON format`);
 
 export const MAIL_RESPONSE_SCHEMA = z
     .object({
-        responseBody: z.string()
+        responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, '\n')) 
             .describe(`Formulate a response to the mail acting as customer service, include the additional information given in this text.
                 Formulate the response in the same language as the original. The signature of the response will be "Your ThorTours Team".`)
     })
