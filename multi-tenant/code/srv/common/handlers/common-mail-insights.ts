@@ -27,6 +27,8 @@ import {
     MAIL_RESPONSE_SCHEMA
 } from "./schemas";
 
+import { actions } from "./default-values";
+
 // Name of LLM Proxy Service Destination
 const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
 
@@ -88,12 +90,20 @@ export default class CommonMailInsights extends ApplicationService {
             const { id } = req.data;
             const { Mails, Translations } = this.entities;
 
-            const mail = await SELECT.from(Mails, (m) => {
+            const mail = await SELECT.one.from(Mails, (m) => {
                 m`.*`;
                 m.translation((t) => {
                     t`.*`;
                 });
             }).where(`ID = '${id}'`);
+
+            // Add default descriptions for actions
+            mail.suggestedActions = mail.suggestedActions?.map((action: any) => {
+                return {
+                    ...action,
+                    descr: actions.find((action) => action.value === action.value)?.descr || ""
+                };
+            });
 
             const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
             const closestMails =
@@ -262,6 +272,14 @@ export default class CommonMailInsights extends ApplicationService {
         } else {
             translation.responseBody = regeneratedResponse;
         }
+
+        // Add default descriptions for actions
+        mail.suggestedActions = mail.suggestedActions?.map((action: any) => {
+            return {
+                ...action,
+                descr: actions.find((action) => action.value === action.value)?.descr || ""
+            };
+        });
 
         return {
             ...mail,
@@ -568,7 +586,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     public getVectorStore = async (tenant?: string) => {
-        const embeddings = new BTPEmbedding(aiCore.embed, undefined, {});
+        const embeddings = new BTPEmbedding(aiCore.embed, tenant);
         const args = getPostgresConnectionOptions(tenant);
         const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
         await typeormVectorStore.ensureTableInDatabase();

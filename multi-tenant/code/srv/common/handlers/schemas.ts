@@ -70,16 +70,16 @@ export const MAIL_INSIGHTS_SCHEMA = z.object({
         .describe(`Based on the email and the services the email is asking for, which of the following action types and action values do you suggest.
             The following actions are structured like "type of action - value of action - description of action". 
             Only use the values provided in the following list while the result can contain multiple actions:
-            - Hotel - Check hotel availability - check if the requested hotel is available and offer results to the sender
-            - Hotel - Cancel hotel booking - cancel the previously booked hotel
-            - Hotel - Manage hotel booking - check the hotel booking and provide information to the sender
-            - Flight - Check flight availability - check if a flight is available according to the mail request and offer it to the sender
-            - Flight - Cancel flight booking - cancel the previously booked flight
-            - Flight - Manage flight booking - check the flight booking and provide information to the sender
-            - Car - Check car availability - check for a rental car offer available and offer results to the sender
-            - Car - Cancel car booking - cancel the previously booked rental car
-            - Car - Manage car booking - check the rental car booking and provide information to the sender
-            - General - Manage general booking - if any other action is required
+            - Hotel - Hotel Availability - check if the requested hotel is available and offer results to the sender
+            - Hotel - Hotel Cancelation - cancel the previously booked hotel
+            - Hotel - Hotel Fix" - check the hotel booking and provide information to the sender
+            - Flight - Flight Availability - check if a flight is available according to the mail request and offer it to the sender
+            - Flight - Flight Cancelation - cancel the previously booked flight
+            - Flight - Flight Fix - check the flight booking and provide information to the sender
+            - Car - Car Availability - check for a rental car offer available and offer results to the sender
+            - Car - Car Cancelation - cancel the previously booked rental car
+            - Car - Car Fix - check the rental car booking and provide information to the sender
+            - General - General Fix - if any other action is required
         `)
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
     Your task is to extract relevant insights out of the emails. Extract the information out of the email subject and body and return a clean and valid JSON format.`);
