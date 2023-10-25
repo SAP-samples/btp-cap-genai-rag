@@ -7,7 +7,7 @@
             "kind": "rest",
             "credentials": {
                 "destination": "PROVIDER_AI_CORE_DESTINATION_HUB",
-                "requestTimeout": "120000"
+                "requestTimeout": "300000"
             }
         },
         "SUBSCRIBER_OFFICE365_DESTINATION": {

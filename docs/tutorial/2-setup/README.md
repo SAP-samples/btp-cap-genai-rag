@@ -1,6 +1,6 @@
 # Overview
 
-This documentation will introduce the steps required to prepare your SAP BTP Global account to deploy the AI sample application.
+This part of the tutorial will introduce the steps required to prepare your SAP BTP Global account to deploy the AI sample application.
 
 - [Subaccount Setup](./1-SubaccountSetup.md)
 - [Entitlement Assignment](./2-AssignEntitlements.md)

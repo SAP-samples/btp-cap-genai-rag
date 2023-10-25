@@ -26,10 +26,7 @@ In Kyma, you must build container images for the components of this sample scena
 2. Please switch to the *(single/multi)-tenant/deploy/kyma* directory. 
 
     ```sh
-    cd single-tenant/deploy/kyma
-    ```
-    ```sh
-    cd multi-tenant/deploy/kyma
+    cd (single/multi)-tenant/deploy/kyma
     ```
 
 3. Make sure you have the required TypeScript dependencies installed globally. 
