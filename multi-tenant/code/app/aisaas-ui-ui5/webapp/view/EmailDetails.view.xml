@@ -29,10 +29,11 @@
 								icon="{path:'api>mail/sentiment', formatter:'formatter.getSentimentIcon'}"
 								text="{parts: ['filters>/sentiment', 'api>mail/sentiment'], formatter:'formatter.getSentimentText'}"
 								state="{path:'api>mail/sentiment', formatter:'formatter.getSentimentState'}"/>
-							<tnt:InfoLabel
+							<ObjectStatus
 								class="sapUiTinyMarginBegin"
-								displayOnly="true"
-								text="{api>mail/category}"/>
+								inverted="true"
+								text="{api>mail/category}"
+								state="Information"/>
 						</HBox>
 					</VBox>
 				</ux:heading>
@@ -89,7 +90,8 @@
 			<ux:ObjectPageSection
 				id="suggestedResponseSection"
 				titleUppercase="false"
-				title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.suggestedResponse} : ${i18n>email.titles.response} }">
+				title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.suggestedResponse} : ${i18n>email.titles.response} }"
+				busyIndicatorDelay="300">
 				<ux:subSections>
 					<ux:ObjectPageSubSection
 						title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.suggestedResponse} : ${i18n>email.titles.response} }">

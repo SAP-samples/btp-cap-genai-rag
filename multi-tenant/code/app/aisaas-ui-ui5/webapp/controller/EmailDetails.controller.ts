@@ -16,7 +16,7 @@ import Text from "sap/m/Text";
 import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import MessageToast from "sap/m/MessageToast";
-
+import PageSection from "sap/uxap/ObjectPageSection";
 import { Mail, KeyFact, Action } from "../model/entities";
 import Formatter from "../model/formatter";
 
@@ -188,8 +188,10 @@ export default class EmailDetails extends BaseController {
         const localModel: JSONModel = this.getModel() as JSONModel;
         const responseToSend = localModel.getProperty("/translatedResponseBody") as string;
         const idMail = localModel.getProperty("/activeEmailId") as string;
+        const suggestedResponse = this.byId("suggestedResponseSection") as PageSection;
+
+        suggestedResponse.setBusy(true);
         try {
-            localModel.setProperty("/busy", true);
             const response = await fetch("api/odata/v4/mail-insights/submitResponse", {
                 method: "POST",
                 headers: {
@@ -208,7 +210,7 @@ export default class EmailDetails extends BaseController {
             console.log(error);
             MessageToast.show(this.getText("email.texts.genericErrorMessage"));
         } finally {
-            localModel.setProperty("/busy", false);
+            suggestedResponse.setBusy(false);
         }
     }
 }
