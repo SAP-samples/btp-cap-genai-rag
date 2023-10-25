@@ -78,32 +78,22 @@ export default class MailInsightsService extends CommonMailInsights {
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
 
-            let translation: string | undefined;
-
             // Translate working language response to recipient's original language
-            if (!mail.insights?.languageMatch) {
-                translation = (await this.translateResponse(response, mail.insights?.languageNameDetermined))
-                    .responseBody;
-            }
+            const translation = !mail.insights?.languageMatch ? (await this.translateResponse(response, mail.insights?.languageNameDetermined)).responseBody : response;
 
             // Store working language response in translation response Body
-            // Store either working language or original language in translation responseBody 
+            // Store either working language or original language in translation responseBody
             const dbEntry = [
-                Object.assign(
-                    {
-                        ...mail,
-                        responded: true,
-                        translations: Object.assign(mail.translations[0], { responseBody: response })
-                    },
-                    {
-                        responseBody: translation || response
-                    }
-                )
+                {
+                    ...mail,
+                    responded: true,
+                    responseBody: translation,
+                    translation: { ...mail.translation, responseBody: response }
+                }
             ];
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
             // Send the working language response + target language translation + AI Translation Disclaimer
-
             await UPSERT.into(Mails).entries(dbEntry);
             return true;
         } catch (error: any) {

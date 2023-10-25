@@ -10,6 +10,7 @@ service MailInsightsService @(
     protocol: 'odata-v4'
 ) {
     entity Mails as projection on db.Mails;
+    
     // Get all mails (compact)
     function getMails()                                                                                        returns array of Mails;
 
@@ -19,8 +20,8 @@ service MailInsightsService @(
         closestMails : array of {
             similarity : Double;
             mail : Association to Mails;
-        };
-    };
+        } ;
+    } ;
 
     // Delete a single mail
     function deleteMail(id : UUID)                                                                              returns Boolean;

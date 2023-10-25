@@ -27,6 +27,8 @@ import {
     MAIL_RESPONSE_SCHEMA
 } from "./schemas";
 
+import { actions } from "./default-values";
+
 // Name of LLM Proxy Service Destination
 const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
 
@@ -56,10 +58,28 @@ const filterForTranslation = ({
 export default class CommonMailInsights extends ApplicationService {
     async init() {
         await super.init();
+        const { Mails } = cds.entities;
+        this.after("READ", Mails, this.onAfterReadMails);
         this.on("getMails", this.onGetMails);
         this.on("getMail", this.onGetMail);
         this.on("addMails", this.onAddMails);
         this.on("deleteMail", this.onDeleteMail);
+    }
+
+    private onAfterReadMails = async (mails : any) => {
+        // Add default descriptions for actions
+        mails.forEach((mail : any) => {
+            if(mail.suggestedActions){
+                mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                    return {
+                        ...suggestedAction,
+                        descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                    };
+                });
+            }
+        })
+
+        return mails;
     }
 
     // Get all Mails excl. closest Mails
@@ -86,29 +106,46 @@ export default class CommonMailInsights extends ApplicationService {
         try {
             const { tenant } = req;
             const { id } = req.data;
-            const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id);
+            const { Mails, Translations } = this.entities;
+
+            const mail = await SELECT.one
+                .from(Mails, (m) => {
+                    m`.*`;
+                    m.translation((t) => {
+                        t`.*`;
+                    });
+                })
+                .where(`ID = '${id}'`);
+
+            // Add default descriptions for actions
+            mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                return {
+                    ...suggestedAction,
+                    descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                };
+            });
+
             const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
             const closestMails =
                 closestMailsIDs.length > 0
-                    ? await SELECT.from(Mails)
-                          .where({
-                              ID: {
-                                  in: closestMailsIDs.map(
-                                      ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
-                                  )
-                              }
-                          })
-                          .columns((m: any) => {
-                              m.ID;
-                              m.subject;
-                              m.body;
-                              m.category;
-                              m.sender;
-                              m.responded;
-                              m.responseBody;
-                              m.translation;
-                          })
+                    ? await SELECT.from(Mails, (m) => {
+                          m.ID;
+                          m.subject;
+                          m.body;
+                          m.category;
+                          m.sender;
+                          m.responded;
+                          m.responseBody;
+                          m.translation((t) => {
+                              t`.*`;
+                          });
+                      }).where({
+                          ID: {
+                              in: closestMailsIDs.map(
+                                  ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
+                              )
+                          }
+                      })
                     : [];
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
                 //@ts-ignore
@@ -127,6 +164,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Process single or multiple new Mail(s)
     private onAddMails = async (req: Request) => {
         try {
+            const { Mails } = this.entities;
             const { tenant } = req;
             const { mails, rag } = req.data;
             const mailBatch = await this.regenerateInsights(mails, rag, tenant);
@@ -135,7 +173,6 @@ export default class CommonMailInsights extends ApplicationService {
             console.log("UPDATE MAILS WITH INSIGHTS...");
 
             cds.tx(async () => {
-                const { Mails } = this.entities;
                 await INSERT.into(Mails).entries(mailBatch);
             });
 
@@ -150,8 +187,25 @@ export default class CommonMailInsights extends ApplicationService {
                 }))
             );
 
-            // Return array of added Mails
-            return mailBatch;
+            const insertedMails = await SELECT.from(Mails, (m : any) => {
+                m`.*`;
+                m.translation((t : any) => {  t`.*` });
+            }).where({
+                ID: { in: mailBatch.map((mail: any) => mail.ID)}
+            });
+
+            // Add default descriptions for actions
+            insertedMails.forEach((mail) => {
+                mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                    return {
+                        ...suggestedAction,
+                        descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                    };
+                });
+            })
+
+            return insertedMails;
+
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -255,6 +309,14 @@ export default class CommonMailInsights extends ApplicationService {
         } else {
             translation.responseBody = regeneratedResponse;
         }
+
+        // Add default descriptions for actions
+        mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+            return {
+                ...suggestedAction,
+                descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+            };
+        });
 
         return {
             ...mail,

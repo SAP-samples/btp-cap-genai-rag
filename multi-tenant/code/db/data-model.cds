@@ -13,6 +13,7 @@ context aisaas.db {
       type Action {
             type  : String;
             value : String;
+            virtual descr : String
       }
 
       type BaseMail {
@@ -31,7 +32,7 @@ context aisaas.db {
             requestedServices : many String;
       }
 
-      entity Mails : cuid {
+      entity Mails : managed, cuid {
             subject                :      String;
             body                   :      LargeString;
             senderEmailAddress     :      String;
