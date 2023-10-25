@@ -108,7 +108,7 @@
                                 <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
                                     <Title text="{i18n>inbox.list.title} ({/emailsCount})" titleStyle="H4"/>
                                     <VBox justifyContent="Center">
-                                        <!-- <Link text="{i18n>inbox.link.sortBy} {/sortText}" press="onSortEmailsList"/> -->
+                                        <Link text="{i18n>inbox.link.sortBy} {/sortText}" press="onSortEmailsList"/>
                                     </VBox>
                                 </HBox>
                             </VBox>
