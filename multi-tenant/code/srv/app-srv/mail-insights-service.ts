@@ -80,11 +80,13 @@ export default class MailInsightsService extends CommonMailInsights {
             const mail = await SELECT.one.from(Mails, id);
 
             // Translate working language response to recipient's original language
-            const translation = !mail.insights?.languageMatch ? (await this.translateResponse(response, mail.insights?.languageNameDetermined)).responseBody : response;
+            const translation = !mail.insights?.languageMatch
+                ? (await this.translateResponse(response, mail.insights?.languageNameDetermined)).responseBody
+                : response;
 
             // Store working language response in translation response Body
             // Store either working language or original language in translation responseBody
-            const dbEntry = [
+            const submittedMail = [
                 {
                     ...mail,
                     responded: true,
@@ -99,7 +101,7 @@ export default class MailInsightsService extends CommonMailInsights {
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
             // Send the working language response + target language translation + AI Translation Disclaimer
-            await UPSERT.into(Mails).entries(dbEntry);
+            await UPSERT.into(Mails).entries(submittedMail);
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);

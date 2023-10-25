@@ -66,21 +66,21 @@ export default class CommonMailInsights extends ApplicationService {
         this.on("deleteMail", this.onDeleteMail);
     }
 
-    private onAfterReadMails = async (mails : any) => {
+    private onAfterReadMails = async (mails: any) => {
         // Add default descriptions for actions
-        mails.forEach((mail : any) => {
-            if(mail.suggestedActions){
+        mails.forEach((mail: any) => {
+            if (mail.suggestedActions) {
                 mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
                     return {
                         ...suggestedAction,
-                        descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                        descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
                     };
                 });
             }
-        })
+        });
 
         return mails;
-    }
+    };
 
     // Get all Mails excl. closest Mails
     private onGetMails = async (req: Request) => {
@@ -121,7 +121,7 @@ export default class CommonMailInsights extends ApplicationService {
             mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
                 return {
                     ...suggestedAction,
-                    descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                    descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
                 };
             });
 
@@ -187,11 +187,13 @@ export default class CommonMailInsights extends ApplicationService {
                 }))
             );
 
-            const insertedMails = await SELECT.from(Mails, (m : any) => {
+            const insertedMails = await SELECT.from(Mails, (m: any) => {
                 m`.*`;
-                m.translation((t : any) => {  t`.*` });
+                m.translation((t: any) => {
+                    t`.*`;
+                });
             }).where({
-                ID: { in: mailBatch.map((mail: any) => mail.ID)}
+                ID: { in: mailBatch.map((mail: any) => mail.ID) }
             });
 
             // Add default descriptions for actions
@@ -199,13 +201,12 @@ export default class CommonMailInsights extends ApplicationService {
                 mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
                     return {
                         ...suggestedAction,
-                        descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                        descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
                     };
                 });
-            })
+            });
 
             return insertedMails;
-
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -314,7 +315,7 @@ export default class CommonMailInsights extends ApplicationService {
         mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
             return {
                 ...suggestedAction,
-                descr: actions.find((action : any) => action.value === suggestedAction.value)?.descr || ""
+                descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
             };
         });
 
@@ -419,8 +420,8 @@ export default class CommonMailInsights extends ApplicationService {
         const potentialResponses = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
                 if (rag) {
-                    const closestMails = await this.getClosestMails(mail.ID, 5, {}, tenant);
-                    const closestResponses = closestMails.length > 0 ? await this.closestResponses(closestMails) : [];
+                    const closestMails = await this.getClosestMails(mail.ID, 5, { submitted: true }, tenant);
+                    const closestResponses = await this.getClosestResponses(closestMails);
 
                     const result = (
                         await chain.call({
@@ -599,18 +600,19 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Get responses of x closest Mails
-    public closestResponses = async (
-        closestMails: Array<[TypeORMVectorStoreDocument, number]>
+    public getClosestResponses = async (
+        mails: Array<[TypeORMVectorStoreDocument, number]>
     ): Promise<Array<[Document]>> => {
+        if (mails.length === 0) {
+            return [];
+        }
         const { Mails } = this.entities;
 
         const responses: Promise<Array<[Document]>> = (
             await SELECT.from(Mails)
                 .where({
                     ID: {
-                        in: closestMails.map(
-                            ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
-                        )
+                        in: mails.map(([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id)
                     }
                 })
                 .columns((m: any) => {

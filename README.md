@@ -9,22 +9,14 @@ Welcome to our dedicated GitHub repository, designed to provide valuable support
 
 <p align="center">
     <img src="./docs/architecture/multitenant-target.png" alt="Target Architecture" />
-    <em>Target Architecture: Multitenant SaaS application with LLM Access</em>
+    <em>Architecture: Multitenant SaaS GenAI application on SAP BTP</em>
 </p>
 
 <details>
-<summary>Further architectures (current, single tenant)</summary>
-<p align="center">
-    <img src="./docs/architecture/multitenant-current.png" alt="Current Architecture" />
-    <em>Multitenant SaaS application (current)</em>
-</p>
+<summary>Single Tenant Architecture</summary>
 <p align="center">
     <img src="./docs/architecture/singletenant-target.png" alt="Target Singletenant Architecture" />
-    <em>Single tenant application (target)</em>
-</p>
-<p align="center">
-    <img src="./docs/architecture/singletenant-current.png" alt="Current Singletenant Architecture" />
-    <em>Single tenant application (current)</em>
+    <em>Architecture: SAP BTP GenAI application</em>
 </p>
 </details>
 
