@@ -6,13 +6,13 @@ using {
 context aisaas.db {
 
       type KeyFact {
-            fact         : String;
-            category     : String;
+            fact     : String;
+            category : String;
       }
 
       type Action {
-            type  : String;
-            value : String;
+            type          : String;
+            value         : String;
             virtual descr : String
       }
 
