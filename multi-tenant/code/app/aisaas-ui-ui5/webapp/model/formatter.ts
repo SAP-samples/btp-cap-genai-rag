@@ -60,9 +60,5 @@ export default {
         } else return null;
     },
 
-    getSimilarEmailHeader: (similarEmail: ClosestMail, similarityText: string, translationOn: boolean) => {
-        const similarity: number = Math.trunc(similarEmail.similarity * 100);
-        if (!translationOn) return `${similarEmail.mail.subject} | ${similarityText}: ${similarity}%`;
-        return `${similarEmail.mail.translation.subject} | ${similarityText}: ${similarity}%`;
-    }
+    getSimilarity: (mail: ClosestMail) => Math.trunc(mail.similarity * 100) + "%"
 };

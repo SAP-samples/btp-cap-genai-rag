@@ -130,7 +130,7 @@
 			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.titles.similarEmails} ({/similarEmails/length})">
 				<ux:subSections>
 					<ux:ObjectPageSubSection title="{i18n>email.titles.similarEmails} ({/similarEmails/length})">
-						<VBox class="sapUiTinyMargin">
+						<VBox class="sapUiTinyMarginBeginEnd">
 							<List
                                 id="similarEmailsList"
 								showSeparators="None"
@@ -140,7 +140,7 @@
 									path: '/similarEmails',
 									sorter: {path: 'similarity', descending: 'false'}
 								}">
-                                <CustomListItem>
+                                <CustomListItem class="sapUiSmallMarginTopBottom">
 									<core:Fragment fragmentName="aisaas.ui.view.SimilarEmailListItem" type="XML"/>
                                 </CustomListItem>
                             </List>
