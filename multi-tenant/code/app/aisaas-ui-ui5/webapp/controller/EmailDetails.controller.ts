@@ -111,11 +111,7 @@ export default class EmailDetails extends BaseController {
             actions.map((action: Action) => {
                 const button: Button = new Button({
                     text: action.value,
-                    press: () =>
-                        this.openMessageDialog(
-                            action.value,
-                            "verbose descrition for '" + action.value + "' (still to come)"
-                        )
+                    press: () => this.openMessageDialog(action.value, action.descr)
                 });
                 button.addStyleClass("sapUiSmallMarginEnd");
                 hBox.addItem(button);

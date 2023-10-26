@@ -109,7 +109,7 @@ export default abstract class BaseController extends Controller {
         content.addStyleClass("sapUiTinyMarginTop");
         content.addStyleClass("sapUiSmallMarginBeginEnd");
 
-        const dialog = new Dialog({ title: title, content: content });
+        const dialog = new Dialog({ title: title, content: content, contentWidth: "40%" });
         const closeButton = new Button({ text: this.getText("buttons.close"), press: () => dialog.close() });
         dialog.setBeginButton(closeButton);
 

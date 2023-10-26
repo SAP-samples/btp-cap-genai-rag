@@ -28,7 +28,8 @@ export interface Mail {
 
 export interface Action {
     type: string,
-    value: string
+    value: string,
+    descr: string
 }
 
 export interface KeyFact {

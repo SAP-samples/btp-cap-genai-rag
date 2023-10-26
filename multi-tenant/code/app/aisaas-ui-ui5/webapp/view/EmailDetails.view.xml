@@ -15,8 +15,8 @@
 				<ux:heading>
 					<VBox>
 						<Title wrapping="true" text="{= !${/translationOn} ? ${api>mail/subject} : ${api>mail/translation/subject} }"/>
-						<HBox>
-							<!-- <Label vAlign="Middle" text="{path: 'api>mail/modifiedAt', formatter: 'formatter.formatDate'}"/> -->
+						<HBox alignItems="Center">
+							<Label vAlign="Middle" text="{path: 'api>mail/createdAt', formatter: 'formatter.formatDate'}"/>
 							<ObjectStatus
 								class="sapUiTinyMarginBegin"
 								inverted="true"
@@ -109,9 +109,9 @@
 								valueLiveUpdate="true"
 								placeholder="{i18n>email.textAreas.placeholders.suggestedResponse}"
 								value="{/translatedResponseBody}"
-								showValueStateMessage="false"
-								liveChange="onChangeResponse"/>
-								<!-- valueState="{= ${/translatedResponseBody} !== ${api>mail/translation/responseBody} ? 'Warning' : 'None' }" -->
+								liveChange="onChangeResponse"
+								valueState="{= ${/translatedResponseBody} !== ${api>mail/translation/responseBody} ? 'Information' : 'None' }"
+								valueStateText="{i18n>email.texts.editedSuggestedResponse}"/>
 							<HBox justifyContent="End">
 								<Button
 									type="Emphasized"
