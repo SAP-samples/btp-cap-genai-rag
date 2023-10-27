@@ -1,6 +1,6 @@
 import cds from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
-import { v5 as uuidv5 } from "uuid";
+import { v5 as uuidv5, v4 as uuidv4 } from "uuid";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
 import { IStoredMail, ITranslatedMail } from "../common/handlers/types";
@@ -77,7 +77,10 @@ export default class MailInsightsService extends CommonMailInsights {
             const { tenant } = req;
             const { id, response } = req.data;
             const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id);
+            const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
+                m("*");
+                m.translation((t: any) => t("*"));
+            });
 
             // Translate working language response to recipient's original language
             const translation = !mail.insights?.languageMatch
@@ -86,23 +89,23 @@ export default class MailInsightsService extends CommonMailInsights {
 
             // Store working language response in translation response Body
             // Store either working language or original language in translation responseBody
-            const submittedMail = [
-                {
-                    ...mail,
-                    responded: true,
-                    responseBody: translation,
-                    translation: { ...mail.translation, responseBody: response }
-                }
-            ];
-
-            const typeormVectorStore = await this.getVectorStore(tenant);
-            const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb = $1`;
-            await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
-            // Send the working language response + target language translation + AI Translation Disclaimer
-            await UPSERT.into(Mails).entries(submittedMail);
-            return true;
+            // Send the working language response + target language translation + AI Translation Disclaimer;
+            const submittedMail = {
+                ...mail,
+                responded: true,
+                responseBody: translation,
+                translation: { ...mail.translation, responseBody: response }
+            };
+            const success = await UPDATE(Mails, mail.ID).set(submittedMail);
+            if (success) {
+                const typeormVectorStore = await this.getVectorStore(tenant);
+                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
+                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
+            }
+
+            return new Boolean(success);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);

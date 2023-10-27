@@ -109,9 +109,9 @@ export default class CommonMailInsights extends ApplicationService {
             const { Mails, Translations } = this.entities;
 
             const mail = await SELECT.one
-                .from(Mails, (m) => {
+                .from(Mails, (m : any) => {
                     m`.*`;
-                    m.translation((t) => {
+                    m.translation((t : any) => {
                         t`.*`;
                     });
                 })
@@ -128,7 +128,7 @@ export default class CommonMailInsights extends ApplicationService {
             const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
             const closestMails =
                 closestMailsIDs.length > 0
-                    ? await SELECT.from(Mails, (m) => {
+                    ? await SELECT.from(Mails, (m : any) => {
                           m.ID;
                           m.subject;
                           m.body;
@@ -136,7 +136,7 @@ export default class CommonMailInsights extends ApplicationService {
                           m.sender;
                           m.responded;
                           m.responseBody;
-                          m.translation((t) => {
+                          m.translation((t : any) => {
                               t`.*`;
                           });
                       }).where({
@@ -197,7 +197,7 @@ export default class CommonMailInsights extends ApplicationService {
             });
 
             // Add default descriptions for actions
-            insertedMails.forEach((mail) => {
+            insertedMails.forEach((mail : any) => {
                 mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
                     return {
                         ...suggestedAction,
