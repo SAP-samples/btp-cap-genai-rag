@@ -9,6 +9,7 @@ export default class MailInsightsService extends CommonMailInsights {
     async init() {
         // Shared handlers (getMails, getMail, addMails, deleteMail)
         await super.init();
+        await this.checkDefaultResourceGroup();
         // Additional handlers
         this.on("submitResponse", this.onSubmitResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);

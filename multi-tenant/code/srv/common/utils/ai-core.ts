@@ -72,7 +72,7 @@ const aiCoreDestination = xsenv.filterServices({ label: "aicore" })[0]
  */
 export const completion = async (prompt: string, tenant?: string, LLMParams: {} = {}) => {
     const appName = getAppName();
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : `default-${appName}`;
 
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.COMPLETION);
     if (deploymentId) {
@@ -113,7 +113,7 @@ export const chatCompletion = async (
 ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
     const appName = getAppName();
     
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : `default-${appName}`;
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -143,7 +143,7 @@ export const chatCompletion = async (
 export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
     const appName = getAppName();
     
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : "default";
+    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : `default-${appName}`;
 
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
@@ -172,7 +172,7 @@ export const embed = async (texts: Array<string>, tenant?: string, EmbeddingPara
     }
 };
 
-const getAppName = () => {
+export const getAppName = () => {
     const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
     // @ts-ignore
     const appName = services[0]?.credentials?.appName;
@@ -259,7 +259,7 @@ export const getResourceGroups = async () => {
         const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll()
             .skipCsrfTokenFetching()
             .execute(aiCoreDestination);
-        return response.data;
+        return response.resources;
     } catch (e: any) {
         console.log(e.message);
     }

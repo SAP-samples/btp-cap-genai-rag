@@ -3,6 +3,7 @@ import { Request } from "@sap/cds/apis/services";
 import { v4 as uuidv4 } from "uuid";
 import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
+import xsenv from "@sap/xsenv";
 import {
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -659,6 +660,43 @@ export default class CommonMailInsights extends ApplicationService {
         }
         return results;
     };
+
+    public checkDefaultResourceGroup = async () => {
+        try {
+            const xsuaa = xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa;
+            //@ts-ignore
+            const appName = xsuaa?.xsappname?.split("!t")[0];
+            const defaultGroupExists = (await aiCore.getResourceGroups())?.find(
+                (resourceGroup: any) => (resourceGroup.resourceGroupId = `default-${appName}`)
+            );
+
+            if (!defaultGroupExists) {
+                // Create AI Core Resource Group for tenant
+                console.log("Info: AI Core Default Resource Group will be created");
+                const resourceGroupId = `default-${appName}`;
+
+                await aiCore.createResourceGroup(resourceGroupId);
+                await delay(10000);
+
+                const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+                const responseConfigurationCreation = await aiCore.createConfigurations({}, headers);
+
+                await Promise.all(
+                    responseConfigurationCreation.map(async (configuration) => {
+                        if (configuration.id) {
+                            await delay(5000);
+                            await aiCore.createDeployment(configuration.id, headers);
+                        }
+                    })
+                );
+
+                console.log("Success: Default Resource Group Onboarding completed!");
+            }
+        } catch (err: any) {
+            console.log("Failed: Error during Default Resource Group Creation!");
+            console.log("Error: " + err.message);
+        }
+    };
 }
 
 const getPostgresConnectionOptions = (tenant?: string) => {
@@ -696,3 +734,6 @@ const fixJsonString = (jsonString: String) => {
             })
     );
 };
+
+const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
+
