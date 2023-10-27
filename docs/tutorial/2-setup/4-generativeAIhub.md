@@ -7,7 +7,6 @@ The generative AI hub which is part of the SAP AI Core offering, allows you to c
 
 1. As described in on the previous chapters, please ensure you assigned the following entitlements to your subaccount.
 
-  - **SAP AI Launchpad** - free (Application)
   - **SAP AI Core** - sap-internal 
 
 2. In your subaccount, please create a new service instance for the SAP AI Core **sap-internal** service entitlement. 
@@ -45,7 +44,3 @@ tokenServiceURL=<url>/oauth/token
 tokenServiceURLType=Dedicated
 HTML5.Timeout=300000
 ```
-
-## Configure the generative AI hub (single-tenant)
-
-> **Important** - Will be provided soon!
