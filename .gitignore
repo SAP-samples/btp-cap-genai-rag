@@ -31,4 +31,4 @@ brokerpass.txt
 *.sqlite-*
 .$*
 
-!/multi-tenant/code/db.sqlite
+!/multi-tenant/code/db.sqlite.sample
