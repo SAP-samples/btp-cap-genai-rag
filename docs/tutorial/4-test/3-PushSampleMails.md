@@ -4,13 +4,15 @@ In this chapter you will learn, how SaaS Subscribers can push sample mails to th
 
 1. Find the provided **http** sample file **requests-btp.http** ([click here](../../../code/test/http/requests-btp.http)), containing a few test mails for processing. 
    
+   > **Hint** - You might need to install the **REST Client** extension in your development environment!
+   
 2. Cope and rename the file to **requests-btp-private.http** to ensure that your credentials are not accidentally being committed to GitHub. 
 
     [<img src="./images/TEST_PrivateFile.png" width="300"/>](./images/TEST_PrivateFile.png?raw=true)
 
-3. Update the variables in the very beginning of the **http** test file. In a multitenant scenario, you can find the required values in the **Service Binding** which you created in the previous step of this section. 
+3. Update the variables in the very beginning of the **http** test file. In a multitenant scenario, you can find the required values in the **Service Binding** which you created in the **Create API Service** ([click here](./2-CreateAPIService.md)) chapter of this tutorial. 
    
-   > **Important** - In a single tenant setup, you can just use an existing Service Binding or new Service Key of your **xsuaa** instance and use the default **Cloud Foundry Route** or **Virtual Service** created for your CAP Application as *btpAppHostname* value. 
+   > **Important** - In a single tenant setup, you can just use an existing Service Binding or new Service Key of your **xsuaa** service instance and use the default **Cloud Foundry Route** or **Kyma Virtual Service** created for your CAP Application as *btpAppHostname* value. 
 
     ```md
     @xsuaaHostname = <uaa.url>
@@ -35,15 +37,15 @@ In this chapter you will learn, how SaaS Subscribers can push sample mails to th
     &grant_type=client_credentials
     ```
 
-5. Once you successfully retrieved a token issued by XSUAA, please scroll down and execute the **ADD MAILS** request. The request will automatically inject the token retrieved from XSUAA. 
+5. Once you successfully retrieved a token issued by XSUAA, please scroll down and execute the **ADD MAILS I** request. The processing will take a while, so please wait until the request returns a result. The request will automatically inject the token retrieved from XSUAA. 
    
    > **Important** - For single-tenant scenarios, please use the **odata/v4/mail-insights** path instead of the **rest/api/mail-insights** path as indicated below. 
 
     ```http
-    ### ADD MAILS
+    ### ADD MAILS I
     @token = {{getXsuaaToken.response.body.$.access_token}}
 
-    # @name addMails
+    # @name addMailsI
     POST {{btpAppHostname}}/rest/api/mail-insights/addMails
     content-type: application/json
     Authorization: Bearer {{token}}
@@ -58,5 +60,6 @@ In this chapter you will learn, how SaaS Subscribers can push sample mails to th
         ...
     ```
 
-6. Once the sample e-mails have been processes successfully, you should see them within your SaaS application. Furthermore, check the chapter on **Extending** the solution to learn how to check the processed e-mails within your PostgreSQL database. 
+6. Continue with the **ADD MAILS II** and **ADD MAILS III** requests to add further sample mails to your application. Injecting the sample mails has been split into three parts, given the token limit of the Large Language Model being used. Please ensure to run the three **ADD MAILS** requests sequentially. 
 
+7. Once all sample e-mails have been processes successfully, please continue with the next chapter to assign the required role collection before opening the GenAI Mail Insights application.
