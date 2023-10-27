@@ -11,11 +11,11 @@ Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider
 
 ## SAP BTP, Cloud Foundry Runtime
 
-- **free** plan not available in eu10
+- **free** plan **not** available in eu10
 
 ## SAP HANA Cloud
 
-- **free** plan not available in eu10
+- **free** plan **not** available in eu10
 
 ## SAP AI Core
 

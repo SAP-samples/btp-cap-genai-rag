@@ -21,6 +21,7 @@ In Kyma, you must build container images for the components of this sample scena
 
     ```sh
     git clone https://github.com/SAP-samples/btp-cap-genai-rag
+    cd btp-cap-genai-rag
     ```
 
 2. Please switch to the *(single/multi)-tenant/deploy/kyma* directory. 
@@ -63,6 +64,7 @@ In Kyma, you must build container images for the components of this sample scena
     npx cross-env IMAGE_PREFIX=sap-demo npm run build:all
     ```
 
+7. If you are facing the following error during the build process, please install the  
 
 7. Once your Container Images are built, please push them to your container registry by running the following command. 
 
@@ -135,6 +137,7 @@ In Kyma, you must build container images for the components of this sample scena
             {
               "broker-user": "sha256:0vsw3...bPwNwUc9WM=:5osh6/uiq...LcE9T0="
             }
+        SBF_CATALOG_FILE: ./catalog-private.json
     ```
 
 7. If you want to use an **existing PostgreSQL instance** please update the **free-tier-private.mtaext** file as depicted below. The existing service instance is named **my-postgresql-db** in this scenario. 

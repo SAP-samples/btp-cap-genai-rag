@@ -12,7 +12,6 @@ Assign the following **"non-default"** entitlements to your Provider Subaccount.
 | Service / Subscription                                                                                                                                               | Plan                 |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
 | [SAP AI Core](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-core?region=all)                                                                              | sap-internal (paid)  |
-| [SAP AI Launchpad](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-launchpad?region=all)                                                                    | free                 |
 | [SAP Authorization and Trust Management Service](https://discovery-center.cloud.sap/serviceCatalog/authorization-and-trust-management-service?region=all)            | broker               |
 | [SAP BTP, Kyma Runtime](https://discovery-center.cloud.sap/serviceCatalog/kyma-runtime?region=all)                                                                   | free                 |
 | [SAP Cloud Management Service for SAP BTP](https://discovery-center.cloud.sap/serviceCatalog/cloud-management-service?region=all)                                    | central              |
@@ -26,7 +25,6 @@ Assign the following **"non-default"** entitlements to your Provider Subaccount.
 | Service / Subscription                                                                                                                                               | Plan                 |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
 | [SAP AI Core](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-core?region=all)                                                                              | sap-internal (paid)  |
-| [SAP AI Launchpad](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-launchpad?region=all)                                                                    | free                 |
 | [SAP Authorization and Trust Management Service](https://discovery-center.cloud.sap/serviceCatalog/authorization-and-trust-management-service?region=all)            | broker               |
 | [SAP BTP, Cloud Foundry Runtime](https://discovery-center.cloud.sap/serviceCatalog/cloud-foundry-runtime?region=all)                                                 | free                 |
 | [SAP Cloud Management Service for SAP BTP](https://discovery-center.cloud.sap/serviceCatalog/cloud-management-service?region=all)                                    | central              |

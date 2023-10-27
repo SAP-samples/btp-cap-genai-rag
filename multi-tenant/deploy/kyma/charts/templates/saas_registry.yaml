@@ -11,7 +11,7 @@
     "appName" (printf "%s-%s" .Values.xsuaa.parameters.xsappname .Values.global.shootName)
     "displayName" .Chart.Description
     "description" (printf "%s (%s-%s)" .Chart.Description .Values.xsuaa.parameters.xsappname .Values.global.shootName)
-    "category" "CAP Application"
+    "category" "SaaS Multitenant Apps"
     "appUrls" $defaultAppUrls
 }}
 {{- include "cap.service-instance" (mergeOverwrite (dict "defaultParameters" $defaultParameters ) .) }}

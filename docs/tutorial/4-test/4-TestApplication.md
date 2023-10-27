@@ -24,4 +24,6 @@ In this part of the tutorial, you will learn how to test the GenAI Mail Insights
 
 4. In the application, you will see the pre-processed sample e-mails. 
 
+    [<img src="./images/TEST_AppResult.png" width="500"/>](./images/TEST_AppResult.png?raw=true)
+
 5. You can now select one of the mails in the list and check out the different features offered by the GenAI Mail Insights Sample application.
