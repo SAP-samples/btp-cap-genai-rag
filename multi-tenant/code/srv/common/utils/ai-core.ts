@@ -112,7 +112,7 @@ export const chatCompletion = async (
     tenant?: string
 ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
     const appName = getAppName();
-    
+
     const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : `default-${appName}`;
     const deploymentId = await getDeploymentId(resourceGroupId);
     if (deploymentId) {
@@ -142,7 +142,7 @@ export const chatCompletion = async (
 
 export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
     const appName = getAppName();
-    
+
     const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${appName}` : `default-${appName}`;
 
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
@@ -175,8 +175,10 @@ export const embed = async (texts: Array<string>, tenant?: string, EmbeddingPara
 export const getAppName = () => {
     const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
     // @ts-ignore
-    const appName = services[0]?.credentials?.appName ||  xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa?.xsappname?.split("!t")[0];
-    
+    const appName =
+        services[0]?.credentials?.appName ||
+        xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa?.xsappname?.split("!t")[0];
+
     return appName;
 };
 

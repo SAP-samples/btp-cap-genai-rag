@@ -231,6 +231,7 @@ export default class EmailDetails extends BaseController {
             if (response.ok) {
                 const data = await response.json();
                 const success = data.value as boolean;
+                console.log("SUCCESS", success);
                 if (success) {
                     // TODO: check how to get translation back to OL
                     this.openMailAnsweredDialog(responseToSend, responseToSend).catch(console.log);

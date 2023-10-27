@@ -25,13 +25,11 @@ import {
     MAIL_INSIGHTS_TRANSLATION_SCHEMA,
     MAIL_RESPONSE_TRANSLATION_SCHEMA,
     MAIL_LANGUAGE_SCHEMA,
-    MAIL_RESPONSE_SCHEMA
+    MAIL_RESPONSE_SCHEMA,
+    WORKING_LANGUAGE
 } from "./schemas";
 
 import { actions } from "./default-values";
-
-// Name of LLM Proxy Service Destination
-const LLM_SERVICE_DESTINATION = "PROVIDER_AI_CORE_DESTINATION_CANARY";
 
 // Default table used in PostgreSQL
 const DEFAULT_TENANT = "_main";
@@ -107,12 +105,12 @@ export default class CommonMailInsights extends ApplicationService {
         try {
             const { tenant } = req;
             const { id } = req.data;
-            const { Mails, Translations } = this.entities;
+            const { Mails } = this.entities;
 
             const mail = await SELECT.one
-                .from(Mails, (m : any) => {
+                .from(Mails, (m: any) => {
                     m`.*`;
-                    m.translation((t : any) => {
+                    m.translation((t: any) => {
                         t`.*`;
                     });
                 })
@@ -129,7 +127,7 @@ export default class CommonMailInsights extends ApplicationService {
             const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
             const closestMails =
                 closestMailsIDs.length > 0
-                    ? await SELECT.from(Mails, (m : any) => {
+                    ? await SELECT.from(Mails, (m: any) => {
                           m.ID;
                           m.subject;
                           m.body;
@@ -137,7 +135,7 @@ export default class CommonMailInsights extends ApplicationService {
                           m.sender;
                           m.responded;
                           m.responseBody;
-                          m.translation((t : any) => {
+                          m.translation((t: any) => {
                               t`.*`;
                           });
                       }).where({
@@ -198,7 +196,7 @@ export default class CommonMailInsights extends ApplicationService {
             });
 
             // Add default descriptions for actions
-            insertedMails.forEach((mail : any) => {
+            insertedMails.forEach((mail: any) => {
                 mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
                     return {
                         ...suggestedAction,
@@ -307,7 +305,9 @@ export default class CommonMailInsights extends ApplicationService {
         const translation = await SELECT.one.from(Translations, mail.translation_ID);
 
         if (!mail.languageMatch) {
-            translation.responseBody = (await this.translateResponse(regeneratedResponse, tenant)).responseBody;
+            translation.responseBody = (
+                await this.translateResponse(regeneratedResponse, tenant, WORKING_LANGUAGE)
+            ).responseBody;
         } else {
             translation.responseBody = regeneratedResponse;
         }
@@ -558,7 +558,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     // Translates a single response using LLM
-    public translateResponse = async (response: string, tenant: string = DEFAULT_TENANT, language?: string) => {
+    public translateResponse = async (response: string, tenant: string = DEFAULT_TENANT, language: string) => {
         try {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
@@ -566,11 +566,9 @@ export default class CommonMailInsights extends ApplicationService {
             const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
             const systemPrompt = new PromptTemplate({
-                template:
-                    "Translate the response of the incoming json" +
-                    (language ? ` into ${language}` : "") +
-                    ".\n{format_instructions}\n" +
-                    "Make sure to escape special characters by double slashes.",
+                template: `Translate the following response of the customer support into ${language}.
+            {format_instructions}
+            Make sure to escape special characters by double slashes.`,
                 inputVariables: [],
                 partialVariables: { format_instructions: formatInstructions }
             });
@@ -588,12 +586,13 @@ export default class CommonMailInsights extends ApplicationService {
 
             const translation: z.infer<typeof MAIL_RESPONSE_TRANSLATION_SCHEMA> = (
                 await chain.call({
-                    response: JSON.stringify(response)
+                    response: response
                 })
             ).text;
-
+            console.log(translation);
             return translation;
         } catch (error) {
+            console.log("Error", error);
             return {
                 responseBody: response || ""
             };
@@ -736,4 +735,3 @@ const fixJsonString = (jsonString: String) => {
 };
 
 const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
-

@@ -60,10 +60,12 @@ export default class MailInsightsService extends CommonMailInsights {
     // Translate Response to original e-mail language
     private onTranslateResponse = async (req: Request) => {
         try {
+            const { tenant } = req;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
-            const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
+            const translation = (await this.translateResponse(response, tenant, mail.languageNameDetermined))
+                .responseBody;
             return translation;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -83,10 +85,12 @@ export default class MailInsightsService extends CommonMailInsights {
                 m.translation((t: any) => t("*"));
             });
 
+            console.log("langmatch", mail.languageMatch, mail.languageNameDetermined);
             // Translate working language response to recipient's original language
-            const translation = !mail.insights?.languageMatch
-                ? (await this.translateResponse(response, mail.insights?.languageNameDetermined)).responseBody
-                : response;
+            const translation =
+                mail.languageMatch === undefined || mail.languageMatch
+                    ? response
+                    : (await this.translateResponse(response, tenant, mail.languageNameDetermined)).responseBody;
 
             // Store working language response in translation response Body
             // Store either working language or original language in translation responseBody
@@ -105,7 +109,7 @@ export default class MailInsightsService extends CommonMailInsights {
                 const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
                 await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
             }
-
+            console.log("success", new Boolean(success));
             return new Boolean(success);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);

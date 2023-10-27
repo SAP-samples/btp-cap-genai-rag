@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const translationTargetLanguage = "English";
+export const WORKING_LANGUAGE = "English";
 
 export const MAIL_LANGUAGE_SCHEMA = z.object({
     languageNameDetermined: z
@@ -9,9 +9,7 @@ export const MAIL_LANGUAGE_SCHEMA = z.object({
     languageMatch: z
         .boolean()
         .describe(
-            "If the email body is written in " +
-                translationTargetLanguage +
-                ", then return 'true', otherwise return 'false'"
+            "If the email body is written in " + WORKING_LANGUAGE + ", then return 'true', otherwise return 'false'"
         )
 }).describe(`You are supporting a travel agency which receives emails from customers all over the world. 
              Your task is to determine the language of the email in order to trigger translation if needed.`);
@@ -30,22 +28,29 @@ export const MAIL_INSIGHTS_SCHEMA = z.object({
             'Extract the name of the customer from the mail body as the name of the sender. If not found, return "X"'
         ),
     sentiment: z
-        .number().transform((number) => Math.round(number)) 
+        .number()
+        .transform((number) => Math.round(number))
         .describe(
             "Determine the sentiment of the mail on a scale from -1 (negative) via 0 (neutral) up to 1 (positive) as an integer. "
         ),
     urgency: z
-        .number().transform((number) => Math.round(number)) 
+        .number()
+        .transform((number) => Math.round(number))
         .describe(
             "What level of urgency does the email express? Give your answer as an integer from 0 (lowest urgency) to 2 (high urgency)."
         ),
     summary: z.string().describe("Summarize the email, use maximum 10 words, in the language of the body."),
-    keyFacts: z.array(
-        z.object({
-            fact: z.string().optional().describe("fact (for the respective category) which should be unique, maximum 2 words"),
-            category: z.string().optional().describe("category of the fact")
-        })
-    ).max(5)
+    keyFacts: z
+        .array(
+            z.object({
+                fact: z
+                    .string()
+                    .optional()
+                    .describe("fact (for the respective category) which should be unique, maximum 2 words"),
+                category: z.string().optional().describe("category of the fact")
+            })
+        )
+        .max(5)
         .describe(`Extract some relevant known facts ouf of the mail in a structured array, each fact needs a category classifying the fact.
             The categories of the facts can be one of the following:
             - Travelers - who is traveling, family, group, couple
@@ -96,19 +101,19 @@ export const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
         })
     ),
     requestedServices: z.array(z.string()),
-    responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, '\n')) 
+    responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, "\n"))
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
-      Your task is to translate the values for this schema into ${translationTargetLanguage}. Return a clean and valid JSON format`);
+      Your task is to translate the values for this schema into ${WORKING_LANGUAGE}. Return a clean and valid JSON format`);
 
 export const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
-    responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, '\n')) 
+    responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, "\n"))
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
         Your task is to translate the values for this schema into the explicitly provided language or into 
-        ${translationTargetLanguage} if no other language is provided. Return a clean and valid JSON format`);
+        ${WORKING_LANGUAGE} if no other language is provided. Return a clean and valid JSON format`);
 
 export const MAIL_RESPONSE_SCHEMA = z
     .object({
-        responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, '\n')) 
+        responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, "\n"))
             .describe(`Formulate a response to the mail acting as customer service, include the additional information given in this text.
                 Formulate the response in the same language as the original. The signature of the response will be "Your ThorTours Team".`)
     })
