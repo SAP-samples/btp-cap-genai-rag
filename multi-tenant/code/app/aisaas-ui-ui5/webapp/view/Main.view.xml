@@ -14,7 +14,7 @@
             <l:Splitter>
                 <l:FixFlex>
                     <l:layoutData>
-                        <l:SplitterLayoutData size="16%" minSize="280px" resizable="false"/>
+                        <l:SplitterLayoutData size="16%" minSize="280px" resizable="false" />
                     </l:layoutData>
                     <l:flexContent>
                         <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
@@ -139,7 +139,7 @@
 
                 <l:FixFlex>
                     <l:layoutData>
-                        <l:SplitterLayoutData size="24%" minSize="384px"/>
+                        <l:SplitterLayoutData size="24%" minSize="384px" />
                     </l:layoutData>
                     <l:fixContent>
                         <VBox class="sapUiSmallMarginTop sapUiSmallMarginEnd">

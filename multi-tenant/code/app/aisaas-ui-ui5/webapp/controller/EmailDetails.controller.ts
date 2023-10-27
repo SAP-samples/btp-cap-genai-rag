@@ -17,8 +17,16 @@ import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import MessageToast from "sap/m/MessageToast";
 import PageSection from "sap/uxap/ObjectPageSection";
+import Fragment from "sap/ui/core/Fragment";
+import Dialog from "sap/m/Dialog";
+
 import { Mail, KeyFact, Action } from "../model/entities";
 import Formatter from "../model/formatter";
+
+const MAIL_ANSWERED_FRAGMENT_NAME = "aisaas.ui.view.MailAnsweredDialog";
+const ID_MAIL_ANSWERED_DIALOG = "mailAnsweredDialog";
+const ID_TEXTAREA_OL = "areaOL";
+const ID_TEXTAREA_WL = "areaWL";
 
 export default class EmailDetails extends BaseController {
     public resetEmailPageState(): void {
@@ -122,6 +130,31 @@ export default class EmailDetails extends BaseController {
         }
     }
 
+    public async openMailAnsweredDialog(responseOL: string, responseWL: string): Promise<void> {
+        const dialog = (await Fragment.load({
+            id: ID_MAIL_ANSWERED_DIALOG,
+            name: MAIL_ANSWERED_FRAGMENT_NAME,
+            controller: this
+        })) as Dialog;
+        this.getView().addDependent(dialog);
+
+        const flexItems = (dialog.getContent()[0] as VBox).getItems();
+        const areaOL = flexItems.find(
+            (item) => item.getId() === ID_MAIL_ANSWERED_DIALOG + "--" + ID_TEXTAREA_OL
+        ) as TextArea;
+        areaOL.setValue(responseOL);
+
+        const areaWL = flexItems.find(
+            (item) => item.getId() === ID_MAIL_ANSWERED_DIALOG + "--" + ID_TEXTAREA_WL
+        ) as TextArea;
+        areaWL.setValue(responseWL);
+
+        const closeButton = new Button({ text: this.getText("buttons.close"), press: () => dialog.close() });
+        dialog.setBeginButton(closeButton);
+
+        dialog.open();
+    }
+
     public onPressAction(): void {
         MessageToast.show("Not implemented!");
     }
@@ -196,9 +229,14 @@ export default class EmailDetails extends BaseController {
                 body: JSON.stringify({ id: idMail, response: responseToSend })
             });
             if (response.ok) {
-                MessageToast.show(this.getText("email.texts.responseSubmittedMessage"));
-                // refresh model to show active email as answered now
-                this.getModel("api").refresh();
+                const data = await response.json();
+                const success = data.value as boolean;
+                if (success) {
+                    // TODO: check how to get translation back to OL
+                    this.openMailAnsweredDialog(responseToSend, responseToSend).catch(console.log);
+                    // refresh model to show active email as answered now
+                    this.getModel("api").refresh();
+                }
             } else {
                 MessageToast.show(this.getText("email.texts.genericErrorMessage"));
             }

@@ -9,7 +9,6 @@
     core:require="{ formatter:
 	'aisaas/ui/model/formatter' }"
 >
-
     <ux:ObjectPageLayout
         id="emailPage"
         showAnchorBarPopover="false"
@@ -17,76 +16,98 @@
         headerContentPinned="true"
         visible="{= ${/activeEmailId} !== null }"
     >
-		<ux:headerTitle>
-			<ux:ObjectPageDynamicHeaderTitle>
-				<ux:heading>
-					<VBox>
-						<Title wrapping="true" text="{= !${/translationOn} ? ${api>mail/subject} : ${api>mail/translation/subject} }" />
-						<HBox alignItems="Center">
-							<ObjectStatus
+        <ux:headerTitle>
+            <ux:ObjectPageDynamicHeaderTitle>
+                <ux:heading>
+                    <VBox>
+                        <Title
+                            wrapping="true"
+                            text="{= !${/translationOn} ? ${api>mail/subject} : ${api>mail/translation/subject} }"
+                        />
+                        <HBox alignItems="Center">
+                            <ObjectStatus
                                 inverted="true"
                                 icon="{path:'api>mail/urgency', formatter:'formatter.getUrgencyIcon'}"
                                 text="{parts: ['filters>/urgency', 'api>mail/urgency'], formatter:'formatter.getUrgencyText'} {i18n>filters.titles.urgency}"
                                 state="{path:'api>mail/urgency', formatter:'formatter.getUrgencyState'}"
                             />
-							<ObjectStatus
+                            <ObjectStatus
                                 class="sapUiTinyMarginBegin"
                                 inverted="true"
                                 icon="{path:'api>mail/sentiment', formatter:'formatter.getSentimentIcon'}"
                                 text="{parts: ['filters>/sentiment', 'api>mail/sentiment'], formatter:'formatter.getSentimentText'}"
                                 state="{path:'api>mail/sentiment', formatter:'formatter.getSentimentState'}"
                             />
-							<ObjectStatus class="sapUiTinyMarginBegin" inverted="true" text="{api>mail/category}" state="Information" />
-						</HBox>
-					</VBox>
-				</ux:heading>
-				<ux:actions>
-					<Label
+                            <ObjectStatus
+                                class="sapUiTinyMarginBegin"
+                                inverted="true"
+                                text="{api>mail/category}"
+                                state="Information"
+                            />
+                        </HBox>
+                    </VBox>
+                </ux:heading>
+                <ux:actions>
+                    <Label
                         vAlign="Middle"
                         text="{path: 'api>mail/createdAt', formatter: 'formatter.formatDate'}"
                         class="sapUiSmallMarginEnd"
                     />
-				</ux:actions>
-			</ux:ObjectPageDynamicHeaderTitle>
-		</ux:headerTitle>
+                </ux:actions>
+            </ux:ObjectPageDynamicHeaderTitle>
+        </ux:headerTitle>
 
-		<ux:headerContent>
-			<HBox id="headerContent" wrap="Wrap" visible="{= !${/translationOn} }" />
-			<HBox id="headerTranslatedContent" wrap="Wrap" visible="{/translationOn}" />
-		</ux:headerContent>
+        <ux:headerContent>
+            <HBox id="headerContent" wrap="Wrap" visible="{= !${/translationOn} }" />
+            <HBox id="headerTranslatedContent" wrap="Wrap" visible="{/translationOn}" />
+        </ux:headerContent>
 
-		<ux:sections>
-			<ux:ObjectPageSection
+        <ux:sections>
+            <ux:ObjectPageSection
                 id="incomingMessageSection"
                 titleUppercase="false"
                 title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.incomingMessage} : ${i18n>email.titles.message} }"
             >
-				<ux:subSections>
-					<ux:ObjectPageSubSection
+                <ux:subSections>
+                    <ux:ObjectPageSubSection
                         title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.incomingMessage} : ${i18n>email.titles.message} }"
                     >
-						<VBox class="sapUiTinyMargin">
-							<Text text="{= !${/translationOn} ? ${api>mail/body} : ${api>mail/translation/body} }" />
-						</VBox>
-					</ux:ObjectPageSubSection>
-				</ux:subSections>
-			</ux:ObjectPageSection>
+                        <VBox class="sapUiTinyMargin">
+                            <Text text="{= !${/translationOn} ? ${api>mail/body} : ${api>mail/translation/body} }" />
+                        </VBox>
+                    </ux:ObjectPageSubSection>
+                </ux:subSections>
+            </ux:ObjectPageSection>
+            <ux:ObjectPageSection
+                titleUppercase="false"
+                title="{i18n>email.titles.summary}"
+            >
+                <ux:subSections>
+                    <ux:ObjectPageSubSection
+                        title="{i18n>email.titles.summary}"
+                    >
+                        <VBox class="sapUiTinyMargin">
+                            <Text text="{= !${/translationOn} ? ${api>mail/summary} : ${api>mail/translation/summary} }" />
+                        </VBox>
+                    </ux:ObjectPageSubSection>
+                </ux:subSections>
+            </ux:ObjectPageSection>
 
-			<ux:ObjectPageSection
+            <ux:ObjectPageSection
                 titleUppercase="false"
                 title="{i18n>email.titles.responsePreparation}"
                 visible="{= !${api>mail/responded} }"
             >
-				<ux:subSections>
-					<ux:ObjectPageSubSection title="{i18n>email.titles.responsePreparation}">
-						<VBox class="sapUiTinyMargin">
-							<VBox class="sapUiMediumMarginBottom">
-								<Title text="{i18n>email.titles.suggestedActions}:" />
-								<HBox id="suggestedActionsBox" />
-							</VBox>
+                <ux:subSections>
+                    <ux:ObjectPageSubSection title="{i18n>email.titles.responsePreparation}">
+                        <VBox class="sapUiTinyMargin">
+                            <VBox class="sapUiMediumMarginBottom">
+                                <Title text="{i18n>email.titles.suggestedActions}:" />
+                                <HBox id="suggestedActionsBox" />
+                            </VBox>
 
-							<Title text="{i18n>email.titles.additionalInfo}:" />
-							<TextArea
+                            <Title text="{i18n>email.titles.additionalInfo}:" />
+                            <TextArea
                                 width="100%"
                                 growing="true"
                                 valueLiveUpdate="true"
@@ -94,29 +115,42 @@
                                 value="{/additionalInfo}"
                                 liveChange="onChangeAdditionalInfo"
                             />
-							<CheckBox text="{i18n>email.texts.includeResponses}" selected="{/submittedResponsesIncluded}" />
-							
-							<HBox justifyContent="End">
-								<Button type="Emphasized" text="{i18n>email.buttons.regenerateResponse}" press="onPressRegenerate" />
-							</HBox>
-						</VBox>
-					</ux:ObjectPageSubSection>
-				</ux:subSections>
-			</ux:ObjectPageSection>
+                            <CheckBox
+                                text="{i18n>email.texts.includeResponses}"
+                                selected="{/submittedResponsesIncluded}"
+                            />
 
-			<ux:ObjectPageSection
+                            <HBox justifyContent="End">
+                                <Button
+                                    type="Emphasized"
+                                    text="{i18n>email.buttons.regenerateResponse}"
+                                    press="onPressRegenerate"
+                                />
+                            </HBox>
+                        </VBox>
+                    </ux:ObjectPageSubSection>
+                </ux:subSections>
+            </ux:ObjectPageSection>
+
+            <ux:ObjectPageSection
                 id="suggestedResponseSection"
                 titleUppercase="false"
                 title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.suggestedResponse} : ${i18n>email.titles.response} }"
                 busyIndicatorDelay="300"
             >
-				<ux:subSections>
-					<ux:ObjectPageSubSection
+                <ux:subSections>
+                    <ux:ObjectPageSubSection
                         title="{= !${path: 'api>mail/responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? ${i18n>email.titles.suggestedResponse} : ${i18n>email.titles.response} }"
                     >
-						<VBox class="sapUiTinyMargin" visible="{= !${api>mail/responded} }">
-							<TextArea width="100%" growing="true" editable="false" visible="{= !${/translationOn} }" value="{/responseBody}" />
-							<TextArea
+                        <VBox class="sapUiTinyMargin" visible="{= !${api>mail/responded} }">
+                            <TextArea
+                                width="100%"
+                                growing="true"
+                                editable="false"
+                                visible="{= !${/translationOn} }"
+                                value="{/responseBody}"
+                            />
+                            <TextArea
                                 width="100%"
                                 growing="true"
                                 visible="{/translationOn}"
@@ -127,22 +161,30 @@
                                 valueState="{= ${/translatedResponseBody} !== ${api>mail/translation/responseBody} ? 'Information' : 'None' }"
                                 valueStateText="{i18n>email.texts.editedSuggestedResponse}"
                             />
-							<HBox justifyContent="End">
-								<Button type="Emphasized" enabled="{/translationOn}" text="{i18n>email.buttons.send}" press="onPressSend" />
-							</HBox>
-						</VBox>
-						<VBox class="sapUiTinyMargin" visible="{= ${api>mail/responded} }">
-							<Text text="{= !${/translationOn} ? ${/responseBody} : ${/translatedResponseBody} }" />
-						</VBox>
-					</ux:ObjectPageSubSection>
-				</ux:subSections>
-			</ux:ObjectPageSection>
+                            <HBox justifyContent="End">
+                                <Button
+                                    type="Emphasized"
+                                    enabled="{/translationOn}"
+                                    text="{i18n>email.buttons.send}"
+                                    press="onPressSend"
+                                />
+                            </HBox>
+                        </VBox>
+                        <VBox class="sapUiTinyMargin" visible="{= ${api>mail/responded} }">
+                            <Text text="{= !${/translationOn} ? ${/responseBody} : ${/translatedResponseBody} }" />
+                        </VBox>
+                    </ux:ObjectPageSubSection>
+                </ux:subSections>
+            </ux:ObjectPageSection>
 
-			<ux:ObjectPageSection titleUppercase="false" title="{i18n>email.titles.similarEmails} ({/similarEmails/length})">
-				<ux:subSections>
-					<ux:ObjectPageSubSection title="{i18n>email.titles.similarEmails} ({/similarEmails/length})">
-						<VBox class="sapUiTinyMarginBeginEnd">
-							<List
+            <ux:ObjectPageSection
+                titleUppercase="false"
+                title="{i18n>email.titles.similarEmails} ({/similarEmails/length})"
+            >
+                <ux:subSections>
+                    <ux:ObjectPageSubSection title="{i18n>email.titles.similarEmails} ({/similarEmails/length})">
+                        <VBox class="sapUiTinyMarginBeginEnd">
+                            <List
                                 id="similarEmailsList"
                                 showSeparators="None"
                                 mode="SingleSelectMaster"
@@ -153,18 +195,17 @@
 								}"
                             >
                                 <CustomListItem class="sapUiSmallMarginTopBottom">
-									<core:Fragment fragmentName="aisaas.ui.view.SimilarEmailListItem" type="XML" />
+                                    <core:Fragment fragmentName="aisaas.ui.view.SimilarEmailListItem" type="XML" />
                                 </CustomListItem>
                             </List>
-						</VBox>
-					</ux:ObjectPageSubSection>
-				</ux:subSections>
-			</ux:ObjectPageSection>
-		</ux:sections>
-	</ux:ObjectPageLayout>
+                        </VBox>
+                    </ux:ObjectPageSubSection>
+                </ux:subSections>
+            </ux:ObjectPageSection>
+        </ux:sections>
+    </ux:ObjectPageLayout>
 
-	<FlexBox height="100%" alignItems="Center" justifyContent="Center" visible="{= !${/activeEmailId} }">
-		<Label text="{i18n>email.texts.noEmail}" />
-	</FlexBox>
-	
+    <FlexBox height="100%" alignItems="Center" justifyContent="Center" visible="{= !${/activeEmailId} }">
+        <Label text="{i18n>email.texts.noEmail}" />
+    </FlexBox>
 </mvc:View>
