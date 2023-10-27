@@ -175,7 +175,8 @@ export const embed = async (texts: Array<string>, tenant?: string, EmbeddingPara
 export const getAppName = () => {
     const services = xsenv.filterServices((svc) => svc.label === "saas-registry" || svc.name === "saas-registry");
     // @ts-ignore
-    const appName = services[0]?.credentials?.appName;
+    const appName = services[0]?.credentials?.appName ||  xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa?.xsappname?.split("!t")[0];
+    
     return appName;
 };
 
