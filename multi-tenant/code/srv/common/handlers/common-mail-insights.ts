@@ -589,10 +589,9 @@ export default class CommonMailInsights extends ApplicationService {
                     response: response
                 })
             ).text;
-            console.log(translation);
             return translation;
         } catch (error) {
-            console.log("Error", error);
+            console.error(`Error: ${error?.message}`);
             return {
                 responseBody: response || ""
             };
