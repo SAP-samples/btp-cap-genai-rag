@@ -3,11 +3,10 @@ import BindingMode from "sap/ui/model/BindingMode";
 
 import Device from "sap/ui/Device";
 
-
 export default {
-	createDeviceModel: () => {
-		const oModel = new JSONModel(Device);
-		oModel.setDefaultBindingMode(BindingMode.OneWay);
-		return oModel;
-	}
+    createDeviceModel: () => {
+        const oModel = new JSONModel(Device);
+        oModel.setDefaultBindingMode(BindingMode.OneWay);
+        return oModel;
+    }
 };

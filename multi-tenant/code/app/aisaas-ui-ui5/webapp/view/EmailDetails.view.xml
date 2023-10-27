@@ -78,16 +78,13 @@
                     </ux:ObjectPageSubSection>
                 </ux:subSections>
             </ux:ObjectPageSection>
-            <ux:ObjectPageSection
-                titleUppercase="false"
-                title="{i18n>email.titles.summary}"
-            >
+            <ux:ObjectPageSection titleUppercase="false" title="{i18n>email.titles.summary}">
                 <ux:subSections>
-                    <ux:ObjectPageSubSection
-                        title="{i18n>email.titles.summary}"
-                    >
+                    <ux:ObjectPageSubSection title="{i18n>email.titles.summary}">
                         <VBox class="sapUiTinyMargin">
-                            <Text text="{= !${/translationOn} ? ${api>mail/summary} : ${api>mail/translation/summary} }" />
+                            <Text
+                                text="{= !${/translationOn} ? ${api>mail/summary} : ${api>mail/translation/summary} }"
+                            />
                         </VBox>
                     </ux:ObjectPageSubSection>
                 </ux:subSections>
