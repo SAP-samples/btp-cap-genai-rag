@@ -1,6 +1,6 @@
 apiVersion: v2
 name: aisaas
-description: AI SaaS
+description: GenAI Mail Insights
 type: application
 version: 0.0.1
 appVersion: 0.0.1

@@ -10,3 +10,4 @@ modules:
         {
           "broker-user": "<paste your hash credentials here>"
         }
+      SBF_CATALOG_FILE: ./catalog-private.json
