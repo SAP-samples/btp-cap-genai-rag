@@ -14,8 +14,10 @@
         </HBox>
         <VBox width="calc(100% - 5rem)">
             <HBox justifyContent="SpaceBetween">
-                <Label text="{= !${/translationOn} ? ${api>sender} : ${api>translation/sender} }" wrapping="true" />
-                <Label text="{path: 'api>createdAt', formatter: 'formatter.formatDate'}" wrapping="true" />
+                <Label text="{= !${/translationOn} ? ${api>sender} : ${api>translation/sender} }"
+                    wrapping="true" />
+                <Label text="{path: 'api>createdAt', formatter: 'formatter.formatDate'}"
+                    wrapping="true" />
             </HBox>
             <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
                 <VBox width="calc(100% - 2rem)">
@@ -24,7 +26,8 @@
                         class="sapUiTinyMarginTop"
                         text="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"
                     />
-                    <Text maxLines="2" text="{= !${/translationOn} ? ${api>body} : ${api>translation/body} }" />
+                    <Text maxLines="2"
+                        text="{= !${/translationOn} ? ${api>summary} : ${api>translation/summary} }" />
                 </VBox>
                 <VBox>
                     <ObjectStatus

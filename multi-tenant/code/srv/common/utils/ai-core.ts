@@ -177,7 +177,7 @@ export const getAppName = () => {
     // @ts-ignore
     const appName =
         services[0]?.credentials?.appName ||
-        xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa?.xsappname?.split("!t")[0];
+        (xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa as any)?.xsappname?.split("!t")[0];
 
     return appName;
 };
