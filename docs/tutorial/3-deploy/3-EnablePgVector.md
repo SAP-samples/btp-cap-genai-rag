@@ -12,7 +12,11 @@ Further details can be found in the official SAP Help documentation. The **Postg
 
 [SAP Help | Using the ‘PostgreSQL, Hyperscaler Option’ Extension APIs for Kyma](https://help.sap.com/docs/postgresql-hyperscaler-option/postgresql-on-sap-btp-hyperscaler-option/using-postgresql-hyperscaler-option-extension-apis-for-kyma?locale=en-US)
 
-1. Create a new **Service Binding** for your **PostgreSQL on SAP BTP, hyperscaler option** service instance in your **Kyma Dashboard**.
+1. Create a new **X.509-based Service Binding** for your **PostgreSQL on SAP BTP, hyperscaler option** service instance in your **Kyma Dashboard**.
+   
+   > **Important** - Make sure to use the **Advanced** options to add the **credential-type** property as visible in the following screenshot!
+   
+    > **Hint** - Please keep in mind that your PostgreSQL service instance will be named differently based on your helm installation details e.g., **aisaas-postgresql-db**. 
 
     [<img src="./images/PGExt_KymaBinding.png" width="400"/>](./images/PGExt_KymaBinding.png?raw=true)
 

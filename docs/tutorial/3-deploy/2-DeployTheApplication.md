@@ -38,9 +38,9 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
       * shootName - The unique shoot name of your Kyma Cluster.
         > **Hint** - To get the **shootName** of your Kyma Cluster, run the following kubectl command:  
         > 
-        >```kubectl get configMaps/shoot-info -n kube-system -o jsonpath='{.data.shootName}'```.<br> 
+        >```kubectl get configMaps/shoot-info -n kube-system -o jsonpath='{.data.shootName}'```<br> 
         > 
-        > In a productive SAP BTP landscape, your **shootName** will always starts with a letter like *a1b2c3* or with the prefix **c-** like c-1b2c3d4*. 
+        > In a productive SAP BTP landscape, your **shootName** will always starts with a letter like *a1b2c3* or with the prefix **c-** like c-1b2c3d4. 
     </details>
 
     <details>
@@ -69,13 +69,15 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
 
       * image.repository - Registry details of your **API Service Broker** Container Image repository like \<username>/aisaas-broker.
       * image.tag - Provide the tag of your container image if you do not want to use the latest image.
-      * config.serviceId & planId(s) - Generate and provide unique GUIDs for your service plans and the broker itself. 
+      * config.serviceId & planId(s) - Generate and provide unique GUIDs for your service plans and the broker itself. You can also use any other command-line tool or your favorite online service to generate your own GUID values.
 
           > **Important** - Run the following script which will generate new GUIDs in a new */code/broker/catalog-private.json* file.<br>
           > 
           > **Run in ./multi-tenant/code/broker**
           > ```sh 
           > # Execute in ./multi-tenant/code/broker #
+          > cd ../../multi-tenant/code/broker # if necessary
+          >
           > cp catalog.json catalog-private.json
           > npx --yes -p @sap/sbf gen-catalog-ids catalog-private.json
           > cat catalog-private.json
