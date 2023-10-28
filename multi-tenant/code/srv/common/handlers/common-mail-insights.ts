@@ -665,7 +665,7 @@ export default class CommonMailInsights extends ApplicationService {
             //@ts-ignore
             const appName = xsuaa?.xsappname?.split("!t")[0];
             const defaultGroupExists = (await aiCore.getResourceGroups())?.find(
-                (resourceGroup: any) => (resourceGroup.resourceGroupId = `default-${appName}`)
+                (resourceGroup: any) => (resourceGroup.resourceGroupId === `default-${appName}`)
             );
 
             if (!defaultGroupExists) {
