@@ -664,14 +664,14 @@ export default class CommonMailInsights extends ApplicationService {
             const xsuaa = xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa;
             //@ts-ignore
             const appName = xsuaa?.xsappname?.split("!t")[0];
+            const resourceGroupId = `default-${appName}`;
             const defaultGroupExists = (await aiCore.getResourceGroups())?.find(
-                (resourceGroup: any) => (resourceGroup.resourceGroupId = `default-${appName}`)
+                (resourceGroup: any) => resourceGroup.resourceGroupId === resourceGroupId
             );
 
             if (!defaultGroupExists) {
                 // Create AI Core Resource Group for tenant
                 console.log("Info: AI Core Default Resource Group will be created");
-                const resourceGroupId = `default-${appName}`;
 
                 await aiCore.createResourceGroup(resourceGroupId);
                 await delay(10000);
