@@ -19,7 +19,7 @@ service MailInsightsApiService @(
     };
 
     // Delete a single mail
-    function deleteMail(id : UUID)                                                                             returns Boolean;
+    action   deleteMail(id : UUID)                                                                             returns Boolean;
     // Add new mails
     action   addMails(mails : array of db.BaseMail, rag : Boolean null)                                        returns array of Mails;
 }
