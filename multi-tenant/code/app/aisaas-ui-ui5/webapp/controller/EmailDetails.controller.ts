@@ -29,6 +29,8 @@ const ID_TEXTAREA_OL = "areaOL";
 const ID_TEXTAREA_WL = "areaWL";
 
 export default class EmailDetails extends BaseController {
+    private mailAnsweredDialog: Dialog;
+
     public resetEmailPageState(): void {
         this.scrollToFirstSection();
         this.resetSimilarEmailsListState();
@@ -125,14 +127,10 @@ export default class EmailDetails extends BaseController {
     }
 
     public async openMailAnsweredDialog(responseOL: string, responseWL: string): Promise<void> {
-        const dialog = (await Fragment.load({
-            id: ID_MAIL_ANSWERED_DIALOG,
-            name: MAIL_ANSWERED_FRAGMENT_NAME,
-            controller: this
-        })) as Dialog;
-        this.getView().addDependent(dialog);
-
-        const flexItems = (dialog.getContent()[0] as VBox).getItems();
+        if (!this.mailAnsweredDialog) {
+            await this.initMailAnsweredDialog();
+        }
+        const flexItems = (this.mailAnsweredDialog.getContent()[0] as VBox).getItems();
         const areaOL = flexItems.find(
             (item) => item.getId() === ID_MAIL_ANSWERED_DIALOG + "--" + ID_TEXTAREA_OL
         ) as TextArea;
@@ -143,10 +141,19 @@ export default class EmailDetails extends BaseController {
         ) as TextArea;
         areaWL.setValue(responseWL);
 
+        this.mailAnsweredDialog.open();
+    }
+
+    public async initMailAnsweredDialog(): Promise<void> {
+        this.mailAnsweredDialog = (await Fragment.load({
+            id: ID_MAIL_ANSWERED_DIALOG,
+            name: MAIL_ANSWERED_FRAGMENT_NAME,
+            controller: this
+        })) as Dialog;
+        const dialog = this.mailAnsweredDialog as Dialog;
+        this.getView().addDependent(dialog);
         const closeButton = new Button({ text: this.getText("buttons.close"), press: () => dialog.close() });
         dialog.setBeginButton(closeButton);
-
-        dialog.open();
     }
 
     public onPressAction(): void {
@@ -236,7 +243,6 @@ export default class EmailDetails extends BaseController {
                 if (success) {
                     // TODO: check how to get translation back to OL
                     this.openMailAnsweredDialog(responseToSend, responseToSend).catch(console.log);
-                    // refresh model to show active email as answered now
                     this.getModel("api").refresh();
                 }
             } else {
@@ -263,7 +269,7 @@ export default class EmailDetails extends BaseController {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    id: localModel.getProperty("/activeEmailId"),
+                    id: localModel.getProperty("/activeEmailId")
                 })
             });
             if (response.ok) {
@@ -278,7 +284,7 @@ export default class EmailDetails extends BaseController {
         }
     }
 
-     public async onDeleteMail(): Promise<void> {
+    public async onDeleteMail(): Promise<void> {
         try {
             const oDataModel = this.getModel("api") as ODataModel;
             const httpHeaders = oDataModel.getHttpHeaders();
@@ -291,7 +297,7 @@ export default class EmailDetails extends BaseController {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    id: localModel.getProperty("/activeEmailId"),
+                    id: localModel.getProperty("/activeEmailId")
                 })
             });
             if (response.ok) {
