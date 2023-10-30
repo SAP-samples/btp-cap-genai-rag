@@ -1,11 +1,13 @@
 # Post-Deployment Actions
 
-Depending on your favorite runtime, you need to apply two Post-Deployment Actions. In a single-tenant setup, Post-Deployment actions are required in the Kyma runtime only. 
+Depending on your favorite runtime, you need to apply two Post-Deployment Actions. In a **single-tenant** setup, Post-Deployment actions are required in the **SAP BTP, Kyma Runtime** only. 
 
-- [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime) <br>
-- [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime-multitenant-only) (Multitenant only)
+- [Post-Deployment Actions](#post-deployment-actions)
+  - [SAP BTP, Kyma Runtime (Single- and Multitenant)](#sap-btp-kyma-runtime-single--and-multitenant)
+  - [SAP BTP, Cloud Foundry Runtime (Multitenant only)](#sap-btp-cloud-foundry-runtime-multitenant-only)
 
-## SAP BTP, Kyma Runtime (Single and Multitenant)
+
+## SAP BTP, Kyma Runtime (Single- and Multitenant)
 
 In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is reachable by your workloads, by providing your PostgreSQL Service Instance with the Egress Cluster IP addresses of your Kyma Cluster. Please follow the steps below to fulfill this requirement. 
 
@@ -36,6 +38,7 @@ In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is re
     [<img src="./images/PDEP_KymaIPs.png" width="200"/>](./images/PDEP_KymaIPs.png?raw=true)
 
 5. Once you updated the settings, please click on **Update**. After a few minutes your PostgreSQL database should be reachable by your applications hosted in your Kyma Cluster.
+
 
 ## SAP BTP, Cloud Foundry Runtime (Multitenant only)
 

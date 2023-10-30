@@ -1,11 +1,8 @@
 # Create an API Service Instance (Multitenant only)
 
-> **Important** - This chapter is only relevant for the **multitenant version** of our AI Sample Scenario. In a single tenant setup, you can use the Application Service endpoints to push sample data to your application. 
+This chapter is only relevant for the **multitenant version** of our AI Sample Scenario. In a single tenant setup, you can use the Application Service endpoints to push sample data to your application. 
 
-> **Hint** - The application has been renamed to **GenAI Mail Insights** - Screenshots will be updated soon!
-
-
-Follow the next steps to create a new API Service instance within a dedicated Subscriber Subaccount. The actual API Service Broker was registered during the Provisioning/Onboarding process of the SaaS application. If the 
+Follow the next steps to create a new GenAI Mail Insights API Service instance within a dedicated Subscriber Subaccount. The API Service Broker was registered during the Provisioning/Onboarding process of the SaaS application. If you cannot see the Gen AI Mail Insights API Service in your Marketplace, please double check the logs of your subscription process. The most common issue are incorrect credentials in the **Credential Store**, which you maintained in one of the previous chapters ([click here](../3-deploy/4-PostDeployActions.md)). In that case, please update the credentials, remove the subscription and re-subscribe. 
 
 1. Go to the Subscriber Subaccount in which you have created the SaaS application subscription.
 

@@ -2,10 +2,14 @@
 
 The generative AI hub which is part of the SAP AI Core offering, allows you to connect your application to various Large Language Models such as GTP 3.5 and GTP 4, as well as respective embedding models. In this chapter you will learn how to setup the respective SAP AI Core component in your SAP BTP Global Account. In the multi-tenant scenario, the respective objects such as *Configurations* and *Deployments* will be generated automatically once a new tenant is being onboarded. This feature is planned to be delivered for the Single-Tenant scenario too. 
 
+- [Setup the generative AI hub in SAP AI Core](#setup-the-generative-ai-hub-in-sap-ai-core)
+  - [Create Service Instance](#create-service-instance)
+  - [Create Destination](#create-destination)
+
 
 ## Create Service Instance 
 
-1. As described in on the previous chapters, please ensure you assigned the following entitlements to your subaccount.
+1. As described in on the previous chapters, please ensure you assigned the following entitlement to your subaccount.
 
   - **SAP AI Core** - sap-internal 
 

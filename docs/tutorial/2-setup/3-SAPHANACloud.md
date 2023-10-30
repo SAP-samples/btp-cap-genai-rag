@@ -2,6 +2,11 @@
 
 Depending on your landscape setup, either create a new SAP HANA Cloud instance or share an existing SAP HANA Cloud instance with your Cloud Foundry Org/Space respectively your Kyma Cluster/Namespace. 
 
+- [Configure SAP HANA Cloud](#configure-sap-hana-cloud)
+  - [Setup your preferred SAP BTP Runtime](#setup-your-preferred-sap-btp-runtime)
+  - [Create a new SAP HANA Cloud Instance](#create-a-new-sap-hana-cloud-instance)
+  - [Share/Map an existing SAP HANA Cloud Instance](#sharemap-an-existing-sap-hana-cloud-instance)
+
 To do so, please follow the respective SAP HANA Academy tutorial and official SAP Help documentation linked below. 
 
 [SAP BTP Developer Onboarding | SAP HANA Cloud](https://blogs.sap.com/2022/12/16/sap-btp-developer-onboarding-sap-hana-cloud/)

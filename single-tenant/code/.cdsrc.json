@@ -1,5 +1,31 @@
 {
     "requires": {
+        "PROVIDER_AI_CORE_DESTINATION_HUB": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "PROVIDER_AI_CORE_DESTINATION_HUB",
+                "requestTimeout": "300000"
+            }
+        },
+        "aicore": {
+            "createResourceGroups": true
+        },
+        "postgres": {
+            "kind": "postgresql-db",
+            "[development]": {
+                "kind": "postgres",
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
+                }
+            }
+        },
+        "-------------------- ": "---",
+        "--- Auth Settings ---": "---",
+        " --------------------": "---",
         "auth": {
             "kind": "xsuaa",
             "[development]": {
@@ -17,6 +43,9 @@
                 }
             }
         },
+        "------------------ ": "---",
+        "--- DB Settings ---": "---",
+        " ------------------": "---",
         "db": {
             "kind": "hana", 
             "impl": "@sap/cds-hana",
@@ -26,19 +55,6 @@
                 "impl": "",
                 "credentials": {
                     "url": "db.sqlite"
-                }
-            }
-        },
-        "postgres": {
-            "kind": "postgresql-db",
-            "[development]": {
-                "kind": "postgres",
-                "credentials": {
-                    "hostname": "localhost",
-                    "port": 5432,
-                    "username": "postgres",
-                    "password": "postgres",
-                    "dbname": "postgres"
                 }
             }
         }

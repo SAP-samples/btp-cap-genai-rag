@@ -11,6 +11,7 @@ local/
 app-build/
 resources/
 *-content.zip
+content.zip
 manifest-bundle.zip
 connection.properties
 *-private.http
