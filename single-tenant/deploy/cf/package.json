@@ -13,8 +13,8 @@
     "build:ui": "npm run build --prefix ../../code/app/ai-ui-ui5/ && npm run copy --prefix ../../code/app/ai-ui-ui5/",
     "cleanup:ts": "npx shx rm -r \"../../code/gen/**/*.{ts,tsconfig}\"",
     "---DEPLOY---": "",
-    "build:mbt": "mbt build",
-    "deploy": "cf deploy mta_archives/ai_0.0.1.mtar", 
+    "build:mbt": "mbt build -e ./mtaext/free-tier-private.mtaext",
+    "deploy": "cf deploy mta_archives/ai_0.0.1.mtar",
     "build:deploy": "npm run build:mbt && npm run deploy"
   }
 }
