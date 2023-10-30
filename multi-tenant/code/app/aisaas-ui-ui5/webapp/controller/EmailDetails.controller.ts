@@ -1,4 +1,4 @@
-import BaseController from "./BaseController";
+import BaseController, { CAP_BASE_URL } from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import ODataModel from "sap/ui/model/odata/v4/ODataModel";
 import Event from "sap/ui/base/Event";
@@ -170,7 +170,7 @@ export default class EmailDetails extends BaseController {
         const httpHeaders: any = oDataModel.getHttpHeaders();
 
         try {
-            const response = await fetch("api/odata/v4/mail-insights/regenerateResponse", {
+            const response = await fetch(`${CAP_BASE_URL}/regenerateResponse`, {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
@@ -221,7 +221,7 @@ export default class EmailDetails extends BaseController {
         const suggestedResponse = this.byId("suggestedResponseSection") as PageSection;
         suggestedResponse.setBusy(true);
         try {
-            const response = await fetch("api/odata/v4/mail-insights/submitResponse", {
+            const response = await fetch(`${CAP_BASE_URL}/submitResponse`, {
                 method: "POST",
                 headers: {
                     // @ts-ignore
@@ -255,7 +255,7 @@ export default class EmailDetails extends BaseController {
             const oDataModel = this.getModel("api") as ODataModel;
             const httpHeaders = oDataModel.getHttpHeaders();
             const localModel: JSONModel = this.getModel() as JSONModel;
-            const response = await fetch("api/odata/v4/mail-insights/revokeResponse", {
+            const response = await fetch(`${CAP_BASE_URL}/revokeResponse`, {
                 method: "POST",
                 headers: {
                     // @ts-ignore
@@ -267,14 +267,42 @@ export default class EmailDetails extends BaseController {
                 })
             });
             if (response.ok) {
-                MessageToast.show("success");
+                MessageToast.show(this.getText("email.texts.revoked"));
                 this.getModel("api").refresh();
             } else {
-                MessageToast.show("Oops, wrong");
+                MessageToast.show(this.getText("email.texts.genericErrorMessage "));
             }
         } catch (error) {
             console.log(error);
-            MessageToast.show("Oops, wrong");
+            MessageToast.show(this.getText("email.texts.genericErrorMessage "));
+        }
+    }
+
+     public async onDeleteMail(): Promise<void> {
+        try {
+            const oDataModel = this.getModel("api") as ODataModel;
+            const httpHeaders = oDataModel.getHttpHeaders();
+            const localModel: JSONModel = this.getModel() as JSONModel;
+            const response = await fetch(`${CAP_BASE_URL}/deleteMail`, {
+                method: "POST",
+                headers: {
+                    // @ts-ignore
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: localModel.getProperty("/activeEmailId"),
+                })
+            });
+            if (response.ok) {
+                MessageToast.show(this.getText("email.texts.deleted"));
+                this.getModel("api").refresh();
+            } else {
+                MessageToast.show(this.getText("email.texts.genericErrorMessage "));
+            }
+        } catch (error) {
+            console.log(error);
+            MessageToast.show(this.getText("email.texts.genericErrorMessage "));
         }
     }
 }

@@ -200,14 +200,20 @@
             </ux:ObjectPageSection>
             <ux:ObjectPageSection titleUppercase="false" title="Administrive tasks">
                 <ux:subSections>
-                    <ux:ObjectPageSubSection title="Administrive tasks">
-                        <VBox class="sapUiTinyMargin">
+                    <ux:ObjectPageSubSection title="{i18n>email.titles.admin}">
+                        <HBox class="sapUiTinyMargin">
                             <Button
-                                type="Emphasized"
-                                text="revoke response"
+                                type="Default"
+                                text="{i18n>email.buttons.revokeResponse}"
                                 press="onRevokeResponse"
                             />
-                        </VBox>
+                            <Button
+                                type="Emphasized"
+                                text="{i18n>email.buttons.deleteMail}"
+                                press="onDeleteMail"
+                                class="sapUiSmallMarginBegin"
+                            />
+                        </HBox>
                     </ux:ObjectPageSubSection>
                 </ux:subSections>
             </ux:ObjectPageSection>
