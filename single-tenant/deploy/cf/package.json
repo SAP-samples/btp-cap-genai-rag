@@ -6,14 +6,15 @@
   "license": "Apache License 2.0",
   "scripts": {
     "---BUILD---": "",
-    "build": "npm run install && npm run build:cds && npm run build:ts && npm run cleanup:ts",
+    "build": "npm run install && npm run build:cds && npm run build:ui && npm run build:ts && npm run cleanup:ts",
     "install": "npm i --prefix ../../code && npm i --prefix ../../code/app/ai-ui-ui5",
     "build:ts": "tsc -p ../../code",
     "build:cds": "npx -p @sap/cds-dk cds build -in ../../code --profile production",
-    "cleanup:ts": "npx shx rm -r '../../code/gen/**/*.{ts,tsconfig}'",
+    "build:ui": "npm run build --prefix ../../code/app/ai-ui-ui5/ && npm run copy --prefix ../../code/app/ai-ui-ui5/",
+    "cleanup:ts": "npx shx rm -r \"../../code/gen/**/*.{ts,tsconfig}\"",
     "---DEPLOY---": "",
-    "build:mbt": "mbt build -p=cf -t=./mta_archives --mtar=ai.mtar",
-    "deploy": "cf deploy mta_archives/ai.mtar",
-    "build:deploy": "npm run build && npm run build:mbt && npm run deploy"
+    "build:mbt": "mbt build",
+    "deploy": "cf deploy mta_archives/ai_0.0.1.mtar", 
+    "build:deploy": "npm run build:mbt && npm run deploy"
   }
 }

@@ -61,7 +61,6 @@ modules:
       - name: ai-uaa
       - name: ai-logging
       - name: ai-hdi-container
-      - name: ai-aicore
       - name: ai-postgresql-db
       - name: ai-html5-repo-runtime
       - name: ai-destination
@@ -281,14 +280,3 @@ resources:
       service-plan: free
       config:
         engine_version: "13"
-
-
-  # ---------------- CORE AI SERVICE ---------------------------
-  - name: ai-aicore
-  # ------------------------------------------------------------
-    active: false
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: aicore
-      service-name: ${space}-ai-aicore
-      service-plan: standard

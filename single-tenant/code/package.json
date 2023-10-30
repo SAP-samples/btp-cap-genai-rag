@@ -40,7 +40,6 @@
         "@sap/cds-dk": "^7.2.0",
         "@sap/html5-app-deployer": "^5.0.0",
         "@sap/html5-repo-mock": "^2.1.1",
-        "@sap/sbf": "^6.5.2",
         "@sap/ux-specification": "^1.96.4",
         "@swc/core": "1.3.82",
         "@types/cors": "^2.8.13",
@@ -56,8 +55,7 @@
         "npm-run-all": "^4.1.5",
         "prettier": "3.0.3",
         "rimraf": "^5.0.1",
-        "shx": "^0.3.4",
-        "tsc-alias": "^1.8.8"
+        "shx": "^0.3.4"
     },
     "scripts": {
         "start": "cds-serve",
@@ -82,8 +80,8 @@
         "router:hybrid": "cds bind --exec npm run router:run",
         "router:run": "(cd router && cds bind --exec --profile hybrid-router node index.js)",
         "-Manual HTML5 Deployment-": "",
-        "deployer:run": "(cd app/html5-deployer && cds bind --exec --profile hybrid-html5 node ../../node_modules/@sap/html5-app-deployer/index.js)",
-        "deployer:hybrid": "cds bind --exec npm run deployer:run",
+        "deployer:hybrid": "cds bind --exec --profile hybrid-html5 npm run deployer:run",
+        "deployer:run": "(cd app/html5-deployer && node ../../node_modules/@sap/html5-app-deployer/index.js)",
         "---------------------": "",
         "-----PostgreSQL------": "",
         "/-------------------/": "",
@@ -92,11 +90,12 @@
         "--------------------": "",
         "--------BUILD-------": "",
         "/------------------/": "",
-        "build": "npm run inst && npm run build:cds && npm run build:ts && npm run cleanup:ts",
+        "build": "npm run inst && npm run build:cds && npm run build:ui && npm run build:ts && npm run cleanup:ts",
         "inst": "npm i && npm install --prefix ./app/ai-ui-ui5",
         "build:cds": "npx -p @sap/cds-dk cds build --profile production",
-        "build:ts": "tsc -p ./tsconfig.json",
-        "cleanup:ts": "npx shx rm -r './gen/**/*.{ts,tsconfig}'",
+        "build:ui": "npm run build --prefix ./app/ai-ui-ui5/ && npm run copy --prefix ./app/ai-ui-ui5/",
+        "build:ts": "tsc -p ./tsconfig.json", 
+        "cleanup:ts": "npx shx rm -r \"./gen/**/*.{ts,tsconfig}\"",
         "cds2types": "cd app-service && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },
     "prettier": {
