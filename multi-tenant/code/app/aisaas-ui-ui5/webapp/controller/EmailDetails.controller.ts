@@ -215,13 +215,17 @@ export default class EmailDetails extends BaseController {
         const localModel: JSONModel = this.getModel() as JSONModel;
         const responseToSend = localModel.getProperty("/translatedResponseBody") as string;
         const idMail = localModel.getProperty("/activeEmailId") as string;
-        const suggestedResponse = this.byId("suggestedResponseSection") as PageSection;
 
+        const oDataModel = this.getModel("api") as ODataModel;
+        const httpHeaders = oDataModel.getHttpHeaders();
+        const suggestedResponse = this.byId("suggestedResponseSection") as PageSection;
         suggestedResponse.setBusy(true);
         try {
             const response = await fetch("api/odata/v4/mail-insights/submitResponse", {
                 method: "POST",
                 headers: {
+                    // @ts-ignore
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ id: idMail, response: responseToSend })
@@ -243,6 +247,34 @@ export default class EmailDetails extends BaseController {
             MessageToast.show(this.getText("email.texts.genericErrorMessage"));
         } finally {
             suggestedResponse.setBusy(false);
+        }
+    }
+
+    public async onRevokeResponse(): Promise<void> {
+        try {
+            const oDataModel = this.getModel("api") as ODataModel;
+            const httpHeaders = oDataModel.getHttpHeaders();
+            const localModel: JSONModel = this.getModel() as JSONModel;
+            const response = await fetch("api/odata/v4/mail-insights/revokeResponse", {
+                method: "POST",
+                headers: {
+                    // @ts-ignore
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: localModel.getProperty("/activeEmailId"),
+                })
+            });
+            if (response.ok) {
+                MessageToast.show("success");
+                this.getModel("api").refresh();
+            } else {
+                MessageToast.show("Oops, wrong");
+            }
+        } catch (error) {
+            console.log(error);
+            MessageToast.show("Oops, wrong");
         }
     }
 }

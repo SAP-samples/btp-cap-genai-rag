@@ -198,6 +198,19 @@
                     </ux:ObjectPageSubSection>
                 </ux:subSections>
             </ux:ObjectPageSection>
+            <ux:ObjectPageSection titleUppercase="false" title="Administrive tasks">
+                <ux:subSections>
+                    <ux:ObjectPageSubSection title="Administrive tasks">
+                        <VBox class="sapUiTinyMargin">
+                            <Button
+                                type="Emphasized"
+                                text="revoke response"
+                                press="onRevokeResponse"
+                            />
+                        </VBox>
+                    </ux:ObjectPageSubSection>
+                </ux:subSections>
+            </ux:ObjectPageSection>
         </ux:sections>
     </ux:ObjectPageLayout>
 
