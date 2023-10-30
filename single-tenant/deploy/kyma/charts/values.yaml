@@ -55,6 +55,7 @@ srv:
   resources:
     limits:
       ephemeral-storage: 1G
+      cpu: 500m
       memory: 500M
     requests:
       ephemeral-storage: 1G

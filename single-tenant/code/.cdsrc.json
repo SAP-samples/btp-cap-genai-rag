@@ -7,9 +7,6 @@
                 "requestTimeout": "300000"
             }
         },
-        "aicore": {
-            "createResourceGroups": true
-        },
         "postgres": {
             "kind": "postgresql-db",
             "[development]": {
