@@ -2,7 +2,8 @@
 
 Once the application was successfully deployed, you need to enable the **pgvector** extension on your new **PostgreSQL on SAP BTP, hyperscaler option** service instance. Please follow the tutorial steps of your selected runtime. 
 
-  - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime) <br>
+- [Enable pgvector extension](#enable-pgvector-extension)
+  - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
   - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
 
 

@@ -2,9 +2,14 @@
 
 In this chapter, you will learn how to set up a hybrid testing environment. Hybrid in this case means, consuming all backing services from SAP BTP, while your application logic is executed on your local development environment. This allows you to conduct more realistic debugging scenarios.
 
+- [Hybrid Development](#hybrid-development)
+  - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
+  - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
+  - [General Steps](#general-steps)
+
 While the chapter appears to be quite comprehensive, please consider this is a one-time action, which does not need to be repeated once configured. Before starting, please ensure that you deployed and already subscribed to the GenAI Mail Insights application within a Subscriber Subaccount. 
 
-## Kyma
+## SAP BTP, Kyma Runtime
 
 1. For starting the hybrid development, you must have installed the GenAI Mail Insights application on your Kyma Cluster using **helm install** as described in the previous tutorial steps.
 
@@ -29,6 +34,25 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    cds bind html5-apps-repo -2 <ReleaseName>-srv-html5-apps-repo --kind html5-apps-repo --on k8s --for hybrid-app
    ```
 
+   **Application Router**
+
+   ```sh
+   # Run in ./(multi/single)-tenant/code #
+
+   cds bind -2 <ReleaseName>-router-destination,<ReleaseName>-router-xsuaa --on k8s --for hybrid-router
+   cds bind html5-apps-repo -2 <ReleaseName>-router-html5-apps-repo --kind html5-apps-repo --on k8s --for hybrid-router
+   ```
+
+   **HTML5 Deployer**
+
+   If you would like to run the HTML5 Apps Deployer in a hybrid mode, please ensure the respective HTML5 Apps Repository binding is configured.
+
+   ```sh
+   # Run in ./(multi/single)-tenant/code #
+
+   cds bind html5-apps-repo -2 <ReleaseName>-html5-apps-deployer-html5-apps-repo --kind html5-apps-repo --on k8s --for hybrid-html5
+   ```
+
    **API Service** (Multitenant only)
 
    ```sh
@@ -40,26 +64,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    cds bind saas-registry -2 <ReleaseName>-api-saas-registry --kind saas-registry --on k8s --for hybrid-api
    ```
 
-   **Application Router** (Single-Tenant & Multitenant)
-
-   ```sh
-   # Run in ./(multi/single)-tenant/code #
-
-   cds bind -2 <ReleaseName>-router-destination,<ReleaseName>-router-xsuaa --on k8s --for hybrid-router
-   cds bind html5-apps-repo -2 <ReleaseName>-router-html5-apps-repo --kind html5-apps-repo --on k8s --for hybrid-router
-   ```
-
-   **Optional - HTML5 Deployer** (Single-Tenant & Multitenant)
-
-   If you would like to run the HTML5 Apps Deployer in a hybrid mode, please ensure the respective HTML5 Apps Repository binding is configured.
-
-   ```sh
-   # Run in ./(multi/single)-tenant/code #
-
-   cds bind html5-apps-repo -2 <ReleaseName>-html5-apps-deployer-html5-apps-repo --kind html5-apps-repo --on k8s --for hybrid-html5
-   ```
-
-   **Optional - API Service Broker** (Multitenant only)
+   **API Service Broker** (Multitenant only)
 
    ```sh
    # Run in ./multi-tenant/code #
@@ -122,7 +127,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 4. This is it, you can now continue with the **General Section** which is equal for Kyma and Cloud Foundry environments.
 
 
-## Cloud Foundry
+## SAP BTP, Cloud Foundry Runtime
 
 1. For starting the hybrid development, you must have installed the GenAI Mail Insights application in your Cloud Foundry Environment using **cf deploy** as described in the previous tutorial steps.
 
@@ -173,18 +178,6 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    cds bind html5-apps-repo -2 <Space>-aisaas-html5-repo-runtime --kind html5-apps-repo --for hybrid-app
    ```
 
-   **API Service** (Multitenant only)
-
-   ```sh
-   # Run in ./multi-tenant/code #
-
-   # Multitenant
-   cds bind -2 <Space>-aisaas-destination,<Space>-aisaas-api-uaa --for hybrid-api
-   cds bind saas-registry -2 <Space>-aisaas-registry --kind saas-registry --for hybrid-app
-   cds bind postgresql-db -2 <Space>-aisaas-postgresql-db --kind postgresql-db --for hybrid-api
-   cds bind sm-container -2 <Space>-aisaas-service-manager --kind service-manager --for hybrid-api
-   ```
-
    **Application Router**
 
    ```sh
@@ -199,7 +192,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    cds bind html5-apps-repo -2 <Space>-aisaas-html5-repo-runtime --kind html5-apps-repo --for hybrid-router
    ```
 
-   **Optional - HTML5 Deployer**
+   **HTML5 Deployer**
 
    ```sh
    # Run in ./(multi/single)-tenant/code #
@@ -213,7 +206,19 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    cds bind html5-apps-repo -2 <Space>-aisaas-html5-repo-host --kind html5-apps-repo --for hybrid-html5
    ```
 
-   **Optional - API Service Broker** (Multitenant only)
+   **API Service** (Multitenant only)
+
+   ```sh
+   # Run in ./multi-tenant/code #
+
+   # Multitenant
+   cds bind -2 <Space>-aisaas-destination,<Space>-aisaas-api-uaa --for hybrid-api
+   cds bind saas-registry -2 <Space>-aisaas-registry --kind saas-registry --for hybrid-app
+   cds bind postgresql-db -2 <Space>-aisaas-postgresql-db --kind postgresql-db --for hybrid-api
+   cds bind sm-container -2 <Space>-aisaas-service-manager --kind service-manager --for hybrid-api
+   ```
+
+   **API Service Broker** (Multitenant only)
 
    ```sh
    # Run in ./multi-tenant/code #
@@ -266,7 +271,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 5. This is it, you can now continue with the **General Section** which is equal for Kyma and Cloud Foundry environments.
 
 
-## General
+## General Steps
 
 After configuring your **.cdsrc-private.json** files and (if necessary) opening the SSH tunnel to your Cloud Foundry environment, you can run the application in hybrid mode, by executing the below commands. 
 
@@ -291,7 +296,7 @@ After configuring your **.cdsrc-private.json** files and (if necessary) opening 
     ```sh
     # Run in ./(multi/single)-tenant/code #
 
-    # App Service + API Service HTML5 Repo Mock + UI5 App
+    # App Service + API Service + HTML5 Repo Mock + UI5 App
     # Parallel start using same terminal
     npm run hybrid 
 

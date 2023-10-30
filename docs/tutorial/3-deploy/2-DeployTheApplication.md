@@ -2,7 +2,8 @@
 
 Depending on your target runtime, different deployment steps are required. Please follow the corresponding instructions for your chosen runtime.
 
-  - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime) <br>
+- [Deploy the Application](#deploy-the-application)
+  - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
   - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
 
 ##  SAP BTP, Kyma Runtime
@@ -154,7 +155,7 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
 
     [<img src="./images/DEP_KymaSuccess.png" width="400"/>](./images/DEP_KymaSuccess.png?raw=true)
 
-5. This is it, you successfully deployed the sample application to your Kyma environment. Continue enabling the **pgvector** extension if not done yet. 
+5. This is it, you successfully deployed the sample application to your Kyma environment. Check out the next chapter, to learn how to enable the **pgvector** extension if not done yet ([click here](./3-EnablePgVector.md)). 
    
   
 
@@ -186,6 +187,6 @@ As the application components are part of the deployment archive in the Cloud Fo
    [<img src="./images/DEP_CfSuccess.png" width="400"/>](./images/DEP_CfSuccess.png?raw=true)
 
 
-4. This is it, you successfully deployed the sample application to your Cloud Foundry environment. Continue enabling the **pgvector** extension if not done yet. 
+4. This is it, you successfully deployed the sample application to your Cloud Foundry environment. Check out the next chapter, to learn how to enable the **pgvector** extension if not done yet ([click here](./3-EnablePgVector.md)). 
 
 

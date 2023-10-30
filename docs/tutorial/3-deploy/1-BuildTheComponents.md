@@ -6,7 +6,8 @@ Depending on your target runtime, different build and deployment steps are requi
   - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
   - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
     - [Multitenant](#multitenant)
-    - [Single-Tenant (Work in progress)](#single-tenant-work-in-progress)
+    - [Single-Tenant](#single-tenant)
+    - [PostgreSQL - Good to Know](#postgresql---good-to-know)
 
 
 ## SAP BTP, Kyma Runtime
@@ -122,7 +123,9 @@ In Kyma, you must build container images for the components of this sample scena
 
 5. Please duplicate the **free-tier.mtaext** file in the **multi-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
 
-6. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago. Your file should look similar to the following. 
+6. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago. Your **mtaext** file should look similar to the following. 
+   
+   > **Important** - If you want to reuse an **existing** PostgreSQL service instance or you cannot use the **free** PostgreSQL service plan, please check the end of this chapter for further details ([click here](#postgresql---good-to-know)).
 
     ```yaml
     ID: aisaas.freetier
@@ -140,30 +143,17 @@ In Kyma, you must build container images for the components of this sample scena
         SBF_CATALOG_FILE: ./catalog-private.json
     ```
 
-7. If you want to use an **existing PostgreSQL instance** please update the **free-tier-private.mtaext** file as depicted below. The existing service instance is named **my-postgresql-db** in this scenario. 
-
-    > ```yaml
-    > resources:
-    >    - name: aisaas-postgresql-db
-    >      # Reuse existing service instance
-    >      type: org.cloudfoundry.existing-service
-    >      parameters:
-    >        # Existing service instance name
-    >        service-name: my-postgresql-db
-
-    > A similar setup can also be achieved with an existing Credential Store Service instance. 
-
-8. Please run the following command to build your **mtar** file. 
+7. Please run the following command to build your **mtar** file. 
 
     ```sh
     # Run in ./multi-tenant/deploy/cf # 
     npm run build:mbt
     ```
 
-9.  Once your Multi-Target Application Archive is built successfully, you can continue deploying your application. 
+8. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).
 
 
-### Single-Tenant (Work in progress)
+### Single-Tenant
 
 1. If not done yet, please (fork and) clone the repository to your development environment. 
 
@@ -183,25 +173,48 @@ In Kyma, you must build container images for the components of this sample scena
     npm i -g typescript ts-node
     ```
 
-4. Please duplicate the **free-tier.mtaext** file in the **single-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
+4. Please duplicate the **free-tier.mtaext** file in the **single-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. 
 
-5. If you want to use an **existing PostgreSQL instance** please update the **free-tier-private.mtaext** file as depicted below. The existing service instance is named **my-postgresql-db** in this scenario. 
+   > **Hint** - Adding the **-private** suffix will ensure this file is not committed to GitHub. 
+   
+   > **Important** - If you want to reuse an **existing** PostgreSQL service instance or you cannot use the **free** PostgreSQL service plan, please check the end of this chapter for further details ([click here](#postgresql---good-to-know)).
 
-    > ```yaml
-    > resources:
-    >    - name: ai-postgresql-db
-    >      # Reuse existing service instance
-    >      type: org.cloudfoundry.existing-service
-    >      parameters:
-    >        # Existing service instance name
-    >        service-name: my-postgresql-db
-
-6. Please run the following command to build your **mtar** file. 
+5. Please run the following command to build your **mtar** file. 
 
     ```sh
     # Run in ./single-tenant/deploy/cf # 
     npm run build:mbt
     ```
 
-7. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application. 
+6. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).
+
+
+### PostgreSQL - Good to Know
+
+- If you want to use an **existing PostgreSQL instance** please update the **free-tier-private.mtaext** file as depicted below. The existing service instance is named **my-postgresql-db** in this scenario. A similar setup can also be achieved with an existing Credential Store Service instance. 
+
+    ```yaml
+    resources:
+    - name: ai(saas)-postgresql-db
+        # Reuse existing service instance
+        type: org.cloudfoundry.existing-service
+        parameters:
+        # Existing service instance name
+        service-name: my-postgresql-db
+    ```
+
+- In case you cannot use the **free** PostgreSQL service plan (e.g., SAP-managed accounts), please assign a paid service plan (+ storage service plan) to your entitlements and adjust your mtaext file as you can see below (smallest configuration without Multi AZ)! 
+  
+    > **Important** - Use with caution, as this will result in costs being charged against your SAP BTP Global Account!
+
+    ```yaml
+    resources:
+    - name: ai(saas)-postgresql-db
+        parameters:
+        service-plan: standard
+        config:
+            engine_version: "13"
+            memory: 2
+            multi_az: false
+    ```
 
