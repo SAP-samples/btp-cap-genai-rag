@@ -23,7 +23,7 @@ service MailInsightsService @(
     };
 
     // Delete a single mail
-    function deleteMail(id : UUID)                                                                  returns Boolean;
+    action   deleteMail(id : UUID)                                                                  returns Boolean;
     // Add new mails
     action   addMails(mails : array of db.BaseMail, rag : Boolean null)                             returns array of Mails;
     // Regenerate a single response
@@ -34,4 +34,6 @@ service MailInsightsService @(
     action   translateResponse(id : UUID, response : String)                                        returns String;
     // Submits response in working language
     action   submitResponse(id : UUID, response : String)                                           returns Boolean;
+    // Revoke answered status 
+    action   revokeResponse(id : UUID)                                                              returns Boolean;
 };

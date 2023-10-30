@@ -3,7 +3,7 @@ import { Request } from "@sap/cds/apis/services";
 import { v5 as uuidv5, v4 as uuidv4 } from "uuid";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
-import { IStoredMail, ITranslatedMail } from "../common/handlers/types";
+import { IStoredMail } from "../common/handlers/types";
 
 export default class MailInsightsService extends CommonMailInsights {
     async init() {
@@ -12,6 +12,7 @@ export default class MailInsightsService extends CommonMailInsights {
         await this.checkDefaultResourceGroup();
         // Additional handlers
         this.on("submitResponse", this.onSubmitResponse);
+        this.on("revokeResponse", this.onRevokeResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
         this.on("translateResponse", this.onTranslateResponse);
@@ -108,6 +109,29 @@ export default class MailInsightsService extends CommonMailInsights {
                 const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
                 await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
             }
+            return new Boolean(success);
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
+    };
+
+
+    // Revoke responded status for single mail
+    private onRevokeResponse = async (req: Request) => {
+        try {
+            const { tenant } = req;
+            const { id } = req.data;
+            const { Mails } = this.entities;
+
+            const success = await UPDATE(Mails, id).with({responded : false});
+
+            if (success) {
+                const typeormVectorStore = await this.getVectorStore(tenant);
+                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": false}' where (metadata->'id')::jsonb ? $1`;
+                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
+            }
+
             return new Boolean(success);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
