@@ -63,6 +63,17 @@
         </ux:headerContent>
 
         <ux:sections>
+            <ux:ObjectPageSection titleUppercase="false" title="{i18n>email.titles.summary}" id="summarySection">
+                <ux:subSections>
+                    <ux:ObjectPageSubSection title="{i18n>email.titles.summary}">
+                        <VBox class="sapUiTinyMargin">
+                            <Text
+                                text="{= !${/translationOn} ? ${api>mail/summary} : ${api>mail/translation/summary} }"
+                            />
+                        </VBox>
+                    </ux:ObjectPageSubSection>
+                </ux:subSections>
+            </ux:ObjectPageSection>
             <ux:ObjectPageSection
                 id="incomingMessageSection"
                 titleUppercase="false"
@@ -78,19 +89,8 @@
                     </ux:ObjectPageSubSection>
                 </ux:subSections>
             </ux:ObjectPageSection>
-            <ux:ObjectPageSection titleUppercase="false" title="{i18n>email.titles.summary}">
-                <ux:subSections>
-                    <ux:ObjectPageSubSection title="{i18n>email.titles.summary}">
-                        <VBox class="sapUiTinyMargin">
-                            <Text
-                                text="{= !${/translationOn} ? ${api>mail/summary} : ${api>mail/translation/summary} }"
-                            />
-                        </VBox>
-                    </ux:ObjectPageSubSection>
-                </ux:subSections>
-            </ux:ObjectPageSection>
-
             <ux:ObjectPageSection
+                id="responsePreparationSection"
                 titleUppercase="false"
                 title="{i18n>email.titles.responsePreparation}"
                 visible="{= !${api>mail/responded} }"
@@ -161,7 +161,6 @@
                             <HBox justifyContent="End">
                                 <Button
                                     type="Emphasized"
-                                    enabled="{/translationOn}"
                                     text="{i18n>email.buttons.send}"
                                     press="onPressSend"
                                 />

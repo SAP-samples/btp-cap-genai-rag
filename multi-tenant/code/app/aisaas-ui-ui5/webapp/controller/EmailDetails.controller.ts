@@ -36,14 +36,8 @@ export default class EmailDetails extends BaseController {
 
     private scrollToFirstSection(): void {
         const page: ObjectPageLayout = this.byId("emailPage") as ObjectPageLayout;
-        const suggestedResponseSection: ObjectPageSection = this.byId("suggestedResponseSection") as ObjectPageSection;
-        const incomingMessageSection: ObjectPageSection = this.byId("incomingMessageSection") as ObjectPageSection;
-
-        setTimeout(() => {
-            //to correct the scrolling
-            page.setSelectedSection(suggestedResponseSection);
-            page.setSelectedSection(incomingMessageSection);
-        }, 400);
+        const summarySection = this.byId("summarySection") as ObjectPageSection;
+        page.scrollToSection(summarySection.getId(), 800);
     }
 
     private resetSimilarEmailsListState(): void {
@@ -170,26 +164,26 @@ export default class EmailDetails extends BaseController {
     public async onPressRegenerate(): Promise<void> {
         const oDataModel = this.getModel("api") as ODataModel;
         const localModel: JSONModel = this.getModel() as JSONModel;
-        localModel.setProperty("/busy", true);
 
+        const responsePreparation = this.byId("responsePreparationSection") as PageSection;
+        responsePreparation.setBusy(true);
         const httpHeaders: any = oDataModel.getHttpHeaders();
 
-        await fetch("api/odata/v4/mail-insights/regenerateResponse", {
-            method: "POST",
-            headers: {
-                "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: localModel.getProperty("/activeEmailId"),
-                rag: localModel.getProperty("/submittedResponsesIncluded"),
-                additionalInformation: localModel.getProperty("/additionalInfo")
-            })
-        })
-            .then((response: Response) => {
-                return response.json();
-            })
-            .then((result: Mail) => {
+        try {
+            const response = await fetch("api/odata/v4/mail-insights/regenerateResponse", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: localModel.getProperty("/activeEmailId"),
+                    rag: localModel.getProperty("/submittedResponsesIncluded"),
+                    additionalInformation: localModel.getProperty("/additionalInfo")
+                })
+            });
+            if (response.ok) {
+                const result = (await response.json()) as Mail;
                 localModel.setProperty("/responseBody", result.responseBody);
                 localModel.setProperty(
                     "/translatedResponseBody",
@@ -197,8 +191,12 @@ export default class EmailDetails extends BaseController {
                 );
                 localModel.setProperty("/busy", false);
                 MessageToast.show(this.getText("email.texts.generateResponseMessage"));
-            })
-            .catch((error: Error) => console.log(error));
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            responsePreparation.setBusy(false);
+        }
     }
 
     public onChangeResponse(event: Event): void {
