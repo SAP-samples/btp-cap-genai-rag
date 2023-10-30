@@ -13,29 +13,29 @@ Assign the following **"non-default"** entitlements to your Provider Subaccount.
 
 ## SAP BTP, Kyma Runtime
 
-| Service / Subscription                                                                                                                                               | Plan                 |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| [SAP AI Core](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-core?region=all)                                                                              | sap-internal (paid)  |
-| [SAP Authorization and Trust Management Service](https://discovery-center.cloud.sap/serviceCatalog/authorization-and-trust-management-service?region=all)            | broker               |
-| [SAP BTP, Kyma Runtime](https://discovery-center.cloud.sap/serviceCatalog/kyma-runtime?region=all)                                                                   | free                 |
-| [SAP Cloud Management Service for SAP BTP](https://discovery-center.cloud.sap/serviceCatalog/cloud-management-service?region=all)                                    | central              |
-| [SAP HANA Cloud](https://discovery-center.cloud.sap/serviceCatalog/sap-hana-cloud?region=all) <br> (Optional if shared instance is being used)                       | hana-free <br> tools |
-| [SAP HANA Schemas & HDI Containers](https://help.sap.com/docs/SAP_HANA_PLATFORM/3823b0f33420468ba5f1cf7f59bd6bd9/e28abca91a004683845805efc2bf967c.html?locale=en-US) | hdi-shared           |
-| [PostgreSQL on SAP BTP, hyperscaler option](https://discovery-center.cloud.sap/serviceCatalog/postgresql-hyperscaler-option?region=all)                              | free                 |
+| Service / Subscription                                                                                                                                               | Plan                 | Multitenant only |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | :--------------: |
+| [SAP AI Core](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-core?region=all) - generative AI hub                                                          | sap-internal (paid)  |                  |
+| [SAP Authorization and Trust Management Service](https://discovery-center.cloud.sap/serviceCatalog/authorization-and-trust-management-service?region=all)            | broker               |        X         |
+| [SAP BTP, Kyma Runtime](https://discovery-center.cloud.sap/serviceCatalog/kyma-runtime?region=all)                                                                   | free                 |                  |
+| [SAP Cloud Management Service for SAP BTP](https://discovery-center.cloud.sap/serviceCatalog/cloud-management-service?region=all)                                    | central              |        X         |
+| [SAP HANA Cloud](https://discovery-center.cloud.sap/serviceCatalog/sap-hana-cloud?region=all) <br> (Optional if shared instance is being used)                       | hana-free <br> tools |                  |
+| [SAP HANA Schemas & HDI Containers](https://help.sap.com/docs/SAP_HANA_PLATFORM/3823b0f33420468ba5f1cf7f59bd6bd9/e28abca91a004683845805efc2bf967c.html?locale=en-US) | hdi-shared           |                  |
+| [PostgreSQL on SAP BTP, hyperscaler option](https://discovery-center.cloud.sap/serviceCatalog/postgresql-hyperscaler-option?region=all)                              | free                 |                  |
 
 > **Hint** - If you cannot assign the **free** PostgreSQL service plan (e.g., SAP-managed accounts), consider a **paid** plan (incl. storage plan). Make sure to check the pricing first, as the costs will be charged against your SAP BTP Global Account. 
 
 ## SAP BTP, Cloud Foundry Runtime
 
-| Service / Subscription                                                                                                                                               | Plan                 |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| [SAP AI Core](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-core?region=all)                                                                              | sap-internal (paid)  |
-| [SAP Authorization and Trust Management Service](https://discovery-center.cloud.sap/serviceCatalog/authorization-and-trust-management-service?region=all)            | broker               |
-| [SAP BTP, Cloud Foundry Runtime](https://discovery-center.cloud.sap/serviceCatalog/cloud-foundry-runtime?region=all)                                                 | free                 |
-| [SAP Cloud Management Service for SAP BTP](https://discovery-center.cloud.sap/serviceCatalog/cloud-management-service?region=all)                                    | central              |
-| [SAP Credential Store](https://discovery-center.cloud.sap/serviceCatalog/credential-store?region=all)                                                                | free                 |
-| [SAP HANA Cloud](https://discovery-center.cloud.sap/serviceCatalog/sap-hana-cloud?region=all) <br> (Optional if shared instance is being used)                       | hana-free <br> tools |
-| [SAP HANA Schemas & HDI Containers](https://help.sap.com/docs/SAP_HANA_PLATFORM/3823b0f33420468ba5f1cf7f59bd6bd9/e28abca91a004683845805efc2bf967c.html?locale=en-US) | hdi-shared           |
-| [PostgreSQL on SAP BTP, hyperscaler option](https://discovery-center.cloud.sap/serviceCatalog/postgresql-hyperscaler-option?region=all)                              | free                 |
+| Service / Subscription                                                                                                                                               | Plan                 | Multitenant only |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | :--------------: |
+| [SAP AI Core](https://discovery-center.cloud.sap/serviceCatalog/sap-ai-core?region=all) - generative AI hub                                                          | sap-internal (paid)  |                  |
+| [SAP Authorization and Trust Management Service](https://discovery-center.cloud.sap/serviceCatalog/authorization-and-trust-management-service?region=all)            | broker               |        X         |
+| [SAP BTP, Cloud Foundry Runtime](https://discovery-center.cloud.sap/serviceCatalog/cloud-foundry-runtime?region=all)                                                 | free                 |                  |
+| [SAP Cloud Management Service for SAP BTP](https://discovery-center.cloud.sap/serviceCatalog/cloud-management-service?region=all)                                    | central              |        X         |
+| [SAP Credential Store](https://discovery-center.cloud.sap/serviceCatalog/credential-store?region=all)                                                                | free                 |                  |
+| [SAP HANA Cloud](https://discovery-center.cloud.sap/serviceCatalog/sap-hana-cloud?region=all) <br> (Optional if shared instance is being used)                       | hana-free <br> tools |                  |
+| [SAP HANA Schemas & HDI Containers](https://help.sap.com/docs/SAP_HANA_PLATFORM/3823b0f33420468ba5f1cf7f59bd6bd9/e28abca91a004683845805efc2bf967c.html?locale=en-US) | hdi-shared           |                  |
+| [PostgreSQL on SAP BTP, hyperscaler option](https://discovery-center.cloud.sap/serviceCatalog/postgresql-hyperscaler-option?region=all)                              | free                 |                  |
 
 > **Hint** - If you cannot assign the **free** PostgreSQL service plan (e.g., SAP-managed accounts), consider a **paid** plan (incl. storage plan). Make sure to check the pricing first, as the costs will be charged against your SAP BTP Global Account. 
