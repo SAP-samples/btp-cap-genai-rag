@@ -110,12 +110,12 @@ xsuaa:
     # Role collections names have to be unique in the same subaccount
     # Therefore a unique identifer has to be utilized 
     role-collections:
-      - name: 'AI Member ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'GenAI Mail Insights Member ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Member Access
         role-template-references: 
           - '$XSAPPNAME.Member'
           - '$XSAPPNAME.Token_Exchange'
-      - name: 'AI Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: 'GenAI Mail Insights Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
         description: Administrator Access
         role-template-references: 
           - '$XSAPPNAME.Admin'
@@ -161,6 +161,7 @@ destination:
         destinations:
           # Backend Destination depends on dynamic Release name
           - Name: ai-srv-api
+            Description: GenAI Mail Insights Service API
             Authentication: NoAuthentication
             ProxyType: Internet
             Type: HTTP

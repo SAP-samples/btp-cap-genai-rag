@@ -15,11 +15,11 @@ export interface IProcessedMail {
 }
 
 export interface ITranslatedMail extends IProcessedMail {
-    translations? : Array<ITranslatedInsight> | {};
+    translation : ITranslatedInsight | {};
 }
 
 export interface IStoredMail extends IBaseMail, IInsights {
-    translations? : Array<ITranslatedInsight> | [];
+    translation : ITranslatedInsight | {};
 }
 
 export interface CustomField {
@@ -53,8 +53,8 @@ interface IInsights {
 }
 
 interface IKeyFact {
-    keyfact?: string;
-    keyfactcategory?: string;
+    fact?: string;
+    category?: string;
 }
 
 interface IAction {

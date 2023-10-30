@@ -158,12 +158,12 @@ resources:
         xsappname: ${xsuaa-app}
         tenant-mode: dedicated
         role-collections:
-          - name: AI Member (${space})
+          - name: GenAI Mail Insights Member (${space})
             description: Member Access
             role-template-references:
               - "$XSAPPNAME.Member"
               - "$XSAPPNAME.Token_Exchange"
-          - name: AI Administrator (${space})
+          - name: GenAI Mail Insights Administrator (${space})
             description: Administrator Access
             role-template-references:
               - "$XSAPPNAME.Admin"
@@ -223,7 +223,7 @@ resources:
             existing_destinations_policy: update
             destinations:
               - Name: ai-srv-api
-                Description: AI Service API
+                Description: GenAI Mail Insights Service API
                 URL: ~{ai-srv-api/srv-url}
                 Type: HTTP
                 ProxyType: Internet

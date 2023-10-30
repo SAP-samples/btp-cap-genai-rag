@@ -1,7 +1,7 @@
 {
   "name": "btp-cap-genai-rag",
   "version": "1.0.0",
-  "description": "A simple CAP project.",
+  "description": "GenAI Mail Insights",
   "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
   "license": "Apache License 2.0",
   "scripts": {

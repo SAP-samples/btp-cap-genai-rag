@@ -1,6 +1,6 @@
 apiVersion: v2
 name: ai
-description: AI
+description: GenAI Mail Insights
 type: application
 version: 0.0.1
 appVersion: 0.0.1

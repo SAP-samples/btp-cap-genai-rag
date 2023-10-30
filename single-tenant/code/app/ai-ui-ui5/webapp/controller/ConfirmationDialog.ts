@@ -6,7 +6,6 @@ import Dialog from "sap/m/Dialog";
 import Control from "sap/ui/core/Control";
 
 export default class ConfirmationDialog extends ManagedObject {
-
     private parentView: View;
     private onConfirm: () => void;
     private onCancel: () => void;
@@ -25,7 +24,9 @@ export default class ConfirmationDialog extends ManagedObject {
                 id: this.parentView.getId(),
                 name: this.FRAGMENT_NAME,
                 controller: this
-            }).then((dialogs: Control | Control[]) => this.parentView.addDependent(Array.isArray(dialogs) ? dialogs[0] : dialogs));
+            }).then((dialogs: Control | Control[]) =>
+                this.parentView.addDependent(Array.isArray(dialogs) ? dialogs[0] : dialogs)
+            );
         }
 
         (this.parentView.byId(this.MESSAGE_ID) as Label).setText(message);
