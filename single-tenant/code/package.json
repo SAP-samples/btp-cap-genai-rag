@@ -75,7 +75,7 @@
         "cap:hybrid": "cds-ts watch --profile hybrid",
         "---HTML5-Mock-Repo---": "",
         "mock:hybrid": "cds bind --exec npm run mock:run:hybrid",
-        "mock:run:hybrid": "(cd router && cds bind --exec --profile hybrid-mock node ../node_modules/@sap/html5-repo-mock/index.js)",
+        "mock:run:hybrid": "(cd router && cds bind --exec --profile hybrid-router node ../node_modules/@sap/html5-repo-mock/index.js)",
         "---Application-Router---": "",
         "router:hybrid": "cds bind --exec npm run router:run",
         "router:run": "(cd router && cds bind --exec --profile hybrid-router node index.js)",
