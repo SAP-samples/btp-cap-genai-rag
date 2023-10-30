@@ -103,7 +103,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Get a single Mail incl. closest Mails
     private onGetMail = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
 
@@ -164,7 +164,7 @@ export default class CommonMailInsights extends ApplicationService {
     private onAddMails = async (req: Request) => {
         try {
             const { Mails } = this.entities;
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { mails, rag } = req.data;
             const mailBatch = await this.regenerateInsights(mails, rag, tenant);
 
@@ -215,7 +215,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Delete single Mail from SAP HANA Cloud and PostgreSQL
     private onDeleteMail = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
 

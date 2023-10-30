@@ -1,6 +1,6 @@
 import cds, { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
-import { v4 as uuidv4,  v5 as uuidv5 } from "uuid";
+import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
 import xsenv from "@sap/xsenv";
@@ -57,7 +57,7 @@ const filterForTranslation = ({
 export default class CommonMailInsights extends ApplicationService {
     async init() {
         const { Mails } = cds.entities;
-        
+
         await super.init();
         await this.checkDefaultResourceGroup();
 
@@ -114,7 +114,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Get a single Mail incl. closest Mails
     private onGetMail = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
 
@@ -175,7 +175,7 @@ export default class CommonMailInsights extends ApplicationService {
     private onAddMails = async (req: Request) => {
         try {
             const { Mails } = this.entities;
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { mails, rag } = req.data;
             const mailBatch = await this.regenerateInsights(mails, rag, tenant);
 
@@ -226,7 +226,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Delete single Mail from SAP HANA Cloud and PostgreSQL
     private onDeleteMail = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
 
@@ -246,7 +246,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Regenerate Insights for all available Mails
     private onRegenerateInsights = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { rag } = req.data;
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails);
@@ -270,7 +270,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Regenerate Response for a single Mail
     private onRegenerateResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, rag, additionalInformation } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
@@ -285,7 +285,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Translate Response to original e-mail language
     private onTranslateResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
@@ -302,7 +302,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Response always passed in user's working language
     private onSubmitResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
@@ -343,11 +343,11 @@ export default class CommonMailInsights extends ApplicationService {
     // Revoke responded status for single mail
     private onRevokeResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
 
-            const success = await UPDATE(Mails, id).with({responded : false});
+            const success = await UPDATE(Mails, id).with({ responded: false });
 
             if (success) {
                 const typeormVectorStore = await this.getVectorStore(tenant);
@@ -365,7 +365,7 @@ export default class CommonMailInsights extends ApplicationService {
     // Sync with Office 365
     private onSyncWithOffice365 = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
 
             const mails = (

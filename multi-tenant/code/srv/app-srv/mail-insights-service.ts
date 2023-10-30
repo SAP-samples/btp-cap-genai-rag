@@ -22,7 +22,7 @@ export default class MailInsightsService extends CommonMailInsights {
     // Regenerate Insights for all available Mails
     private onRegenerateInsights = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { rag } = req.data;
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails);
@@ -46,7 +46,7 @@ export default class MailInsightsService extends CommonMailInsights {
     // Regenerate Response for a single Mail
     private onRegenerateResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, rag, additionalInformation } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
@@ -61,7 +61,7 @@ export default class MailInsightsService extends CommonMailInsights {
     // Translate Response to original e-mail language
     private onTranslateResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
@@ -78,7 +78,7 @@ export default class MailInsightsService extends CommonMailInsights {
     // Response always passed in user's working language
     private onSubmitResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
@@ -120,7 +120,7 @@ export default class MailInsightsService extends CommonMailInsights {
     // Revoke responded status for single mail
     private onRevokeResponse = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
 
@@ -142,7 +142,7 @@ export default class MailInsightsService extends CommonMailInsights {
     // Sync with Office 365
     private onSyncWithOffice365 = async (req: Request) => {
         try {
-            const { tenant } = req;
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
 
             const mails = (

@@ -1,4 +1,4 @@
-using {ai.db as db} from '../db/schema';
+using {ai.db as db} from '../db/data-model';
 
 @(requires: [
     'Member',
