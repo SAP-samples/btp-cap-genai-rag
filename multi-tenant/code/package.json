@@ -115,7 +115,7 @@
         "build:ui": "npm run build --prefix ./app/aisaas-ui-ui5/ && npm run copy --prefix ./app/aisaas-ui-ui5/",
         "copy:common": "npx shx cp -r ./srv/common ./gen/api && npx shx cp -r ./srv/common ./gen/app",
         "build:ts": "tsc -p ./tsconfig.json",
-        "cleanup:ts": "glob './gen/**/*.{ts,tsconfig}' | xargs npx shx rm",
+        "cleanup:ts": "npx shx rm -r \"./gen/**/*.{ts,tsconfig}\"",
         "replace:paths": "npx shx sed -i \"s/(srv\\/api-srv|srv\\/app-srv)/srv/g\" ./gen/**/csn.json",
         "cds2types": "cd app-service && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },

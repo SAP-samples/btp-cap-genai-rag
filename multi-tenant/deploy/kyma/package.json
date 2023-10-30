@@ -15,7 +15,7 @@
     "copy:common": "npx shx cp -r ../../code/srv/common ../../code/gen/api && npx shx cp -r ../../code/srv/common ../../code/gen/app",
     "build:ts": "tsc -p ../../code/tsconfig.json",
     "replace:paths": "npx shx sed -i \"s/(srv\\/api-srv|srv\\/app-srv)/srv/g\" ../../code/gen/**/csn.json",
-    "cleanup:ts": "glob '../../code/gen/**/*.{ts,tsconfig}' | xargs npx shx rm",
+    "cleanup:ts": "npx shx rm -r \"../../code/gen/**/*.{ts,tsconfig}\"",
     "------------------------": "",
     "-Helm Default Scripts-": "",
     "/----------------------/": "",

@@ -13,7 +13,7 @@
     "copy:common": "npx shx cp -r ../../code/srv/common ../../code/gen/api && npx shx cp -r ../../code/srv/common ../../code/gen/app",
     "build:ts": "tsc -p ../../code/tsconfig.json",
     "replace:paths": "npx shx sed -i \"s/(srv\\/api-srv|srv\\/app-srv)/srv/g\" ../../code/gen/**/csn.json",
-    "cleanup:ts": "glob '../../code/gen/**/*.{ts,tsconfig}' | xargs npx shx rm",
+    "cleanup:ts": "npx shx rm -r \"../../code/gen/**/*.{ts,tsconfig}\"",
     "---DEPLOY---": "",
     "build:mbt": "mbt build -e ./mtaext/free-tier-private.mtaext",
     "deploy": "cf deploy mta_archives/aisaas_0.0.1.mtar",
