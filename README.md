@@ -32,6 +32,26 @@ Though initially tailored for a travel agency, the code can be adapted to suit v
 
 The business scenario is also available as [single-tenant version](./single-tenant) in the respective directory of this repository.
 
+## Impressions of the Reference Application
+
+[<img src="./docs/images/App_Impressions00.png" width="300"/>](./docs/images/App_Impressions00.png?raw=true)
+[<img src="./docs/images/App_Impressions01.png" width="300"/>](./docs/images/App_Impressions01.png?raw=true)
+
+[<img src="./docs/images/App_Impressions02.png" width="300"/>](./docs/images/App_Impressions02.png?raw=true)
+[<img src="./docs/images/App_Impressions03.png" width="300"/>](./docs/images/App_Impressions03.png?raw=true)
+
+[<img src="./docs/images/App_Impressions04.png" width="300"/>](./docs/images/App_Impressions04.png?raw=true)
+[<img src="./docs/images/App_Impressions05.png" width="300"/>](./docs/images/App_Impressions05.png?raw=true)
+
+[<img src="./docs/images/App_Impressions06.png" width="300"/>](./docs/images/App_Impressions06.png?raw=true)
+[<img src="./docs/images/App_Impressions07.png" width="300"/>](./docs/images/App_Impressions07.png?raw=true)
+
+[<img src="./docs/images/App_Impressions08.png" width="300"/>](./docs/images/App_Impressions08.png?raw=true)
+[<img src="./docs/images/App_Impressions09.png" width="300"/>](./docs/images/App_Impressions09.png?raw=true) 
+
+[<img src="./docs/images/App_Impressions10.png" width="300"/>](./docs/images/App_Impressions10.png?raw=true)
+[<img src="./docs/images/App_Impressions11.png" width="300"/>](./docs/images/App_Impressions11.png?raw=true) 
+
 ## Getting started
 
 This sample scenario comes with a step-by-step tutorial for a deployment in your own SAP BTP landscape. Check the following chapters and setup the scenario step-by-step in your own environment. The guide covers the deployment of the single-tenant as well as the multitenant version of the application.
