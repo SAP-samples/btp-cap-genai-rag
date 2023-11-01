@@ -1,4 +1,4 @@
-# Develop a CAP-based (multitenant) application using GenAI and RAG on SAP BTP
+# GenAI Mail Insights - Develop a CAP-based (multitenant) application using GenAI and RAG on SAP BTP
 
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/btp-cap-genai-rag)](https://api.reuse.software/info/github.com/SAP-samples/btp-cap-genai-rag)
 
