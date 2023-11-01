@@ -78,6 +78,16 @@ For additional support, [ask a question in SAP Community](https://answers.sap.co
 
 ## Contributing
 
+Thanks to all collaborators to make this application real!
+
+- [Adi Pleyer](https://github.com/AdiPleyer)
+- [Iyad Al Hafez](https://github.com/Iyad-Alhafez)
+- [Julian Schambeck](https://github.com/julian-schambeck)
+- [Kay Schmitteckert](https://github.com/kay-schmitteckert)
+- [Martin Frick](https://github.com/martinfrick) 
+- Karen Detken
+- Hyun Lee
+
 If you wish to contribute code, offer fixes or improvements, please send a pull request. Due to legal reasons, contributors will be asked to accept a DCO when they create the first pull request to this project. This happens in an automated fashion during the submission process. SAP uses [the standard DCO text of the Linux Foundation](https://developercertificate.org/).
 
 ## License
