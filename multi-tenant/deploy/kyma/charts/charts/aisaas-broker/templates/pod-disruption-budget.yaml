@@ -1,0 +1,11 @@
+{{- if .Values.ha.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "aisaas-broker.fullname" . }}
+  labels: {{- include "aisaas-broker.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.ha.pdb.minAvailable | default 1 }}
+  selector:
+    matchLabels: {{- include "aisaas-broker.selectorLabels" . | nindent 6 }}
+{{- end }}

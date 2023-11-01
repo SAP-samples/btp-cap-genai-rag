@@ -1,0 +1,209 @@
+<mvc:View
+    controllerName="ai.ui.controller.Main"
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+    xmlns:tnt="sap.tnt"
+    xmlns:core="sap.ui.core"
+    core:require="{ formatter:
+	'ai/ui/model/formatter' }"
+>
+    <Page showHeader="false" busy="{/busy}" busyIndicatorDelay="0">
+        <content>
+            <l:Splitter>
+                <l:FixFlex>
+                    <l:layoutData>
+                        <l:SplitterLayoutData size="16%" minSize="280px" resizable="false" />
+                    </l:layoutData>
+                    <l:flexContent>
+                        <ScrollContainer width="100%" height="100%" horizontal="false" vertical="true">
+                            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+                                <Panel class="sapUiNoContentPadding">
+                                    <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.settings}" />
+                                    </Toolbar>
+                                    <CheckBox text="{i18n>filters.texts.workIn}" selected="{/translationOn}" />
+                                </Panel>
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
+                                    <Toolbar>
+                                        <Title
+                                            class="sapUiSmallMarginBegin"
+                                            text="{i18n>filters.titles.requestState}"
+                                        />
+                                        <ToolbarSpacer />
+                                        <Link
+                                            id="requestStatesClearLink"
+                                            text="{i18n>filters.link.clear}"
+                                            enabled="{= ${/activeRequestStates}.length > 0 }"
+                                            press="onPressClear"
+                                        />
+                                    </Toolbar>
+                                    <List
+                                        id="requestStatesList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/requestStates}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter"
+                                    >
+                                        <StandardListItem
+                                            title="{filters>label}"
+                                            selected="{= ${/activeRequestStates}.includes(${filters>id}) }"
+                                        />
+                                    </List>
+                                </Panel>
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
+                                    <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.requestType}" />
+                                        <ToolbarSpacer />
+                                        <Link
+                                            id="categoryClearLink"
+                                            text="{i18n>filters.link.clear}"
+                                            enabled="{= ${/activeCategories}.length > 0 }"
+                                            press="onPressClear"
+                                        />
+                                    </Toolbar>
+                                    <List
+                                        id="categoryList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/categories}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter"
+                                    >
+                                        <StandardListItem
+                                            title="{filters>label}"
+                                            selected="{= ${/activeCategories}.includes(${filters>id}) }"
+                                        />
+                                    </List>
+                                </Panel>
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
+                                    <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.urgency}" />
+                                        <ToolbarSpacer />
+                                        <Link
+                                            id="urgencyClearLink"
+                                            text="{i18n>filters.link.clear}"
+                                            enabled="{= ${/activeUrgencies}.length > 0 }"
+                                            press="onPressClear"
+                                        />
+                                    </Toolbar>
+                                    <List
+                                        id="urgencyList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/urgency}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter"
+                                    >
+                                        <StandardListItem
+                                            title="{filters>label}"
+                                            selected="{= ${/activeUrgencies}.includes(${filters>id}) }"
+                                        />
+                                    </List>
+                                </Panel>
+                                <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
+                                    <Toolbar>
+                                        <Title class="sapUiSmallMarginBegin" text="{i18n>filters.titles.sentiment}" />
+                                        <ToolbarSpacer />
+                                        <Link
+                                            id="sentimentClearLink"
+                                            text="{i18n>filters.link.clear}"
+                                            enabled="{= ${/activeSentiments}.length > 0 }"
+                                            press="onPressClear"
+                                        />
+                                    </Toolbar>
+                                    <List
+                                        id="sentimentList"
+                                        backgroundDesign="Transparent"
+                                        items="{filters>/sentiment}"
+                                        showSeparators="None"
+                                        mode="MultiSelect"
+                                        includeItemInSelection="true"
+                                        selectionChange="onSelectFilter"
+                                    >
+                                        <StandardListItem
+                                            title="{filters>label}"
+                                            selected="{= ${/activeSentiments}.includes(${filters>id}) }"
+                                        />
+                                    </List>
+                                </Panel>
+                            </VBox>
+                        </ScrollContainer>
+                    </l:flexContent>
+                </l:FixFlex>
+
+                <l:FixFlex>
+                    <l:layoutData>
+                        <l:SplitterLayoutData size="24%" minSize="384px" />
+                    </l:layoutData>
+                    <l:fixContent>
+                        <VBox class="sapUiSmallMarginTop sapUiSmallMarginEnd">
+                            <Panel class="sapUiNoContentPadding">
+                                <VBox class="sapUiSmallMargin" fitContainer="true">
+                                    <SearchField
+                                        value="{/searchKeyword}"
+                                        placeholder="{i18n>inbox.searchField.placeholder}"
+                                        search="onSearch"
+                                    />
+                                    <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
+                                        <Title text="{i18n>inbox.list.title} ({/emailsCount})" titleStyle="H4" />
+                                        <VBox justifyContent="Center">
+                                            <Link
+                                                text="{i18n>inbox.link.sortBy} {/sortText}"
+                                                press="onSortEmailsList"
+                                            />
+                                        </VBox>
+                                    </HBox>
+                                </VBox>
+                            </Panel>
+                        </VBox>
+                    </l:fixContent>
+
+                    <l:flexContent>
+                        <ScrollContainer
+                            width="100%"
+                            height="100%"
+                            horizontal="false"
+                            vertical="true"
+                            class="sapUiTinyMarginTop"
+                        >
+                            <VBox class="sapUiTinyMarginEnd">
+                                <List
+                                    id="emailsList"
+                                    mode="SingleSelectMaster"
+                                    noDataText="{i18n>inbox.list.noData}"
+                                    items="{
+                                    path: 'api>/Mails',
+                                    parameters: {
+                                        $count: true,
+                                        $expand: 'translation'
+                                    },
+                                    events: {
+                                        dataReceived: '.onUpdateEmailsList'
+                                    }
+                                }"
+                                    selectionChange="onSelectEmail"
+                                >
+                                    <CustomListItem
+                                        tooltip="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"
+                                        highlight="{= !${path: 'api>responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? 'Information' : 'None' }"
+                                        selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${/activeEmailId} }"
+                                    >
+                                        <core:Fragment fragmentName="ai.ui.view.EmailListItem" type="XML" />
+                                    </CustomListItem>
+                                </List>
+                            </VBox>
+                        </ScrollContainer>
+                    </l:flexContent>
+                </l:FixFlex>
+
+                <mvc:XMLView id="emailDetails" viewName="ai.ui.view.EmailDetails" />
+            </l:Splitter>
+        </content>
+    </Page>
+</mvc:View>

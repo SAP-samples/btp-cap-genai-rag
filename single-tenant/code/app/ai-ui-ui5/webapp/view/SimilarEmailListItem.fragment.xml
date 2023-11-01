@@ -1,0 +1,46 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
+    xmlns:core="sap.ui.core"
+    core:require="{ formatter: 'ai/ui/model/formatter' }"
+>
+    <Panel expandable="true" expanded="false" stickyHeader="true">
+        <headerToolbar>
+            <Toolbar>
+                <HBox width="100%" alignItems="Center" justifyContent="SpaceBetween">
+                    <Title text="{= ${/translationOn} ? ${mail/translation/subject} : ${mail/subject}}" />
+                    <HBox alignItems="Center" class="sapUiTinyMarginEnd">
+                        <ObjectStatus
+                            visible="{mail/responded}"
+                            text="{i18n>email.texts.answered}"
+                            state="Success"
+                            icon="sap-icon://complete"
+                        />
+                        <Title
+                            text="{parts: [''], formatter:'formatter.getSimilarity'}"
+                            class="sapUiSmallMarginBegin"
+                        />
+                    </HBox>
+                </HBox>
+            </Toolbar>
+        </headerToolbar>
+        <VBox class="sapUiMediumMarginBeginEnd sapUiTinyMarginTop sapUiMediumMarginBottom">
+            <HBox>
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.type}:" />
+                <tnt:InfoLabel displayOnly="true" text="{mail/category}" />
+            </HBox>
+            <HBox class="sapUiTinyMarginTop">
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.sender}:" />
+                <Text text="{= !${/translationOn} ? ${mail/sender} : ${mail/translation/sender} }" />
+            </HBox>
+            <HBox class="sapUiTinyMarginTop">
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.message}:" />
+                <Text text="{= !${/translationOn} ? ${mail/body} : ${mail/translation/body} }" />
+            </HBox>
+            <HBox class="sapUiSmallMarginTop">
+                <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.response}:" />
+                <Text text="{= !${/translationOn} ? ${mail/responseBody} : ${mail/translation/responseBody} }" />
+            </HBox>
+        </VBox>
+    </Panel>
+</core:FragmentDefinition>

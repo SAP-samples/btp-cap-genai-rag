@@ -1,0 +1,23 @@
+{
+  "services": [
+    {
+      "name": "aisaas-api",
+      "description": "API for AI SaaS App",
+      "bindable": true,
+      "plans": [
+        {
+          "name": "trial",
+          "description": "Trial Plan"
+        },
+        {
+          "name": "default",
+          "description": "Standard Plan"
+        },
+        {
+          "name": "premium",
+          "description": "Premium Plan"
+        }
+      ]
+    }
+  ]
+}

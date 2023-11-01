@@ -1,0 +1,59 @@
+{
+    "requires": {
+        "PROVIDER_AI_CORE_DESTINATION_HUB": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "PROVIDER_AI_CORE_DESTINATION_HUB",
+                "requestTimeout": "300000"
+            }
+        },
+        "postgres": {
+            "kind": "postgresql-db",
+            "[development]": {
+                "kind": "postgres",
+                "credentials": {
+                    "hostname": "localhost",
+                    "port": 5432,
+                    "username": "postgres",
+                    "password": "postgres",
+                    "dbname": "postgres"
+                }
+            }
+        },
+        "-------------------- ": "---",
+        "--- Auth Settings ---": "---",
+        " --------------------": "---",
+        "auth": {
+            "kind": "xsuaa",
+            "[development]": {
+                "kind": "basic",
+                "users": {
+                    "alice": {
+                        "roles": ["Admin", "Member"]
+                    },
+                    "carol": {
+                        "roles": ["Member"]
+                    },
+                    "system-user": {
+                        "roles": ["system-user"]
+                    }
+                }
+            }
+        },
+        "------------------ ": "---",
+        "--- DB Settings ---": "---",
+        " ------------------": "---",
+        "db": {
+            "kind": "hana", 
+            "impl": "@sap/cds-hana",
+            "deploy-format": "hdbtable",
+            "[development]": {
+                "kind": "sqlite",
+                "impl": "",
+                "credentials": {
+                    "url": "db.sqlite"
+                }
+            }
+        }
+    }
+}

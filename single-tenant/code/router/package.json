@@ -1,0 +1,10 @@
+{
+    "name": "router",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "@sap/approuter": "^14.1.2"
+    }
+}

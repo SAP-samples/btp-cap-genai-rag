@@ -1,0 +1,46 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
+    xmlns:core="sap.ui.core"
+    core:require="{ formatter: 'ai/ui/model/formatter' }"
+>
+    <HBox class="sapUiSmallMargin" justifyContent="SpaceBetween">
+        <HBox justifyContent="Center">
+            <Avatar
+                displaySize="M"
+                backgroundColor="Accent6"
+                initials="{path:'api>sender', formatter:'formatter.getAvatarInitial'}"
+            />
+        </HBox>
+        <VBox width="calc(100% - 5rem)">
+            <HBox justifyContent="SpaceBetween">
+                <Label text="{= !${/translationOn} ? ${api>sender} : ${api>translation/sender} }"
+                    wrapping="true" />
+                <Label text="{path: 'api>createdAt', formatter: 'formatter.formatDate'}"
+                    wrapping="true" />
+            </HBox>
+            <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
+                <VBox width="calc(100% - 2rem)">
+                    <tnt:InfoLabel displayOnly="true" text="{api>category}" />
+                    <Title
+                        class="sapUiTinyMarginTop"
+                        text="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"
+                    />
+                    <Text maxLines="2"
+                        text="{= !${/translationOn} ? ${api>summary} : ${api>translation/summary} }" />
+                </VBox>
+                <VBox>
+                    <ObjectStatus
+                        class="sapUiTinyMarginBottom"
+                        icon="{path:'api>urgency', formatter:'formatter.getUrgencyIcon'}"
+                        state="{path:'api>urgency', formatter:'formatter.getUrgencyState'}"
+                    />
+                    <ObjectStatus
+                        icon="{path:'api>sentiment', formatter:'formatter.getSentimentIcon'}"
+                        state="{path:'api>sentiment', formatter:'formatter.getSentimentState'}"
+                    />
+                </VBox>
+            </HBox>
+        </VBox>
+    </HBox>
+</core:FragmentDefinition>

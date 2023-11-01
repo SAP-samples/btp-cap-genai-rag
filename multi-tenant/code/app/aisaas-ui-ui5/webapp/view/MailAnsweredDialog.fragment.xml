@@ -1,0 +1,19 @@
+<!-- dialog shown when mail has been answered. displays the send answer in working language
+(English),
+the translation of the answer back to the original language, and a disclaimer -->
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc">
+    <!-- ids here need to match ids used in email details controller that manages this dialog -->
+    <Dialog id="mailAnsweredDialog" title="{i18n>email.texts.responseSubmittedMessage}"
+        contentWidth="40%">
+        <content>
+            <VBox class="sapUiTinyMarginTopBottom sapUiSmallMarginBeginEnd">
+                <TextArea id="areaWL" width="100%" class="sapUiTinyMarginTop" growing="true"
+                    editable="false" />
+                <Title text="{i18n>email.texts.translationDisclaimer}" titleStyle="H6"
+                    class="sapUiSmallMarginTop" wrapping="true" />
+                <TextArea id="areaOL" width="100%" class="sapUiSmallMarginTop" growing="true"
+                    editable="false" />
+            </VBox>
+        </content>
+    </Dialog>
+</core:FragmentDefinition>

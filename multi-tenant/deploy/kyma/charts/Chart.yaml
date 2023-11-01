@@ -1,0 +1,19 @@
+apiVersion: v2
+name: aisaas
+description: GenAI Mail Insights
+type: application
+version: 0.0.1
+appVersion: 0.0.1
+dependencies:
+  - name: aisaas-srv
+    alias: srv
+    version: 0.1.0
+  - name: aisaas-router
+    alias: router
+    version: 0.1.0
+  - name: aisaas-broker
+    alias: broker
+    version: 0.1.0
+  - name: aisaas-api
+    alias: api
+    version: 0.1.0
