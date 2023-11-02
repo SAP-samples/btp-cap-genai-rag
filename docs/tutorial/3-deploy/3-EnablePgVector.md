@@ -15,7 +15,7 @@ Further details can be found in the official SAP Help documentation. The **Postg
 
 1. Create a new **X.509-based Service Binding** for your **PostgreSQL on SAP BTP, hyperscaler option** service instance in your **Kyma Dashboard**.
    
-   > **Important** - Make sure to use the **Advanced** options to add the **credential-type** property as visible in the following screenshot!
+    > **Important** - Make sure to use the **Advanced** options to add the **credential-type** property as visible in the following screenshot!
    
     > **Hint** - Please keep in mind that your PostgreSQL service instance will be named differently based on your helm installation details e.g., **aisaas-postgresql-db**. 
 
@@ -23,7 +23,7 @@ Further details can be found in the official SAP Help documentation. The **Postg
 
 2. Run the following CURL command or use a tool like Postman to activate the extension. 
 
-    ```md
+    ```sh
     curl -X PUT 'https://api-backing-services-k8s.<KymaRegion>.data.services.cloud.sap/v1/postgresql-db/instances/<PostgreSQLServiceInstanceId>/extensions/vector' \
       --cert client-cert.pem \
       --key client-key.pem \

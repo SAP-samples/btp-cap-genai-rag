@@ -9,6 +9,7 @@ In this chapter, you will learn how to set up a hybrid testing environment. Hybr
 
 While the chapter appears to be quite comprehensive, please consider this is a one-time action, which does not need to be repeated once configured. Before starting, please ensure that you deployed and already subscribed to the GenAI Mail Insights application within a Subscriber Subaccount. 
 
+
 ## SAP BTP, Kyma Runtime
 
 1. For starting the hybrid development, you must have installed the GenAI Mail Insights application on your Kyma Cluster using **helm install** as described in the previous tutorial steps.

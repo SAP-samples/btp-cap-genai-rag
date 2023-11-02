@@ -10,7 +10,7 @@ Follow the next steps to create a new GenAI Mail Insights API Service instance w
 
 3. Depending on your runtime, the name of the API Service should be as follows. The additional details such as the Kyma Namespace or Cloud Foundry Org have been added to ensure the uniqueness of your application within the respective SAP BTP region. 
    
-   > **Hint** - If you cannot see your API Service in the list of available services, please double-check the logs of your SaaS application service. Most probably, the process failed due to missing credentials. 
+    > **Hint** - If you cannot see your API Service in the list of available services, please double-check the logs of your SaaS application service. Most probably, the process failed due to missing credentials. 
 
     [<img src="./images/API_CreateInstance.png" width="300"/>](./images/API_CreateInstance.png?raw=true)
 

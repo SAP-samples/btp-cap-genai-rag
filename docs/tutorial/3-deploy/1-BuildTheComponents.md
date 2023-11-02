@@ -2,6 +2,8 @@
 
 Depending on your target runtime, different build and deployment steps are required. Please follow the corresponding instructions for your chosen runtime.
 
+> **Note** - Some of the SAP BTP, Kyma Runtime services of this scenario are currently undergoing active development. Therefore, we recommend getting started with the SAP BTP, Cloud Foundry Runtime version of the sample application. This note will be removed once the Kyma track of this use-case is fully operational end-to-end.
+
 - [Build the components](#build-the-components)
   - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
   - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
@@ -127,7 +129,7 @@ In the following steps, you will build a multi-target application which can be d
    
    > **Important** - If you want to reuse an **existing** PostgreSQL service instance or you cannot use the **free** PostgreSQL service plan, please check the end of this chapter for further details ([click here](#postgresql---good-to-know)).
 
-    ```yaml
+    ```sh
     ID: aisaas.freetier
     _schema-version: 3.2.0
     version: 1.0.0
@@ -140,7 +142,7 @@ In the following steps, you will build a multi-target application which can be d
             {
               "broker-user": "sha256:0vsw3...bPwNwUc9WM=:5osh6/uiq...LcE9T0="
             }
-        SBF_CATALOG_FILE: ./catalog-private.json
+          SBF_CATALOG_FILE: ./catalog-private.json
     ```
 
 7. Please run the following command to build your **mtar** file. 
@@ -196,9 +198,9 @@ In the following steps, you will build a multi-target application which can be d
     ```yaml
     resources:
     - name: ai(saas)-postgresql-db
-        # Reuse existing service instance
-        type: org.cloudfoundry.existing-service
-        parameters:
+      # Reuse existing service instance
+      type: org.cloudfoundry.existing-service
+      parameters:
         # Existing service instance name
         service-name: existing-postgresql-db
     ```
