@@ -3,9 +3,36 @@
 In this chapter, you will learn how to set up a local environment. Local in this case means your application logic is executed on your local development environment, while only the Large Language Model is consumed through a SAP BTP Destination (requiring an XSUAA and Destination Service Binding).
 
 - [Local Development](#local-development)
-  - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
   - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
+  - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
   - [General Steps](#general-steps)
+
+
+## SAP BTP, Kyma Runtime
+
+Even though we are in a local development setup, the **generative AI hub** access cannot be "mocked" locally, so you still require access to your destination pointing to the **generative AI hub in SAP AI Core**. The same applies for the XSUAA instance, required to issue a token for accessing the Destination Service. 
+
+1. For starting the local development, you will at least need a Destination Service instance, as well as an XSUAA instance in your SAP BTP Kyma cluster. Therefore, we suggest to install the GenAI Mail Insights application to your Kyma Cluster using **helm install** as described in the previous tutorial steps. 
+
+2. Once the application is installed and all Service Instances are created please run the following commands, to create the respective **.cdsrc-private.json** file required for local testing. Please ensure that you are connected to the correct Kyma cluster by running **kubectl cluster-info**.
+
+    > **Hint** - We are creating two profiles in the multitenant case. **development** for local scenarios without **multitenancy** and **local-with-mtx** for local scenarios with **multitenancy**. 
+
+    ```sh
+    # Run in ./(multi/single)-tenant/code #
+
+    # Single-Tenant
+    cds bind -2 <ReleaseName>-srv-destination --on k8s --for development
+    cds bind auth -2 <ReleaseName>-srv-xsuaa --kind basic --on k8s --for development
+
+    # Multitenant
+    cds bind -2 <ReleaseName>-srv-destination --on k8s --for development
+    cds bind auth -2 <ReleaseName>-srv-xsuaa --kind basic --on k8s --for development
+    cds bind -2 <ReleaseName>-srv-destination --on k8s --for local-with-mtx
+    cds bind auth -2 <ReleaseName>-srv-xsuaa --kind basic --on k8s --for local-with-mtx
+    ```
+
+3. Continue with the **General** steps described below ([click here](#general-steps)), which are the same for Cloud Foundry and/or Kyma setups. 
 
 
 ## SAP BTP, Cloud Foundry Runtime
@@ -39,32 +66,6 @@ Even though we are in a local development setup, the **generative AI hub** acces
 
 3. Continue with the **General** steps described below, which are the same for Cloud Foundry and/or Kyma setups. 
 
-
-## SAP BTP, Kyma Runtime
-
-Even though we are in a local development setup, the **generative AI hub** access cannot be "mocked" locally, so you still require access to your destination pointing to the **generative AI hub in SAP AI Core**. The same applies for the XSUAA instance, required to issue a token for accessing the Destination Service. 
-
-1. For starting the local development, you will at least need a Destination Service instance, as well as an XSUAA instance in your SAP BTP Kyma cluster. Therefore, we suggest to install the GenAI Mail Insights application to your Kyma Cluster using **helm install** as described in the previous tutorial steps. 
-
-2. Once the application is installed and all Service Instances are created please run the following commands, to create the respective **.cdsrc-private.json** file required for local testing. Please ensure that you are connected to the correct Kyma cluster by running **kubectl cluster-info**.
-
-    > **Hint** - We are creating two profiles in the multitenant case. **development** for local scenarios without **multitenancy** and **local-with-mtx** for local scenarios with **multitenancy**. 
-
-    ```sh
-    # Run in ./(multi/single)-tenant/code #
-
-    # Single-Tenant
-    cds bind -2 <ReleaseName>-srv-destination --on k8s --for development
-    cds bind auth -2 <ReleaseName>-srv-xsuaa --kind basic --on k8s --for development
-
-    # Multitenant
-    cds bind -2 <ReleaseName>-srv-destination --on k8s --for development
-    cds bind auth -2 <ReleaseName>-srv-xsuaa --kind basic --on k8s --for development
-    cds bind -2 <ReleaseName>-srv-destination --on k8s --for local-with-mtx
-    cds bind auth -2 <ReleaseName>-srv-xsuaa --kind basic --on k8s --for local-with-mtx
-    ```
-
-3. Continue with the **General** steps described below ([click here](#general-steps)), which are the same for Cloud Foundry and/or Kyma setups. 
 
 
 ## General Steps

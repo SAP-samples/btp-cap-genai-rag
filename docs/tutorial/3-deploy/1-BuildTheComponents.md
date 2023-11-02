@@ -2,6 +2,8 @@
 
 Depending on your target runtime, different build and deployment steps are required. Please follow the corresponding instructions for your chosen runtime.
 
+> **Note** - Some of the SAP BTP, Kyma Runtime services of this scenario are currently undergoing active development. Therefore, we recommend getting started with the SAP BTP, Cloud Foundry Runtime version of the sample application. This note will be removed once the Kyma track of this use-case is fully operational end-to-end.
+
 - [Build the components](#build-the-components)
   - [SAP BTP, Kyma Runtime](#sap-btp-kyma-runtime)
   - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)

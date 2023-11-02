@@ -2,6 +2,8 @@
 
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/btp-cap-genai-rag)](https://api.reuse.software/info/github.com/SAP-samples/btp-cap-genai-rag)
 
+> **Note** - Some of the SAP BTP, Kyma Runtime services of this scenario are currently undergoing active development. Therefore, we recommend getting started with the SAP BTP, Cloud Foundry Runtime version of the sample application. This note will be removed once the Kyma track of this use-case is fully operational end-to-end.
+
 Welcome to our dedicated GitHub repository, designed to provide valuable support to developers, partners and customers aiming to create advanced **GenAI** solutions on **SAP Business Technology Platform (SAP BTP)** following the **Reference Architecture**. Inside, you'll find a carefully crafted example that follows SAP BTP's respected Golden Path development approach. We've covered both [single-tenant and multitenant (Software as a Service, SaaS) versions](#versions) to suit different needs. Discover how to smoothly integrate different **Large Language Models (LLMs)** via SAP AI Core (**generative AI hub**), make the most of LangChain in CAP and use advanced techniques like output parsing according a custom schema or **Retrieval Augmented Generation (RAG)** through embeddings and a vector database to achieve even higher value for your use case. Notably, our repository supports two runtimes, Cloud Foundry and Kyma, offering flexibility in your journey to harness GenAI on SAP BTP.
 
 <p align="center">
@@ -31,7 +33,7 @@ The business scenario is also available as [single-tenant version](./single-tena
 
 This use case can be replicated end to end following the respected Discovery Center Mission: [GenAI Mail Insights - Develop a CAP-based (multitenant) application using GenAI and RAG on SAP BTP](https://discovery-center.cloud.sap/missiondetail/4371/)
 
-> **Note** As a prerequisite, access to Generative AI Hub is required. GA is planned later this year.
+> **Note** - As a prerequisite, access to Generative AI Hub is required. GA is planned later this year.
 
 ## Impressions of the Reference Application
 
