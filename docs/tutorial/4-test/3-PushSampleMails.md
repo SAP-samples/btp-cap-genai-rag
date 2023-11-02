@@ -75,7 +75,7 @@ In this chapter you will learn, how SaaS Subscribers can push sample mails to th
 
 5. Once you successfully retrieved a token issued by XSUAA, please scroll down and execute the **ADD MAILS I** request. The processing will take a while, so please wait until the request returns a result. The request will automatically inject the token retrieved from XSUAA. 
    
-   > **Important** - For single-tenant scenarios, please use the **odata/v4/mail-insights** path instead of the **rest/api/mail-insights** path as indicated below. Replace the POST endpoint manually as depicted in the example below.
+    > **Important** - For single-tenant scenarios, please use the **odata/v4/mail-insights** path instead of the **rest/api/mail-insights** path as indicated below. Replace the POST endpoint manually as depicted in the example below.
 
     ```sh
     ### ADD MAILS I

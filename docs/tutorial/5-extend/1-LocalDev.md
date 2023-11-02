@@ -144,7 +144,7 @@ After finishing the **.cdsrc-private.json** setup in Kyma or Cloud Foundry, plea
 
 6. If you also want to run the UI5 Typescript application, please run the following command in a new Terminal window. This will automatically open the UI5 Typescript app on **localhost:8081** and you can interact with your CAP services. Use the default user e.g., **alice** to login once requested - no password is required so just hit Enter. 
    
-   > **Hint** - UI5 will forward the requests to your local CAP backend using the **ui5-middleware-simpleproxy** middleware.
+    > **Hint** - UI5 will forward the requests to your local CAP backend using the **ui5-middleware-simpleproxy** middleware.
 
     ```sh
     # Run in ./(multi/single)-tenant/code #
@@ -153,7 +153,7 @@ After finishing the **.cdsrc-private.json** setup in Kyma or Cloud Foundry, plea
 
 7. An alternative option is running the following npm script to run the App-Service as well as the UI5 app in parallel. 
    
-   > **Hint** - Your backend might take longer than the UI5 app to start, so please wait until both components are running before using the UI.
+    > **Hint** - Your backend might take longer than the UI5 app to start, so please wait until both components are running before using the UI.
 
     ```sh
     # Run in ./(multi/single)-tenant/code #

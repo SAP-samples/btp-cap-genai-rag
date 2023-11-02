@@ -129,7 +129,7 @@ In the following steps, you will build a multi-target application which can be d
    
    > **Important** - If you want to reuse an **existing** PostgreSQL service instance or you cannot use the **free** PostgreSQL service plan, please check the end of this chapter for further details ([click here](#postgresql---good-to-know)).
 
-    ```yaml
+    ```sh
     ID: aisaas.freetier
     _schema-version: 3.2.0
     version: 1.0.0
@@ -142,7 +142,7 @@ In the following steps, you will build a multi-target application which can be d
             {
               "broker-user": "sha256:0vsw3...bPwNwUc9WM=:5osh6/uiq...LcE9T0="
             }
-        SBF_CATALOG_FILE: ./catalog-private.json
+          SBF_CATALOG_FILE: ./catalog-private.json
     ```
 
 7. Please run the following command to build your **mtar** file. 
@@ -198,9 +198,9 @@ In the following steps, you will build a multi-target application which can be d
     ```yaml
     resources:
     - name: ai(saas)-postgresql-db
-        # Reuse existing service instance
-        type: org.cloudfoundry.existing-service
-        parameters:
+      # Reuse existing service instance
+      type: org.cloudfoundry.existing-service
+      parameters:
         # Existing service instance name
         service-name: existing-postgresql-db
     ```
