@@ -19,6 +19,7 @@ Welcome to our dedicated GitHub repository, designed to provide valuable support
 </p>
 </details>
 
+
 ## Business Use Case of the Reference Application
 
 The [provided code sample](./multi-tenant) presents a multitenant application crafted by a potential SAP partner or customer, tailored for SAP Business Technology Platform (SAP BTP). This scenario presents a comprehensive SaaS solution for enhancing customer support within a travel agency, utilizing advanced email insights and automation. The system analyzes incoming emails using Large Language Models (LLMs) to offer core insights such as categorization, sentiment analysis and urgency assessment. It goes beyond basic analysis by extracting key facts and customizable fields like location, managed through a dedicated configuration page.
@@ -40,20 +41,23 @@ This use case can be replicated end to end following the respected Discovery Cen
 [<img src="./docs/images/App_Impressions00.png" width="300"/>](./docs/images/App_Impressions00.png?raw=true)
 [<img src="./docs/images/App_Impressions01.png" width="300"/>](./docs/images/App_Impressions01.png?raw=true)
 
+[<img src="./docs/images/App_Impressions12.png" width="300"/>](./docs/images/App_Impressions12.png?raw=true)
 [<img src="./docs/images/App_Impressions02.png" width="300"/>](./docs/images/App_Impressions02.png?raw=true)
+
 [<img src="./docs/images/App_Impressions03.png" width="300"/>](./docs/images/App_Impressions03.png?raw=true)
-
 [<img src="./docs/images/App_Impressions04.png" width="300"/>](./docs/images/App_Impressions04.png?raw=true)
+
 [<img src="./docs/images/App_Impressions05.png" width="300"/>](./docs/images/App_Impressions05.png?raw=true)
-
 [<img src="./docs/images/App_Impressions06.png" width="300"/>](./docs/images/App_Impressions06.png?raw=true)
+
 [<img src="./docs/images/App_Impressions07.png" width="300"/>](./docs/images/App_Impressions07.png?raw=true)
-
 [<img src="./docs/images/App_Impressions08.png" width="300"/>](./docs/images/App_Impressions08.png?raw=true)
-[<img src="./docs/images/App_Impressions09.png" width="300"/>](./docs/images/App_Impressions09.png?raw=true) 
 
+[<img src="./docs/images/App_Impressions09.png" width="300"/>](./docs/images/App_Impressions09.png?raw=true) 
 [<img src="./docs/images/App_Impressions10.png" width="300"/>](./docs/images/App_Impressions10.png?raw=true)
+
 [<img src="./docs/images/App_Impressions11.png" width="300"/>](./docs/images/App_Impressions11.png?raw=true) 
+
 
 ## Getting started
 
@@ -67,17 +71,20 @@ This sample scenario comes with a step-by-step tutorial for a deployment in your
 
 Depending on your scenario (single- vs multitenant), please ensure to skip steps which are only relevant for multitenant setups. This will be mentioned in the documentation accordingly.
 
+
 ## How to obtain support
 
 [Create an issue](https://github.com/SAP-samples/btp-cap-genai-rag/issues) in this repository if you find a bug or have questions about the content.
 
 For additional support, [ask a question in SAP Community](https://answers.sap.com/questions/ask.html).
 
+
 ## Known Issues, Open Tasks and Additional Details
 
 - **Error during paketo build process** 
   - Description: The **cap-js/sqlite** package is currently not part of the dependencies as it causes issues during the paketo build process. 
   - Workaround: Install the **cap-js/sqlite** package manually without saving it in your package dependencies by running - **npm i @cap-js/sqlite --no-save** in the */(multi/single)-tenant/code* directory. 
+
 
 ## Contributing
 
@@ -92,6 +99,7 @@ Thanks to all collaborators to make this application real!
 - Hyun Lee
 
 If you wish to contribute code, offer fixes or improvements, please send a pull request. Due to legal reasons, contributors will be asked to accept a DCO when they create the first pull request to this project. This happens in an automated fashion during the submission process. SAP uses [the standard DCO text of the Linux Foundation](https://developercertificate.org/).
+
 
 ## License
 

@@ -21,6 +21,7 @@ While initially designed for a travel agency, this code can be adapted to suit v
     - The in-app feature only allows users to add one mail at a time.
   
         [<img src="./images/FL_PushAPI.png" height="150"/>](./images/FL_PushAPI.png?raw=true)
+        [<img src="./images/FL_InAppAdd.png" height="150"/>](./images/FL_InAppAdd.png?raw=true)
 
 2. The mails are being pre-processed using the capabilities of a Large Language Model (1-6):
     - Insights such as the urgency, a mail summary, the tone, key facts as well as potential actions are being extracted
