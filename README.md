@@ -29,6 +29,10 @@ Though initially tailored for a travel agency, the code can be adapted to suit v
 
 The business scenario is also available as [single-tenant version](./single-tenant) in the respective directory of this repository.
 
+This use case can be replicated end to end following the respected Discovery Center Mission: [GenAI Mail Insights - Develop a CAP-based (multitenant) application using GenAI and RAG on SAP BTP](https://discovery-center.cloud.sap/missiondetail/4371/)
+
+> **Note** As a prerequisite, access to Generative AI Hub is required. GA is planned later this year.
+
 ## Impressions of the Reference Application
 
 [<img src="./docs/images/App_Impressions00.png" width="300"/>](./docs/images/App_Impressions00.png?raw=true)
