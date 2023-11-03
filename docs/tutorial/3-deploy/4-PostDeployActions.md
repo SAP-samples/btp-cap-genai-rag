@@ -9,15 +9,15 @@ Depending on your favorite runtime, you need to apply two Post-Deployment Action
 
 ## SAP BTP, Kyma Runtime (Single- and Multitenant)
 
-In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is reachable by your workloads, by providing your PostgreSQL Service Instance with the Egress Cluster IP addresses of your Kyma Cluster. Please follow the steps below to fulfill this requirement. 
+In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is reachable by your workloads, by providing your PostgreSQL Service Instance with the Egress Cluster IP address(es) of your Kyma Cluster. Please follow the steps below to fulfill this requirement. 
 
 1. Please download or copy the **Shell** or **PowerShell** scripts provided in the following SAP-Samples repository. 
 
     [SAP-Samples | Kyma Runtime Extension Samples](https://github.com/SAP-samples/kyma-runtime-extension-samples/tree/main/get-egress-ips)
 
-2. By running these scripts in your development environment, you will get the egress IP addresses of your Kyma Cluster.
+2. By running these scripts in your development environment, you will get the egress IP address(es) of your Kyma Cluster.
    
-    > **Important** - The values below are just sample values! Make sure you run the script and determine your Cluster IP addresses!
+    > **Important** - The values below are just sample values! Make sure you run the script and determine your Cluster IP address(es)! Free Tier service plans will only have one node / IP address. 
 
     ```
     sh ./get-egress-ips.sh
@@ -31,7 +31,7 @@ In the SAP BTP, Kyma Runtime you must ensure that your PostgreSQL database is re
 
     [<img src="./images/PDEP_KymaIPgSql.png" width="400"/>](./images/PDEP_KymaIPgSql.png?raw=true)
 
-4. In the **Instance Parameters** section, please add a new parameter called **allow_access**. Add the Egress IPs of your Kyma Cluster as comma-separated string. 
+4. In the **Instance Parameters** section, please add a new parameter called **allow_access**. Add the Egress IP(s) of your Kyma Cluster as comma-separated string. 
 
     > **Hint** - If you are planning to setup a hybrid testing setup, please also add your own IP address to the list of IP addresses. Keep in mind your private IP address is likely to change on a daily basis, so make sure to update that value from time to time. You can get your latest current IP address by using a website like [http://ifconfig.me/ip](http://ifconfig.me/ip).
 

@@ -2,8 +2,6 @@
 
 Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider Subaccount. Please consider the following infos before creating a subaccount in any SAP BTP region. 
 
-> **Note** - Some of the SAP BTP, Kyma Runtime services of this scenario are currently undergoing active development. Therefore, we recommend getting started with the SAP BTP, Cloud Foundry Runtime version of the sample application. This note will be removed once the Kyma track of this use-case is fully operational end-to-end.
-
 - [Subaccount Setup](#subaccount-setup)
   - [SAP BTP PostgreSQL, Hyperscaler Option](#sap-btp-postgresql-hyperscaler-option)
   - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
