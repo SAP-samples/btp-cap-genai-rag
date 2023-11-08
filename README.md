@@ -3,14 +3,14 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/btp-cap-genai-rag)](https://api.reuse.software/info/github.com/SAP-samples/btp-cap-genai-rag)
 
 > [!IMPORTANT]
-> **General Availabilites:** </br>
-> [**generative AI hub**](https://www.sap.com/events/teched/news-guide/ai.html#article8) Q4/2023 </br>
-> [**SAP HANA Cloud Vector Engine**](https://www.sap.com/events/teched/news-guide/ai.html#article8) Q1/2024
+> General Availability: </br>
+> [generative AI hub](https://www.sap.com/events/teched/news-guide/ai.html#article8) Q4/2023 </br>
+> [SAP HANA Cloud Vector Engine](https://www.sap.com/events/teched/news-guide/ai.html#article8) Q1/2024
 
 Welcome to our dedicated GitHub repository, designed to provide valuable support to developers, partners and customers aiming to create advanced **GenAI** solutions on **SAP Business Technology Platform (SAP BTP)** following the **Reference Architecture**. Inside, you'll find a carefully crafted example that follows SAP BTP's respected Golden Path development approach. We've covered both **single-tenant and multitenant (Software as a Service, SaaS) versions** to suit different needs. Discover how to smoothly integrate different **Large Language Models (LLMs)** via SAP AI Core (**generative AI hub**), make the most of LangChain in CAP and use advanced techniques like output parsing according a custom schema or **Retrieval Augmented Generation (RAG)** through embeddings and a vector database to achieve even higher value for your use case. Notably, our repository supports two runtimes, Cloud Foundry and Kyma, offering flexibility in your journey to harness GenAI on SAP BTP.
 
 > [!NOTE]
-> We encourage you to check out our accompanying Discovery Center Mission [**Develop a CAP-based (multitenant) application using GenAI and RAG**](https://discovery-center.cloud.sap/missiondetail/4371/) along with the corresponding reference architecture guidance for [**Retrieval Augmented Generation with GenAI on SAP BTP**](https://discovery-center.cloud.sap/refArchDetail/ref-arch-open-ai). To learn more about Generative AI at SAP, we highly recommend to visit [this OpenSAP course](https://open.sap.com/courses/genai1).
+> We encourage you to check out our accompanying Discovery Center Mission [Develop a CAP-based (multitenant) application using GenAI and RAG](https://discovery-center.cloud.sap/missiondetail/4371/) along with the corresponding reference architecture guidance for [Retrieval Augmented Generation with GenAI on SAP BTP](https://discovery-center.cloud.sap/refArchDetail/ref-arch-open-ai). To learn more about Generative AI at SAP, we highly recommend to visit [this OpenSAP course](https://open.sap.com/courses/genai1).
 
 </br>
 
