@@ -6,8 +6,8 @@
   "license": "Apache License 2.0",
   "scripts": {
     "---BUILD---": "",
-    "build": "npm run install && npm run build:cds && npm run build:ui && npm run build:ts && npm run cleanup:ts",
-    "install": "npm i --prefix ../../code && npm i --prefix ../../code/app/ai-ui-ui5",
+    "build": "npm run inst && npm run build:cds && npm run build:ui && npm run build:ts && npm run cleanup:ts",
+    "inst": "npm i --prefix ../../code && npm i --prefix ../../code/app/ai-ui-ui5",
     "build:ts": "tsc -p ../../code",
     "build:cds": "npx -p @sap/cds-dk cds build -in ../../code --profile production",
     "build:ui": "npm run build --prefix ../../code/app/ai-ui-ui5/ && npm run copy --prefix ../../code/app/ai-ui-ui5/",
