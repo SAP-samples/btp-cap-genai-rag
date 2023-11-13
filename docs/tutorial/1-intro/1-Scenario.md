@@ -86,22 +86,36 @@ The standout feature that distinguishes our GenAI Mail Insights sample scenario 
 
 > **Insight:** If the concept of multitenancy in SAP BTP is new to you, we strongly suggest perusing the following GitHub repository to gain a deeper understanding of deploying a CAP-based multitenant application in the SAP BTP, Kyma Runtime, as well as the SAP BTP, Cloud Foundry Runtime. <br>[Explore the development of a multitenant Software as a Service application in SAP BTP using CAP](https://github.com/SAP-samples/btp-cap-multitenant-saas)
 
-**Vector Store**
+### Vector Store
 
 Within this sample scenario, a Vector database plays a pivotal role, serving as the repository for embeddings generated from incoming emails. These embeddings, in turn, facilitate a similarity search for identifying analogous emails when generating novel response suggestions. In the absence of native support for storing vectors or embeddings in SAP HANA Cloud, we employ a PostgreSQL database for this purpose. The integration into the application is seamless, using features provided by LangChain.
 
-**SAP AI Core**
+### SAP AI Core
 
 SAP AI Core is a service within the SAP Business Technology Platform that is designed to manage the execution and operations of your AI assets in a standardized, scalable, and cloud-agnostic manner. Beyond its compatibility with third-party offerings, such as the OpenAI Large Language Model services, SAP AI Core offers the flexibility to deploy custom workloads. 
 
-**generative AI hub**
+### generative AI hub
 
 A fundamental component of the SAP AI Core offering, the generative AI hub empowers customers and partners to leverage generative AI solutions provided by SAP, Large Language Models hosted by Azure (OpenAI), and other reputable third-party vendors. Please note that, as of the present, there is no free tier offering available for the generative AI hub service plan, and charges are incurred based on the tokens consumed.
 
-**SAP AI Launchpad**
+### Resource Groups
 
-The SAP AI Launchpad provides a user-friendly graphical interface for seamless interaction with SAP AI Core offerings, including the generative AI hub. Users can conveniently create the necessary configurations and deployments directly within the SAP AI Launchpad. Alternatively, the corresponding SAP AI Core APIs, integral to our multi-tenant setup, are also at your disposal.
+SAP AI Core introduces the concept of "Resource Groups", used for tenant separation within our sample setup. Future releases of SAP AI Core have plans to introduce a metering feature based on resource groups (subject to change — please consult the official roadmap). While in a single-tenant scenario, a default resource group suffices, in a multitenant context, unique resource groups are used for each tenant. Configurations and Deployments are automatically generated within a new resource group upon tenant subscription.
 
-**Resource Groups**
+In the sample scenario, the required resource groups are instantiated programmatically. A default resource group is created (if non existent) upon startup of the CAP service. In a single-context this default resource group is used for all requests to SAP AI Core. In a multitenant setup, the default resource group is required for local testing without a tenant context. For multitenant deployments, a new resource group is provisioned during the subscription process for each tenant based on the unique tenant GUID. 
 
-SAP AI Core introduces the concept of "Resource Groups", used for tenant segregation within our sample setup. Future releases of SAP AI Core have plans to introduce a metering feature based on resource-groups (subject to change — please consult the official roadmap). While in a single-tenant scenario, a default resource group suffices, in a multitenant context, unique resource groups are used for each tenant. Configurations and Deployments are automatically generated within a new resource group upon tenant subscription.
+> **Important** - To comply with the SAP AI Core naming requirements, the resulting resource group names are converted to lower letters. In addition, only characters from a-z and numbers from 0-9 as well as dashes (except as first and last character) are allowed. Other characters will be removed from the resulting resource group name.
+
+**Multitenant Setup Resource Groups**
+
+- Kyma - **default/\<TenantGuid>-aisaas-\<Namespace>-\<ShootName>**
+  > **Sample** - 63c57b07-59c0-468d-a547-32fe121da998-aisaas-dev-a1b2c3
+- Cloud Foundry - **default/\<TenantGuid>-aisaas-\<Space>-\<Org>**
+  > **Sample** - 001f7b54-990a-43e3-8add-0fc41ddf0639-aisaas-dev-sap-demo
+
+**Single-Tenant Setup Resource Groups**
+
+- Kyma - **default-ai-\<Namespace>-\<ShootName>**
+  > **Sample** - ai-dev-a1b2c3
+- Cloud Foundry - **default-ai-\<Space>-\<Org>**
+  > **Sample** - ai-dev-sap-demo
