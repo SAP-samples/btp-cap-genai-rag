@@ -2,6 +2,7 @@ import cds from "@sap/cds";
 import xsenv from "@sap/xsenv";
 import { Request } from "@sap/cds/apis/services";
 
+//@ts-ignore
 import Automator from "../common/utils/automator";
 import * as aiCore from "../common/utils/ai-core";
 
