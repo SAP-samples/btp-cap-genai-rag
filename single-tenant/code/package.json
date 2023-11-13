@@ -35,7 +35,7 @@
     "devDependencies": {
         "@babel/cli": "^7.22.15",
         "@prettier/plugin-xml": "^3.2.1",
-        "@sap/approuter": "^14.1.1",
+        "@sap/approuter": "^14.3.4",
         "@sap/cds-common-content": "1.0.1",
         "@sap/cds-dk": "^7.2.0",
         "@sap/html5-app-deployer": "^5.0.0",

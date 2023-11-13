@@ -75,7 +75,6 @@ POST http://localhost:4004/odata/v4/mail-insights/addMails
 content-type: application/json
 Authorization: Basic system-user:
 
-
 {
   "mails": [
     {

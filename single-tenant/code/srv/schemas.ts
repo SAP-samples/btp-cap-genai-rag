@@ -1,7 +1,10 @@
 import { z } from "zod";
 
+// Set default working language of user 
+// Can be stored/defined dynamically in a future release
 export const WORKING_LANGUAGE = "English";
 
+// Custom Schema for Language Determination
 export const MAIL_LANGUAGE_SCHEMA = z.object({
     languageNameDetermined: z
         .string()
@@ -14,6 +17,7 @@ export const MAIL_LANGUAGE_SCHEMA = z.object({
 }).describe(`You are supporting a travel agency which receives emails from customers all over the world. 
              Your task is to determine the language of the email in order to trigger translation if needed.`);
 
+// Custom Schema for Mail Insights extraction
 export const MAIL_INSIGHTS_SCHEMA = z.object({
     category: z.string().describe(`Classify the email into one the following categories:
         - Booking Assistance - if the email is asking for help in the process of booking of a travel or hotel stay,
@@ -89,6 +93,7 @@ export const MAIL_INSIGHTS_SCHEMA = z.object({
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
     Your task is to extract relevant insights out of the emails. Extract the information out of the email subject and body and return a clean and valid JSON format.`);
 
+// Custom Schema for Mail Insights Translation
 export const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
     subject: z.string(),
     body: z.string(),
@@ -105,12 +110,14 @@ export const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
       Your task is to translate the values for this schema into ${WORKING_LANGUAGE}. Return a clean and valid JSON format`);
 
+// Custom Schema for Mail Response Translation
 export const MAIL_RESPONSE_TRANSLATION_SCHEMA = z.object({
     responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, "\n"))
 }).describe(`You are supporting a travel agency which receives emails from customers requesting help or information. 
         Your task is to translate the values for this schema into the explicitly provided language or into 
         ${WORKING_LANGUAGE} if no other language is provided. Return a clean and valid JSON format`);
 
+// Custom Schema for Mail Response Generation
 export const MAIL_RESPONSE_SCHEMA = z
     .object({
         responseBody: z.string().transform((responseBody) => responseBody.replace(/\\\\n/g, "\n"))

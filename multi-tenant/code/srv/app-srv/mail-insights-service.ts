@@ -1,25 +1,40 @@
 import cds from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
-import { v5 as uuidv5, v4 as uuidv4 } from "uuid";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
-import { IStoredMail } from "../common/handlers/types";
+import * as aiCore from "../common/utils/ai-core"; 
 
+/**
+ * MailInsightsService class extends CommonMailInsights
+ * @extends CommonMailInsights
+ */
 export default class MailInsightsService extends CommonMailInsights {
+    /**
+     * Initialization method to register CAP Action Handlers
+     * @async
+     * @returns {Promise<void>}
+     */
     async init() {
         // Shared handlers (getMails, getMail, addMails, deleteMail)
         await super.init();
-        await this.checkDefaultResourceGroup();
+
+        // Create a default SAP AI Core resource groups if non existent
+        await aiCore.checkDefaultResourceGroup();
+
         // Additional handlers
         this.on("submitResponse", this.onSubmitResponse);
         this.on("revokeResponse", this.onRevokeResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
         this.on("translateResponse", this.onTranslateResponse);
-        this.on("syncWithOffice365", this.onSyncWithOffice365);
     }
 
-    // Regenerate Insights for all available Mails
+    /**
+     * Method to regenerate Insights for all available Mails
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
     private onRegenerateInsights = async (req: Request) => {
         try {
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
@@ -43,7 +58,12 @@ export default class MailInsightsService extends CommonMailInsights {
         }
     };
 
-    // Regenerate Response for a single Mail
+    /**
+     * Method to regenerate Response for a single Mail
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
     private onRegenerateResponse = async (req: Request) => {
         try {
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
@@ -58,7 +78,12 @@ export default class MailInsightsService extends CommonMailInsights {
         }
     };
 
-    // Translate Response to original e-mail language
+    /**
+     * Method to translate Response to original e-mail language
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
     private onTranslateResponse = async (req: Request) => {
         try {
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
@@ -74,8 +99,12 @@ export default class MailInsightsService extends CommonMailInsights {
         }
     };
 
-    // Submit response for single Mail
-    // Response always passed in user's working language
+    /**
+     * Method to submit response for a single Mail. Response always passed in user's working language
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
     private onSubmitResponse = async (req: Request) => {
         try {
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
@@ -91,9 +120,6 @@ export default class MailInsightsService extends CommonMailInsights {
                 mail.languageMatch === undefined || mail.languageMatch
                     ? response
                     : (await this.translateResponse(response, tenant, mail.languageNameDetermined)).responseBody;
-
-            // Store working language response in translation response Body
-            // Store either working language or original language in translation responseBody
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
             // Send the working language response + target language translation + AI Translation Disclaimer;
@@ -117,7 +143,12 @@ export default class MailInsightsService extends CommonMailInsights {
     };
 
 
-    // Revoke responded status for single mail
+    /**
+     * Method to revoke responded status for a single mail
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
     private onRevokeResponse = async (req: Request) => {
         try {
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
@@ -133,48 +164,6 @@ export default class MailInsightsService extends CommonMailInsights {
             }
 
             return new Boolean(success);
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    // Sync with Office 365
-    private onSyncWithOffice365 = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
-
-            const mails = (
-                await mailInbox.send({
-                    method: "GET",
-                    path: `messages?$select=id,sender,subject,body`
-                })
-            ).value?.map((mail: any) => {
-                return {
-                    ID: uuidv5(mail.id, uuidv5.URL),
-                    sender: mail.sender?.emailAddress?.address || "",
-                    subject: mail.subject || "",
-                    body: mail.body?.content || ""
-                };
-            });
-
-            const mailBatch = await this.regenerateInsights(mails);
-
-            // embed mail bodies with IDs
-            console.log("EMBED MAILS WITH IDs...");
-            const typeormVectorStore = await this.getVectorStore(tenant);
-
-            const queryString = `DELETE from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ?| $1`;
-            await typeormVectorStore.appDataSource.query(queryString, [mails.map((mail: any) => mail.ID)]);
-
-            await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: IStoredMail) => ({
-                    pageContent: mail.body,
-                    metadata: { id: mail.ID }
-                }))
-            );
-            return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
