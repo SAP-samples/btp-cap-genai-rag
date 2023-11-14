@@ -1,9 +1,8 @@
 import cds, { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
-import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
-import xsenv from "@sap/xsenv";
 import {
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -13,53 +12,35 @@ import {
 import { Document } from "langchain/document";
 import { LLMChain, StuffDocumentsChain } from "langchain/chains";
 import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
-import { TypeORMVectorStore, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
+import { TypeORMVectorStore, TypeORMVectorStoreArgs, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 
 import * as aiCore from "./utils/ai-core";
 import BTPEmbedding from "./utils/langchain/BTPEmbedding";
 import BTPAzureOpenAIChatLLM from "./utils/langchain/BTPAzureOpenAIChatLLM";
 
 import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail } from "./types";
-import {
-    MAIL_INSIGHTS_SCHEMA,
-    MAIL_INSIGHTS_TRANSLATION_SCHEMA,
-    MAIL_RESPONSE_TRANSLATION_SCHEMA,
-    MAIL_LANGUAGE_SCHEMA,
-    MAIL_RESPONSE_SCHEMA,
-    WORKING_LANGUAGE
-} from "./schemas";
-
+import * as schemas from "./schemas";
 import { actions } from "./default-values";
 
 // Default table used in PostgreSQL
 const DEFAULT_TENANT = "_main";
 
-const filterForTranslation = ({
-    subject,
-    body,
-    sender,
-    requestedServices,
-    customFields,
-    summary,
-    keyFacts,
-    responseBody
-}: any) => ({
-    subject,
-    body,
-    sender,
-    requestedServices,
-    customFields,
-    summary,
-    keyFacts,
-    responseBody
-});
-
+/**
+ * Class representing CommonMailInsights
+ * @extends ApplicationService
+ */
 export default class CommonMailInsights extends ApplicationService {
-    async init() {
+    /**
+     * Initiate CommonMailInsights instance
+     * @returns {Promise<void>}
+     */
+    async init(): Promise<void> {
+        await super.init();
+
         const { Mails } = cds.entities;
 
-        await super.init();
-        await this.checkDefaultResourceGroup();
+        // Create a default AI core resource group if non existent
+        await aiCore.checkDefaultResourceGroup();
 
         // Handlers
         this.after("READ", Mails, this.onAfterReadMails);
@@ -70,30 +51,43 @@ export default class CommonMailInsights extends ApplicationService {
         this.on("addMails", this.onAddMails);
         this.on("deleteMail", this.onDeleteMail);
         this.on("submitResponse", this.onSubmitResponse);
+        this.on("revokeResponse", this.onRevokeResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
         this.on("translateResponse", this.onTranslateResponse);
-        this.on("syncWithOffice365", this.onSyncWithOffice365);
     }
 
-    private onAfterReadMails = async (mails: any) => {
-        // Add default descriptions for actions
-        mails.forEach((mail: any) => {
-            if (mail.suggestedActions) {
-                mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
-                    return {
-                        ...suggestedAction,
-                        descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
-                    };
-                });
-            }
-        });
-
-        return mails;
+    /**
+     * Handler for after reading mails
+     * @param {any} mails
+     * @returns {Promise<any>}
+     */
+    private onAfterReadMails = async (mails: any): Promise<any> => {
+        try {
+            // Add default descriptions for actions
+            mails.forEach((mail: any) => {
+                if (mail.suggestedActions) {
+                    mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                        return {
+                            ...suggestedAction,
+                            descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
+                        };
+                    });
+                }
+            });
+            return mails;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return mails;
+        }
     };
 
-    // Get all Mails excl. closest Mails
-    private onGetMails = async (req: Request) => {
+    /**
+     * Handler for getting mails action
+     * @param {Request} req
+     * @returns {Promise<any>}
+     */
+    private onGetMails = async (req: Request): Promise<any> => {
         try {
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails).columns((m: any) => {
@@ -111,8 +105,12 @@ export default class CommonMailInsights extends ApplicationService {
         }
     };
 
-    // Get a single Mail incl. closest Mails
-    private onGetMail = async (req: Request) => {
+    /**
+     * Handler for getting a single mail
+     * @param {Request} req
+     * @returns {Promise<any>}
+     */
+    private onGetMail = async (req: Request): Promise<any> => {
         try {
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
@@ -171,8 +169,12 @@ export default class CommonMailInsights extends ApplicationService {
         }
     };
 
-    // Process single or multiple new Mail(s)
-    private onAddMails = async (req: Request) => {
+    /**
+     * Handler for adding mails
+     * @param {Request} req
+     * @returns {Promise<any>}
+     */
+    private onAddMails = async (req: Request): Promise<any> => {
         try {
             const { Mails } = this.entities;
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
@@ -182,15 +184,12 @@ export default class CommonMailInsights extends ApplicationService {
             // insert mails with insights
             console.log("UPDATE MAILS WITH INSIGHTS...");
 
-            cds.tx(async () => {
-                await INSERT.into(Mails).entries(mailBatch);
-            });
+            await INSERT.into(Mails).entries(mailBatch);
 
             // Embed mail bodies with IDs
             console.log("EMBED MAILS WITH IDs...");
 
-            const typeormVectorStore = await this.getVectorStore(tenant);
-            await typeormVectorStore.addDocuments(
+            await (await this.getVectorStore(tenant)).addDocuments(
                 mailBatch.map((mail: IStoredMail) => ({
                     pageContent: mail.body,
                     metadata: { id: mail.ID }
@@ -217,14 +216,19 @@ export default class CommonMailInsights extends ApplicationService {
             });
 
             return insertedMails;
+
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
         }
     };
 
-    // Delete single Mail from SAP HANA Cloud and PostgreSQL
-    private onDeleteMail = async (req: Request) => {
+    /**
+     * Handler for deleting a mail
+     * @param {Request} req
+     * @returns {Promise<any>}
+     */
+    private onDeleteMail = async (req: Request): Promise<any> => {
         try {
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
@@ -234,8 +238,8 @@ export default class CommonMailInsights extends ApplicationService {
 
             const typeormVectorStore = await this.getVectorStore(tenant);
             const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
-
             await typeormVectorStore.appDataSource.query(queryString, [id]);
+            
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -243,168 +247,13 @@ export default class CommonMailInsights extends ApplicationService {
         }
     };
 
-    // Regenerate Insights for all available Mails
-    private onRegenerateInsights = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const { rag } = req.data;
-            const { Mails } = this.entities;
-            const mails = await SELECT.from(Mails);
-            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
-
-            // insert mails with insights
-            console.log("UPDATE MAILS WITH INSIGHTS...");
-
-            cds.tx(async () => {
-                const { Mails } = this.entities;
-                await UPSERT.into(Mails).entries(mailBatch);
-            });
-
-            return true;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    // Regenerate Response for a single Mail
-    private onRegenerateResponse = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const { id, rag, additionalInformation } = req.data;
-            const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id);
-            const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
-            return response;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    // Translate Response to original e-mail language
-    private onTranslateResponse = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const { id, response } = req.data;
-            const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id);
-            const translation = (await this.translateResponse(response, tenant, mail.languageNameDetermined))
-                .responseBody;
-            return translation;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    // Submit response for single Mail
-    // Response always passed in user's working language
-    private onSubmitResponse = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const { id, response } = req.data;
-            const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
-                m("*");
-                m.translation((t: any) => t("*"));
-            });
-
-            // Translate working language response to recipient's original language
-            const translation =
-                mail.languageMatch === undefined || mail.languageMatch
-                    ? response
-                    : (await this.translateResponse(response, tenant, mail.languageNameDetermined)).responseBody;
-
-            // Store working language response in translation response Body
-            // Store either working language or original language in translation responseBody
-
-            // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
-            // Send the working language response + target language translation + AI Translation Disclaimer;
-            const submittedMail = {
-                ...mail,
-                responded: true,
-                responseBody: translation,
-                translation: { ...mail.translation, responseBody: response }
-            };
-            const success = await UPDATE(Mails, mail.ID).set(submittedMail);
-            if (success) {
-                const typeormVectorStore = await this.getVectorStore(tenant);
-                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
-                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
-            }
-            return new Boolean(success);
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    // Revoke responded status for single mail
-    private onRevokeResponse = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const { id } = req.data;
-            const { Mails } = this.entities;
-
-            const success = await UPDATE(Mails, id).with({ responded: false });
-
-            if (success) {
-                const typeormVectorStore = await this.getVectorStore(tenant);
-                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": false}' where (metadata->'id')::jsonb ? $1`;
-                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
-            }
-
-            return new Boolean(success);
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    // Sync with Office 365
-    private onSyncWithOffice365 = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const mailInbox = await cds.connect.to("SUBSCRIBER_OFFICE365_DESTINATION");
-
-            const mails = (
-                await mailInbox.send({
-                    method: "GET",
-                    path: `messages?$select=id,sender,subject,body`
-                })
-            ).value?.map((mail: any) => {
-                return {
-                    ID: uuidv5(mail.id, uuidv5.URL),
-                    sender: mail.sender?.emailAddress?.address || "",
-                    subject: mail.subject || "",
-                    body: mail.body?.content || ""
-                };
-            });
-
-            const mailBatch = await this.regenerateInsights(mails);
-
-            // embed mail bodies with IDs
-            console.log("EMBED MAILS WITH IDs...");
-            const typeormVectorStore = await this.getVectorStore(tenant);
-
-            const queryString = `DELETE from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ?| $1`;
-            await typeormVectorStore.appDataSource.query(queryString, [mails.map((mail: any) => mail.ID)]);
-
-            await typeormVectorStore.addDocuments(
-                mailBatch.map((mail: IStoredMail) => ({
-                    pageContent: mail.body,
-                    metadata: { id: mail.ID }
-                }))
-            );
-            return true;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    // (Re-)Generate Insights, Response(s) and Translation(s) for single or multiple Mail(s)
+    /**
+     * (Re-)Generate Insights, Response(s) and Translation(s) for single or multiple Mail(s)
+     * @param {Array<IBaseMail>} mails - array of mails
+     * @param {boolean} rag - flag to denote if RAG status should be considered
+     * @param {string} tenant - tenant id
+     * @returns {Promise<Array<ITranslatedMail>>} Promise object represents the translated mails
+     */
     public regenerateInsights = async (
         mails: Array<IBaseMail>,
         rag: boolean = false,
@@ -422,9 +271,9 @@ export default class CommonMailInsights extends ApplicationService {
         ]);
 
         const processedMails = mails.reduce((acc, mail) => {
-            const generalInsight = generalInsights.find((res) => res.mail.ID === mail.ID)?.insights;
-            const potentialResponse = potentialResponses.find((res) => res.mail.ID === mail.ID)?.response;
-            const languageMatch = languageMatches.find((res) => res.mail.ID === mail.ID)?.languageMatch;
+            const generalInsight = generalInsights.find((res: any) => res.mail.ID === mail.ID)?.insights;
+            const potentialResponse = potentialResponses.find((res: any) => res.mail.ID === mail.ID)?.response;
+            const languageMatch = languageMatches.find((res: any) => res.mail.ID === mail.ID)?.languageMatch;
 
             acc.push({
                 mail,
@@ -449,7 +298,14 @@ export default class CommonMailInsights extends ApplicationService {
         });
     };
 
-    // (Re-)Generate Response for a single Mail
+    /**
+     * (Re-)Generate Response for a single Mail
+     * @param {IStoredMail} mail - stored mail
+     * @param {boolean} rag - flag to denote if RAG status should be considered
+     * @param {string} tenant - tenant id
+     * @param {string} additionalInformation - additional information for the response
+     * @returns {Promise<IStoredMail>} Promise object represents the stored mail with regenerated response
+     */
     public regenerateResponse = async (
         mail: IStoredMail,
         rag: boolean = false,
@@ -478,7 +334,7 @@ export default class CommonMailInsights extends ApplicationService {
 
         if (!mail.languageMatch) {
             translation.responseBody = (
-                await this.translateResponse(regeneratedResponse, tenant, WORKING_LANGUAGE)
+                await this.translateResponse(regeneratedResponse, tenant, schemas.WORKING_LANGUAGE)
             ).responseBody;
         } else {
             translation.responseBody = regeneratedResponse;
@@ -499,12 +355,18 @@ export default class CommonMailInsights extends ApplicationService {
         };
     };
 
-    // Extract Insights for Mail(s) using LLM
+    /**
+     * Extract insights for mails using LLM.
+     *
+     * @param {Array<IBaseMail>} mails - Array of mails to extract insights from.
+     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
+     * @returns {Promise<Array<IProcessedMail>>} - A promise that resolves to an array of processed mails.
+     */
     public extractGeneralInsights = async (
         mails: Array<IBaseMail>,
         tenant: string = DEFAULT_TENANT
     ): Promise<Array<IProcessedMail>> => {
-        const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_SCHEMA);
+        const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
         const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
@@ -519,7 +381,7 @@ export default class CommonMailInsights extends ApplicationService {
         const systemMessagePrompt = new SystemMessagePromptTemplate({ prompt: systemPrompt });
         const humanTemplate = "{subject}\n{body}";
         const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(humanTemplate);
-        const chatPrompt = ChatPromptTemplate.fromPromptMessages([systemMessagePrompt, humanMessagePrompt]);
+        const chatPrompt = ChatPromptTemplate.fromMessages([systemMessagePrompt, humanMessagePrompt]);
 
         const chain = new LLMChain({
             llm: llm,
@@ -531,7 +393,7 @@ export default class CommonMailInsights extends ApplicationService {
         console.log("GENERATING INSIGHTS...");
         const mailsInsights = await Promise.all(
             mails.map(async (mail: IBaseMail): Promise<IProcessedMail> => {
-                const insights: z.infer<typeof MAIL_INSIGHTS_SCHEMA> = (
+                const insights: z.infer<typeof schemas.MAIL_INSIGHTS_SCHEMA> = (
                     await chain.call({
                         subject: mail.subject,
                         body: mail.body
@@ -544,15 +406,21 @@ export default class CommonMailInsights extends ApplicationService {
         return mailsInsights;
     };
 
-    // Generate potential Response(s) using LLM
+    /**
+     * Generate potential Response(s) using LLM.
+     * @param {Array<IBaseMail>} mails - An array of mails.
+     * @param {boolean} rag - A flag to control retrieval augmented generation usage.
+     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
+     * @param {string} additionalInformation - Additional information for mail response.
+     * @return {Promise} - Returns a Promise that resolves to an array of potential responses.
+     */
     public preparePotentialResponses = async (
         mails: Array<IBaseMail>,
         rag: boolean = false,
         tenant: string = DEFAULT_TENANT,
         additionalInformation?: string
-    ) => {
-        // prepare response
-        const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_SCHEMA);
+    ): Promise<any> => {
+        const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
         const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
@@ -609,7 +477,7 @@ export default class CommonMailInsights extends ApplicationService {
 
                     return { mail, response };
                 } else {
-                    const response: z.infer<typeof MAIL_RESPONSE_SCHEMA> = (
+                    const response: z.infer<typeof schemas.MAIL_RESPONSE_SCHEMA> = (
                         await chain.call({
                             sender: mail.senderEmailAddress,
                             subject: mail.subject,
@@ -625,10 +493,15 @@ export default class CommonMailInsights extends ApplicationService {
         return potentialResponses;
     };
 
-    // Extract Language Match(es) using LLM
-    public extractLanguageMatches = async (mails: Array<IBaseMail>, tenant: string = DEFAULT_TENANT) => {
+    /**
+     * Extract Language Match(es) using LLM.
+     * @param {Array<IBaseMail>} mails - An array of mails.
+     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
+     * @return {Promise} - Returns a Promise that resolves to an array of language matches.
+     */
+    public extractLanguageMatches = async (mails: Array<IBaseMail>, tenant: string = DEFAULT_TENANT): Promise<any> => {
         // prepare response
-        const parser = StructuredOutputParser.fromZodSchema(MAIL_LANGUAGE_SCHEMA);
+        const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_LANGUAGE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
         const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
@@ -653,7 +526,7 @@ export default class CommonMailInsights extends ApplicationService {
 
         const languageMatches = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-                const languageMatch: z.infer<typeof MAIL_LANGUAGE_SCHEMA> = (
+                const languageMatch: z.infer<typeof schemas.MAIL_LANGUAGE_SCHEMA> = (
                     await chain.call({
                         mail: mail.body
                     })
@@ -666,10 +539,15 @@ export default class CommonMailInsights extends ApplicationService {
         return languageMatches;
     };
 
-    // Translates Insight(s) using LLM
-    public translateInsights = async (mails: Array<IProcessedMail>, tenant: string = DEFAULT_TENANT) => {
+    /**
+     * Translates Insight(s) using LLM.
+     * @param {Array<IProcessedMail>} mails - An array of processed mails.
+     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
+     * @return {Promise} - Returns a Promise that resolves to an array of translations.
+     */
+    public translateInsights = async (mails: Array<IProcessedMail>, tenant: string = DEFAULT_TENANT): Promise<any> => {
         // prepare response
-        const parser = StructuredOutputParser.fromZodSchema(MAIL_INSIGHTS_TRANSLATION_SCHEMA);
+        const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
         const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
@@ -695,7 +573,7 @@ export default class CommonMailInsights extends ApplicationService {
         const translations = await Promise.all(
             mails.map(async (mail: IProcessedMail) => {
                 if (!mail.insights?.languageMatch) {
-                    const translation: z.infer<typeof MAIL_INSIGHTS_TRANSLATION_SCHEMA> = (
+                    const translation: z.infer<typeof schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA> = (
                         await chain.call({
                             insights: JSON.stringify(
                                 filterForTranslation({
@@ -729,11 +607,17 @@ export default class CommonMailInsights extends ApplicationService {
         return translations;
     };
 
-    // Translates a single response using LLM
-    public translateResponse = async (response: string, tenant: string = DEFAULT_TENANT, language: string) => {
+    /**
+     * Translates a single response using LLM.
+     * @param {string} response - The response text.
+     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
+     * @param {string} language - The language for translation.
+     * @return {Promise} - Returns a Promise that resolves to the translated response.
+     */
+    public translateResponse = async (response: string, tenant: string = DEFAULT_TENANT, language: string): Promise<any> => {
         try {
             // prepare response
-            const parser = StructuredOutputParser.fromZodSchema(MAIL_RESPONSE_TRANSLATION_SCHEMA);
+            const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA);
             const formatInstructions = parser.getFormatInstructions();
             const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
 
@@ -756,7 +640,7 @@ export default class CommonMailInsights extends ApplicationService {
                 outputParser: OutputFixingParser.fromLLM(llm, parser)
             });
 
-            const translation: z.infer<typeof MAIL_RESPONSE_TRANSLATION_SCHEMA> = (
+            const translation: z.infer<typeof schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA> = (
                 await chain.call({
                     response: response
                 })
@@ -770,7 +654,152 @@ export default class CommonMailInsights extends ApplicationService {
         }
     };
 
-    // Get responses of x closest Mails
+    /**
+     * Method to regenerate Insights for all available Mails
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
+    private onRegenerateInsights = async (req: Request) => {
+        try {
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
+            const { rag } = req.data;
+            const { Mails } = this.entities;
+            const mails = await SELECT.from(Mails);
+            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+
+            // insert mails with insights
+            console.log("UPDATE MAILS WITH INSIGHTS...");
+
+            cds.tx(async () => {
+                const { Mails } = this.entities;
+                await UPSERT.into(Mails).entries(mailBatch);
+            });
+
+            return true;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
+    };
+
+    /**
+     * Method to regenerate Response for a single Mail
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
+    private onRegenerateResponse = async (req: Request) => {
+        try {
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
+            const { id, rag, additionalInformation } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id);
+            const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
+            return response;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
+    };
+
+    /**
+     * Method to translate Response to original e-mail language
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
+    private onTranslateResponse = async (req: Request) => {
+        try {
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
+            const { id, response } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id);
+            const translation = (await this.translateResponse(response, tenant, mail.languageNameDetermined))
+                .responseBody;
+            return translation;
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
+    };
+
+    /**
+     * Method to submit response for a single Mail. Response always passed in user's working language
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
+    private onSubmitResponse = async (req: Request) => {
+        try {
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
+            const { id, response } = req.data;
+            const { Mails } = this.entities;
+            const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
+                m("*");
+                m.translation((t: any) => t("*"));
+            });
+
+            // Translate working language response to recipient's original language
+            const translation =
+                mail.languageMatch === undefined || mail.languageMatch
+                    ? response
+                    : (await this.translateResponse(response, tenant, mail.languageNameDetermined)).responseBody;
+
+            // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
+            // Send the working language response + target language translation + AI Translation Disclaimer;
+            const submittedMail = {
+                ...mail,
+                responded: true,
+                responseBody: translation,
+                translation: { ...mail.translation, responseBody: response }
+            };
+            const success = await UPDATE(Mails, mail.ID).set(submittedMail);
+            if (success) {
+                const typeormVectorStore = await this.getVectorStore(tenant);
+                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
+                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
+            }
+            return new Boolean(success);
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
+    };
+
+
+    /**
+     * Method to revoke responded status for a single mail
+     * @async
+     * @param {Request} req - Request object
+     * @returns {Promise<boolean|*>}
+     */
+    private onRevokeResponse = async (req: Request) => {
+        try {
+            const tenant = cds.env?.requires?.multitenancy && req.tenant;
+            const { id } = req.data;
+            const { Mails } = this.entities;
+
+            const success = await UPDATE(Mails, id).with({responded : false});
+
+            if (success) {
+                const typeormVectorStore = await this.getVectorStore(tenant);
+                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": false}' where (metadata->'id')::jsonb ? $1`;
+                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
+            }
+
+            return new Boolean(success);
+        } catch (error: any) {
+            console.error(`Error: ${error?.message}`);
+            return req.error(`Error: ${error?.message}`);
+        }
+    };
+
+    /**
+     * Get responses of x closest Mails.
+     * @param {Array<[TypeORMVectorStoreDocument, number]>} mails - An array of mails along with their distances.
+     * @return {Promise<Array<[Document]>>} - Returns a Promise that resolves to an array of closest responses.
+     */
     public getClosestResponses = async (
         mails: Array<[TypeORMVectorStoreDocument, number]>
     ): Promise<Array<[Document]>> => {
@@ -795,7 +824,12 @@ export default class CommonMailInsights extends ApplicationService {
         return responses;
     };
 
-    public getVectorStore = async (tenant?: string) => {
+    /**
+     * Get VectorStore instance.
+     * @param {string} tenant - The tenant identifier.
+     * @return {Promise<TypeORMVectorStore>} - Returns a Promise that resolves to a VectorStore instance.
+     */
+    public getVectorStore = async (tenant?: string): Promise<TypeORMVectorStore> => {
         const embeddings = new BTPEmbedding(aiCore.embed, tenant);
         const args = getPostgresConnectionOptions(tenant);
         const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
@@ -803,6 +837,14 @@ export default class CommonMailInsights extends ApplicationService {
         return typeormVectorStore;
     };
 
+    /**
+     * Get closest mails.
+     * @param {string} id - The id of the mail.
+     * @param {number} k - The number of closest mails to fetch (default value is 5).
+     * @param {any} filter - The filter criteria.
+     * @param {string} tenant - The tenant identifier.
+     * @return {Promise<Array<[TypeORMVectorStoreDocument, number]>>} - Returns a Promise that resolves to an array of closest mails.
+     */
     public getClosestMails = async (
         id: string,
         k: number = 5,
@@ -830,46 +872,41 @@ export default class CommonMailInsights extends ApplicationService {
         }
         return results;
     };
-
-    public checkDefaultResourceGroup = async () => {
-        try {
-            const xsuaa = xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa;
-            //@ts-ignore
-            const appName = xsuaa?.xsappname?.split("!t")[0]?.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^(-*)|(-*)$/g, '');
-            const resourceGroupId = `default-${appName}`;
-            const defaultGroupExists = (await aiCore.getResourceGroups())?.find(
-                (resourceGroup: any) => resourceGroup.resourceGroupId === resourceGroupId
-            );
-
-            if (!defaultGroupExists) {
-                // Create AI Core Resource Group for tenant
-                console.log("Info: AI Core Default Resource Group will be created");
-
-                await aiCore.createResourceGroup(resourceGroupId);
-                await delay(10000);
-
-                const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-                const responseConfigurationCreation = await aiCore.createConfigurations({}, headers);
-
-                await Promise.all(
-                    responseConfigurationCreation.map(async (configuration) => {
-                        if (configuration.id) {
-                            await delay(5000);
-                            await aiCore.createDeployment(configuration.id, headers);
-                        }
-                    })
-                );
-
-                console.log("Success: Default Resource Group Onboarding completed!");
-            }
-        } catch (err: any) {
-            console.log("Failed: Error during Default Resource Group Creation!");
-            console.log("Error: " + err.message);
-        }
-    };
 }
 
-const getPostgresConnectionOptions = (tenant?: string) => {
+/**
+ * Filters given object for translation related properties.
+ *
+ * @param {Object} The object containing potential fields for translation.
+ * @returns {Object} - An object containing the filtered fields.
+ */
+const filterForTranslation = ({
+    subject,
+    body,
+    sender,
+    requestedServices,
+    customFields,
+    summary,
+    keyFacts,
+    responseBody
+}: any): object => ({
+    subject,
+    body,
+    sender,
+    requestedServices,
+    customFields,
+    summary,
+    keyFacts,
+    responseBody
+});
+
+/**
+ * Gets PostgreSQL server connection options.
+ *
+ * @param {string} [tenant] - The tenant string.
+ * @returns {TypeORMVectorStoreArgs} - An object containing connection options and the table name.
+ */
+const getPostgresConnectionOptions = (tenant?: string): TypeORMVectorStoreArgs => {
     // @ts-ignore
     const credentials = cds.env.requires?.postgres?.credentials;
     return {
@@ -890,10 +927,16 @@ const getPostgresConnectionOptions = (tenant?: string) => {
         } as DataSourceOptions,
 
         tableName: tenant ? "_" + tenant.replace(/-/g, "") : DEFAULT_TENANT
-    };
+    } as TypeORMVectorStoreArgs;
 };
 
-const fixJsonString = (jsonString: String) => {
+/**
+ * Parses JSON strings, adding missing ',' for valid JSON and replacing '\n' by '\\n' in property values.
+ *
+ * @param {string} jsonString - The JSON string to parse.
+ * @returns {string} - The parsed JSON string.
+ */
+const fixJsonString = (jsonString: String): string => {
     return (
         jsonString
             // Workaround - Add missing ',' for valid JSON
@@ -905,4 +948,5 @@ const fixJsonString = (jsonString: String) => {
     );
 };
 
-const delay = (ms: number) => new Promise((res: any) => setTimeout(res, ms));
+
+
