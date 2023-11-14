@@ -2,7 +2,7 @@ import cds from "@sap/cds";
 import express from "express";
 
 // List of services to disable
-const services = [
+const SERVICES_TO_DISABLE = [
     "toggles",
     "extensibility",
     "cds.xt.ModelProviderService",
@@ -12,7 +12,7 @@ const services = [
   ];
   
 // Disable all services in the list
-services.forEach((service) => {
+SERVICES_TO_DISABLE.forEach((service) => {
     cds.env.requires[service] = false;
 });
   
@@ -22,7 +22,7 @@ services.forEach((service) => {
  * @param {express.Application} app - The express application.
  */
 cds.on('bootstrap', async (app : express.Application) => {
-    app.get('/healthz', (_, res) => { res.status(200).send('OK') })
+    app.get('/healthz', (_: express.Request, res: express.Response) => res.status(200).send(''))
 });
 
 export default cds.server;
