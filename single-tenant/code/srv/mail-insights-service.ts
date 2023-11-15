@@ -22,7 +22,6 @@ import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail } from "./types
 import * as schemas from "./schemas";
 import { actions } from "./default-values";
 
-// Default table used in PostgreSQL
 const DEFAULT_TENANT = "_main";
 
 /**
@@ -133,7 +132,8 @@ export default class CommonMailInsights extends ApplicationService {
                 };
             });
 
-            const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
+            const closestMailsIDs = await this.getClosestMails(id, 5, false, tenant);
+
             const closestMails =
                 closestMailsIDs.length > 0
                     ? await SELECT.from(Mails, (m: any) => {
@@ -150,18 +150,20 @@ export default class CommonMailInsights extends ApplicationService {
                       }).where({
                           ID: {
                               in: closestMailsIDs.map(
-                                  ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
+                                  ([doc, _]: [TypeORMVectorStoreDocument, number]) => doc.id
                               )
                           }
                       })
                     : [];
+
             const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
                 //@ts-ignore
-                const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
-                    ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
+                const [_, similarity]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
+                    ([doc, _]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.id
                 );
-                return { similarity: 1.0 - _distance, mail: mail };
+                return { similarity, mail };
             });
+            
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -185,16 +187,6 @@ export default class CommonMailInsights extends ApplicationService {
             console.log("UPDATE MAILS WITH INSIGHTS...");
 
             await INSERT.into(Mails).entries(mailBatch);
-
-            // Embed mail bodies with IDs
-            console.log("EMBED MAILS WITH IDs...");
-
-            await (await this.getVectorStore(tenant)).addDocuments(
-                mailBatch.map((mail: IStoredMail) => ({
-                    pageContent: mail.body,
-                    metadata: { id: mail.ID }
-                }))
-            );
 
             const insertedMails = await SELECT.from(Mails, (m: any) => {
                 m`.*`;
@@ -230,16 +222,9 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onDeleteMail = async (req: Request): Promise<any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
-
             await DELETE.from(Mails, id);
-
-            const typeormVectorStore = await this.getVectorStore(tenant);
-            const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
-            await typeormVectorStore.appDataSource.query(queryString, [id]);
-            
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -264,24 +249,27 @@ export default class CommonMailInsights extends ApplicationService {
             return { ...mail, ID: mail.ID || uuidv4() };
         });
 
-        const [generalInsights, potentialResponses, languageMatches] = await Promise.all([
+        const [generalInsights, potentialResponses, languageMatches, embeddings] = await Promise.all([
             this.extractGeneralInsights(mails, tenant),
             this.preparePotentialResponses(mails, rag, tenant),
-            this.extractLanguageMatches(mails, tenant)
+            this.extractLanguageMatches(mails, tenant),
+            this.createEmbeddings(mails, tenant)
         ]);
 
         const processedMails = mails.reduce((acc, mail) => {
             const generalInsight = generalInsights.find((res: any) => res.mail.ID === mail.ID)?.insights;
             const potentialResponse = potentialResponses.find((res: any) => res.mail.ID === mail.ID)?.response;
             const languageMatch = languageMatches.find((res: any) => res.mail.ID === mail.ID)?.languageMatch;
+            const embedding = embeddings.find((res: any) => res.mail.ID === mail.ID)?.embedding;
 
             acc.push({
                 mail,
                 insights: {
                     ...generalInsight,
                     ...potentialResponse,
-                    ...languageMatch
-                }
+                    ...languageMatch,
+                    embedding: embedding
+                },
             });
 
             return acc;
@@ -461,7 +449,7 @@ export default class CommonMailInsights extends ApplicationService {
         const potentialResponses = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
                 if (rag) {
-                    const closestMails = await this.getClosestMails(mail.ID, 5, { submitted: true }, tenant);
+                    const closestMails = await this.getClosestMails(mail.ID, 5, true, tenant);
                     const closestResponses = await this.getClosestResponses(closestMails);
 
                     const result = (
@@ -537,6 +525,25 @@ export default class CommonMailInsights extends ApplicationService {
         );
 
         return languageMatches;
+    };
+
+
+    /**
+     * Create Embeddings
+     * @param {Array<IBaseMail>} mails - An array of mails.
+     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
+     * @return {Promise} - Returns a Promise that resolves to an array of embeddings.
+     */
+    public createEmbeddings = async (mails: Array<IBaseMail>, tenant: string = DEFAULT_TENANT): Promise<any> => {
+        const embed = new BTPEmbedding(aiCore.embed, tenant);
+        const embeddings = await Promise.all(
+            mails.map(async (mail: IBaseMail) => {
+                const embedding = `[${(await embed.embedDocuments([mail.subject]))[0].toString()}]`
+                return { mail, embedding };
+            })
+        );
+
+        return embeddings;
     };
 
     /**
@@ -755,11 +762,6 @@ export default class CommonMailInsights extends ApplicationService {
                 translation: { ...mail.translation, responseBody: response }
             };
             const success = await UPDATE(Mails, mail.ID).set(submittedMail);
-            if (success) {
-                const typeormVectorStore = await this.getVectorStore(tenant);
-                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
-                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
-            }
             return new Boolean(success);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -776,18 +778,9 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onRevokeResponse = async (req: Request) => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
-
             const success = await UPDATE(Mails, id).with({responded : false});
-
-            if (success) {
-                const typeormVectorStore = await this.getVectorStore(tenant);
-                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": false}' where (metadata->'id')::jsonb ? $1`;
-                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
-            }
-
             return new Boolean(success);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -824,50 +817,45 @@ export default class CommonMailInsights extends ApplicationService {
         return responses;
     };
 
-    /**
-     * Get VectorStore instance.
-     * @param {string} tenant - The tenant identifier.
-     * @return {Promise<TypeORMVectorStore>} - Returns a Promise that resolves to a VectorStore instance.
-     */
-    public getVectorStore = async (tenant?: string): Promise<TypeORMVectorStore> => {
-        const embeddings = new BTPEmbedding(aiCore.embed, tenant);
-        const args = getPostgresConnectionOptions(tenant);
-        const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
-        await typeormVectorStore.ensureTableInDatabase();
-        return typeormVectorStore;
-    };
 
     /**
      * Get closest mails.
      * @param {string} id - The id of the mail.
      * @param {number} k - The number of closest mails to fetch (default value is 5).
-     * @param {any} filter - The filter criteria.
      * @param {string} tenant - The tenant identifier.
      * @return {Promise<Array<[TypeORMVectorStoreDocument, number]>>} - Returns a Promise that resolves to an array of closest mails.
      */
     public getClosestMails = async (
         id: string,
         k: number = 5,
-        filter: any = {},
+        responded: boolean = false,
         tenant?: string
     ): Promise<Array<[TypeORMVectorStoreDocument, number]>> => {
-        const typeormVectorStore = await this.getVectorStore(tenant);
+        
+        const documents = await cds.run(`
+            SELECT 
+                similars.ID as "id",
+                similars.BODY as "pageContent",
+                COSINE_SIMILARITY(TO_REAL_VECTOR(similars."EMBEDDING"), focus."EMBEDDING") as "similarity"
+            FROM "AI_DB_MAILS" as similars
+            JOIN (
+                SELECT 
+                    ID, 
+                    TO_REAL_VECTOR("EMBEDDING") as "EMBEDDING"
+                FROM "AI_DB_MAILS"
+                WHERE ID = ?
+                LIMIT 1
+            ) as focus ON focus.ID <> similars.ID
+            ${responded ? 'WHERE RESPONDED = true' : ''}
+            ORDER BY "similarity" DESC LIMIT ?`, [id, k]
+        );
 
-        const queryString = `
-        SELECT x.id, x."pageContent", x.metadata, x.embedding <=> focus.embedding as _distance from ${typeormVectorStore.tableName} as x
-        join (SELECT * from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ? $1) as focus
-        on focus.id != x.id
-        WHERE x.metadata @> $2
-        ORDER BY _distance LIMIT $3;
-        `;
-
-        const documents = await typeormVectorStore.appDataSource.query(queryString, [id, filter, k]);
         const results: Array<[TypeORMVectorStoreDocument, number]> = [];
         for (const doc of documents) {
-            if (doc._distance != null && doc.pageContent != null) {
+            if (doc.similarity != null && doc.pageContent != null) {
                 const document = new TypeORMVectorStoreDocument(doc);
                 document.id = doc.id;
-                results.push([document, doc._distance]);
+                results.push([document, doc.similarity]);
             }
         }
         return results;
@@ -900,35 +888,6 @@ const filterForTranslation = ({
     responseBody
 });
 
-/**
- * Gets PostgreSQL server connection options.
- *
- * @param {string} [tenant] - The tenant string.
- * @returns {TypeORMVectorStoreArgs} - An object containing connection options and the table name.
- */
-const getPostgresConnectionOptions = (tenant?: string): TypeORMVectorStoreArgs => {
-    // @ts-ignore
-    const credentials = cds.env.requires?.postgres?.credentials;
-    return {
-        postgresConnectionOptions: {
-            type: "postgres",
-            host: credentials?.hostname,
-            username: credentials?.username,
-            database: credentials?.dbname,
-            password: credentials?.password,
-            port: credentials?.port,
-            ssl: credentials?.sslcert
-                ? {
-                      cert: credentials?.sslcert,
-                      ca: credentials?.sslrootcert,
-                      rejectUnauthorized: credentials?.hostname === "127.0.0.1" ? false : undefined
-                  }
-                : false
-        } as DataSourceOptions,
-
-        tableName: tenant ? "_" + tenant.replace(/-/g, "") : DEFAULT_TENANT
-    } as TypeORMVectorStoreArgs;
-};
 
 /**
  * Parses JSON strings, adding missing ',' for valid JSON and replacing '\n' by '\\n' in property values.

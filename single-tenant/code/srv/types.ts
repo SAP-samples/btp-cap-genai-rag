@@ -50,6 +50,7 @@ interface IInsights {
     responseBody?: String;
     languageNameDetermined?: String;
     languageMatch?: Boolean;
+    embedding?: String;
 }
 
 interface IKeyFact {

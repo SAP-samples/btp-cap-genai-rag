@@ -61,7 +61,6 @@ modules:
       - name: ai-uaa
       - name: ai-logging
       - name: ai-hdi-container
-      - name: ai-postgresql-db
       - name: ai-html5-repo-runtime
       - name: ai-destination
       - name: ai-approuter
@@ -268,16 +267,3 @@ resources:
       service-name: ${space}-ai-hdi-container
     properties:
       com-container-name: "${service-name}"
-
-
-  # ----------------- POSTGRESQL -------------------------------------
-  - name: ai-postgresql-db
-  # ------------------------------------------------------------------
-    active: true
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: postgresql-db
-      service-name: ${space}-ai-postgresql-db
-      service-plan: free
-      config:
-        engine_version: "13"

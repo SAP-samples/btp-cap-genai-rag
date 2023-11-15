@@ -1,0 +1,20 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc">
+    <Dialog id="addMailDialog" title="{i18n>addMailDialog.title}" contentWidth="40%">
+        <content>
+            <VBox class="sapUiTinyMarginTopBottom sapUiSmallMarginBeginEnd">
+            	<Label text="{i18n>addMailDialog.labels.sender}" labelFor="sender" showColon="true" />
+                <Input id="sender" value="{state>/senderAddress}" class="sapUiTinyMarginTop" placeholder="{i18n>addMailDialog.placeholders.sender}" width="32%"  
+                   />
+            	<Label text="{i18n>addMailDialog.labels.subject}" labelFor="subject" class="sapUiSmallMarginTop" showColon="true" />
+                <Input id="subject" value="{state>/subject}" class="sapUiTinyMarginTop" placeholder="{i18n>addMailDialog.placeholders.subject}" width="72%"
+                    />
+            	<Label text="{i18n>addMailDialog.labels.body}" labelFor="body" class="sapUiSmallMarginTop" showColon="true" />
+                <TextArea id="body" value="{state>/body}" width="100%" class="sapUiTinyMarginTop" growing="true"
+                    placeholder="{i18n>addMailDialog.placeholders.body}" />
+            </VBox>
+        </content>
+        <beginButton>
+            <Button text="{i18n>email.buttons.confirm}" type="Emphasized" press="onAddMail" />
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

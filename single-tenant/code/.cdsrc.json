@@ -7,24 +7,25 @@
                 "requestTimeout": "300000"
             }
         },
-        "postgres": {
-            "kind": "postgresql-db",
-            "[development]": {
-                "kind": "postgres",
-                "credentials": {
-                    "hostname": "localhost",
-                    "port": 5432,
-                    "username": "postgres",
-                    "password": "postgres",
-                    "dbname": "postgres"
-                }
-            }
-        },
         "-------------------- ": "---",
         "--- Auth Settings ---": "---",
         " --------------------": "---",
         "auth": {
             "kind": "xsuaa",
+            "[development-hana]": {
+                "kind": "basic",
+                "users": {
+                    "alice": {
+                        "roles": ["Admin", "Member"]
+                    },
+                    "carol": {
+                        "roles": ["Member"]
+                    },
+                    "system-user": {
+                        "roles": ["system-user"]
+                    }
+                }
+            },
             "[development]": {
                 "kind": "basic",
                 "users": {
@@ -47,6 +48,11 @@
             "kind": "hana", 
             "impl": "@sap/cds-hana",
             "deploy-format": "hdbtable",
+            "[development-hana]": {
+                "kind": "hana",
+                "impl": "@sap/cds-hana",
+                "deploy-format": "hdbtable"
+            },
             "[development]": {
                 "kind": "sqlite",
                 "impl": "",
