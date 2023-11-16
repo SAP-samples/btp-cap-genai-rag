@@ -28,7 +28,6 @@
         "node-fetch": "^2.6.7",
         "openai": "~4.4.0",
         "passport": "^0.6.0",
-        "pg": "^8.11.2",
         "typeorm": "^0.3.17",
         "uuid": "^9.0.1"
     },
@@ -45,7 +44,6 @@
         "@types/cors": "^2.8.13",
         "@types/express": "^4.17.17",
         "@types/node": "^20.4.2",
-        "@types/pg": "^8.10.2",
         "@types/sap__xsenv": "^3.3.0",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",

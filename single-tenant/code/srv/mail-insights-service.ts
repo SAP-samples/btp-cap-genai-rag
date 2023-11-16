@@ -1,7 +1,6 @@
 import cds, { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 import { v4 as uuidv4 } from "uuid";
-import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
 import {
     ChatPromptTemplate,
@@ -9,10 +8,9 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate
 } from "langchain/prompts";
-import { Document } from "langchain/document";
 import { LLMChain, StuffDocumentsChain } from "langchain/chains";
 import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
-import { TypeORMVectorStore, TypeORMVectorStoreArgs, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
+import { TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 
 import * as aiCore from "./utils/ai-core";
 import BTPEmbedding from "./utils/langchain/BTPEmbedding";
@@ -22,7 +20,8 @@ import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail } from "./types
 import * as schemas from "./schemas";
 import { actions } from "./default-values";
 
-const DEFAULT_TENANT = "_main";
+// Default tenant if no tenant in CDS context
+const DEFAULT_TENANT = "main";
 
 /**
  * Class representing CommonMailInsights
@@ -111,7 +110,6 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onGetMail = async (req: Request): Promise<any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
 
@@ -132,7 +130,7 @@ export default class CommonMailInsights extends ApplicationService {
                 };
             });
 
-            const closestMailsIDs = await this.getClosestMails(id, 5, false, tenant);
+            const closestMailsIDs = await this.getClosestMails(id, 5);
 
             const closestMails =
                 closestMailsIDs.length > 0
@@ -149,9 +147,7 @@ export default class CommonMailInsights extends ApplicationService {
                           });
                       }).where({
                           ID: {
-                              in: closestMailsIDs.map(
-                                  ([doc, _]: [TypeORMVectorStoreDocument, number]) => doc.id
-                              )
+                              in: closestMailsIDs.map(([doc, _]: [TypeORMVectorStoreDocument, number]) => doc.id)
                           }
                       })
                     : [];
@@ -163,7 +159,7 @@ export default class CommonMailInsights extends ApplicationService {
                 );
                 return { similarity, mail };
             });
-            
+
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -208,7 +204,6 @@ export default class CommonMailInsights extends ApplicationService {
             });
 
             return insertedMails;
-
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -224,8 +219,8 @@ export default class CommonMailInsights extends ApplicationService {
         try {
             const { id } = req.data;
             const { Mails } = this.entities;
-            await DELETE.from(Mails, id);
-            return true;
+            const result = await DELETE.from(Mails, id);
+            return Boolean(result);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -233,7 +228,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     /**
-     * (Re-)Generate Insights, Response(s) and Translation(s) for single or multiple Mail(s)
+     * (Re-)Generate Insights, Response(s), Translation(s) and Embeddings for single or multiple Mail(s)
      * @param {Array<IBaseMail>} mails - array of mails
      * @param {boolean} rag - flag to denote if RAG status should be considered
      * @param {string} tenant - tenant id
@@ -268,8 +263,8 @@ export default class CommonMailInsights extends ApplicationService {
                     ...generalInsight,
                     ...potentialResponse,
                     ...languageMatch,
-                    embedding: embedding
-                },
+                    embedding
+                }
             });
 
             return acc;
@@ -345,7 +340,6 @@ export default class CommonMailInsights extends ApplicationService {
 
     /**
      * Extract insights for mails using LLM.
-     *
      * @param {Array<IBaseMail>} mails - Array of mails to extract insights from.
      * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @returns {Promise<Array<IProcessedMail>>} - A promise that resolves to an array of processed mails.
@@ -449,7 +443,7 @@ export default class CommonMailInsights extends ApplicationService {
         const potentialResponses = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
                 if (rag) {
-                    const closestMails = await this.getClosestMails(mail.ID, 5, true, tenant);
+                    const closestMails = await this.getClosestMails(mail.ID, 5, true);
                     const closestResponses = await this.getClosestResponses(closestMails);
 
                     const result = (
@@ -527,7 +521,6 @@ export default class CommonMailInsights extends ApplicationService {
         return languageMatches;
     };
 
-
     /**
      * Create Embeddings
      * @param {Array<IBaseMail>} mails - An array of mails.
@@ -538,7 +531,7 @@ export default class CommonMailInsights extends ApplicationService {
         const embed = new BTPEmbedding(aiCore.embed, tenant);
         const embeddings = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-                const embedding = `[${(await embed.embedDocuments([mail.subject]))[0].toString()}]`
+                const embedding = `[${(await embed.embedDocuments([mail.subject]))[0].toString()}]`;
                 return { mail, embedding };
             })
         );
@@ -621,7 +614,11 @@ export default class CommonMailInsights extends ApplicationService {
      * @param {string} language - The language for translation.
      * @return {Promise} - Returns a Promise that resolves to the translated response.
      */
-    public translateResponse = async (response: string, tenant: string = DEFAULT_TENANT, language: string): Promise<any> => {
+    public translateResponse = async (
+        response: string,
+        tenant: string = DEFAULT_TENANT,
+        language: string
+    ): Promise<any> => {
         try {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA);
@@ -630,8 +627,8 @@ export default class CommonMailInsights extends ApplicationService {
 
             const systemPrompt = new PromptTemplate({
                 template: `Translate the following response of the customer support into ${language}.
-            {format_instructions}
-            Make sure to escape special characters by double slashes.`,
+                    {format_instructions}
+                    Make sure to escape special characters by double slashes.`,
                 inputVariables: [],
                 partialVariables: { format_instructions: formatInstructions }
             });
@@ -769,7 +766,6 @@ export default class CommonMailInsights extends ApplicationService {
         }
     };
 
-
     /**
      * Method to revoke responded status for a single mail
      * @async
@@ -780,8 +776,8 @@ export default class CommonMailInsights extends ApplicationService {
         try {
             const { id } = req.data;
             const { Mails } = this.entities;
-            const success = await UPDATE(Mails, id).with({responded : false});
-            return new Boolean(success);
+            const result = await UPDATE(Mails, id).with({ responded: false });
+            return new Boolean(result);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -790,49 +786,50 @@ export default class CommonMailInsights extends ApplicationService {
 
     /**
      * Get responses of x closest Mails.
-     * @param {Array<[TypeORMVectorStoreDocument, number]>} mails - An array of mails along with their distances.
-     * @return {Promise<Array<[Document]>>} - Returns a Promise that resolves to an array of closest responses.
+     * @param {Array<[TypeORMVectorStoreDocument, number]>} mails - An array of mails along with their similarities.
+     * @return {Promise<Array<[TypeORMVectorStoreDocument]>>} - Returns a Promise that resolves to an array of closest responses.
      */
     public getClosestResponses = async (
         mails: Array<[TypeORMVectorStoreDocument, number]>
-    ): Promise<Array<[Document]>> => {
+    ): Promise<Array<[TypeORMVectorStoreDocument]>> => {
         if (mails.length === 0) {
             return [];
         }
         const { Mails } = this.entities;
-
-        const responses: Promise<Array<[Document]>> = (
+        const responses: Promise<Array<[TypeORMVectorStoreDocument]>> = (
             await SELECT.from(Mails)
                 .where({
                     ID: {
-                        in: mails.map(([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id)
+                        in: mails.map(([doc, _]: [TypeORMVectorStoreDocument, number]) => doc.id)
                     }
                 })
                 .columns((m: any) => {
                     m.ID;
                     m.responseBody;
                 })
-        ).map((mail: any) => new Document({ metadata: { id: mail.id }, pageContent: mail.responseBody }));
+        ).map((mail: any) => {
+            const document = new TypeORMVectorStoreDocument({ pageContent: mail.responseBody });
+            document.id = mail.ID;
+            return document;
+        });
 
         return responses;
     };
-
 
     /**
      * Get closest mails.
      * @param {string} id - The id of the mail.
      * @param {number} k - The number of closest mails to fetch (default value is 5).
-     * @param {string} tenant - The tenant identifier.
+     * @param {boolean} responded - Only consider responded mails for similarity search
      * @return {Promise<Array<[TypeORMVectorStoreDocument, number]>>} - Returns a Promise that resolves to an array of closest mails.
      */
     public getClosestMails = async (
         id: string,
         k: number = 5,
-        responded: boolean = false,
-        tenant?: string
+        responded: boolean = false
     ): Promise<Array<[TypeORMVectorStoreDocument, number]>> => {
-        
-        const documents = await cds.run(`
+        const documents = await cds.run(
+            `
             SELECT 
                 similars.ID as "id",
                 similars.BODY as "pageContent",
@@ -846,8 +843,9 @@ export default class CommonMailInsights extends ApplicationService {
                 WHERE ID = ?
                 LIMIT 1
             ) as focus ON focus.ID <> similars.ID
-            ${responded ? 'WHERE RESPONDED = true' : ''}
-            ORDER BY "similarity" DESC LIMIT ?`, [id, k]
+            ${responded ? "WHERE RESPONDED = true" : ""}
+            ORDER BY "similarity" DESC LIMIT ?`,
+            [id, k]
         );
 
         const results: Array<[TypeORMVectorStoreDocument, number]> = [];
@@ -888,7 +886,6 @@ const filterForTranslation = ({
     responseBody
 });
 
-
 /**
  * Parses JSON strings, adding missing ',' for valid JSON and replacing '\n' by '\\n' in property values.
  *
@@ -901,11 +898,8 @@ const fixJsonString = (jsonString: String): string => {
             // Workaround - Add missing ',' for valid JSON
             .replace(/\"\s*\"/g, '", "')
             // Workaround - Replace \n by \\n in property values
-            .replace(/"([^"]*)"/g, (match, capture) => {
+            .replace(/"([^"]*)"/g, (match, _) => {
                 return match.replace(/\n(?!\\n)/g, "\\n");
             })
     );
 };
-
-
-

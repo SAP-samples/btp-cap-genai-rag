@@ -24,13 +24,13 @@ export default class BTPEmbedding extends Embeddings {
     /**
      * Creates an instance of BTPEmbedding.
      * @param {function} embed - The function that transforms documents into embeddings.
-     * @param {string} tenant - The tenant to be used for the embedding. Defaults to "_main".
+     * @param {string} tenant - The tenant to be used for the embedding. Defaults to "main".
      * @param {Object} EmbeddingParams - The parameters to be passed to the embed function. Defaults to an empty object.
      * @param {EmbeddingsParams} params - The parameters for the super class. Defaults to an empty object.
      */
     constructor(
         embed: (documents: string[], tenant?: string) => Promise<number[][]>,
-        tenant: string = "_main",
+        tenant: string = "main",
         EmbeddingParams: {} = {},
         params: EmbeddingsParams = {}
     ) {

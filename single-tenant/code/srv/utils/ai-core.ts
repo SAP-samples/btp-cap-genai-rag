@@ -73,7 +73,7 @@ enum Tasks {
  * @returns {Promise<string>} - The text completion
  */
 export const completion = async (prompt: string, tenant?: string, LLMParams: {} = {}): Promise<string> => {
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+    const resourceGroupId = tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.COMPLETION);
 
     if (deploymentId) {
@@ -113,7 +113,7 @@ export const chatCompletion = async (
     tenant?: string,
     LLMParams: {} = {}
 ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+    const resourceGroupId = tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.CHAT);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -149,7 +149,7 @@ export const chatCompletion = async (
  * @returns {Promise<number[][]>} - The embeddings
  */
 export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+    const resourceGroupId = tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);

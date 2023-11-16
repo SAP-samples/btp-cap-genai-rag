@@ -16,7 +16,7 @@ export default class BTPAzureOpenAIChatLLM extends ChatOpenAI<ChatOpenAICallOpti
     /**
      * Constructs a new instance of BTPAzureOpenAIChatLLM
      * @param {Function} chatCompletion - A function to generate chat completions
-     * @param {string} tenant - The tenant for the chat, defaults to '_main'
+     * @param {string} tenant - The tenant for the chat, defaults to 'main'
      * @param {ChatOpenAICallOptions} params - Additional parameters for the OpenAI API
      */
     constructor(
@@ -24,7 +24,7 @@ export default class BTPAzureOpenAIChatLLM extends ChatOpenAI<ChatOpenAICallOpti
             request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
             tenant?: string
         ) => Promise<OpenAIClient.Chat.Completions.ChatCompletion>,
-        tenant: string = "_main",
+        tenant: string = "main",
         params: ChatOpenAICallOptions = {}
     ) {
         super({
