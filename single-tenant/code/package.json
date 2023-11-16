@@ -55,7 +55,8 @@
         "npm-run-all": "^4.1.5",
         "prettier": "3.0.3",
         "rimraf": "^5.0.1",
-        "shx": "^0.3.4"
+        "shx": "^0.3.4",
+        "@cap-js/cds-typer": "^0"
     },
     "scripts": {
         "start": "cds-serve",
@@ -94,7 +95,7 @@
         "inst": "npm i && npm install --prefix ./app/ai-ui-ui5",
         "build:cds": "npx -p @sap/cds-dk cds build --profile production",
         "build:ui": "npm run build --prefix ./app/ai-ui-ui5/ && npm run copy --prefix ./app/ai-ui-ui5/",
-        "build:ts": "tsc -p ./tsconfig.json", 
+        "build:ts": "tsc -p ./tsconfig.json",
         "cleanup:ts": "npx shx rm -r \"./gen/**/*.{ts,tsconfig}\"",
         "cds2types": "cd app-service && cds2types --cds ./$npm_config_service.cds --output ./types/entities.ts"
     },
@@ -105,5 +106,8 @@
         "singleQuote": false,
         "trailingComma": "none",
         "printWidth": 120
+    },
+    "imports": {
+        "#cds-models/*": "./@cds-models/*/index.js"
     }
 }

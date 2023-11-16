@@ -36,4 +36,4 @@ service MailInsightsService @(
     action   submitResponse(id : UUID, response : String)                                           returns Boolean;
     // Revoke answered status 
     action   revokeResponse(id : UUID)                                                              returns Boolean;
-};
+}; 
