@@ -10,15 +10,6 @@
                 "requestTimeout": "300000"
             }
         },
-        "SUBSCRIBER_OFFICE365_DESTINATION": {
-            "kind": "rest",
-            "credentials": {
-                "destination": "SUBSCRIBER_OFFICE365_DESTINATION"
-            }
-        },
-        "aicore": {
-            "createResourceGroups": true
-        },
         " ---------------------": "---",
         "--- MTXs Settings ----": "---",
         "--------------------- ": "---",
@@ -37,9 +28,6 @@
                         ]
                     }
                 ]
-            },
-            "postgres": {
-                "kind": "postgresql-db"
             },
             "hana": {
                 "kind": "hana-cloud",
@@ -62,9 +50,6 @@
                         "for": ["*"]
                     }
                 ]
-            },
-            "postgres": {
-                "kind": "postgresql-db"
             }
         },
         "[hybrid-api]": {
@@ -72,48 +57,27 @@
             "cds.xt.ExtensibilityService": false,
             "cds.xt.ModelProviderService": false,
             "cds.xt.DeploymentService": false,
-            "cds.xt.SaasProvisioningService": false,
-            "postgres": {
-                "kind": "postgresql-db"
-            }
+            "cds.xt.SaasProvisioningService": false
         },
         "[bas]": {
             "multitenancy": false,
             "extensibility": false,
-            "toggles": false,
-            "postgres": {
-                "kind": "postgresql-db"
-            }
+            "toggles": false
         },
         "[local-with-mtx]": {
             "multitenancy": true,
             "extensibility": false,
-            "toggles": false,
-            "postgres": {
-                "kind": "postgres",
-                "credentials": {
-                    "hostname": "localhost",
-                    "port": 5432,
-                    "username": "postgres",
-                    "password": "postgres",
-                    "dbname": "postgres"
-                }
-            }
+            "toggles": false
+        },
+        "[development-hana]": {
+            "multitenancy": false,
+            "extensibility": false,
+            "toggles": false
         },
         "[development]": {
             "multitenancy": false,
             "extensibility": false,
-            "toggles": false,
-            "postgres": {
-                "kind": "postgres",
-                "credentials": {
-                    "hostname": "localhost",
-                    "port": 5432,
-                    "username": "postgres",
-                    "password": "postgres",
-                    "dbname": "postgres"
-                }
-            }
+            "toggles": false
         },
         "------------------ ": "---",
         "--- DB Settings ---": "---",
@@ -157,6 +121,11 @@
                 "credentials": {
                     "url": "db.sqlite"
                 }
+            },
+            "[development-hana]": {
+                "kind": "hana",
+                "impl": "@sap/cds-hana",
+                "deploy-format": "hdbtable"
             },
             "[development]": {
                 "kind": "sqlite",
@@ -205,6 +174,20 @@
                     },
                     "system-user": {
                         "tenant": "t1",
+                        "roles": ["system-user"]
+                    }
+                }
+            },
+            "[development-hana]": {
+                "kind": "basic",
+                "users": {
+                    "alice": {
+                        "roles": ["Admin"]
+                    },
+                    "carol": {
+                        "roles": ["Member"]
+                    },
+                    "system-user": {
                         "roles": ["system-user"]
                     }
                 }
