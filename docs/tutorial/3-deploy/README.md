@@ -8,7 +8,7 @@ In the following steps, you will learn how to build and deploy the AI sample app
     - [Multitenant](./1-BuildTheComponents.md#multitenant)
     - [Single-Tenant (Work in progress)](./1-BuildTheComponents.md#single-tenant-work-in-progress)
 - [Deploy the application](./2-DeployTheApplication.md)
-  - [SAP BTP, Kyma Runtime](./2-DeployTheApplication#sap-btp-kyma-runtime)
+  - [SAP BTP, Kyma Runtime](./2-DeployTheApplication.md#sap-btp-kyma-runtime)
   - [SAP BTP, Cloud Foundry Runtime](./2-DeployTheApplication.md#sap-btp-cloud-foundry-runtime)
 - [Enable the pgvector extension](./3-EnablePgVector.md)
 - [Post-Deployment actions](./4-PostDeployActions.md) 
