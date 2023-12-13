@@ -8,7 +8,7 @@
       "node": "^18.x"
     },
     "scripts": {
-      "kyma-build-single-tenant": "npm i -g typescript ts-node && npm --prefix ./single-tenant/deploy/kyma run build",
-      "kyma-build-multi-tenant": "npm i -g typescript ts-node && npm --prefix ./multi-tenant/deploy/kyma run build"
+      "kyma-build-single-tenant": "npm --prefix ./single-tenant/deploy/kyma run cicd",
+      "kyma-build-multi-tenant": "npm --prefix ./multi-tenant/deploy/kyma run cicd"
     }
   }
