@@ -104,7 +104,13 @@ In the following steps, you will build a multi-target application which can be d
     npm i -g typescript ts-node
     ```
 
-3. Run the following command to generate unique Service Plan Ids for your Service Broker. 
+4. Make sure you have the Cloud MTA Build Tool (MBT) installed globally. 
+
+    ```sh
+    npm install -g mbt
+    ```
+
+5. Run the following command to generate unique Service Plan Ids for your Service Broker. 
 
     >**Hint** - Using the **-private** file name extension, these Ids will not be committed to GitHub. 
 
@@ -114,16 +120,16 @@ In the following steps, you will build a multi-target application which can be d
     npx --yes -p @sap/sbf gen-catalog-ids ../../code/broker/catalog-private.json
     ```
 
-4. Run the following password to create a new Service Broker password. Please copy the generated plaintext password and hashed credentials and store them in a secure place!
+6. Run the following command to create a new Service Broker password. Please copy the generated plaintext password and hashed credentials and store them in a secure place!
 
     ```sh
     # Run in ./multi-tenant/deploy/cf # 
     npx --yes -p @sap/sbf hash-broker-password -b
     ```
 
-5. Please duplicate the **free-tier.mtaext** file in the **multi-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
+7. Please duplicate the **free-tier.mtaext** file in the **multi-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub. 
 
-6. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago. Your **mtaext** file should look similar to the following. 
+8. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago. Your **mtaext** file should look similar to the following. 
    
    > **Important** - If you want to reuse an **existing** PostgreSQL service instance or you cannot use the **free** PostgreSQL service plan, please check the end of this chapter for further details ([click here](#postgresql---good-to-know)).
 
@@ -143,14 +149,16 @@ In the following steps, you will build a multi-target application which can be d
           SBF_CATALOG_FILE: ./catalog-private.json
     ```
 
-7. Please run the following command to build your **mtar** file. 
+9.  Please run the following command to build your **mtar** file. 
+
+    > **Hint** - If you are facing any issues related to **zod** which are similar to *node_modules/zod/lib/index.js implicitly has an 'any' type* please add the **noImplicitAny: false** configuration to your respective **tsconfig.json** file. 
 
     ```sh
     # Run in ./multi-tenant/deploy/cf # 
     npm run build:mbt
     ```
 
-8. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).
+10. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).
 
 
 ### Single-Tenant
