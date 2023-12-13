@@ -11,7 +11,7 @@
     "build:cds": "npx --yes -p @sap/cds-dk cds build -in ../../code --profile production",
     "build:ui": "npm run build --prefix ../../code/app/ai-ui-ui5/ && npm run copy --prefix ../../code/app/ai-ui-ui5/",
     "build:ts": "tsc -p ../../code/tsconfig.json",
-    "build:tsnpx": "npx --yes tsc -p ../../code/tsconfig.json",
+    "build:tsnpx": "npx --yes -p typescript tsc -p ../../code/tsconfig.json",
     "cleanup:ts": "npx --yes shx rm -r \"../../code/gen/**/*.{ts,tsconfig}\"",
     "------------------------": "",
     "-Helm Default Scripts-": "",

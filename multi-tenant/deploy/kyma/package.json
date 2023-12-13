@@ -15,7 +15,7 @@
     "build:ui": "npm run build --prefix ../../code/app/aisaas-ui-ui5/ && npm run copy --prefix ../../code/app/aisaas-ui-ui5/",
     "copy:common": "npx --yes shx cp -r ../../code/srv/common ../../code/gen/api && npx shx cp -r ../../code/srv/common ../../code/gen/app",
     "build:ts": "tsc -p ../../code/tsconfig.json",
-    "build:tsnpx": "npx --yes tsc -p ../../code/tsconfig.json",
+    "build:tsnpx": "npx --yes -p typescript tsc -p ../../code/tsconfig.json",
     "replace:paths": "npx --yes shx sed -i \"s/(srv\\/api-srv|srv\\/app-srv)/srv/g\" ../../code/gen/**/csn.json",
     "cleanup:ts": "npx --yes shx rm -r \"../../code/gen/**/*.{ts,tsconfig}\"",
     "------------------------": "",
