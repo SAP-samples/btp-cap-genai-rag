@@ -12,6 +12,8 @@ import Button from "sap/m/Button";
 
 import ConfirmationDialog from "./ConfirmationDialog";
 
+export const CAP_BASE_URL = "api/odata/v4/mail-insights";
+
 /**
  * @namespace ui.controller
  */

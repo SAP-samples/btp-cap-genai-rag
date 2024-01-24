@@ -15,7 +15,7 @@ build-parameters:
 modules:
   # --------------------- APPROUTER MODULE ---------------------
   - name: ai
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: approuter.nodejs
     path: ../../code/router
     build-parameters:
@@ -41,7 +41,7 @@ modules:
 
   # --------------------- SERVER MODULE ------------------------
   - name: ai-srv
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: nodejs
     path: ../../code/gen/srv
     build-parameters:
@@ -99,10 +99,10 @@ modules:
       - name: ai-srv-api
         properties:
           srv-url: ${default-url}
-  
+
   # --------------------- UI MODULE ----------------------------
   - name: ai-ui
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: html5
     path: ../../code/app/ai-ui-ui5
     build-parameters:
@@ -116,7 +116,7 @@ modules:
 
   # ------------------- HTML5 APP DEPLOYER ---------------------
   - name: ai-app-deployer
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: com.sap.html5.application-content
     path: ../../code/app/html5-deployer
     parameters:
@@ -128,7 +128,7 @@ modules:
 
   # --------------------- DB MODULE --------------------------
   - name: ai-db-deployer
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: hdb
     path: ../../code/gen/db
     build-parameters:
@@ -143,7 +143,7 @@ modules:
 resources:
   # ----------------------- UAA SERVICE ------------------------
   - name: ai-uaa
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     properties:
       xsuaa-app: ${xsuaa-app}
@@ -197,7 +197,7 @@ resources:
 
   # ---------------- APPLICATION LOGGING SERVICE ---------------
   - name: ai-logging
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service: application-logs
@@ -206,7 +206,7 @@ resources:
 
   # ----------------- DESTINATION SERVICE ----------------------
   - name: ai-destination
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     requires:
       - name: ai-srv-api
@@ -233,7 +233,7 @@ resources:
 
   # ----------------- AUTOSCALER  ------------------------------------
   - name: ai-autoscaler
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service: autoscaler
@@ -242,7 +242,7 @@ resources:
 
   # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------
   - name: ai-html5-repo-host
-  # -----------------------------------------------------------------
+    # -----------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service-plan: app-host
@@ -253,7 +253,7 @@ resources:
 
   # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
   - name: ai-html5-repo-runtime
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service-plan: app-runtime
@@ -262,17 +262,16 @@ resources:
 
   # ------------.----- AI DB HDI CONTAINER ---------------------
   - name: ai-hdi-container
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: com.sap.xs.hdi-container
     parameters:
       service-name: ${space}-ai-hdi-container
     properties:
       com-container-name: "${service-name}"
 
-
   # ----------------- POSTGRESQL -------------------------------------
   - name: ai-postgresql-db
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     active: true
     type: org.cloudfoundry.managed-service
     parameters:

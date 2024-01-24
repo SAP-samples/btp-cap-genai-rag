@@ -29,11 +29,6 @@ Authorization: Bearer {{token}}
 {
   "mails": [
     {
-        "subject": "Potřebuji pomoc s plánováním více měst v Evropě",
-        "body": "Dobrý den týmu ThorTours, plánuji více měst v Evropě na příští léto a mám problémy s nalezením nejlepšího způsobu, jak rezervovat lety a hotely. Můžete mi pomoci vytvořit itinerář, který zahrnuje Řím, Paříž, Berlín a Barcelonu?\nDěkuji předem,\nJan\n",
-        "senderEmailAddress": "honza123@tttraveler.org"
-    },
-    {
         "subject": "ヨーロッパ複数都市ツアーの支援が必要です",
         "body": "こんにちは、ThorToursチームの皆様、来年の夏にヨーロッパで複数の都市を巡るツアーを計画しており、飛行機やホテルの予約方法について最適な方法が分からずにいます。ローマ、パリ、ベルリン、バルセロナを含む旅程を作成するお手伝いをしていただけますか？\nよろしくお願いいたします。\nトム・デイビス\n",
         "senderEmailAddress": "tom.davis@tttraveler.org"

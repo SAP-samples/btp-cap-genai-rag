@@ -65,8 +65,8 @@
 				"settings": {
 					"bundleName": "ai.ui.i18n.i18n",
 					"bundleUrl": "i18n/i18n.properties",
-                    "supportedLocales": ["en", ""],
-                    "fallbackLocale": "en"
+					"supportedLocales": ["en", ""],
+					"fallbackLocale": "en"
 				}
 			},
 			"api": {

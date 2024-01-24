@@ -189,7 +189,9 @@ export default class CommonMailInsights extends ApplicationService {
             // Embed mail bodies with IDs
             console.log("EMBED MAILS WITH IDs...");
 
-            await (await this.getVectorStore(tenant)).addDocuments(
+            await (
+                await this.getVectorStore(tenant)
+            ).addDocuments(
                 mailBatch.map((mail: IStoredMail) => ({
                     pageContent: mail.body,
                     metadata: { id: mail.ID }
@@ -216,7 +218,6 @@ export default class CommonMailInsights extends ApplicationService {
             });
 
             return insertedMails;
-
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -239,7 +240,7 @@ export default class CommonMailInsights extends ApplicationService {
             const typeormVectorStore = await this.getVectorStore(tenant);
             const queryString = `DELETE FROM ${typeormVectorStore.tableName} WHERE (metadata->'id')::jsonb ? $1;`;
             await typeormVectorStore.appDataSource.query(queryString, [id]);
-            
+
             return true;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -373,7 +374,7 @@ export default class CommonMailInsights extends ApplicationService {
         const systemPrompt = new PromptTemplate({
             template:
                 "Give insights about the incoming email.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except of '\n'.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -434,7 +435,7 @@ export default class CommonMailInsights extends ApplicationService {
                       "Also consider given additional information if available to enhance the response."
                     : "Formulate a response to the original mail using given additional information.") +
                 "Address the sender appropriately.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except of '\n'.",
             inputVariables: rag ? ["context"] : [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -508,7 +509,7 @@ export default class CommonMailInsights extends ApplicationService {
         const systemPrompt = new PromptTemplate({
             template:
                 "Extract the language related information.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except of '\n'.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -554,7 +555,7 @@ export default class CommonMailInsights extends ApplicationService {
         const systemPrompt = new PromptTemplate({
             template:
                 "Translate the insights of the incoming json.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except of '\n'.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -614,7 +615,11 @@ export default class CommonMailInsights extends ApplicationService {
      * @param {string} language - The language for translation.
      * @return {Promise} - Returns a Promise that resolves to the translated response.
      */
-    public translateResponse = async (response: string, tenant: string = DEFAULT_TENANT, language: string): Promise<any> => {
+    public translateResponse = async (
+        response: string,
+        tenant: string = DEFAULT_TENANT,
+        language: string
+    ): Promise<any> => {
         try {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA);
@@ -767,7 +772,6 @@ export default class CommonMailInsights extends ApplicationService {
         }
     };
 
-
     /**
      * Method to revoke responded status for a single mail
      * @async
@@ -780,7 +784,7 @@ export default class CommonMailInsights extends ApplicationService {
             const { id } = req.data;
             const { Mails } = this.entities;
 
-            const success = await UPDATE(Mails, id).with({responded : false});
+            const success = await UPDATE(Mails, id).with({ responded: false });
 
             if (success) {
                 const typeormVectorStore = await this.getVectorStore(tenant);
@@ -947,6 +951,3 @@ const fixJsonString = (jsonString: String): string => {
             })
     );
 };
-
-
-

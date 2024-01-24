@@ -9,7 +9,8 @@ the translation of the answer back to the original language, and a disclaimer --
             <VBox class="sapUiTinyMarginTopBottom sapUiSmallMarginBeginEnd">
                 <TextArea id="areaWL" width="100%" class="sapUiTinyMarginTop" growing="true"
                     editable="false" />
-                <Text text="{i18n>email.texts.translationDisclaimer}" class="sapUiSmallMarginTop" />
+                <Title text="{i18n>email.texts.translationDisclaimer}" titleStyle="H6"
+                    class="sapUiSmallMarginTop" wrapping="true" />
                 <TextArea id="areaOL" width="100%" class="sapUiSmallMarginTop" growing="true"
                     editable="false" />
             </VBox>
