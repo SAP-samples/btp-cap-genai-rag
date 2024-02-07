@@ -16,7 +16,7 @@ build-parameters:
 modules:
   # --------------------- APPROUTER MODULE ---------------------
   - name: aisaas
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: approuter.nodejs
     path: ../../code/router
     build-parameters:
@@ -48,7 +48,7 @@ modules:
 
   # --------------------- SERVER MODULE ------------------------
   - name: aisaas-srv
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: nodejs
     path: ../../code/gen/app
     build-parameters:
@@ -78,8 +78,6 @@ modules:
                 - decrypt
                 - encrypt
                 - list
-      - name: aisaas-logging
-      - name: aisaas-postgresql-db
       - name: aisaas-registry
       - name: aisaas-service-manager
       - name: aisaas-service-manager-admin
@@ -87,7 +85,6 @@ modules:
       - name: aisaas-destination
       - name: aisaas-api-sb-srv
       - name: aisaas-approuter
-      - name: aisaas-autoscaler
         parameters:
           config:
             instance_min_count: 1
@@ -126,10 +123,10 @@ modules:
       - name: aisaas-srv-api
         properties:
           srv-url: ${default-url}
-  
+
   # --------------------- UI MODULE ----------------------------
   - name: aisaas-ui
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: html5
     path: ../../code/app/aisaas-ui-ui5
     build-parameters:
@@ -143,7 +140,7 @@ modules:
 
   # ------------------- HTML5 APP DEPLOYER ---------------------
   - name: aisaas-app-deployer
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: com.sap.html5.application-content
     path: ../../code/app/html5-deployer
     build-parameters:
@@ -153,7 +150,7 @@ modules:
 
   # --------------------- COMMON DB MODULE ---------------------
   - name: aisaas-db-com
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: hdb
     path: ../../code/gen/db-com
     build-parameters:
@@ -167,7 +164,7 @@ modules:
 
   # ----------- BROKER MODULE (OSBAPI Implementation) ----------
   - name: aisaas-api-sb
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: nodejs
     path: ../../code/broker/
     build-parameters:
@@ -211,7 +208,7 @@ modules:
 
   # --------------------- API MODULE ---------------------------
   - name: aisaas-api-srv
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: nodejs
     path: ../../code/gen/api
     parameters:
@@ -226,7 +223,6 @@ modules:
       - name: aisaas-service-manager
       - name: aisaas-api-uaa
       - name: aisaas-destination
-      - name: aisaas-postgresql-db
       - name: aisaas-registry
     provides:
       - name: aisaas-api-srv-api
@@ -236,7 +232,7 @@ modules:
 resources:
   # ----------------------- UAA SERVICE ------------------------
   - name: aisaas-uaa
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     properties:
       xsuaa-app: ${xsuaa-app}
@@ -353,7 +349,7 @@ resources:
 
   # ----------------- CREDENTIAL STORE  -----------------------
   - name: aisaas-credstore
-  # -----------------------------------------------------------
+    # -----------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service: credstore
@@ -365,7 +361,7 @@ resources:
 
   # --------------------- REGISTRY SERVICE ---------------------
   - name: aisaas-registry
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     requires:
       - name: aisaas-uaa
@@ -396,7 +392,7 @@ resources:
 
   # ------------------- SERVICE MANAGER SERVICE ----------------
   - name: aisaas-service-manager
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     requires:
       - name: aisaas-uaa
@@ -411,25 +407,16 @@ resources:
 
   # -------------- SERVICE MANAGER SERVICE ADMIN ---------------
   - name: aisaas-service-manager-admin
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service: service-manager
       service-name: ${space}-aisaas-service-manager-admin
       service-plan: subaccount-admin
 
-  # ---------------- APPLICATION LOGGING SERVICE ---------------
-  - name: aisaas-logging
-  # ------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: application-logs
-      service-name: ${space}-aisaas-logging
-      service-plan: lite
-
   # ----------------- COMMON DB HDI CONAINER -------------------
   - name: aisaas-com-hdi-container
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: com.sap.xs.hdi-container
     parameters:
       service-name: ${space}-aisaas-com-hdi-container
@@ -438,7 +425,7 @@ resources:
 
   # ----------------- DESTINATION SERVICE ----------------------
   - name: aisaas-destination
-  # ------------------------------------------------------------
+    # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     requires:
       - name: aisaas-srv-api
@@ -463,18 +450,9 @@ resources:
                 HTML5.Timeout: 300000
                 forwardAuthToken: true
 
-  # ----------------- AUTOSCALER  ------------------------------------
-  - name: aisaas-autoscaler
-  # ------------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: autoscaler
-      service-name: ${space}-aisaas-autoscaler
-      service-plan: standard
-
   # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------
   - name: aisaas-html5-repo-host
-  # -----------------------------------------------------------------
+    # -----------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service-plan: app-host
@@ -485,28 +463,16 @@ resources:
 
   # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
   - name: aisaas-html5-repo-runtime
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service-plan: app-runtime
       service-name: ${space}-aisaas-html5-repo-runtime
       service: html5-apps-repo
 
-  # ----------------- POSTGRESQL -------------------------------------
-  - name: aisaas-postgresql-db
-  # ------------------------------------------------------------------
-    active: true
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: postgresql-db
-      service-name: ${space}-aisaas-postgresql-db
-      service-plan: free
-      config:
-        engine_version: "13"
-
   # ----------------- XSUAA - BROKER ---------------------------------
   - name: aisaas-api-uaa
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service: xsuaa

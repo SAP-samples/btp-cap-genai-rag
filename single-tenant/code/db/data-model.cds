@@ -45,7 +45,7 @@ context ai.db {
             responseBody           :      LargeString;
             languageNameDetermined :      String;
             languageMatch          :      Boolean;
-            embedding              :      LargeString;
+            embedding              :      Vector(1536);
             translation            :      Composition of Translations;
             requestedServices      : many String;
             suggestedActions       : many Action;

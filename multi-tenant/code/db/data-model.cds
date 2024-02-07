@@ -3,7 +3,7 @@ using {
       managed
 } from '@sap/cds/common';
 
-context aisaas.db {
+context ai.db {
 
       type KeyFact {
             fact     : String;
@@ -45,7 +45,7 @@ context aisaas.db {
             responseBody           :      LargeString;
             languageNameDetermined :      String;
             languageMatch          :      Boolean;
-            embedding              :      LargeString;
+            embedding              :      cds.Vector;
             translation            :      Composition of Translations;
             requestedServices      : many String;
             suggestedActions       : many Action;

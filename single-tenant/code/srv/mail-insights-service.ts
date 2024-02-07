@@ -23,6 +23,32 @@ import { actions } from "./default-values";
 // Default tenant if no tenant in CDS context
 const DEFAULT_TENANT = "main";
 
+let vectorBuffer2Array = (buffer: Buffer): Array<number> => {
+    const sizeDimensions = 4;
+    let result = [];
+    let offset = sizeDimensions;
+    while (offset < buffer.length) {
+        const value = buffer.readFloatLE(offset);
+        result.push(value);
+        offset += 4;
+    }
+    return result;
+};
+
+let array2VectorBuffer = (data: Array<number>): Buffer => {
+    const sizeFloat = 4;
+    const sizeDimensions = 4;
+    const bufferSize = data.length * sizeFloat + sizeDimensions;
+
+    const buffer = Buffer.allocUnsafe(bufferSize);
+    // write size into buffer
+    buffer.writeUInt32LE(data.length, 0);
+    data.forEach((value: number, index: number) => {
+        buffer.writeFloatLE(value, index * sizeFloat + sizeDimensions);
+    });
+    return buffer;
+};
+
 /**
  * Class representing CommonMailInsights
  * @extends ApplicationService
@@ -52,7 +78,6 @@ export default class CommonMailInsights extends ApplicationService {
         this.on("revokeResponse", this.onRevokeResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
-        this.on("translateResponse", this.onTranslateResponse);
     }
 
     /**
@@ -64,14 +89,12 @@ export default class CommonMailInsights extends ApplicationService {
         try {
             // Add default descriptions for actions
             mails.forEach((mail: any) => {
-                if (mail.suggestedActions) {
-                    mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
-                        return {
-                            ...suggestedAction,
-                            descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
-                        };
-                    });
-                }
+                mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                    return {
+                        ...suggestedAction,
+                        descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
+                    };
+                });
             });
             return mails;
         } catch (error: any) {
@@ -416,7 +439,7 @@ export default class CommonMailInsights extends ApplicationService {
                       "Also consider given additional information if available to enhance the response."
                     : "Formulate a response to the original mail using given additional information.") +
                 "Address the sender appropriately.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except '\n'.",
             inputVariables: rag ? ["context"] : [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -531,7 +554,11 @@ export default class CommonMailInsights extends ApplicationService {
         const embed = new BTPEmbedding(aiCore.embed, tenant);
         const embeddings = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-                const embedding = `[${(await embed.embedDocuments([mail.subject]))[0].toString()}]`;
+                const embeddings = await embed.embedDocuments([mail.body]);
+                const embeddingOriginal = embeddings[0];
+                const embedding = array2VectorBuffer(embeddingOriginal);
+                //const embeddingTemp = Float32Array.from(embeddingOriginal);
+                //const embedding = Buffer.from(embeddingTemp.buffer);
                 return { mail, embedding };
             })
         );
@@ -708,27 +735,6 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     /**
-     * Method to translate Response to original e-mail language
-     * @async
-     * @param {Request} req - Request object
-     * @returns {Promise<boolean|*>}
-     */
-    private onTranslateResponse = async (req: Request) => {
-        try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
-            const { id, response } = req.data;
-            const { Mails } = this.entities;
-            const mail = await SELECT.one.from(Mails, id);
-            const translation = (await this.translateResponse(response, tenant, mail.languageNameDetermined))
-                .responseBody;
-            return translation;
-        } catch (error: any) {
-            console.error(`Error: ${error?.message}`);
-            return req.error(`Error: ${error?.message}`);
-        }
-    };
-
-    /**
      * Method to submit response for a single Mail. Response always passed in user's working language
      * @async
      * @param {Request} req - Request object
@@ -833,12 +839,12 @@ export default class CommonMailInsights extends ApplicationService {
             SELECT 
                 similars.ID as "id",
                 similars.BODY as "pageContent",
-                COSINE_SIMILARITY(TO_REAL_VECTOR(similars."EMBEDDING"), focus."EMBEDDING") as "similarity"
+                COSINE_SIMILARITY(similars."EMBEDDING", focus."EMBEDDING") as "similarity"
             FROM "AI_DB_MAILS" as similars
             JOIN (
                 SELECT 
                     ID, 
-                    TO_REAL_VECTOR("EMBEDDING") as "EMBEDDING"
+                    "EMBEDDING"
                 FROM "AI_DB_MAILS"
                 WHERE ID = ?
                 LIMIT 1

@@ -1,64 +1,15 @@
 {
+    "cdsc": {
+        "beta": {
+            "vectorType": true
+        }
+    },
     "requires": {
         "PROVIDER_AI_CORE_DESTINATION_HUB": {
             "kind": "rest",
             "credentials": {
                 "destination": "PROVIDER_AI_CORE_DESTINATION_HUB",
                 "requestTimeout": "300000"
-            }
-        },
-        "-------------------- ": "---",
-        "--- Auth Settings ---": "---",
-        " --------------------": "---",
-        "auth": {
-            "kind": "xsuaa",
-            "[development-hana]": {
-                "kind": "basic",
-                "users": {
-                    "alice": {
-                        "roles": ["Admin", "Member"]
-                    },
-                    "carol": {
-                        "roles": ["Member"]
-                    },
-                    "system-user": {
-                        "roles": ["system-user"]
-                    }
-                }
-            },
-            "[development]": {
-                "kind": "basic",
-                "users": {
-                    "alice": {
-                        "roles": ["Admin", "Member"]
-                    },
-                    "carol": {
-                        "roles": ["Member"]
-                    },
-                    "system-user": {
-                        "roles": ["system-user"]
-                    }
-                }
-            }
-        },
-        "------------------ ": "---",
-        "--- DB Settings ---": "---",
-        " ------------------": "---",
-        "db": {
-            "kind": "hana", 
-            "impl": "@sap/cds-hana",
-            "deploy-format": "hdbtable",
-            "[development-hana]": {
-                "kind": "hana",
-                "impl": "@sap/cds-hana",
-                "deploy-format": "hdbtable"
-            },
-            "[development]": {
-                "kind": "sqlite",
-                "impl": "",
-                "credentials": {
-                    "url": "db.sqlite"
-                }
             }
         }
     }

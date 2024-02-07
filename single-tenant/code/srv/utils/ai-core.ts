@@ -67,42 +67,6 @@ enum Tasks {
 
 /**
  * Use the chat completion api from Azure OpenAI services to make a completion call
- * @param {string} prompt - The text to be completed
- * @param {string} [tenant] - The tenant for which the completion is being made
- * @param {Object} [LLMParams={}] - Additional parameters
- * @returns {Promise<string>} - The text completion
- */
-export const completion = async (prompt: string, tenant?: string, LLMParams: {} = {}): Promise<string> => {
-    const resourceGroupId = tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
-    const deploymentId = await getDeploymentId(resourceGroupId, Tasks.COMPLETION);
-
-    if (deploymentId) {
-        const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
-        const payload: any = {
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 2000,
-            temperature: 0.0,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-            stop: "null",
-            ...LLMParams
-        };
-        const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-        const response: any = await aiCoreService.send({
-            // @ts-ignore
-            query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=${API_VERSION}`,
-            data: payload,
-            headers: headers
-        });
-
-        return response["choices"][0]?.message?.content;
-    } else {
-        return `No deployment found for this tenant (${tenant})`;
-    }
-};
-
-/**
- * Use the chat completion api from Azure OpenAI services to make a completion call
  * @param {OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming} request - The messages for the chat completion
  * @param {string} [tenant] - The tenant for which the completion is being made
  * @param {Object} [LLMParams={}] - Additional parameters
@@ -333,7 +297,7 @@ export const getResourceGroups = async (): Promise<Array<any>> => {
         return response.resources;
     } catch (e: any) {
         console.error(`Error: ${e?.message}`);
-        return []
+        return [];
     }
 };
 
@@ -344,9 +308,12 @@ export const getResourceGroups = async (): Promise<Array<any>> => {
  * @returns {Promise<Array<any>>} The response of configuration creation
  * @throws {Error} If an error occurs during creation
  */
-export const createConfigurations = async (configuration: ConfigurationBaseData, headers: AICoreApiHeaders): Promise<Array<any>> => {
+export const createConfigurations = async (
+    configuration: ConfigurationBaseData,
+    headers: AICoreApiHeaders
+): Promise<Array<any>> => {
     const responseConfigurationCreation = Promise.all(
-        CONFIGURATIONS.map((config : any) => {
+        CONFIGURATIONS.map((config: any) => {
             return ConfigurationApi.configurationCreate({
                 // @ts-ignore
                 name: config.name,

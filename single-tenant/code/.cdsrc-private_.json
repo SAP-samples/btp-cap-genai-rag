@@ -1,0 +1,83 @@
+{
+    "requires": {
+        "[hybrid]": {
+            "destinations": {
+                "binding": {
+                    "type": "cf",
+                    "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+                    "org": "cf-eu10",
+                    "space": "dev",
+                    "instance": "dev-ai-destination",
+                    "key": "dev-ai-destination-key",
+                    "resolved": false
+                },
+                "kind": "destinations",
+                "vcap": {
+                    "name": "destinations"
+                }
+            },
+            "db": {
+                "credentials": {
+                    "url": "jdbc:sap://8e5882ff-9a6f-4b50-b479-9cf8f0060f1d.hana.demo-hc-3-haas-hc-dev.dev-aws.hanacloud.ondemand.com:443?encrypt=true&validateCertificate=true&currentschema=1C584EB2E31741808BFE36F78157704F",
+                    "certificate": "-----BEGIN CERTIFICATE-----\nMIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\nMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\nd3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD\nQTAeFw0wNjExMTAwMDAwMDBaFw0zMTExMTAwMDAwMDBaMGExCzAJBgNVBAYTAlVT\nMRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j\nb20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IENBMIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4jvhEXLeqKTTo1eqUKKPC3eQyaKl7hLOllsB\nCSDMAZOnTjC3U/dDxGkAV53ijSLdhwZAAIEJzs4bg7/fzTtxRuLWZscFs3YnFo97\nnh6Vfe63SKMI2tavegw5BmV/Sl0fvBf4q77uKNd0f3p4mVmFaG5cIzJLv07A6Fpt\n43C/dxC//AH2hdmoRBBYMql1GNXRor5H4idq9Joz+EkIYIvUX7Q6hL+hqkpMfT7P\nT19sdl6gSzeRntwi5m3OFBqOasv+zbMUZBfHWymeMr/y7vrTC0LUq7dBMtoM1O/4\ngdW7jVg/tRvoSSiicNoxBN33shbyTApOB6jtSj1etX+jkMOvJwIDAQABo2MwYTAO\nBgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUA95QNVbR\nTLtm8KPiGxvDl7I90VUwHwYDVR0jBBgwFoAUA95QNVbRTLtm8KPiGxvDl7I90VUw\nDQYJKoZIhvcNAQEFBQADggEBAMucN6pIExIK+t1EnE9SsPTfrgT1eXkIoyQY/Esr\nhMAtudXH/vTBH1jLuG2cenTnmCmrEbXjcKChzUyImZOMkXDiqw8cvpOp/2PV5Adg\n06O/nVsJ8dWO41P0jmP6P6fbtGbfYmbW0W5BjfIttep3Sp+dWOIrWcBAI+0tKIJF\nPnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls\nYSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\nCAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n-----END CERTIFICATE-----",
+                    "database_id": "8e5882ff-9a6f-4b50-b479-9cf8f0060f1d",
+                    "driver": "com.sap.db.jdbc.Driver",
+                    "hdi_password": "Bf4RIP8zfqkwFlxjGkcG7w9rbaOyJJDXnc9qga.Qx6XKJRQIvJidq9Zsgx31u4pg4M6vDVbiwYJ.LwYj.XbgRLrg2.RUET5dK6lgsN9QolYjIhKr0jMPcT7XCg8CFfPG",
+                    "hdi_user": "1C584EB2E31741808BFE36F78157704F_37RGCY1DPYNZIIP6SBCAWDY7U_DT",
+                    "host": "8e5882ff-9a6f-4b50-b479-9cf8f0060f1d.hana.demo-hc-3-haas-hc-dev.dev-aws.hanacloud.ondemand.com",
+                    "password": "Bd2WlSC-tM1cwtumO4ATpZIxVTSjaboYWY.i3ZrSiJZ9tevtuPv_-W1yRRzw4h9hmtHNXT4I_QN_jybOwxa_LMmHzVuccZfRmI_ozajYGHnXzzg4.H-Mji2oiFF-bOFv",
+                    "port": "443",
+                    "schema": "1C584EB2E31741808BFE36F78157704F",
+                    "user": "1C584EB2E31741808BFE36F78157704F_37RGCY1DPYNZIIP6SBCAWDY7U_RT"
+                }
+            },
+            "auth": {
+                "binding": {
+                    "type": "cf",
+                    "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+                    "org": "cf-eu10",
+                    "space": "dev",
+                    "instance": "dev-ai-uaa",
+                    "key": "dev-ai-uaa-key",
+                    "resolved": false
+                },
+                "kind": "basic",
+                "vcap": {
+                    "name": "auth"
+                }
+            },
+            "html5-apps-repo": {
+                "binding": {
+                    "type": "cf",
+                    "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+                    "org": "cf-eu10",
+                    "space": "dev",
+                    "instance": "dev-ai-html5-repo-runtime",
+                    "key": "dev-ai-html5-repo-runtime-key",
+                    "resolved": false
+                },
+                "kind": "html5-apps-repo",
+                "vcap": {
+                    "name": "html5-apps-repo"
+                }
+            }
+        },
+        "[ui-deployment]": {
+            "html5-apps-repo": {
+                "binding": {
+                    "type": "cf",
+                    "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+                    "org": "cf-eu10",
+                    "space": "dev",
+                    "instance": "dev-ai-html5-repo-host",
+                    "key": "dev-ai-html5-repo-host-key",
+                    "resolved": false
+                },
+                "kind": "html5-apps-repo",
+                "vcap": {
+                    "name": "html5-apps-repo"
+                }
+            }
+        }
+    }
+}

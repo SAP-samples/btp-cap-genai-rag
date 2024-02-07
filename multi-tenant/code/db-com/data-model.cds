@@ -1,6 +1,6 @@
-using { cuid } from '@sap/cds/common';
+using {cuid} from '@sap/cds/common';
 
-context aisaas.common {
+context ai.common {
     entity Shared : cuid {
         value : String;
     };

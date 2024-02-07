@@ -113,7 +113,7 @@ export const chatCompletion = async (
     tenant?: string,
     LLMParams: {} = {}
 ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
-    const resourceGroupId = tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+    const resourceGroupId = "default"; //tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.CHAT);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -149,7 +149,7 @@ export const chatCompletion = async (
  * @returns {Promise<number[][]>} - The embeddings
  */
 export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
-    const resourceGroupId = tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+    const resourceGroupId = "default"; //tenant && tenant !== "main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -333,7 +333,7 @@ export const getResourceGroups = async (): Promise<Array<any>> => {
         return response.resources;
     } catch (e: any) {
         console.error(`Error: ${e?.message}`);
-        return []
+        return [];
     }
 };
 
@@ -344,9 +344,12 @@ export const getResourceGroups = async (): Promise<Array<any>> => {
  * @returns {Promise<Array<any>>} The response of configuration creation
  * @throws {Error} If an error occurs during creation
  */
-export const createConfigurations = async (configuration: ConfigurationBaseData, headers: AICoreApiHeaders): Promise<Array<any>> => {
+export const createConfigurations = async (
+    configuration: ConfigurationBaseData,
+    headers: AICoreApiHeaders
+): Promise<Array<any>> => {
     const responseConfigurationCreation = Promise.all(
-        CONFIGURATIONS.map((config : any) => {
+        CONFIGURATIONS.map((config: any) => {
             return ConfigurationApi.configurationCreate({
                 // @ts-ignore
                 name: config.name,

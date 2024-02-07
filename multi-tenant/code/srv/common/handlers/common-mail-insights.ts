@@ -219,7 +219,6 @@ export default class CommonMailInsights extends ApplicationService {
         }
     };
 
-
     /**
      * (Re-)Generate Insights, Response(s), Translation(s) and Embeddings for single or multiple Mail(s)
      * @param {Array<IBaseMail>} mails - array of mails
@@ -409,7 +408,7 @@ export default class CommonMailInsights extends ApplicationService {
                       "Also consider given additional information if available to enhance the response."
                     : "Formulate a response to the original mail using given additional information.") +
                 "Address the sender appropriately.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes but not '\n'",
             inputVariables: rag ? ["context"] : [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -524,7 +523,7 @@ export default class CommonMailInsights extends ApplicationService {
         const embed = new BTPEmbedding(aiCore.embed, tenant);
         const embeddings = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
-                const embedding = `[${(await embed.embedDocuments([mail.subject]))[0].toString()}]`;
+                const embedding = `[${(await embed.embedDocuments([mail.body]))[0].toString()}]`;
                 return { mail, embedding };
             })
         );
@@ -700,12 +699,12 @@ export default class CommonMailInsights extends ApplicationService {
             SELECT 
                 similars.ID as "id",
                 similars.BODY as "pageContent",
-                COSINE_SIMILARITY(TO_REAL_VECTOR(similars."EMBEDDING"), focus."EMBEDDING") as "similarity"
+                COSINE_SIMILARITY(similars."EMBEDDING", focus."EMBEDDING") as "similarity"
             FROM "AI_DB_MAILS" as similars
             JOIN (
                 SELECT 
                     ID, 
-                    TO_REAL_VECTOR("EMBEDDING") as "EMBEDDING"
+                    "EMBEDDING"
                 FROM "AI_DB_MAILS"
                 WHERE ID = ?
                 LIMIT 1
