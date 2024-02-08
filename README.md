@@ -17,9 +17,11 @@ In this scenario, we provide a practical demonstration using a minimal amount of
 
 ### PREPARE FOR DEPLOYMENT
 
-1. [Create an instance of SAP AI Core ](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-instance) and make sure to choose the service plan `extended` to activate Generative AI Hub and continue [creating a Service Key](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-key)
+1. [Create an instance of SAP AI Core ](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-instance) and make sure to choose the service plan `extended` to activate Generative AI Hub and continue [creating a Service Key](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-key).
 
-2. [Create a Destination](https://help.sap.com/docs/btp/sap-business-technology-platform/create-destination) for Generative AI Hub in the SAP BTP Cockpit of your Subaccount based on the Service Key of SAP AI Core you created in the previous step:
+2. [Create deployments](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-deployment-for-generative-ai-model-in-sap-ai-core) for a model support ChatCompletion (e.g, gpt-35-turbo or gpt-4) and an embedding model (text-embedding-ada-002) and note down the Deployment IDs for each. All available models are listed [here](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/models-and-scenarios-in-generative-ai-hub).
+
+3. [Create a Destination](https://help.sap.com/docs/btp/sap-business-technology-platform/create-destination) for Generative AI Hub in the SAP BTP Cockpit of your Subaccount based on the Service Key of SAP AI Core you created in the previous step:
 
    ```yaml
    Name: GENERATIVE_AI_HUB
@@ -36,21 +38,21 @@ In this scenario, we provide a practical demonstration using a minimal amount of
    HTML5.DynamicDestination: true
    ```
 
-3. [Create SAP HANA Cloud](https://help.sap.com/docs/HANA_CLOUD_ALIBABA_CLOUD/683a53aec4fc408783bbb2dd8e47afeb/7d4071a49c204dfc9e542c5e47b53156.html) with Vector Engine (pre-release QRC 1/2024 or later (on canary))
+4. [Create SAP HANA Cloud](https://help.sap.com/docs/HANA_CLOUD_ALIBABA_CLOUD/683a53aec4fc408783bbb2dd8e47afeb/7d4071a49c204dfc9e542c5e47b53156.html) with Vector Engine (pre-release QRC 1/2024 or later (on canary)).
 
 ### DEPLOYMENT
 
-1. Dupliate `api/.cdsrc.json.sample` to `api/.cdsrc.json` and enter the Deployment IDs for the created ChatCompletion and Embedding model. Adjust the Resource Group if necessary.
-2. Run `npm run build` or `yarn build` on CLI to build the MTA
-3. Login to your subaccount with [Cloud Foundry CLI](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html), running `cf login`
-4. Run `npm run deploy` or `yarn deploy` on CLI to deploy the API to your Subaccount
+1. Dupliate `api/.cdsrc.json.sample` to `api/.cdsrc.json` and enter the Deployment IDs for the created ChatCompletion and Embedding model from the preparation steps above. Adjust the Resource Group if necessary.
+2. Run `npm run build` or `yarn build` on CLI to build the MTA.
+3. Login to your subaccount with [Cloud Foundry CLI](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html), running `cf login`.
+4. Run `npm run deploy` or `yarn deploy` on CLI to deploy the API to your Subaccount.
 
 ### DEVELOPMENT
 
 After succesful deployment, we can develop based on the created service instances on SAP BTP.
 
-1. Run `npm install` or `yarn install` to install project specific dependencies
-2. Login to your subaccount with [Cloud Foundry CLI](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html), running `cf login`
+1. Run `npm install` or `yarn install` to install project specific dependencies.
+2. Login to your subaccount with [Cloud Foundry CLI](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html), running `cf login`.
 3. [Bind services for hybrid testing](https://cap.cloud.sap/docs/advanced/hybrid-testing) and development (create Service Keys if necessary).
 
    ```bash
@@ -72,5 +74,5 @@ After succesful deployment, we can develop based on the created service instance
 
 ### MANUAL CDS DEPLOYMENT TO SAP HANA CLOUD
 
-1. Duplicate `api/default-env.sample.json` to `api/default-env.json` and enter the credentials from the Service Key of the `genaihub-vectorengine-sample-hdi-container` instance
-2. Run `cds deploy -2 hana` in `api`
+1. Duplicate `api/default-env.sample.json` to `api/default-env.json` and enter the credentials from the Service Key of the `genaihub-vectorengine-sample-hdi-container` instance.
+2. Run `cds deploy -2 hana` in `api`.
