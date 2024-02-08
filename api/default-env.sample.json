@@ -1,0 +1,12 @@
+{
+    "VCAP_SERVICES": {
+        "hana": [
+            {
+                "label": "hana",
+                "tags": ["hana", "database", "relational"],
+                "plan": "hdi-shared",
+                "credentials": {}
+            }
+        ]
+    }
+}

@@ -1,0 +1,7 @@
+{
+  "uaa": {
+    "url": "https://aws-eu10.authentication.sap.hana.ondemand.com",
+    "clientid": "",
+    "clientsecret": ""
+  }
+}

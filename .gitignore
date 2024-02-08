@@ -31,3 +31,7 @@ _out
 *.sqlite
 *.sqlite-*
 .$*
+api/test/requests.http
+!*.sample.http
+!default-*.sample.json
+!router/dev/default-env.json
