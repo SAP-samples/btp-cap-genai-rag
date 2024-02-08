@@ -6,7 +6,7 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate
 } from "langchain/prompts";
-import { LLMChain, StuffDocumentsChain } from "langchain/chains";
+import { LLMChain } from "langchain/chains";
 
 import * as aiCore from "./utils/ai-core";
 import BTPEmbedding from "./utils/langchain/BTPEmbedding";

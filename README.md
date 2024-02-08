@@ -1,6 +1,6 @@
 ## CAP with Generative AI Hub & SAP HANA Cloud Vector Engine
 
-**BASIC CODING FOR LLM ACCESS AND SIMILARITY SEARCH**
+**BASIC CODING FOR LLM ACCESS AND SIMILARITY SEARCH ON SAP BUSINESS TECHNOLOGY PLATFORM**
 
 In this scenario, we provide a practical demonstration using a minimal amount of boilerplate code to fullfill the [Reference Architecture for GenAI and RAG on SAP BTP](https://discovery-center.cloud.sap/refArchDetail/ref-arch-open-ai) in a single-tenant mode. Our aim is to exemplify the utilization of CAP (Cloud Application Programming Model), LLMs (Large Language Models) and Embedding Models through Generative AI Hub in SAP AI Core. This setup empowers us to conduct a Similarity Search, leveraging the capabilities offered by the SAP HANA Cloud Vector Engine.
 
@@ -17,7 +17,7 @@ In this scenario, we provide a practical demonstration using a minimal amount of
 
 ### PREPARE FOR DEPLOYMENT
 
-1. [Create an instance of SAP AI Core ](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-instance) and make sure to choose the service plan `extended` to activate Generative AI Hub and continue creating a [Service Key](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-key)
+1. [Create an instance of SAP AI Core ](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-instance) and make sure to choose the service plan `extended` to activate Generative AI Hub and continue [creating a Service Key](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/create-service-key)
 
 2. [Create a Destination](https://help.sap.com/docs/btp/sap-business-technology-platform/create-destination) for Generative AI Hub in the SAP BTP Cockpit of your Subaccount based on the Service Key of SAP AI Core you created in the previous step:
 
