@@ -6,7 +6,7 @@ In this scenario, we provide a practical demonstration using a minimal amount of
 
 <p align="center">
     <img src="./docs/architecture.png" alt="Reference Architecture for GenAI and RAG on SAP BTP (single-tenant)" />
-    <em>Reference Architecture for GenAI and RAG on SAP BTP (single-tenant)</em>
+    <em>Instance of Reference Architecture for GenAI and RAG on SAP BTP (single-tenant)</em>
 </p>
 
 ### PREREQUISITES
