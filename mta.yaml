@@ -1,0 +1,110 @@
+_schema-version: "3.2"
+ID: genaihub-vectorengine-sample
+version: 0.0.1
+
+parameters:
+    enable-parallel-deployments: true
+build-parameters:
+    before-all:
+        - builder: custom
+          commands:
+              - npm run build:cf --prefix api
+
+modules:
+    # --------------------- APPROUTER MODULE ---------------------
+    - name: genaihub-vectorengine-sample
+      # ------------------------------------------------------------
+      type: approuter.nodejs
+      path: ./router
+      build-parameters:
+          builder: npm
+          ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+      parameters:
+          app-name: genaihub-vectorengine-sample-${space}
+          disk-quota: 256MB
+          memory: 128MB
+          app-domain: ${app-name}.${default-domain}
+          keep-existing-routes: true
+      requires:
+          - name: genaihub-vectorengine-sample-uaa
+          - name: genaihub-vectorengine-sample-destination
+          - name: genaihub-vectorengine-sample-srv-api
+            group: destinations
+            properties:
+                forwardAuthToken: true
+                name: api
+                strictSSL: false
+                url: ~{srv-url}
+      provides:
+          - name: genaihub-vectorengine-sample-approuter
+            properties:
+                app-url: ${default-url}
+                application: ${app-name}
+                app-domain: ${app-domain}
+
+    # --------------------- SERVER MODULE ------------------------
+    - name: genaihub-vectorengine-sample-srv
+      # ------------------------------------------------------------
+      type: nodejs
+      path: ./api/gen/srv
+      build-parameters:
+          builder: npm
+          ignore: [".DS_Store", "manifest*.yml", "node_modules/"]
+      parameters:
+          app-name: genaihub-vectorengine-sample-srv-${space}
+          memory: 256MB
+          disk-quota: 1024MB
+          command: node ./api/node_modules/@sap/cds/bin/cds-serve
+      requires:
+          - name: genaihub-vectorengine-sample-uaa
+          - name: genaihub-vectorengine-sample-destination
+          - name: genaihub-vectorengine-sample-hdi-container
+      provides:
+          - name: genaihub-vectorengine-sample-srv-api
+            properties:
+                srv-url: ${default-url}
+
+    # --------------------- DB MODULE --------------------------
+    - name: genaihub-vectorengine-sample-db-deployer
+      # ------------------------------------------------------------
+      type: hdb
+      path: ./api/gen/db
+      build-parameters:
+          ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+      parameters:
+          app-name: genaihub-vectorengine-sample-db-deployer-${space}
+          memory: 256MB
+          disk-quota: 1024MB
+      requires:
+          - name: genaihub-vectorengine-sample-hdi-container
+
+resources:
+    # ----------------------- UAA SERVICE ------------------------
+    - name: genaihub-vectorengine-sample-uaa
+      # ------------------------------------------------------------
+      type: org.cloudfoundry.managed-service
+      parameters:
+          config:
+              tenant-mode: dedicated
+              xsappname: genaihub-vectorengine-sample
+          path: ./api/xs-security.json
+          service: xsuaa
+          service-plan: application
+
+    # ----------------- DESTINATION SERVICE ----------------------
+    - name: genaihub-vectorengine-sample-destination
+      # ------------------------------------------------------------
+      type: org.cloudfoundry.managed-service
+      parameters:
+          service: destination
+          service-plan: lite
+
+    # ------------------ HDI CONTAINER ---------------------
+    - name: genaihub-vectorengine-sample-hdi-container
+      # ------------------------------------------------------------
+      type: com.sap.xs.hdi-container
+      parameters:
+          service: hana
+          service-plan: hdi-shared
+      properties:
+          hdi-service-name: ${service-name}

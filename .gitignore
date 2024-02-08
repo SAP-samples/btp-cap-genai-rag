@@ -26,10 +26,8 @@ _out
 .che/
 .gen/
 .DS_Store
+.cdsrc.json
 .cdsrc-private.json
-brokerpass.txt
 *.sqlite
 *.sqlite-*
 .$*
-
-!/multi-tenant/code/db.sqlite.sample

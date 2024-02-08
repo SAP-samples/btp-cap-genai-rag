@@ -1,0 +1,13 @@
+{
+    "name": "aisaas-approuter",
+    "dependencies": {
+        "@sap/approuter": "^14.3.4"
+    },
+    "engines": {
+        "node": "^18.x"
+    },
+    "scripts": {
+        "start": "node node_modules/@sap/approuter/approuter.js",
+        "start:local": "node node_modules/@sap/approuter/approuter.js --workingDir ./dev"
+    }
+}

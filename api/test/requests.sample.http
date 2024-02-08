@@ -1,0 +1,63 @@
+@xsuaaHostname = auth-url-of-xsuaa
+@btpXsuaaClient = client-id-of-xsuaa
+@btpXsuaaSecret = client-secret-of-xsuaa
+@btpAppHostname = http://localhost:4004
+# http://localhost:4004 or url of CAP backend
+
+### GET XSUAA TOKEN
+
+# @name getXsuaaToken
+POST {{xsuaaHostname}}/oauth/token
+Accept: application/json
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic {{btpXsuaaClient}}:{{btpXsuaaSecret}}
+
+client_id={{btpXsuaaClient}}
+&client_secret={{btpXsuaaSecret}}
+&grant_type=client_credentials
+
+
+### CHAT COMPLETION
+
+@token = {{getXsuaaToken.response.body.$.access_token}}
+# @name chatCompeletion
+POST {{btpAppHostname}}/odata/v4/sample/chatCompletion
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "prompt": "Hi, whats your name?"
+}
+
+
+### EMBED 1
+# @name embed1
+POST {{btpAppHostname}}/odata/v4/sample/embed
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "text": "Football, also known as soccer in some parts of the world, is a globally beloved sport that transcends boundaries and unites people from diverse backgrounds. With its roots tracing back to the 19th century in England, football has evolved into a spectacle of skill, passion, and teamwork. The essence of football lies in its simplicity: two teams of eleven players each, battling it out on a rectangular field to score goals by maneuvering a spherical ball with their feet. Yet, within this simplicity, lies a complexity that captivates millions worldwide. From the grassroots level to the grand stages of international tournaments like the FIFA World Cup, football serves as a platform for dreams to be realized and heroes to be made. The sport's appeal extends beyond the pitch, shaping cultures, economies, and identities. It fosters camaraderie among fans, who gather in stadiums, pubs, and living rooms to cheer for their favorite teams. The drama unfolds not only during the ninety minutes of play but also in the narratives of resilience, triumph, and heartbreak that accompany each match. Football stars emerge as icons, inspiring generations with their dazzling skills and unwavering determination. Their names become synonymous with greatness, etched in the annals of sporting history. As the world continues to evolve, football remains a constant, offering moments of joy, excitement, and unity to all who embrace its spirit. Whether played on a dusty street corner or a state-of-the-art stadium, football's magic transcends borders and languages, reminding us of the power of sport to unite humanity."
+}
+
+### EMBED 2
+
+# @name embed2
+POST {{btpAppHostname}}/odata/v4/sample/embed
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "text": "Technology permeates every facet of modern life, revolutionizing how we live, work, and interact with the world around us. From the invention of the wheel to the age of artificial intelligence, humanity's journey has been marked by groundbreaking technological advancements that have reshaped society. In the digital age, technology serves as the driving force behind innovation and progress. The relentless march of technological evolution has given rise to a plethora of marvels, from smartphones that connect us instantaneously to the internet, to medical breakthroughs that extend and improve lives. The rapid pace of technological development has transformed industries, fueling economic growth and fostering new opportunities. From automation and robotics in manufacturing to blockchain and cryptocurrency in finance, technology continues to disrupt traditional paradigms, creating both challenges and possibilities for the future. Moreover, technology has democratized access to information and knowledge, empowering individuals to learn, create, and collaborate on a global scale. The internet serves as a vast repository of human achievement, offering limitless opportunities for education, entertainment, and discovery. However, with great power comes great responsibility. As we harness the potential of technology to address pressing global challenges such as climate change, healthcare disparities, and social inequality, we must also confront ethical dilemmas and ensure that technology serves the collective good. In the midst of rapid change, one thing remains certain: technology will continue to shape the course of human history, unlocking new frontiers of possibility and reshaping the way we navigate the world. As we stand on the cusp of a new era defined by innovation and ingenuity, the potential of technology to drive positive change is boundless."
+}
+
+### SEARCH
+
+# @name search
+POST {{btpAppHostname}}/odata/v4/sample/search
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "text": "Looking for tech related documents"
+}

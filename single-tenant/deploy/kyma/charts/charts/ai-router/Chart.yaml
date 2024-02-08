@@ -1,6 +1,0 @@
-apiVersion: v2
-name: ai-router
-description: A Helm chart for ai router
-kubeVersion: ">= 1.21"
-type: application
-version: 0.1.0

@@ -1,0 +1,21 @@
+{
+    "cdsc": {
+        "beta": {
+            "vectorType": true
+        }
+    },
+    "requires": {
+        "GENERATIVE_AI_HUB": {
+            "kind": "rest",
+            "credentials": {
+                "destination": "GENERATIVE_AI_HUB",
+                "requestTimeout": "300000"
+            },
+            "DEPLOYMENTS": {
+                "CHAT_COMPLETION": "<YOUR-CHAT-COMPLETION-MODEL-DEPLOYMENT-ID>",
+                "EMBEDDING": "<YOUR-EMBEDDING-MODEL-DEPLOYMENT-ID>"
+            },
+            "RESOURCE_GROUP_ID": "default"
+        }
+    }
+}

@@ -1,14 +1,18 @@
 {
-    "name": "btp-cap-genai-rag",
-    "version": "0.0.1",
-    "repository": "https://github.com/sap-samples/btp-cap-genai-rag",
+    "name": "genaihub-vectorengine-sample",
+    "version": "1.0.0",
+    "description": "CAP sample with Generative AI Hub & SAP HANA Cloud Vector Engine",
+    "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
     "license": "Apache License 2.0",
-    "description": "GenAI Mail Insights",
-    "engines": {
-      "node": "^18.x"
-    },
+    "private": true,
     "scripts": {
-      "kyma-build-single-tenant": "npm --prefix ./single-tenant/deploy/kyma run cicd",
-      "kyma-build-multi-tenant": "npm --prefix ./multi-tenant/deploy/kyma run cicd"
+        "--------DEVELOPMENT-------": "",
+        "watch": "npx --yes npm-run-all --npm-path npm --parallel watch:api router",
+        "watch:api": "npm run watch --prefix ./api",
+        "router": "npm run start:local --prefix ./router",
+        "--------BUILD & DEPLOY-------": "",
+        "build": "mbt build -p=cf -t=./mta_archives --mtar=genaihub-vectorengine-sample_0.0.1.mtar",
+        "deploy": "cf deploy mta_archives/genaihub-vectorengine-sample_0.0.1.mtar",
+        "build:deploy": "npm run build && npm run deploy"
     }
-  }
+}
