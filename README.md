@@ -42,7 +42,8 @@ In this scenario, we provide a practical demonstration using a minimal amount of
 
 1. Dupliate `api/.cdsrc.json.sample` to `api/.cdsrc.json` and enter the Deployment IDs for the created ChatCompletion and Embedding model. Adjust the Resource Group if necessary.
 2. Run `npm run build` or `yarn build` on CLI to build the MTA
-3. Run `npm run deploy` or `yarn deploy` on CLI to deploy the API to your Subaccount
+3. Login to your subaccount with Cloud Foundry CLI, running cf login
+4. Run `npm run deploy` or `yarn deploy` on CLI to deploy the API to your Subaccount
 
 ### DEVELOPMENT
 
