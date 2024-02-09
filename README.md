@@ -27,14 +27,15 @@ In this scenario, we provide a practical demonstration using a minimal amount of
    Name: GENERATIVE_AI_HUB
    Description: SAP AI Core deployed service (generative AI hub)
    URL: <AI-API-OF-AI-CORE-SERVICE-KEY>/v2 # make sure to add /v2!
-   URL.headers.AI-Resource-Group: default # adjust if necessary
-   URL.headers.Content-Type: application/json
    Type: HTTP
    ProxyType: Internet
    Authentication: OAuth2ClientCredentials
    tokenServiceURL: <TOKEN-SERVICE-URL-OF-AI-CORE-SERVICE-KEY>/oauth/token
    clientId: <YOUR-CLIENT-ID-OF-AI-CORE-SERVICE-KEY>
    clientSecret: <YOUR-CLIENT-SECRET-OF-AI-CORE-SERVICE-KEY>
+   # Additional Properties:
+   URL.headers.AI-Resource-Group: default # adjust if necessary
+   URL.headers.Content-Type: application/json
    HTML5.DynamicDestination: true
    ```
 
