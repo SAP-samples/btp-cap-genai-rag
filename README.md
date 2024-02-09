@@ -13,7 +13,7 @@ In this scenario, we provide a practical demonstration using a minimal amount of
 
 - Cloud Foundry Subaccount
 - Access to generative AI hub (SAP AI Core with service plan `extended`)
-- Access to SAP HANA Cloud Vector Engine (pre-release on canary landscape)
+- Access to SAP HANA Cloud Vector Engine (`QRC 1/2024` or later)
 
 ### PREPARE FOR DEPLOYMENT
 
@@ -38,7 +38,7 @@ In this scenario, we provide a practical demonstration using a minimal amount of
    HTML5.DynamicDestination: true
    ```
 
-4. [Create SAP HANA Cloud](https://help.sap.com/docs/HANA_CLOUD_ALIBABA_CLOUD/683a53aec4fc408783bbb2dd8e47afeb/7d4071a49c204dfc9e542c5e47b53156.html) with Vector Engine (pre-release QRC 1/2024 or later (on canary)).
+4. [Create SAP HANA Cloud](https://help.sap.com/docs/HANA_CLOUD_ALIBABA_CLOUD/683a53aec4fc408783bbb2dd8e47afeb/7d4071a49c204dfc9e542c5e47b53156.html) with Vector Engine (QRC 1/2024 or later).
 
 ### DEPLOYMENT
 
@@ -64,7 +64,7 @@ After succesful deployment, we can develop based on the created service instance
 
    After the services are bound successfuly, `api/.cdsrc-private.json` should exist with the `hybrid` profile.
 
-4. Run`npm run watch:api` or `yarn watch:api` from project root to start CAP backend.
+4. Run `npm run watch:api` or `yarn watch:api` from project root to start CAP backend.
 5. Duplicate `api/test/requests.sample.http` to `api/test/requests.http` and enter UAA details from the Service Key of the `genaihub-vectorengine-sample-uaa` instance to execute the requests.
 
 #### if UI is attached (tbd)
