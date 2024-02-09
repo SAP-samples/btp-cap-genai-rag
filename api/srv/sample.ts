@@ -45,8 +45,10 @@ export default class SampleService extends ApplicationService {
                 text: text,
                 embedding: array2VectorBuffer(embeddings[0])
             };
-            await INSERT.into(Documents).entries([document]);
-            return true;
+            const success = await INSERT.into(Documents).entries([document]);
+            if (success) {
+                return true;
+            }
         }
         return false;
     };
