@@ -54,7 +54,7 @@ modules:
           app-name: genaihub-vectorengine-sample-srv-${space}
           memory: 256MB
           disk-quota: 1024MB
-          command: node ./api/node_modules/@sap/cds/bin/cds-serve
+          command: node ./node_modules/@sap/cds/bin/cds-serve
       requires:
           - name: genaihub-vectorengine-sample-uaa
           - name: genaihub-vectorengine-sample-destination
