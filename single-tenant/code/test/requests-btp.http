@@ -1,7 +1,7 @@
-@xsuaaHostname = https://scepoc.authentication.eu11.hana.ondemand.com
-@btpXsuaaClient = sb-ai-kay-StrategicCustomerEngagementPoC!t4820
-@btpXsuaaSecret = f36ce7f5-71b4-4399-9dcd-6b0506a86abb$qpHlR5eS7PmGmkL4gZitl93AA-WcRWb-I_2G_UgBwHk=
-@btpAppHostname = https://strategiccustomerengagementpoc-kay-ai-srv.cfapps.eu11.hana.ondemand.com
+@xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
+@btpXsuaaClient = sb-ai-dev-sap-demo!b12345
+@btpXsuaaSecret = abcd1234abcd1234abcd1234
+@btpAppHostname = https://sap-demo-dev-ai-api-srv.cfapps.eu10.hana.ondemand.com
 
 
 ### GET XSUAA TOKEN
