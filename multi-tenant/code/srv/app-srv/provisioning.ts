@@ -4,12 +4,11 @@ import { Request } from "@sap/cds/apis/services";
 
 //@ts-ignore
 import Automator from "../common/utils/automator";
-import * as aiCore from "../common/utils/ai-core";
 
 /**
  * Abstract class Provisioning
  * Used to add custom logic to the Subscriber Tenant Provisioning Process
- * Extended by runtime specific classes Kyma and CloudFoundry 
+ * Extended by runtime specific classes Kyma and CloudFoundry
  */
 abstract class Provisioning {
     /**
@@ -54,25 +53,6 @@ abstract class Provisioning {
 
             // Create AI Core Resource Group for tenant
             console.log("Info: SAP AI Core Resource Groups artifacts will be created for tenant");
-            
-            const resourceGroupId = `${tenant}-${aiCore.getAppName()}`;
-            await aiCore.createResourceGroup(resourceGroupId);
-
-            console.log(`Resource Group for tenant ${tenant} has been created successfully.`);
-
-            await delay(10000);
-            const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-            const responseConfigurationCreation = await aiCore.createConfigurations({}, headers);
-            
-            responseConfigurationCreation.forEach(async(configuration) => {
-                if (configuration.id) {
-                    await delay(10000);
-                    await aiCore.createDeployment(configuration.id, headers);
-                    console.log(`Success: SAP AI Core Resource Group artifacts for tenant ${tenant} created successfully!`);
-                } else {
-                    console.log(`Failed: Error creating SAP AI Core Resource Group artifacts for tenant ${tenant}!`);
-                }
-            })
         } catch (error: any) {
             console.error("Error: Automation skipped because of error during subscription");
             console.error(`Error: ${error.message}`);
@@ -96,11 +76,6 @@ abstract class Provisioning {
             const automator = new Automator(tenant, subdomain);
             await automator.undeployTenantArtifacts();
 
-            // Delete AI Core Resource Group for tenant
-            const resourceGroupId = `${tenant}-${aiCore.getAppName()}`;
-            const response = await aiCore.deleteResourceGroup(resourceGroupId);
-
-            console.log(`Resource Group for tenant ${tenant} deleted successfully.`, response);
             console.log("Success: Unsubscription completed!");
         } catch (error: any) {
             console.error("Error: Automation skipped because of error during unsubscription");
@@ -136,7 +111,7 @@ abstract class Provisioning {
         const initialDependencies: Array<any> = (await next()) || [];
         const services = xsenv.getServices({
             destination: { tag: "destination" },
-            html5Runtime: { tag: 'html5-apps-repo-rt' }
+            html5Runtime: { tag: "html5-apps-repo-rt" }
         });
         const dependencies = initialDependencies.concat([
             // @ts-ignore

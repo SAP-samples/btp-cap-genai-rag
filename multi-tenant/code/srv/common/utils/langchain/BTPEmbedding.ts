@@ -9,12 +9,7 @@ export default class BTPEmbedding extends Embeddings {
      * The embed function that transforms documents into embeddings.
      * @private
      */
-    private embed: (documents: string[], tenant?: string, EmbeddingParams?: {}) => Promise<number[][]>;
-    /**
-     * The tenant to be used for the embedding.
-     * @private
-     */
-    private tenant: string;
+    private embed: (documents: string[], EmbeddingParams?: {}) => Promise<number[][]>;
     /**
      * The parameters to be passed to the embed function.
      * @private
@@ -24,19 +19,16 @@ export default class BTPEmbedding extends Embeddings {
     /**
      * Creates an instance of BTPEmbedding.
      * @param {function} embed - The function that transforms documents into embeddings.
-     * @param {string} tenant - The tenant to be used for the embedding. Defaults to "main".
      * @param {Object} EmbeddingParams - The parameters to be passed to the embed function. Defaults to an empty object.
      * @param {EmbeddingsParams} params - The parameters for the super class. Defaults to an empty object.
      */
     constructor(
-        embed: (documents: string[], tenant?: string) => Promise<number[][]>,
-        tenant: string = "main",
+        embed: (documents: string[]) => Promise<number[][]>,
         EmbeddingParams: {} = {},
         params: EmbeddingsParams = {}
     ) {
         super(params);
         this.embed = embed;
-        this.tenant = tenant;
         this.EmbeddingParams = EmbeddingParams;
     }
 
@@ -46,7 +38,7 @@ export default class BTPEmbedding extends Embeddings {
      * @returns {Promise<number[][]>} The embeddings of the documents.
      */
     async embedDocuments(documents: string[]): Promise<number[][]> {
-        const embeddings = await this.embed(documents, this.tenant, this.EmbeddingParams);
+        const embeddings = await this.embed(documents, this.EmbeddingParams);
         return embeddings;
     }
 

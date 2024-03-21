@@ -20,9 +20,6 @@ import { IBaseMail, IProcessedMail, ITranslatedMail, IStoredMail } from "./types
 import * as schemas from "./schemas";
 import { actions } from "./default-values";
 
-// Default tenant if no tenant in CDS context
-const DEFAULT_TENANT = "main";
-
 /**
  * Class representing CommonMailInsights
  * @extends ApplicationService
@@ -167,9 +164,8 @@ export default class CommonMailInsights extends ApplicationService {
     private onAddMails = async (req: Request): Promise<any> => {
         try {
             const { Mails } = this.entities;
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { mails, rag } = req.data;
-            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+            const mailBatch = await this.regenerateInsights(mails, rag);
 
             // insert mails with insights
             console.log("UPDATE MAILS WITH INSIGHTS...");
@@ -223,24 +219,19 @@ export default class CommonMailInsights extends ApplicationService {
      * (Re-)Generate Insights, Response(s), Translation(s) and Embeddings for single or multiple Mail(s)
      * @param {Array<IBaseMail>} mails - array of mails
      * @param {boolean} rag - flag to denote if RAG status should be considered
-     * @param {string} tenant - tenant id
      * @returns {Promise<Array<ITranslatedMail>>} Promise object represents the translated mails
      */
-    public regenerateInsights = async (
-        mails: Array<IBaseMail>,
-        rag: boolean = false,
-        tenant: string = DEFAULT_TENANT
-    ) => {
+    public regenerateInsights = async (mails: Array<IBaseMail>, rag: boolean = false) => {
         // Add unique ID to mails if not existent
         mails = mails.map((mail) => {
             return { ...mail, ID: mail.ID || uuidv4() };
         });
 
         const [generalInsights, potentialResponses, languageMatches, embeddings] = await Promise.all([
-            this.extractGeneralInsights(mails, tenant),
-            this.preparePotentialResponses(mails, rag, tenant),
-            this.extractLanguageMatches(mails, tenant),
-            this.createEmbeddings(mails, tenant)
+            this.extractGeneralInsights(mails),
+            this.preparePotentialResponses(mails, rag),
+            this.extractLanguageMatches(mails),
+            this.createEmbeddings(mails)
         ]);
 
         const processedMails = mails.reduce((acc, mail) => {
@@ -262,7 +253,7 @@ export default class CommonMailInsights extends ApplicationService {
             return acc;
         }, [] as IProcessedMail[]);
 
-        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails, tenant);
+        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails);
 
         return translatedMails.map((mail) => {
             return {
@@ -277,14 +268,12 @@ export default class CommonMailInsights extends ApplicationService {
      * (Re-)Generate Response for a single Mail
      * @param {IStoredMail} mail - stored mail
      * @param {boolean} rag - flag to denote if RAG status should be considered
-     * @param {string} tenant - tenant id
      * @param {string} additionalInformation - additional information for the response
      * @returns {Promise<IStoredMail>} Promise object represents the stored mail with regenerated response
      */
     public regenerateResponse = async (
         mail: IStoredMail,
         rag: boolean = false,
-        tenant: string = DEFAULT_TENANT,
         additionalInformation?: string
     ): Promise<IStoredMail> => {
         const { Translations } = this.entities;
@@ -299,7 +288,6 @@ export default class CommonMailInsights extends ApplicationService {
                     }
                 ],
                 rag,
-                tenant,
                 additionalInformation
             )
         )[0]?.response?.responseBody;
@@ -309,7 +297,7 @@ export default class CommonMailInsights extends ApplicationService {
 
         if (!mail.languageMatch) {
             translation.responseBody = (
-                await this.translateResponse(regeneratedResponse, tenant, schemas.WORKING_LANGUAGE)
+                await this.translateResponse(regeneratedResponse, schemas.WORKING_LANGUAGE)
             ).responseBody;
         } else {
             translation.responseBody = regeneratedResponse;
@@ -333,16 +321,12 @@ export default class CommonMailInsights extends ApplicationService {
     /**
      * Extract insights for mails using LLM.
      * @param {Array<IBaseMail>} mails - Array of mails to extract insights from.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @returns {Promise<Array<IProcessedMail>>} - A promise that resolves to an array of processed mails.
      */
-    public extractGeneralInsights = async (
-        mails: Array<IBaseMail>,
-        tenant: string = DEFAULT_TENANT
-    ): Promise<Array<IProcessedMail>> => {
+    public extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -384,19 +368,17 @@ export default class CommonMailInsights extends ApplicationService {
      * Generate potential Response(s) using LLM.
      * @param {Array<IBaseMail>} mails - An array of mails.
      * @param {boolean} rag - A flag to control retrieval augmented generation usage.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @param {string} additionalInformation - Additional information for mail response.
      * @return {Promise} - Returns a Promise that resolves to an array of potential responses.
      */
     public preparePotentialResponses = async (
         mails: Array<IBaseMail>,
         rag: boolean = false,
-        tenant: string = DEFAULT_TENANT,
         additionalInformation?: string
     ): Promise<any> => {
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -470,14 +452,13 @@ export default class CommonMailInsights extends ApplicationService {
     /**
      * Extract Language Match(es) using LLM.
      * @param {Array<IBaseMail>} mails - An array of mails.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @return {Promise} - Returns a Promise that resolves to an array of language matches.
      */
-    public extractLanguageMatches = async (mails: Array<IBaseMail>, tenant: string = DEFAULT_TENANT): Promise<any> => {
+    public extractLanguageMatches = async (mails: Array<IBaseMail>): Promise<any> => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_LANGUAGE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -516,11 +497,10 @@ export default class CommonMailInsights extends ApplicationService {
     /**
      * Create Embeddings
      * @param {Array<IBaseMail>} mails - An array of mails.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @return {Promise} - Returns a Promise that resolves to an array of embeddings.
      */
-    public createEmbeddings = async (mails: Array<IBaseMail>, tenant: string = DEFAULT_TENANT): Promise<any> => {
-        const embed = new BTPEmbedding(aiCore.embed, tenant);
+    public createEmbeddings = async (mails: Array<IBaseMail>): Promise<any> => {
+        const embed = new BTPEmbedding(aiCore.embed);
         const embeddings = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
                 const embedding = `[${(await embed.embedDocuments([mail.body]))[0].toString()}]`;
@@ -534,14 +514,13 @@ export default class CommonMailInsights extends ApplicationService {
     /**
      * Translates Insight(s) using LLM.
      * @param {Array<IProcessedMail>} mails - An array of processed mails.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @return {Promise} - Returns a Promise that resolves to an array of translations.
      */
-    public translateInsights = async (mails: Array<IProcessedMail>, tenant: string = DEFAULT_TENANT): Promise<any> => {
+    public translateInsights = async (mails: Array<IProcessedMail>): Promise<any> => {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -602,20 +581,15 @@ export default class CommonMailInsights extends ApplicationService {
     /**
      * Translates a single response using LLM.
      * @param {string} response - The response text.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @param {string} language - The language for translation.
      * @return {Promise} - Returns a Promise that resolves to the translated response.
      */
-    public translateResponse = async (
-        response: string,
-        tenant: string = DEFAULT_TENANT,
-        language: string
-    ): Promise<any> => {
+    public translateResponse = async (response: string, language: string): Promise<any> => {
         try {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA);
             const formatInstructions = parser.getFormatInstructions();
-            const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+            const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
             const systemPrompt = new PromptTemplate({
                 template: `Translate the following response of the customer support into ${language}.

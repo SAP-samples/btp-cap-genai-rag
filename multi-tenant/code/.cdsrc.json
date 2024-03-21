@@ -12,21 +12,8 @@
                 "requestTimeout": "300000"
             }
         },
-        " ---------------------": "---",
-        "--- MTXs Settings ----": "---",
-        "--------------------- ": "---",
-        "[production]": {
-            "multitenancy": true,
-            "toggles": true,
-            "extensibility": true,
-            "cds.xt.ExtensibilityService": {
-                "element-prefix": ["x_"],
-                "extension-allowlist": [
-                    {
-                        "for": ["*"]
-                    }
-                ]
-            }
-        }
+        "multitenancy": true,
+        "toggles": true,
+        "extensibility": false
     }
 }

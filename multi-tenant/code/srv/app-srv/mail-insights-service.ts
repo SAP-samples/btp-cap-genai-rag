@@ -2,7 +2,7 @@ import cds from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
-import * as aiCore from "../common/utils/ai-core"; 
+import * as aiCore from "../common/utils/ai-core";
 
 /**
  * MailInsightsService class extends CommonMailInsights
@@ -37,11 +37,10 @@ export default class MailInsightsService extends CommonMailInsights {
      */
     private onRegenerateInsights = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { rag } = req.data;
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails);
-            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+            const mailBatch = await this.regenerateInsights(mails, rag);
 
             // insert mails with insights
             console.log("UPDATE MAILS WITH INSIGHTS...");
@@ -66,11 +65,10 @@ export default class MailInsightsService extends CommonMailInsights {
      */
     private onRegenerateResponse = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, rag, additionalInformation } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
-            const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
+            const response = await this.regenerateResponse(mail, rag, additionalInformation);
             return response;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -86,12 +84,10 @@ export default class MailInsightsService extends CommonMailInsights {
      */
     private onTranslateResponse = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
-            const translation = (await this.translateResponse(response, tenant, mail.languageNameDetermined))
-                .responseBody;
+            const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
             return translation;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -107,7 +103,6 @@ export default class MailInsightsService extends CommonMailInsights {
      */
     private onSubmitResponse = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
@@ -119,7 +114,7 @@ export default class MailInsightsService extends CommonMailInsights {
             const translation =
                 mail.languageMatch === undefined || mail.languageMatch
                     ? response
-                    : (await this.translateResponse(response, tenant, mail.languageNameDetermined)).responseBody;
+                    : (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
             // Send the working language response + target language translation + AI Translation Disclaimer;
@@ -136,7 +131,6 @@ export default class MailInsightsService extends CommonMailInsights {
             return req.error(`Error: ${error?.message}`);
         }
     };
-
 
     /**
      * Method to revoke responded status for a single mail

@@ -244,6 +244,7 @@ resources:
       xsuaa-app: aisaas-${space}-${org}
       config:
         xsappname: ${xsuaa-app}
+        tenant-mode: shared
         role-collections:
           - name: GenAI Mail Insights Member (${space})
             description: Member Access
