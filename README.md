@@ -15,6 +15,7 @@ We encourage you to check out our accompanying Discovery Center Mission [Develop
 
 <details>
 <summary>Single Tenant Architecture</summary>
+</br>
 <p align="center">
     <img src="./docs/architecture/singletenant-target.png" alt="Target Singletenant Architecture" />
     <em>Architecture: Single-tenant GenAI application with RAG on SAP BTP</em>
