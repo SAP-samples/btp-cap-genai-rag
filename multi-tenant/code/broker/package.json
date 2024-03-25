@@ -1,18 +1,18 @@
 {
-  "name": "aisaas-broker",
-  "version": "1.0.0",
-  "description": "Service Broker Application ( @sap/sbf )",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "start": "node start.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@sap/sbf": "^6.6.0"
-  },
-  "engines": {
-    "node": "^18.x"
-  }
+    "name": "aisaas-broker",
+    "version": "1.0.0",
+    "description": "Service Broker Application ( @sap/sbf )",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node start.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@sap/sbf": "^6.6.0"
+    },
+    "engines": {
+        "node": "^18.x"
+    }
 }

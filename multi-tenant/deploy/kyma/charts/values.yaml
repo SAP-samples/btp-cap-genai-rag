@@ -1,22 +1,21 @@
 global:
   imagePullSecret: {}
-  domain:  # see domain in Config Map kube-system/shoot-info or custom domain (e.g. sap-demo.com) 
-  shootName:  # see shootName in Config Map kube-system/shoot-info
+  domain: # see domain in Config Map kube-system/shoot-info or custom domain (e.g. sap-demo.com)
+  shootName: # see shootName in Config Map kube-system/shoot-info
   gateway: # use default value (kyma-system/kyma-gateway) or custom gateway (e.g. aisaas/demo-gateway)
   # If necessary, override essential dependencies required in subcharts
   # Required in case you e.g., provide a fullNameOverride or a custom exposed host
   api:
-    fullName:  # leave empty to apply default logic - $Release.Name-api (e.g. aisaas-api)
+    fullName: # leave empty to apply default logic - $Release.Name-api (e.g. aisaas-api)
     deploymentHost: # leave empty to apply default logic - $Release.Name-api-$Release.Namespace (e.g. aisaas-api-default)
   broker:
-    fullName:  # leave empty to apply default logic - $Release.Name-broker (e.g. aisaas-broker)
-    deploymentHost:  # leave empty to apply default - $Release.Name-broker-$Release.Namespace (e.g. aisaas-broker-default)
+    fullName: # leave empty to apply default logic - $Release.Name-broker (e.g. aisaas-broker)
+    deploymentHost: # leave empty to apply default - $Release.Name-broker-$Release.Namespace (e.g. aisaas-broker-default)
   router:
     name: # leave empty to apply default logic - router (e.g. router)
     fullName: # leave empty to apply default logic - $Release.Name-router (e.g. aisaas-router)
     deploymentHost: # leave empty to apply default logic - $Release.Name-router-$Release.Namespace (e.g. aisaas-router-default)
     port: # leave empty to apply default value - 5000
-
 
 # Application Router Workload
 router:
@@ -29,8 +28,8 @@ router:
       serviceInstanceName: html5-repo-runtime
   image:
     # Provide your Application Router Docker Image repository
-    repository: 
-    tag: 
+    repository:
+    tag:
   resources:
     limits:
       ephemeral-storage: 1G
@@ -40,7 +39,6 @@ router:
       ephemeral-storage: 1G
       cpu: 300m
       memory: 500M
-
 
 # Backend Service Workload
 srv:
@@ -56,16 +54,16 @@ srv:
       serviceInstanceName: postgresql-db
     saas-registry:
       serviceInstanceName: saas-registry
-    destination: 
+    destination:
       serviceInstanceName: destination
-    hana: 
+    hana:
       serviceInstanceName: com-hdi-container
     html5-apps-repo:
       serviceInstanceName: html5-repo-runtime
   image:
     # Provide your Backend Service Docker Image repository
-    repository: 
-    tag: 
+    repository:
+    tag:
   resources:
     limits:
       ephemeral-storage: 1G
@@ -74,7 +72,6 @@ srv:
       ephemeral-storage: 1G
       cpu: 500m
       memory: 500M
-
 
 # SaaS API Workload
 api:
@@ -91,8 +88,8 @@ api:
       serviceInstanceName: saas-registry
   image:
     # Provide your API Service Docker Image repository
-    repository: 
-    tag: 
+    repository:
+    tag:
 
   resources:
     limits:
@@ -104,7 +101,6 @@ api:
       cpu: 200m
       memory: 500M
 
-
 # API Service Broker Workload
 broker:
   bindings:
@@ -112,8 +108,8 @@ broker:
       serviceInstanceName: xsuaa-api
   image:
     # Provide your API Service Broker Docker Image repository
-    repository: 
-    tag: 
+    repository:
+    tag:
   resources:
     limits:
       ephemeral-storage: 1G
@@ -123,17 +119,17 @@ broker:
       ephemeral-storage: 1G
       cpu: 100m
       memory: 500M
-  config: 
+  config:
     # Leave empty to generate new ID on Helm installation
     # ! Should be static in productive scenarios !
-    serviceId: 
+    serviceId:
     displayName: GenAI Mail Insights API
     plans:
       - name: default
         description: GenAI Mail Insights default plan
         # Leave empty to generate new ID on Helm installation
         # ! Should be static in productive scenarios !
-        planId:  
+        planId:
       - name: premium
         description: GenAI Mail Insights premium plan
         # Leave empty to generate new ID on Helm installation
@@ -145,14 +141,13 @@ broker:
         # ! Should be static in productive scenarios !
         planId:
 
-
 # Shared Database Container Deployer Job
 # Deploys the shared data model to a database container
 hana_deployer:
   image:
     # Provide your HDI Container Deployer Docker Image repository
-    repository: 
-    tag: 
+    repository:
+    tag:
   bindings:
     hana:
       serviceInstanceName: com-hdi-container
@@ -164,15 +159,14 @@ hana_deployer:
       cpu: 500m
       memory: 1G
 
-
 # HTML5 Apps Deployer Job
 # Deploys the UI modules to the HTML5 App Repository
 html5_apps_deployer:
   cloudService: aisaas
   image:
     # Provide your HTML5 Apps Deployer Docker Image repository
-    repository: 
-    tag: 
+    repository:
+    tag:
   bindings:
     html5-apps-repo:
       serviceInstanceName: html5-repo-host
@@ -184,7 +178,6 @@ html5_apps_deployer:
       cpu: 300m
       memory: 500M
 
-
 # SAP XSUAA Instance (for SaaS Application)
 # XSUAA instance for SaaS application based on application service plan
 xsuaa:
@@ -192,28 +185,28 @@ xsuaa:
   servicePlanName: application
   parameters:
     # xsappname has to be unique in the same subaccount
-    xsappname: '{{.Release.Name}}-{{.Release.Namespace}}'
+    xsappname: "{{.Release.Name}}-{{.Release.Namespace}}"
     tenant-mode: shared
     # Role collections names have to be unique in the same subaccount
-    # Therefore a unique identifer has to be utilized 
+    # Therefore a unique identifer has to be utilized
     role-collections:
-      - name: 'GenAI Mail Insights Member ({{.Release.Name}}-{{.Release.Namespace}})'
+      - name: "GenAI Mail Insights Member ({{.Release.Name}}-{{.Release.Namespace}})"
         description: Member Access
-        role-template-references: 
-          - '$XSAPPNAME.Member'
-          - '$XSAPPNAME.Token_Exchange'
-      - name: 'GenAI Mail Insights Administrator ({{.Release.Name}}-{{.Release.Namespace}})'
+        role-template-references:
+          - "$XSAPPNAME.Member"
+          - "$XSAPPNAME.Token_Exchange"
+      - name: "GenAI Mail Insights Administrator ({{.Release.Name}}-{{.Release.Namespace}})"
         description: Administrator Access
-        role-template-references: 
-          - '$XSAPPNAME.Admin'
-          - '$XSAPPNAME.SaaSAdmin'
-          - '$XSAPPNAME.UserManagementAdmin'
-          - '$XSAPPNAME.Token_Exchange'
-      - name: 'GenAI Mail Insights Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})'
+        role-template-references:
+          - "$XSAPPNAME.Admin"
+          - "$XSAPPNAME.SaaSAdmin"
+          - "$XSAPPNAME.UserManagementAdmin"
+          - "$XSAPPNAME.Token_Exchange"
+      - name: "GenAI Mail Insights Extension Developer ({{.Release.Name}}-{{.Release.Namespace}})"
         description: Extension Developer Access
-        role-template-references: 
-          - '$XSAPPNAME.ExtensionDeveloper'
-          - '$XSAPPNAME.Token_Exchange'
+        role-template-references:
+          - "$XSAPPNAME.ExtensionDeveloper"
+          - "$XSAPPNAME.Token_Exchange"
     scopes:
       - name: "$XSAPPNAME.mtcallback"
         description: SaaS Provisioning
@@ -242,19 +235,19 @@ xsuaa:
       - name: Admin
         description: Administrator
         scope-references:
-        - "$XSAPPNAME.Admin"
-        - xs_authorization.read
-        - xs_authorization.write
-        - xs_user.read
-        - xs_user.write
-        - xs_idp.read
-        - xs_idp.write
+          - "$XSAPPNAME.Admin"
+          - xs_authorization.read
+          - xs_authorization.write
+          - xs_user.read
+          - xs_user.write
+          - xs_idp.read
+          - xs_idp.write
       - name: SaaSAdmin
         description: SaaS Administrator
         scope-references:
-        - "$XSAPPNAME.mtcallback"
-        - "$XSAPPNAME.mtdeployment"
-        - "$XSAPPNAME.MtxDiagnose"
+          - "$XSAPPNAME.mtcallback"
+          - "$XSAPPNAME.mtdeployment"
+          - "$XSAPPNAME.MtxDiagnose"
       - name: ExtensionDeveloper
         description: Extension Developer
         scope-references: ["$XSAPPNAME.cds.ExtensionDeveloper"]
@@ -262,19 +255,19 @@ xsuaa:
         description: Manage authorizations, trusted identity providers, and users.
         default-role-name: User and Role Administrator
         scope-references:
-        - xs_authorization.read
-        - xs_authorization.write
-        - xs_user.read
-        - xs_user.write
-        - xs_idp.read
-        - xs_idp.write
+          - xs_authorization.read
+          - xs_authorization.write
+          - xs_user.read
+          - xs_user.write
+          - xs_idp.read
+          - xs_idp.write
       - name: UserManagementAuditor
         description: Read-only access for authorizations, trusted identity providers, and users.
         default-role-name: User and Role Auditor
         scope-references:
-        - xs_authorization.read
-        - xs_user.read
-        - xs_idp.read
+          - xs_authorization.read
+          - xs_user.read
+          - xs_idp.read
     foreign-scope-references:
       - xs_authorization.read
       - xs_authorization.write
@@ -291,13 +284,12 @@ xsuaa:
       - "$XSAPPNAME.cds.UIFlexDeveloper"
     oauth2-configuration:
       token-validity: 900
-      redirect-uris: 
+      redirect-uris:
         - http://*.localhost:5000/**
         - http://localhost:5000/**
       credential-types:
         - binding-secret
         - x509
-
 
 # SAP XSUAA Instance (for SaaS API)
 # XSUAA instance for SaaS API based on broker service plan
@@ -306,7 +298,7 @@ xsuaa_api:
   servicePlanName: broker
   parameters:
     # xsappname has to be unique in the same subaccount
-    xsappname: '{{.Release.Name}}-api-{{.Release.Namespace}}'
+    xsappname: "{{.Release.Name}}-api-{{.Release.Namespace}}"
     scopes:
       - description: GenAI Mail Insights default plan
         name: $XSAPPNAME.plan_default
@@ -314,7 +306,6 @@ xsuaa_api:
         name: $XSAPPNAME.trial_default
       - description: GenAI Mail Insights premium plan
         name: $XSAPPNAME.plan_premium
-  
 
 # SAP Software-as-a-Service Registry
 # Required to connect SaaS application with SAP BTP SaaS registry
@@ -322,7 +313,7 @@ xsuaa_api:
 saas_registry:
   serviceOfferingName: saas-registry
   servicePlanName: application
-  # Parameters allow us to modify the subscription process 
+  # Parameters allow us to modify the subscription process
   # The following setup provides an option to define a custom domain
   parameters:
     appPlans:
@@ -333,7 +324,7 @@ saas_registry:
       - description: GenAI Mail Insights premium plan
         name: premium
     propagateParams: true
-    paramsSchema: 
+    paramsSchema:
       schemas:
         subscription:
           create:
@@ -347,10 +338,9 @@ saas_registry:
                   title: Custom Subdomain
                   description: >-
                     Provide a custom subdomain for this subscription instance. This subdomain will be used instead of the default 
-                    <SubaccountSubdomain>-<ReleaseName>-router-<Namespace> pattern. Please make sure to use unique subdomains only! 
+                    <SubaccountSubdomain>-<ReleaseName>-router-<Namespace> pattern. Please make sure to use unique subdomains only!
 
-
-# SAP Destination Service 
+# SAP Destination Service
 # Used to centrally store destinations of the SaaS application
 destination:
   serviceOfferingName: destination
@@ -381,13 +371,11 @@ sm_container:
     acquireTimeoutMillis: max
     polling_timeout_seconds: 480
 
-
 # SAP Service Manager ("subaccount-admin" plan)
 # Required to create an instance of CIS Service ("central" plan)
 sm_admin:
   serviceOfferingName: service-manager
   servicePlanName: subaccount-admin
-
 
 # SAP HANA Cloud HDI Container
 # Required for shared data model deployment
@@ -395,25 +383,14 @@ com_hdi_container:
   serviceOfferingName: hana
   servicePlanName: hdi-shared
 
-
 # SAP HTML5 Application Repository
 # Storing the SaaS application UI modules
 html5_repo_host:
   serviceOfferingName: html5-apps-repo
   servicePlanName: app-host
 
-
 # SAP HTML5 Application Repository
-# Allows access to the SaaS applicaiton UI modules 
+# Allows access to the SaaS applicaiton UI modules
 html5_repo_runtime:
   serviceOfferingName: html5-apps-repo
   servicePlanName: app-runtime
-
-
-# PostgreSQL Database
-# Required for storing vectors
-postgresql_db:
-  serviceOfferingName: postgresql-db
-  servicePlanName: free
-  parameters:
-    engine_version: "13"

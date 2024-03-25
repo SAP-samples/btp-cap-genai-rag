@@ -27,11 +27,11 @@ const CONFIGURATIONS = process.env["AI_CORE_CONFIGURATIONS"]
     ? JSON.parse(process.env["AI_CORE_CONFIGURATIONS"])
     : [
           {
-              name: "gpt-4-32k-config",
+              name: "gpt-4config",
               parameters: [
                   {
                       key: "modelName",
-                      value: "gpt-4-32k"
+                      value: "gpt-4"
                   },
                   {
                       key: "modelVersion",
@@ -56,8 +56,8 @@ const CONFIGURATIONS = process.env["AI_CORE_CONFIGURATIONS"]
 
 // SAP AI Core Configurations to be used for different Tasks
 enum Tasks {
-    CHAT = "gpt-4-32k-config",
-    COMPLETION = "gpt-4-32k-config",
+    CHAT = "gpt-4-config",
+    COMPLETION = "gpt-4-config",
     EMBEDDING = "text-embedding-ada-002-config"
 }
 
@@ -68,12 +68,11 @@ enum Tasks {
 /**
  * Use the chat completion api from Azure OpenAI services to make a completion call
  * @param {string} prompt - The text to be completed
- * @param {string} [tenant] - The tenant for which the completion is being made
  * @param {Object} [LLMParams={}] - Additional parameters
  * @returns {Promise<string>} - The text completion
  */
-export const completion = async (prompt: string, tenant?: string, LLMParams: {} = {}): Promise<string> => {
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+export const completion = async (prompt: string, LLMParams: {} = {}): Promise<string> => {
+    const resourceGroupId = getAppName();
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.COMPLETION);
 
     if (deploymentId) {
@@ -97,23 +96,21 @@ export const completion = async (prompt: string, tenant?: string, LLMParams: {} 
 
         return response["choices"][0]?.message?.content;
     } else {
-        return `No deployment found for this tenant (${tenant})`;
+        return `No deployment found for the resource group ${resourceGroupId}`;
     }
 };
 
 /**
  * Use the chat completion api from Azure OpenAI services to make a completion call
  * @param {OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming} request - The messages for the chat completion
- * @param {string} [tenant] - The tenant for which the completion is being made
  * @param {Object} [LLMParams={}] - Additional parameters
  * @returns {Promise<OpenAIClient.Chat.Completions.ChatCompletion>} - The text completion
  */
 export const chatCompletion = async (
     request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
-    tenant?: string,
     LLMParams: {} = {}
 ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+    const resourceGroupId = getAppName();
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.CHAT);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -144,12 +141,11 @@ export const chatCompletion = async (
 /**
  * Use the embedding api from Azure OpenAI services to generate embeddings
  * @param {Array<string>} texts - The texts to embed
- * @param {string} [tenant] - The tenant for which the texts are being embedded
  * @param {Object} [EmbeddingParams={}] - Additional parameters
  * @returns {Promise<number[][]>} - The embeddings
  */
-export const embed = async (texts: Array<string>, tenant?: string, EmbeddingParams: {} = {}): Promise<number[][]> => {
-    const resourceGroupId = tenant && tenant !== "_main" ? `${tenant}-${getAppName()}` : `default-${getAppName()}`;
+export const embed = async (texts: Array<string>, EmbeddingParams: {} = {}): Promise<number[][]> => {
+    const resourceGroupId = getAppName();
     const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
     if (deploymentId) {
         const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
@@ -284,7 +280,7 @@ export const getDeploymentId = async (resourceGroupId: string, task: Tasks = Tas
 };
 
 /**
- * Creates a new resource group in the AI core instance with the tenant id of the subscriber
+ * Creates a new resource group in the AI core instance for the application
  * @param {string} resourceGroupId - The resource group id of the subscriber
  * @returns {Promise<any>} The response of creation
  * @throws {Error} If an error occurs during creation
@@ -304,7 +300,7 @@ export const createResourceGroup = async (resourceGroupId: string): Promise<any>
 };
 
 /**
- * Deletes the resource group in the AI core instance with the tenant id of the subscriber
+ * Deletes the resource group in the AI core instance for the application
  * @param {string} resourceGroupId - The resource group id of the subscriber
  * @returns {Promise<any>} The response of deletion
  * @throws {Error} If an error occurs during deletion
@@ -333,7 +329,7 @@ export const getResourceGroups = async (): Promise<Array<any>> => {
         return response.resources;
     } catch (e: any) {
         console.error(`Error: ${e?.message}`);
-        return []
+        return [];
     }
 };
 
@@ -344,9 +340,12 @@ export const getResourceGroups = async (): Promise<Array<any>> => {
  * @returns {Promise<Array<any>>} The response of configuration creation
  * @throws {Error} If an error occurs during creation
  */
-export const createConfigurations = async (configuration: ConfigurationBaseData, headers: AICoreApiHeaders): Promise<Array<any>> => {
+export const createConfigurations = async (
+    configuration: ConfigurationBaseData,
+    headers: AICoreApiHeaders
+): Promise<Array<any>> => {
     const responseConfigurationCreation = Promise.all(
-        CONFIGURATIONS.map((config : any) => {
+        CONFIGURATIONS.map((config: any) => {
             return ConfigurationApi.configurationCreate({
                 // @ts-ignore
                 name: config.name,

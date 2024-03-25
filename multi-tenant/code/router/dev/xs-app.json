@@ -1,0 +1,23 @@
+{
+    "welcomeFile": "/index.html",
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "^/api(.*)$",
+            "target": "$1",
+            "destination": "api",
+            "csrfProtection": false
+        },
+        {
+            "source": "^/user-api(.*)",
+            "target": "$1",
+            "service": "sap-approuter-userapi"
+        },
+        {
+            "source": "^/(.*)$",
+            "target": "/$1",
+            "destination": "ui",
+            "csrfProtection": false
+        }
+    ]
+}

@@ -1,6 +1,7 @@
-import BaseController from "./BaseController";
+import BaseController, { CAP_BASE_URL } from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import ODataModel from "sap/ui/model/odata/v4/ODataModel";
+import ContextV4 from "sap/ui/model/odata/v4/Context";
 import Event from "sap/ui/base/Event";
 import ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 import ObjectPageSection from "sap/uxap/ObjectPageSection";
@@ -29,6 +30,8 @@ const ID_TEXTAREA_OL = "areaOL";
 const ID_TEXTAREA_WL = "areaWL";
 
 export default class EmailDetails extends BaseController {
+    private mailAnsweredDialog: Dialog;
+
     public resetEmailPageState(): void {
         this.scrollToFirstSection();
         this.resetSimilarEmailsListState();
@@ -36,14 +39,8 @@ export default class EmailDetails extends BaseController {
 
     private scrollToFirstSection(): void {
         const page: ObjectPageLayout = this.byId("emailPage") as ObjectPageLayout;
-        const suggestedResponseSection: ObjectPageSection = this.byId("suggestedResponseSection") as ObjectPageSection;
-        const incomingMessageSection: ObjectPageSection = this.byId("incomingMessageSection") as ObjectPageSection;
-
-        setTimeout(() => {
-            //to correct the scrolling
-            page.setSelectedSection(suggestedResponseSection);
-            page.setSelectedSection(incomingMessageSection);
-        }, 400);
+        const summarySection = this.byId("summarySection") as ObjectPageSection;
+        page.scrollToSection(summarySection.getId(), 800);
     }
 
     private resetSimilarEmailsListState(): void {
@@ -131,14 +128,10 @@ export default class EmailDetails extends BaseController {
     }
 
     public async openMailAnsweredDialog(responseOL: string, responseWL: string): Promise<void> {
-        const dialog = (await Fragment.load({
-            id: ID_MAIL_ANSWERED_DIALOG,
-            name: MAIL_ANSWERED_FRAGMENT_NAME,
-            controller: this
-        })) as Dialog;
-        this.getView().addDependent(dialog);
-
-        const flexItems = (dialog.getContent()[0] as VBox).getItems();
+        if (!this.mailAnsweredDialog) {
+            await this.initMailAnsweredDialog();
+        }
+        const flexItems = (this.mailAnsweredDialog.getContent()[0] as VBox).getItems();
         const areaOL = flexItems.find(
             (item) => item.getId() === ID_MAIL_ANSWERED_DIALOG + "--" + ID_TEXTAREA_OL
         ) as TextArea;
@@ -149,10 +142,19 @@ export default class EmailDetails extends BaseController {
         ) as TextArea;
         areaWL.setValue(responseWL);
 
+        this.mailAnsweredDialog.open();
+    }
+
+    public async initMailAnsweredDialog(): Promise<void> {
+        this.mailAnsweredDialog = (await Fragment.load({
+            id: ID_MAIL_ANSWERED_DIALOG,
+            name: MAIL_ANSWERED_FRAGMENT_NAME,
+            controller: this
+        })) as Dialog;
+        const dialog = this.mailAnsweredDialog as Dialog;
+        this.getView().addDependent(dialog);
         const closeButton = new Button({ text: this.getText("buttons.close"), press: () => dialog.close() });
         dialog.setBeginButton(closeButton);
-
-        dialog.open();
     }
 
     public onPressAction(): void {
@@ -170,26 +172,26 @@ export default class EmailDetails extends BaseController {
     public async onPressRegenerate(): Promise<void> {
         const oDataModel = this.getModel("api") as ODataModel;
         const localModel: JSONModel = this.getModel() as JSONModel;
-        localModel.setProperty("/busy", true);
 
+        const responsePreparation = this.byId("responsePreparationSection") as PageSection;
+        responsePreparation.setBusy(true);
         const httpHeaders: any = oDataModel.getHttpHeaders();
 
-        await fetch("api/odata/v4/mail-insights/regenerateResponse", {
-            method: "POST",
-            headers: {
-                "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: localModel.getProperty("/activeEmailId"),
-                rag: localModel.getProperty("/submittedResponsesIncluded"),
-                additionalInformation: localModel.getProperty("/additionalInfo")
-            })
-        })
-            .then((response: Response) => {
-                return response.json();
-            })
-            .then((result: Mail) => {
+        try {
+            const response = await fetch(`${CAP_BASE_URL}/regenerateResponse`, {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: localModel.getProperty("/activeEmailId"),
+                    rag: localModel.getProperty("/submittedResponsesIncluded"),
+                    additionalInformation: localModel.getProperty("/additionalInfo")
+                })
+            });
+            if (response.ok) {
+                const result = (await response.json()) as Mail;
                 localModel.setProperty("/responseBody", result.responseBody);
                 localModel.setProperty(
                     "/translatedResponseBody",
@@ -197,8 +199,12 @@ export default class EmailDetails extends BaseController {
                 );
                 localModel.setProperty("/busy", false);
                 MessageToast.show(this.getText("email.texts.generateResponseMessage"));
-            })
-            .catch((error: Error) => console.log(error));
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            responsePreparation.setBusy(false);
+        }
     }
 
     public onChangeResponse(event: Event): void {
@@ -215,27 +221,34 @@ export default class EmailDetails extends BaseController {
     /* To submit response for finalization */
     public async onPressSend(): Promise<void> {
         const localModel: JSONModel = this.getModel() as JSONModel;
-        const responseToSend = localModel.getProperty("/translatedResponseBody") as string;
+        const responseWorkingLanguage = localModel.getProperty("/translatedResponseBody") as string;
         const idMail = localModel.getProperty("/activeEmailId") as string;
-        const suggestedResponse = this.byId("suggestedResponseSection") as PageSection;
 
+        const oDataModel = this.getModel("api") as ODataModel;
+        const httpHeaders = oDataModel.getHttpHeaders();
+        const suggestedResponse = this.byId("suggestedResponseSection") as PageSection;
         suggestedResponse.setBusy(true);
         try {
-            const response = await fetch("api/odata/v4/mail-insights/submitResponse", {
+            const response = await fetch(`${CAP_BASE_URL}/submitResponse`, {
                 method: "POST",
                 headers: {
+                    // @ts-ignore
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ id: idMail, response: responseToSend })
+                body: JSON.stringify({ id: idMail, response: responseWorkingLanguage })
             });
             if (response.ok) {
                 const data = await response.json();
                 const success = data.value as boolean;
                 if (success) {
-                    // TODO: check how to get translation back to OL
-                    this.openMailAnsweredDialog(responseToSend, responseToSend).catch(console.log);
-                    // refresh model to show active email as answered now
                     this.getModel("api").refresh();
+                    // hope that bindings are refreshed by now. there is no async version of
+                    // refresh function on model level
+                    const responseOriginalLanguage = (
+                        await (this.getView().getBindingContext("api") as ContextV4).requestObject()
+                    ).mail.responseBody;
+                    this.openMailAnsweredDialog(responseOriginalLanguage, responseWorkingLanguage).catch(console.log);
                 }
             } else {
                 MessageToast.show(this.getText("email.texts.genericErrorMessage"));
@@ -245,6 +258,62 @@ export default class EmailDetails extends BaseController {
             MessageToast.show(this.getText("email.texts.genericErrorMessage"));
         } finally {
             suggestedResponse.setBusy(false);
+        }
+    }
+
+    public async onRevokeResponse(): Promise<void> {
+        try {
+            const oDataModel = this.getModel("api") as ODataModel;
+            const httpHeaders = oDataModel.getHttpHeaders();
+            const localModel: JSONModel = this.getModel() as JSONModel;
+            const response = await fetch(`${CAP_BASE_URL}/revokeResponse`, {
+                method: "POST",
+                headers: {
+                    // @ts-ignore
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: localModel.getProperty("/activeEmailId")
+                })
+            });
+            if (response.ok) {
+                MessageToast.show(this.getText("email.texts.revoked"));
+                this.getModel("api").refresh();
+            } else {
+                MessageToast.show(this.getText("email.texts.genericErrorMessage"));
+            }
+        } catch (error) {
+            console.log(error);
+            MessageToast.show(this.getText("email.texts.genericErrorMessage"));
+        }
+    }
+
+    public async onDeleteMail(): Promise<void> {
+        try {
+            const oDataModel = this.getModel("api") as ODataModel;
+            const httpHeaders = oDataModel.getHttpHeaders();
+            const localModel: JSONModel = this.getModel() as JSONModel;
+            const response = await fetch(`${CAP_BASE_URL}/deleteMail`, {
+                method: "POST",
+                headers: {
+                    // @ts-ignore
+                    "X-CSRF-Token": httpHeaders["X-CSRF-Token"],
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: localModel.getProperty("/activeEmailId")
+                })
+            });
+            if (response.ok) {
+                MessageToast.show(this.getText("email.texts.deleted"));
+                this.getModel("api").refresh();
+            } else {
+                MessageToast.show(this.getText("email.texts.genericErrorMessage"));
+            }
+        } catch (error) {
+            console.log(error);
+            MessageToast.show(this.getText("email.texts.genericErrorMessage"));
         }
     }
 }

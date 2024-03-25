@@ -40,8 +40,6 @@ srv:
   bindings:
     xsuaa:
       serviceInstanceName: xsuaa
-    postgresql-db:
-      serviceInstanceName: postgresql-db
     destination: 
       serviceInstanceName: destination
     hana: 
@@ -176,14 +174,6 @@ destination:
 com_hdi_container:
   serviceOfferingName: hana
   servicePlanName: hdi-shared
-
-# PostgreSQL Database
-# Required for storing vectors
-postgresql_db:
-  serviceOfferingName: postgresql-db
-  servicePlanName: free
-  parameters:
-    engine_version: "13"
 
 # SAP HTML5 Application Repository
 # Storing the application UI modules

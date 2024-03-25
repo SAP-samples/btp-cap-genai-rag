@@ -1,7 +1,6 @@
 import cds, { ApplicationService } from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 import { v4 as uuidv4 } from "uuid";
-import { DataSourceOptions } from "typeorm";
 import { z } from "zod";
 import {
     ChatPromptTemplate,
@@ -9,10 +8,9 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate
 } from "langchain/prompts";
-import { Document } from "langchain/document";
 import { LLMChain, StuffDocumentsChain } from "langchain/chains";
 import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
-import { TypeORMVectorStore, TypeORMVectorStoreArgs, TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
+import { TypeORMVectorStoreDocument } from "langchain/vectorstores/typeorm";
 
 import * as aiCore from "./utils/ai-core";
 import BTPEmbedding from "./utils/langchain/BTPEmbedding";
@@ -21,11 +19,39 @@ import BTPAzureOpenAIChatLLM from "./utils/langchain/BTPAzureOpenAIChatLLM";
 import * as schemas from "./schemas";
 import { actions } from "./default-values";
 
+<<<<<<< HEAD
 import { Mail, Mails, Translation, Translations } from "./@cds-models/mail-insights-service/MailInsightsService";
 import { Action } from "./@cds-models/mail-insights-service/ai/db";
 
 // Default table used in PostgreSQL
 const DEFAULT_TENANT = "_main";
+=======
+let vectorBuffer2Array = (buffer: Buffer): Array<number> => {
+    const sizeDimensions = 4;
+    let result = [];
+    let offset = sizeDimensions;
+    while (offset < buffer.length) {
+        const value = buffer.readFloatLE(offset);
+        result.push(value);
+        offset += 4;
+    }
+    return result;
+};
+
+let array2VectorBuffer = (data: Array<number>): Buffer => {
+    const sizeFloat = 4;
+    const sizeDimensions = 4;
+    const bufferSize = data.length * sizeFloat + sizeDimensions;
+
+    const buffer = Buffer.allocUnsafe(bufferSize);
+    // write size into buffer
+    buffer.writeUInt32LE(data.length, 0);
+    data.forEach((value: number, index: number) => {
+        buffer.writeFloatLE(value, index * sizeFloat + sizeDimensions);
+    });
+    return buffer;
+};
+>>>>>>> 11/hana-vector-engine
 
 /**
  * Class representing CommonMailInsights
@@ -54,7 +80,6 @@ export default class CommonMailInsights extends ApplicationService {
         this.on("revokeResponse", this.onRevokeResponse);
         this.on("regenerateInsights", this.onRegenerateInsights);
         this.on("regenerateResponse", this.onRegenerateResponse);
-        this.on("translateResponse", this.onTranslateResponse);
     }
 
     /**
@@ -65,6 +90,7 @@ export default class CommonMailInsights extends ApplicationService {
     private onAfterReadMails = async (mails: Mails): Promise<Mails> => {
         try {
             // Add default descriptions for actions
+<<<<<<< HEAD
             mails.forEach((mail: Mail) => {
                 if (mail.suggestedActions) {
                     mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: Action) => {
@@ -74,6 +100,15 @@ export default class CommonMailInsights extends ApplicationService {
                         };
                     });
                 }
+=======
+            mails.forEach((mail: any) => {
+                mail.suggestedActions = mail.suggestedActions?.map((suggestedAction: any) => {
+                    return {
+                        ...suggestedAction,
+                        descr: actions.find((action: any) => action.value === suggestedAction.value)?.descr || ""
+                    };
+                });
+>>>>>>> 11/hana-vector-engine
             });
             return mails;
         } catch (error: any) {
@@ -111,8 +146,13 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onGetMail = async (req: Request): Promise<Mail | Express.Request> => {
         try {
+<<<<<<< HEAD
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id }: { id: string } = req.data;
+=======
+            const { id } = req.data;
+            const { Mails } = this.entities;
+>>>>>>> 11/hana-vector-engine
 
             const mail = await SELECT.one
                 .from(Mails, (m) => {
@@ -131,7 +171,11 @@ export default class CommonMailInsights extends ApplicationService {
                 };
             });
 
+<<<<<<< HEAD
             const closestMailsIDs = await this.getClosestMails(id, 5, {}, tenant);
+=======
+            const closestMailsIDs = await this.getClosestMails(id, 5);
+>>>>>>> 11/hana-vector-engine
 
             const closestMails =
                 closestMailsIDs.length > 0
@@ -148,19 +192,25 @@ export default class CommonMailInsights extends ApplicationService {
                           });
                       }).where({
                           ID: {
-                              in: closestMailsIDs.map(
-                                  ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id
-                              )
+                              in: closestMailsIDs.map(([doc, _]: [TypeORMVectorStoreDocument, number]) => doc.id)
                           }
                       })
                     : [];
 
+<<<<<<< HEAD
             const closestMailsWithSimilarity = closestMails.map((mail: Mail) => {
                 const [_, _distance]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
                     ([doc, _distance]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.metadata.id
+=======
+            const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: any) => {
+                //@ts-ignore
+                const [_, similarity]: [TypeORMVectorStoreDocument, number] = closestMailsIDs.find(
+                    ([doc, _]: [TypeORMVectorStoreDocument, number]) => mail.ID === doc.id
+>>>>>>> 11/hana-vector-engine
                 );
-                return { similarity: 1.0 - _distance, mail: mail };
+                return { similarity, mail };
             });
+
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -175,15 +225,22 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onAddMails = async (req: Request): Promise<Mail | Express.Request> => {
         try {
+<<<<<<< HEAD
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { mails, rag }: { mails: Mails; rag: boolean } = req.data;
             const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+=======
+            const { Mails } = this.entities;
+            const { mails, rag } = req.data;
+            const mailBatch = await this.regenerateInsights(mails, rag);
+>>>>>>> 11/hana-vector-engine
 
             // insert mails with insights
             console.log("UPDATE MAILS WITH INSIGHTS...");
 
             await INSERT.into(Mails).entries(mailBatch);
 
+<<<<<<< HEAD
             // Embed mail bodies with IDs
             console.log("EMBED MAILS WITH IDs...");
 
@@ -200,6 +257,12 @@ export default class CommonMailInsights extends ApplicationService {
                 m("*");
                 m.translation((t) => {
                     t("*")
+=======
+            const insertedMails = await SELECT.from(Mails, (m: any) => {
+                m`.*`;
+                m.translation((t: any) => {
+                    t`.*`;
+>>>>>>> 11/hana-vector-engine
                 });
             }).where({
                 ID: { in: mailBatch.map((mail) => mail.ID) }
@@ -229,6 +292,7 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onDeleteMail = async (req: Request): Promise<boolean | Express.Request> => {
         try {
+<<<<<<< HEAD
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } : { id : string } = req.data;
 
@@ -239,6 +303,12 @@ export default class CommonMailInsights extends ApplicationService {
             await typeormVectorStore.appDataSource.query(queryString, [id]);
 
             return true;
+=======
+            const { id } = req.data;
+            const { Mails } = this.entities;
+            const result = await DELETE.from(Mails, id);
+            return Boolean(result);
+>>>>>>> 11/hana-vector-engine
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -246,6 +316,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     /**
+<<<<<<< HEAD
      * (Re-)Generate Insights, Response(s) and Translation(s) for single or multiple Mail(s)
      * @param {Array<Mails>} mails - array of mails
      * @param {boolean} rag - flag to denote if RAG status should be considered
@@ -257,18 +328,28 @@ export default class CommonMailInsights extends ApplicationService {
         rag: boolean = false,
         tenant: string = DEFAULT_TENANT
     ): Promise<Mails> => {
+=======
+     * (Re-)Generate Insights, Response(s), Translation(s) and Embeddings for single or multiple Mail(s)
+     * @param {Array<IBaseMail>} mails - array of mails
+     * @param {boolean} rag - flag to denote if RAG status should be considered
+     * @returns {Promise<Array<ITranslatedMail>>} Promise object represents the translated mails
+     */
+    public regenerateInsights = async (mails: Array<IBaseMail>, rag: boolean = false) => {
+>>>>>>> 11/hana-vector-engine
         // Add unique ID to mails if not existent
         mails = mails.map((mail) => {
             return { ...mail, ID: mail.ID || uuidv4() };
         });
 
-        const [generalInsights, potentialResponses, languageMatches] = await Promise.all([
-            this.extractGeneralInsights(mails, tenant),
-            this.preparePotentialResponses(mails, rag, tenant),
-            this.extractLanguageMatches(mails, tenant)
+        const [generalInsights, potentialResponses, languageMatches, embeddings] = await Promise.all([
+            this.extractGeneralInsights(mails),
+            this.preparePotentialResponses(mails, rag),
+            this.extractLanguageMatches(mails),
+            this.createEmbeddings(mails)
         ]);
 
         const processedMails = mails.reduce((acc, mail) => {
+<<<<<<< HEAD
             const generalInsight = generalInsights.find((res) => res.ID === mail.ID);
             const potentialResponse = potentialResponses.find((res) => res.ID === mail.ID);
             const languageMatch = languageMatches.find((res) => res.ID === mail.ID);
@@ -278,27 +359,52 @@ export default class CommonMailInsights extends ApplicationService {
                 responseBody: potentialResponse.responseBody,
                 languageMatch: languageMatch.languageMatch,
                 languageNameDetermined: languageMatch.languageNameDetermined
+=======
+            const generalInsight = generalInsights.find((res: any) => res.mail.ID === mail.ID)?.insights;
+            const potentialResponse = potentialResponses.find((res: any) => res.mail.ID === mail.ID)?.response;
+            const languageMatch = languageMatches.find((res: any) => res.mail.ID === mail.ID)?.languageMatch;
+            const embedding = embeddings.find((res: any) => res.mail.ID === mail.ID)?.embedding;
+
+            acc.push({
+                mail,
+                insights: {
+                    ...generalInsight,
+                    ...potentialResponse,
+                    ...languageMatch,
+                    embedding
+                }
+>>>>>>> 11/hana-vector-engine
             });
 
             return acc;
         }, [] as Mails);
 
+<<<<<<< HEAD
         const translatedMails = await this.translateInsights(processedMails, tenant);
         return translatedMails;
+=======
+        const translatedMails: Array<ITranslatedMail> = await this.translateInsights(processedMails);
+
+        return translatedMails.map((mail) => {
+            return {
+                ...mail.mail,
+                ...mail.insights,
+                translation: mail.translation
+            };
+        });
+>>>>>>> 11/hana-vector-engine
     };
 
     /**
      * (Re-)Generate Response for a single Mail
      * @param {IStoredMail} mail - stored mail
      * @param {boolean} rag - flag to denote if RAG status should be considered
-     * @param {string} tenant - tenant id
      * @param {string} additionalInformation - additional information for the response
      * @returns {Promise<IStoredMail>} Promise object represents the stored mail with regenerated response
      */
     public regenerateResponse = async (
         mail: Mail,
         rag: boolean = false,
-        tenant: string = DEFAULT_TENANT,
         additionalInformation?: string
     ): Promise<Mail> => {
         const regeneratedResponse = (
@@ -312,7 +418,6 @@ export default class CommonMailInsights extends ApplicationService {
                     }
                 ],
                 rag,
-                tenant,
                 additionalInformation
             )
         )[0]?.responseBody;
@@ -320,11 +425,17 @@ export default class CommonMailInsights extends ApplicationService {
         const translation = (await SELECT.one.from(Translations, mail.translation_ID)) as Translation;
 
         if (!mail.languageMatch) {
+<<<<<<< HEAD
             translation.responseBody = await this.translateResponse(
                 regeneratedResponse,
                 tenant,
                 schemas.WORKING_LANGUAGE
             );
+=======
+            translation.responseBody = (
+                await this.translateResponse(regeneratedResponse, schemas.WORKING_LANGUAGE)
+            ).responseBody;
+>>>>>>> 11/hana-vector-engine
         } else {
             translation.responseBody = regeneratedResponse;
         }
@@ -346,15 +457,13 @@ export default class CommonMailInsights extends ApplicationService {
 
     /**
      * Extract insights for mails using LLM.
-     *
-     * @param {Mails} mails - Array of mails to extract insights from.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
-     * @returns {Promise<Mails>} - A promise that resolves to an array of processed mails.
+     * @param {Array<IBaseMail>} mails - Array of mails to extract insights from.
+     * @returns {Promise<Array<IProcessedMail>>} - A promise that resolves to an array of processed mails.
      */
-    public extractGeneralInsights = async (mails: Mails, tenant: string = DEFAULT_TENANT): Promise<Mails> => {
+    public extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -396,19 +505,17 @@ export default class CommonMailInsights extends ApplicationService {
      * Generate potential Response(s) using LLM.
      * @param {Mails} mails - An array of mails.
      * @param {boolean} rag - A flag to control retrieval augmented generation usage.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @param {string} additionalInformation - Additional information for mail response.
      * @return {Promise} - Returns a Promise that resolves to an array of potential responses.
      */
     public preparePotentialResponses = async (
         mails: Mails,
         rag: boolean = false,
-        tenant: string = DEFAULT_TENANT,
         additionalInformation?: string
     ): Promise<Mails> => {
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -420,7 +527,7 @@ export default class CommonMailInsights extends ApplicationService {
                       "Also consider given additional information if available to enhance the response."
                     : "Formulate a response to the original mail using given additional information.") +
                 "Address the sender appropriately.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except '\n'.",
             inputVariables: rag ? ["context"] : [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -447,7 +554,7 @@ export default class CommonMailInsights extends ApplicationService {
         const potentialResponses = await Promise.all(
             mails.map(async (mail) => {
                 if (rag) {
-                    const closestMails = await this.getClosestMails(mail.ID, 5, { submitted: true }, tenant);
+                    const closestMails = await this.getClosestMails(mail.ID, 5, true);
                     const closestResponses = await this.getClosestResponses(closestMails);
 
                     const result = (
@@ -481,15 +588,22 @@ export default class CommonMailInsights extends ApplicationService {
 
     /**
      * Extract Language Match(es) using LLM.
+<<<<<<< HEAD
      * @param {Mails} mails - An array of mails.
      * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @return {Promise<Mails>} - Returns a Promise that resolves to an array of language matches.
      */
     public extractLanguageMatches = async (mails: Mails, tenant: string = DEFAULT_TENANT): Promise<Mails> => {
+=======
+     * @param {Array<IBaseMail>} mails - An array of mails.
+     * @return {Promise} - Returns a Promise that resolves to an array of language matches.
+     */
+    public extractLanguageMatches = async (mails: Array<IBaseMail>): Promise<any> => {
+>>>>>>> 11/hana-vector-engine
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_LANGUAGE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -526,16 +640,44 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     /**
+     * Create Embeddings
+     * @param {Array<IBaseMail>} mails - An array of mails.
+     * @return {Promise} - Returns a Promise that resolves to an array of embeddings.
+     */
+    public createEmbeddings = async (mails: Array<IBaseMail>): Promise<any> => {
+        const embed = new BTPEmbedding(aiCore.embed);
+        const embeddings = await Promise.all(
+            mails.map(async (mail: IBaseMail) => {
+                const embeddings = await embed.embedDocuments([mail.body]);
+                const embeddingOriginal = embeddings[0];
+                const embedding = array2VectorBuffer(embeddingOriginal);
+                //const embeddingTemp = Float32Array.from(embeddingOriginal);
+                //const embedding = Buffer.from(embeddingTemp.buffer);
+                return { mail, embedding };
+            })
+        );
+
+        return embeddings;
+    };
+
+    /**
      * Translates Insight(s) using LLM.
+<<<<<<< HEAD
      * @param {Mails} mails - An array of processed mails.
      * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @return {Promise} - Returns a Promise that resolves to an array of translations.
      */
     public translateInsights = async (mails: Mails, tenant: string = DEFAULT_TENANT): Promise<Mails> => {
+=======
+     * @param {Array<IProcessedMail>} mails - An array of processed mails.
+     * @return {Promise} - Returns a Promise that resolves to an array of translations.
+     */
+    public translateInsights = async (mails: Array<IProcessedMail>): Promise<any> => {
+>>>>>>> 11/hana-vector-engine
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -595,25 +737,28 @@ export default class CommonMailInsights extends ApplicationService {
     /**
      * Translates a single response using LLM.
      * @param {string} response - The response text.
-     * @param {string} [tenant=DEFAULT_TENANT] - Tenant string (default value is DEFAULT_TENANT).
      * @param {string} language - The language for translation.
      * @return {Promise<string>} - Returns a Promise that resolves to the translated response.
      */
+<<<<<<< HEAD
     public translateResponse = async (
         response: string,
         tenant: string = DEFAULT_TENANT,
         language: string
     ): Promise<string> => {
+=======
+    public translateResponse = async (response: string, language: string): Promise<any> => {
+>>>>>>> 11/hana-vector-engine
         try {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA);
             const formatInstructions = parser.getFormatInstructions();
-            const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion, tenant);
+            const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
 
             const systemPrompt = new PromptTemplate({
                 template: `Translate the following response of the customer support into ${language}.
-            {format_instructions}
-            Make sure to escape special characters by double slashes.`,
+                    {format_instructions}
+                    Make sure to escape special characters by double slashes.`,
                 inputVariables: [],
                 partialVariables: { format_instructions: formatInstructions }
             });
@@ -649,11 +794,16 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onRegenerateInsights = async (req: Request): Promise<boolean | Express.Request> => {
         try {
+<<<<<<< HEAD
             const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { rag } : { rag : boolean} = req.data;
             
+=======
+            const { rag } = req.data;
+            const { Mails } = this.entities;
+>>>>>>> 11/hana-vector-engine
             const mails = await SELECT.from(Mails);
-            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+            const mailBatch = await this.regenerateInsights(mails, rag);
 
             // insert mails with insights
             console.log("UPDATE MAILS WITH INSIGHTS...");
@@ -675,10 +825,9 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onRegenerateResponse = async (req: Request): Promise<boolean | Express.Request> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, rag, additionalInformation } = req.data;
             const mail = await SELECT.one.from(Mails, id);
-            const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
+            const response = await this.regenerateResponse(mail, rag, additionalInformation);
             return response;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -687,6 +836,7 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     /**
+<<<<<<< HEAD
      * Method to translate Response to original e-mail language
      * @async
      * @param {Request} req - Request object
@@ -706,6 +856,8 @@ export default class CommonMailInsights extends ApplicationService {
     };
 
     /**
+=======
+>>>>>>> 11/hana-vector-engine
      * Method to submit response for a single Mail. Response always passed in user's working language
      * @async
      * @param {Request} req - Request object
@@ -713,7 +865,6 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onSubmitResponse = async (req: Request): Promise<boolean | Express.Request> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const mail = await SELECT.one.from(Mails, id).columns((m) => {
                 m("*");
@@ -724,7 +875,11 @@ export default class CommonMailInsights extends ApplicationService {
             const translation =
                 mail.languageMatch === undefined || mail.languageMatch
                     ? response
+<<<<<<< HEAD
                     : await this.translateResponse(response, tenant, mail.languageNameDetermined);
+=======
+                    : (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
+>>>>>>> 11/hana-vector-engine
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
             // Send the working language response + target language translation + AI Translation Disclaimer;
@@ -735,11 +890,6 @@ export default class CommonMailInsights extends ApplicationService {
                 translation: { ...mail.translation, responseBody: response }
             };
             const success = await UPDATE(Mails, mail.ID).set(submittedMail);
-            if (success) {
-                const typeormVectorStore = await this.getVectorStore(tenant);
-                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
-                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
-            }
             return new Boolean(success);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -755,8 +905,8 @@ export default class CommonMailInsights extends ApplicationService {
      */
     private onRevokeResponse = async (req: Request): Promise<boolean | Express.Request> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
+<<<<<<< HEAD
 
             const success = await UPDATE(Mails, id).with({ responded: false });
 
@@ -767,6 +917,11 @@ export default class CommonMailInsights extends ApplicationService {
             }
 
             return new Boolean(success);
+=======
+            const { Mails } = this.entities;
+            const result = await UPDATE(Mails, id).with({ responded: false });
+            return new Boolean(result);
+>>>>>>> 11/hana-vector-engine
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
@@ -775,76 +930,87 @@ export default class CommonMailInsights extends ApplicationService {
 
     /**
      * Get responses of x closest Mails.
-     * @param {Array<[TypeORMVectorStoreDocument, number]>} mails - An array of mails along with their distances.
-     * @return {Promise<Array<[Document]>>} - Returns a Promise that resolves to an array of closest responses.
+     * @param {Array<[TypeORMVectorStoreDocument, number]>} mails - An array of mails along with their similarities.
+     * @return {Promise<Array<[TypeORMVectorStoreDocument]>>} - Returns a Promise that resolves to an array of closest responses.
      */
     public getClosestResponses = async (
         mails: Array<[TypeORMVectorStoreDocument, number]>
+<<<<<<< HEAD
     ): Promise<Array<Document>> => {
         if (mails.length === 0) {
             return [];
         }
 
         const responses: Array<Document> = (
+=======
+    ): Promise<Array<[TypeORMVectorStoreDocument]>> => {
+        if (mails.length === 0) {
+            return [];
+        }
+        const { Mails } = this.entities;
+        const responses: Promise<Array<[TypeORMVectorStoreDocument]>> = (
+>>>>>>> 11/hana-vector-engine
             await SELECT.from(Mails)
                 .where({
                     ID: {
-                        in: mails.map(([doc, _distance]: [TypeORMVectorStoreDocument, number]) => doc.metadata.id)
+                        in: mails.map(([doc, _]: [TypeORMVectorStoreDocument, number]) => doc.id)
                     }
                 })
                 .columns((m) => {
                     m.ID;
                     m.responseBody;
                 })
+<<<<<<< HEAD
         ).map((mail) => new Document({ metadata: { id: mail.ID }, pageContent: mail.responseBody }));
+=======
+        ).map((mail: any) => {
+            const document = new TypeORMVectorStoreDocument({ pageContent: mail.responseBody });
+            document.id = mail.ID;
+            return document;
+        });
+>>>>>>> 11/hana-vector-engine
 
         return responses;
-    };
-
-    /**
-     * Get VectorStore instance.
-     * @param {string} tenant - The tenant identifier.
-     * @return {Promise<TypeORMVectorStore>} - Returns a Promise that resolves to a VectorStore instance.
-     */
-    public getVectorStore = async (tenant?: string): Promise<TypeORMVectorStore> => {
-        const embeddings = new BTPEmbedding(aiCore.embed, tenant);
-        const args = getPostgresConnectionOptions(tenant);
-        const typeormVectorStore = await TypeORMVectorStore.fromDataSource(embeddings, args);
-        await typeormVectorStore.ensureTableInDatabase();
-        return typeormVectorStore;
     };
 
     /**
      * Get closest mails.
      * @param {string} id - The id of the mail.
      * @param {number} k - The number of closest mails to fetch (default value is 5).
-     * @param {any} filter - The filter criteria.
-     * @param {string} tenant - The tenant identifier.
+     * @param {boolean} responded - Only consider responded mails for similarity search
      * @return {Promise<Array<[TypeORMVectorStoreDocument, number]>>} - Returns a Promise that resolves to an array of closest mails.
      */
     public getClosestMails = async (
         id: string,
         k: number = 5,
-        filter: any = {},
-        tenant?: string
+        responded: boolean = false
     ): Promise<Array<[TypeORMVectorStoreDocument, number]>> => {
-        const typeormVectorStore = await this.getVectorStore(tenant);
+        const documents = await cds.run(
+            `
+            SELECT 
+                similars.ID as "id",
+                similars.BODY as "pageContent",
+                COSINE_SIMILARITY(similars."EMBEDDING", focus."EMBEDDING") as "similarity"
+            FROM "AI_DB_MAILS" as similars
+            JOIN (
+                SELECT 
+                    ID, 
+                    "EMBEDDING"
+                FROM "AI_DB_MAILS"
+                WHERE ID = ?
+                LIMIT 1
+            ) as focus ON focus.ID <> similars.ID
+            ${responded ? "WHERE RESPONDED = true" : ""}
+            ORDER BY "similarity" DESC LIMIT ?`,
+            [id, k]
+        );
 
-        const queryString = `
-        SELECT x.id, x."pageContent", x.metadata, x.embedding <=> focus.embedding as _distance from ${typeormVectorStore.tableName} as x
-        join (SELECT * from ${typeormVectorStore.tableName} where (metadata->'id')::jsonb ? $1) as focus
-        on focus.id != x.id
-        WHERE x.metadata @> $2
-        ORDER BY _distance LIMIT $3;
-        `;
-
-        const documents = await typeormVectorStore.appDataSource.query(queryString, [id, filter, k]);
         const results: Array<[TypeORMVectorStoreDocument, number]> = [];
         for (const doc of documents) {
-            if (doc._distance != null && doc.pageContent != null) {
+            if (doc.similarity != null && doc.pageContent != null) {
                 const document = new TypeORMVectorStoreDocument(doc);
                 document.id = doc.id;
-                results.push([document, doc._distance]);
+                results.push([document, doc.similarity]);
             }
         }
         return results;
@@ -878,36 +1044,6 @@ const filterForTranslation = ({
 });
 
 /**
- * Gets PostgreSQL server connection options.
- *
- * @param {string} [tenant] - The tenant string.
- * @returns {TypeORMVectorStoreArgs} - An object containing connection options and the table name.
- */
-const getPostgresConnectionOptions = (tenant?: string): TypeORMVectorStoreArgs => {
-    // @ts-ignore
-    const credentials = cds.env.requires?.postgres?.credentials;
-    return {
-        postgresConnectionOptions: {
-            type: "postgres",
-            host: credentials?.hostname,
-            username: credentials?.username,
-            database: credentials?.dbname,
-            password: credentials?.password,
-            port: credentials?.port,
-            ssl: credentials?.sslcert
-                ? {
-                      cert: credentials?.sslcert,
-                      ca: credentials?.sslrootcert,
-                      rejectUnauthorized: credentials?.hostname === "127.0.0.1" ? false : undefined
-                  }
-                : false
-        } as DataSourceOptions,
-
-        tableName: tenant ? "_" + tenant.replace(/-/g, "") : DEFAULT_TENANT
-    } as TypeORMVectorStoreArgs;
-};
-
-/**
  * Parses JSON strings, adding missing ',' for valid JSON and replacing '\n' by '\\n' in property values.
  *
  * @param {string} jsonString - The JSON string to parse.
@@ -919,7 +1055,7 @@ const fixJsonString = (jsonString: String): string => {
             // Workaround - Add missing ',' for valid JSON
             .replace(/\"\s*\"/g, '", "')
             // Workaround - Replace \n by \\n in property values
-            .replace(/"([^"]*)"/g, (match, capture) => {
+            .replace(/"([^"]*)"/g, (match, _) => {
                 return match.replace(/\n(?!\\n)/g, "\\n");
             })
     );

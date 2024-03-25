@@ -43,9 +43,9 @@ context aisaas.db {
             urgency                :      Integer;
             summary                :      String;
             responseBody           :      LargeString;
-            responseModified       :      Boolean;
             languageNameDetermined :      String;
             languageMatch          :      Boolean;
+            embedding              :      cds.Vector;
             translation            :      Composition of Translations;
             requestedServices      : many String;
             suggestedActions       : many Action;

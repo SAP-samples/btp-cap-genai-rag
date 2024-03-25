@@ -2,7 +2,7 @@ import cds from "@sap/cds";
 import { Request } from "@sap/cds/apis/services";
 
 import CommonMailInsights from "../common/handlers/common-mail-insights";
-import * as aiCore from "../common/utils/ai-core"; 
+import * as aiCore from "../common/utils/ai-core";
 
 /**
  * MailInsightsService class extends CommonMailInsights
@@ -14,7 +14,7 @@ export default class MailInsightsService extends CommonMailInsights {
      * @async
      * @returns {Promise<void>}
      */
-    async init() {
+    async init(): Promise<void> {
         // Shared handlers (getMails, getMail, addMails, deleteMail)
         await super.init();
 
@@ -35,13 +35,12 @@ export default class MailInsightsService extends CommonMailInsights {
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onRegenerateInsights = async (req: Request) => {
+    private onRegenerateInsights = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { rag } = req.data;
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails);
-            const mailBatch = await this.regenerateInsights(mails, rag, tenant);
+            const mailBatch = await this.regenerateInsights(mails, rag);
 
             // insert mails with insights
             console.log("UPDATE MAILS WITH INSIGHTS...");
@@ -64,13 +63,12 @@ export default class MailInsightsService extends CommonMailInsights {
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onRegenerateResponse = async (req: Request) => {
+    private onRegenerateResponse = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, rag, additionalInformation } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
-            const response = await this.regenerateResponse(mail, rag, tenant, additionalInformation);
+            const response = await this.regenerateResponse(mail, rag, additionalInformation);
             return response;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -84,14 +82,12 @@ export default class MailInsightsService extends CommonMailInsights {
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onTranslateResponse = async (req: Request) => {
+    private onTranslateResponse = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id);
-            const translation = (await this.translateResponse(response, tenant, mail.languageNameDetermined))
-                .responseBody;
+            const translation = (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
             return translation;
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -105,9 +101,8 @@ export default class MailInsightsService extends CommonMailInsights {
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onSubmitResponse = async (req: Request) => {
+    private onSubmitResponse = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id, response } = req.data;
             const { Mails } = this.entities;
             const mail = await SELECT.one.from(Mails, id).columns((m: any) => {
@@ -119,7 +114,7 @@ export default class MailInsightsService extends CommonMailInsights {
             const translation =
                 mail.languageMatch === undefined || mail.languageMatch
                     ? response
-                    : (await this.translateResponse(response, tenant, mail.languageNameDetermined)).responseBody;
+                    : (await this.translateResponse(response, mail.languageNameDetermined)).responseBody;
 
             // Implement your custom logic to send e-mail e.g. using Microsoft Graph API
             // Send the working language response + target language translation + AI Translation Disclaimer;
@@ -130,11 +125,6 @@ export default class MailInsightsService extends CommonMailInsights {
                 translation: { ...mail.translation, responseBody: response }
             };
             const success = await UPDATE(Mails, mail.ID).set(submittedMail);
-            if (success) {
-                const typeormVectorStore = await this.getVectorStore(tenant);
-                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": true}' where (metadata->'id')::jsonb ? $1`;
-                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
-            }
             return new Boolean(success);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
@@ -142,28 +132,18 @@ export default class MailInsightsService extends CommonMailInsights {
         }
     };
 
-
     /**
      * Method to revoke responded status for a single mail
      * @async
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onRevokeResponse = async (req: Request) => {
+    private onRevokeResponse = async (req: Request): Promise<boolean | any> => {
         try {
-            const tenant = cds.env?.requires?.multitenancy && req.tenant;
             const { id } = req.data;
             const { Mails } = this.entities;
-
-            const success = await UPDATE(Mails, id).with({responded : false});
-
-            if (success) {
-                const typeormVectorStore = await this.getVectorStore(tenant);
-                const submitQueryPGVector = `UPDATE ${typeormVectorStore.tableName} SET metadata = metadata::jsonb || '{"submitted": false}' where (metadata->'id')::jsonb ? $1`;
-                await typeormVectorStore.appDataSource.query(submitQueryPGVector, [id]);
-            }
-
-            return new Boolean(success);
+            const result = await UPDATE(Mails, id).with({ responded: false });
+            return new Boolean(result);
         } catch (error: any) {
             console.error(`Error: ${error?.message}`);
             return req.error(`Error: ${error?.message}`);
