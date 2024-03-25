@@ -331,7 +331,7 @@ export default class CommonMailInsights extends ApplicationService {
         const systemPrompt = new PromptTemplate({
             template:
                 "Give insights about the incoming email.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except of '\n'.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -463,7 +463,7 @@ export default class CommonMailInsights extends ApplicationService {
         const systemPrompt = new PromptTemplate({
             template:
                 "Extract the language related information.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except of '\n'.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });
@@ -525,7 +525,7 @@ export default class CommonMailInsights extends ApplicationService {
         const systemPrompt = new PromptTemplate({
             template:
                 "Translate the insights of the incoming json.\n{format_instructions}\n" +
-                "Make sure to escape special characters by double slashes.",
+                "Make sure to escape special characters by double slashes except of '\n'.",
             inputVariables: [],
             partialVariables: { format_instructions: formatInstructions }
         });

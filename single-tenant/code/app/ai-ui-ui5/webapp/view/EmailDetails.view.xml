@@ -191,7 +191,7 @@
                                 noDataText="{i18n>email.list.noData}"
                                 items="{
 									path: '/similarEmails',
-									sorter: {path: 'similarity', descending: 'true'}
+									sorter: {path: 'similarity', descending: false}
 								}"
                             >
                                 <CustomListItem class="sapUiSmallMarginTopBottom">

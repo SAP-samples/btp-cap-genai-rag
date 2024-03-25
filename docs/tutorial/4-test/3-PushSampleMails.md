@@ -2,9 +2,9 @@
 
 In this chapter you will learn, how SaaS Subscribers can push sample mails to their SaaS instance using the SaaS API. 
 
-1. Find the provided **http** sample file **requests-btp.http** ([click here](../../../code/test/http/requests-btp.http)), containing a few test mails for processing. 
+1. Find the provided **http** sample file **requests-btp.http** ([single-tenant](../../../single-tenant/code/test/requests-btp.http) or [multi-tenant](../../../multi-tenant/code/test/http/requests-btp.http)), containing a few test mails for processing. 
    
-   > **Hint** - You might need to install the **REST Client** extension in your development environment!
+   > **Hint** - You might need to install the **REST Client** extension in your development environment. You can find respective extensions for popular editors such as Visual Studio Code.
    
 2. Duplicate and rename the file to **requests-btp-private.http** to ensure that your credentials are not accidentally being committed to GitHub. 
 

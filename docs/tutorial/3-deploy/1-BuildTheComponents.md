@@ -101,7 +101,13 @@ In the following steps, you will build a multi-target application which can be d
    npm i -g typescript ts-node
    ```
 
-4. Run the following command to generate unique Service Plan Ids for your Service Broker.
+4. Make sure you have the Cloud MTA Build Tool (MBT) installed globally.
+
+   ```sh
+   npm install -g mbt
+   ```
+
+5. Run the following command to generate unique Service Plan Ids for your Service Broker.
 
    > **Hint** - Using the **-private** file name extension, these Ids will not be committed to GitHub.
 
@@ -111,25 +117,41 @@ In the following steps, you will build a multi-target application which can be d
    npx --yes -p @sap/sbf gen-catalog-ids ../../code/broker/catalog-private.json
    ```
 
-5. Run the following password to create a new Service Broker password. Please copy the generated plaintext password and hashed credentials and store them in a secure place!
+6. Run the following command to create a new Service Broker password. Please copy the generated plaintext password and hashed credentials and store them in a secure place!
 
    ```sh
    # Run in ./multi-tenant/deploy/cf #
    npx --yes -p @sap/sbf hash-broker-password -b
    ```
 
-6. Please duplicate the **free-tier.mtaext** file in the **multi-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub.
+7. Please duplicate the **free-tier.mtaext** file in the **multi-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**. Adding the **-private** suffix will ensure this file is not committed to GitHub.
 
-7. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago.
+8. Open the **free-tier-private.mtaext** file and replace the placeholder "\<paste your hash credentials here\>" with your **hashed credentials** value created a few steps ago. Your mtaext file should look similar to the following.
 
-8. Please run the following command to build your **mtar** file.
+   ```
+   ID: aisaas.freetier
+   _schema-version: 3.2.0
+   version: 1.0.0
+   extends: aisaas
+
+   modules:
+      - name: aisaas-api-sb
+         properties:
+            SBF_BROKER_CREDENTIALS_HASH:  >
+            {
+               "broker-user": "sha256:0vsw3...bPwNwUc9WM=:5osh6/uiq...LcE9T0="
+            }
+            SBF_CATALOG_FILE: ./catalog-private.json
+   ```
+
+9. Please run the following command to build your **mtar** file.
 
    ```sh
    # Run in ./multi-tenant/deploy/cf #
    npm run build:mbt
    ```
 
-9. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).
+10. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).
 
 ### Single-Tenant
 

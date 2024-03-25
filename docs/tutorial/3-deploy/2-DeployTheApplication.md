@@ -160,13 +160,21 @@ As the application components are part of the deployment archive in the Cloud Fo
    cf login -a "https://api.cf.<Region>.hana.ondemand.com"
    ```
 
-2. Start the deployment to Cloud Foundry, by running the following command.
+2. Make sure you have the MultiApps CF CLI Plugin installed.
+
+> **Hint** - You can find further details on the following website [https://github.com/cloudfoundry/multiapps-cli-plugin](https://github.com/cloudfoundry/multiapps-cli-plugin).
+
+```
+cf install-plugin multiapps
+```
+
+3. Start the deployment to Cloud Foundry, by running the following command.
 
    ```sh
    # Run in ./(multi/single)-tenant/deploy/cf #
    npm run deploy
    ```
 
-3. The deployment process will take a while, as especially creating the **PostgreSQL on SAP BTP, hyperscaler option** service instance might take up to 30mins. Wait for the process to finish successfully and also check in the **SAP BTP Cockpit** if all service instances have been created successfully.
+4. The deployment process will take a while, as especially creating the **PostgreSQL on SAP BTP, hyperscaler option** service instance might take up to 30mins. Wait for the process to finish successfully and also check in the **SAP BTP Cockpit** if all service instances have been created successfully.
 
    [<img src="./images/DEP_CfSuccess.png" width="400"/>](./images/DEP_CfSuccess.png?raw=true)

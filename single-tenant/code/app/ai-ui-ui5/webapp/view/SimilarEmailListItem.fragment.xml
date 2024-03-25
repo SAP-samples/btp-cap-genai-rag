@@ -8,7 +8,8 @@
         <headerToolbar>
             <Toolbar>
                 <HBox width="100%" alignItems="Center" justifyContent="SpaceBetween">
-                    <Title text="{= ${/translationOn} ? ${mail/translation/subject} : ${mail/subject}}" />
+                    <Title
+                        text="{= ${/translationOn} ? ${mail/translation/subject} : ${mail/subject}}" />
                     <HBox alignItems="Center" class="sapUiTinyMarginEnd">
                         <ObjectStatus
                             visible="{mail/responded}"
@@ -39,7 +40,8 @@
             </HBox>
             <HBox class="sapUiSmallMarginTop">
                 <Title width="6rem" titleStyle="H6" text="{i18n>email.titles.response}:" />
-                <Text text="{= !${/translationOn} ? ${mail/responseBody} : ${mail/translation/responseBody} }" />
+                <Text
+                    text="{= !${/translationOn} ? ${mail/responseBody} : ${mail/translation/responseBody} }" />
             </HBox>
         </VBox>
     </Panel>
