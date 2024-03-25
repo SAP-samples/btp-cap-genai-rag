@@ -59,13 +59,10 @@ modules:
       appName: ~{ai-approuter/application}
     requires:
       - name: ai-uaa
-      - name: ai-logging
       - name: ai-hdi-container
-      - name: ai-postgresql-db
       - name: ai-html5-repo-runtime
       - name: ai-destination
       - name: ai-approuter
-      - name: ai-autoscaler
         parameters:
           config:
             instance_min_count: 1
@@ -110,7 +107,7 @@ modules:
       builder: custom
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
       commands:
-        - npm run build
+        #- npm run build
         - npm run copy
       supported-platforms: []
 
@@ -195,15 +192,6 @@ resources:
             - binding-secret
             - x509
 
-  # ---------------- APPLICATION LOGGING SERVICE ---------------
-  - name: ai-logging
-    # ------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: application-logs
-      service-name: ${space}-ai-logging
-      service-plan: lite
-
   # ----------------- DESTINATION SERVICE ----------------------
   - name: ai-destination
     # ------------------------------------------------------------
@@ -230,15 +218,6 @@ resources:
                 HTML5.DynamicDestination: true
                 HTML5.Timeout: 300000
                 forwardAuthToken: true
-
-  # ----------------- AUTOSCALER  ------------------------------------
-  - name: ai-autoscaler
-    # ------------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: autoscaler
-      service-name: ${space}-ai-autoscaler
-      service-plan: standard
 
   # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------
   - name: ai-html5-repo-host
@@ -268,15 +247,3 @@ resources:
       service-name: ${space}-ai-hdi-container
     properties:
       com-container-name: "${service-name}"
-
-  # ----------------- POSTGRESQL -------------------------------------
-  - name: ai-postgresql-db
-    # ------------------------------------------------------------------
-    active: true
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: postgresql-db
-      service-name: ${space}-ai-postgresql-db
-      service-plan: free
-      config:
-        engine_version: "13"

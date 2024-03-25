@@ -9,7 +9,12 @@ service MailInsightsService @(
     path    : 'mail-insights',
     protocol: 'odata-v4'
 ) {
-    entity Mails as projection on db.Mails;
+    entity Mails as
+        projection on db.Mails
+        excluding {
+            embedding
+        };
+
     // Get all mails (compact)
     function getMails()                                                                             returns array of Mails;
 
@@ -34,6 +39,6 @@ service MailInsightsService @(
     action   translateResponse(id : UUID, response : String)                                        returns String;
     // Submits response in working language
     action   submitResponse(id : UUID, response : String)                                           returns Boolean;
-    // Revoke answered status 
+    // Revoke answered status
     action   revokeResponse(id : UUID)                                                              returns Boolean;
 };

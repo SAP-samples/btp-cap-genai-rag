@@ -1,19 +1,13 @@
 # Subaccount Setup
 
-Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider Subaccount. Please consider the following infos before creating a subaccount in any SAP BTP region. 
+Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider Subaccount. Please consider the following infos before creating a subaccount in any SAP BTP region.
 
 - [Subaccount Setup](#subaccount-setup)
-  - [SAP BTP PostgreSQL, Hyperscaler Option](#sap-btp-postgresql-hyperscaler-option)
   - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
   - [SAP HANA Cloud](#sap-hana-cloud)
   - [SAP AI Core](#sap-ai-core)
 
-> **Important** - This mission can not be deployed to **Trial** environments, as some of the services are not available in **Trial** landscapes. 
-
-
-## SAP BTP PostgreSQL, Hyperscaler Option
-
-- In **Kyma Runtime** only available for **AWS** landscapes
+> **Important** - This mission can not be deployed to **Trial** environments, as some of the services are not available in **Trial** landscapes.
 
 ## SAP BTP, Cloud Foundry Runtime
 
@@ -26,6 +20,5 @@ Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider
 ## SAP AI Core
 
 - Only available in **AWS** landscapes
-
 
 If you are targeting a setup using **Free Tier** service plans for the majority of the services, we suggest to setup the sample scenario in the AWS **us10** region.

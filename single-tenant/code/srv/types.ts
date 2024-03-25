@@ -3,10 +3,10 @@ import { z } from "zod";
 export type ZodOptionalStringOrNumber = z.ZodString | z.ZodNumber | z.ZodOptional<z.ZodString | z.ZodNumber>
 
 export interface IBaseMail {
-    ID: string;
-    subject: string;
-    body: string;
-    senderEmailAddress: string;
+    ID?: string;
+    subject?: string;
+    body?: string;
+    senderEmailAddress?: string;
 }
 
 export interface IProcessedMail {
@@ -50,6 +50,7 @@ interface IInsights {
     responseBody?: String;
     languageNameDetermined?: String;
     languageMatch?: Boolean;
+    embedding?: String;
 }
 
 interface IKeyFact {

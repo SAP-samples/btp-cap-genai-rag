@@ -1,5 +1,6 @@
 mta_archives/
 node_modules/
+@cds-models/
 default-*.json
 .env
 .yo-rc.json

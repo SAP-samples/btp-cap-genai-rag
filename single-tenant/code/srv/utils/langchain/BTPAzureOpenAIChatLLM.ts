@@ -8,23 +8,19 @@ import { type OpenAI as OpenAIClient } from "openai";
  */
 export default class BTPAzureOpenAIChatLLM extends ChatOpenAI<ChatOpenAICallOptions> {
     private chatCompletion: (
-        request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
-        tenant?: string
+        request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming
     ) => Promise<OpenAIClient.Chat.Completions.ChatCompletion>;
-    private tenant: string;
 
     /**
      * Constructs a new instance of BTPAzureOpenAIChatLLM
      * @param {Function} chatCompletion - A function to generate chat completions
-     * @param {string} tenant - The tenant for the chat, defaults to '_main'
      * @param {ChatOpenAICallOptions} params - Additional parameters for the OpenAI API
      */
     constructor(
         chatCompletion: (
-            request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
-            tenant?: string
+            request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming
         ) => Promise<OpenAIClient.Chat.Completions.ChatCompletion>,
-        tenant: string = "_main",
+        tenant: string = "main",
         params: ChatOpenAICallOptions = {}
     ) {
         super({
@@ -33,7 +29,6 @@ export default class BTPAzureOpenAIChatLLM extends ChatOpenAI<ChatOpenAICallOpti
             streaming: false
         });
         this.chatCompletion = chatCompletion;
-        this.tenant = tenant;
     }
 
     /**
@@ -55,6 +50,6 @@ export default class BTPAzureOpenAIChatLLM extends ChatOpenAI<ChatOpenAICallOpti
         request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
         options?: OpenAICoreRequestOptions
     ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> {
-        return await this.chatCompletion(request, this.tenant);
+        return await this.chatCompletion(request);
     }
 }

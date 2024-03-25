@@ -1,0 +1,28 @@
+{
+    "xsappname": "ai-kay-StrategicCustomerEngagementPoC",
+    "scopes": [
+        {
+            "name": "$XSAPPNAME.Member",
+            "description": "Member"
+        },
+        {
+            "name": "$XSAPPNAME.Admin",
+            "description": "Admin"
+        }
+    ],
+    "attributes": [],
+    "role-templates": [
+        {
+            "name": "Member",
+            "description": "generated",
+            "scope-references": ["$XSAPPNAME.Member"],
+            "attribute-references": []
+        },
+        {
+            "name": "Admin",
+            "description": "generated",
+            "scope-references": ["$XSAPPNAME.Admin"],
+            "attribute-references": []
+        }
+    ]
+}
