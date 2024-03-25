@@ -39,9 +39,6 @@ The business scenario is also available as [single-tenant version](./single-tena
 - [Blog post about GenAI Mail Insights by Martin Frick](https://blogs.sap.com/2023/11/15/genai-mail-insights-leveraging-the-generative-ai-hub-in-sap-ai-core-to-improve-customer-support/)
 - [Video about GenAI Mail Insights by Adi Pleyer](https://sapvideo.cfapps.eu10-004.hana.ondemand.com/?entry_id=1_uq2ma82t)
 
-- [Blog post about GenAI Mail Insights by Martin Frick](https://blogs.sap.com/2023/11/15/genai-mail-insights-leveraging-the-generative-ai-hub-in-sap-ai-core-to-improve-customer-support/)
-- [Video about GenAI Mail Insights by Adi Pleyer](https://sapvideo.cfapps.eu10-004.hana.ondemand.com/?entry_id=1_uq2ma82t)
-
 [<img src="./docs/images/App_Impressions00.png" width="300"/>](./docs/images/App_Impressions00.png?raw=true)
 [<img src="./docs/images/App_Impressions01.png" width="300"/>](./docs/images/App_Impressions01.png?raw=true)
 
