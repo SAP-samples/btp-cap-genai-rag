@@ -107,7 +107,7 @@ modules:
       builder: custom
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
       commands:
-        - npm run build
+        #- npm run build
         - npm run copy
       supported-platforms: []
 

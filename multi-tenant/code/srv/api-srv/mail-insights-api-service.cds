@@ -1,4 +1,4 @@
-using {ai.db} from '../../db/data-model';
+using {aisaas.db} from '../../db/data-model';
 
 @(requires: ['system-user'])
 service MailInsightsApiService @(

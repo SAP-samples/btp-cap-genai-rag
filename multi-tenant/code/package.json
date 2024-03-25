@@ -44,6 +44,7 @@
         "@sap/approuter": "^14.3.4",
         "@sap/cds-common-content": "1.0.1",
         "@sap/cds-dk": "^7.2.0",
+        "@sap/cds-compiler": "^4.6.0",
         "@sap/html5-app-deployer": "^5.0.0",
         "@sap/html5-repo-mock": "^2.1.1",
         "@sap/sbf": "^6.6.0",

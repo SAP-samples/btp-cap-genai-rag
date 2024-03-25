@@ -14,6 +14,15 @@
         },
         "multitenancy": true,
         "toggles": true,
-        "extensibility": false
+        "extensibility": false,
+        "db": {
+            "kind": "hana",
+            "impl": "@sap/cds-hana",
+            "deploy-format": "hdbtable",
+            "vcap": {
+                "label": "service-manager",
+                "plan": "container"
+            }
+        }
     }
 }

@@ -3,7 +3,7 @@ using {
       managed
 } from '@sap/cds/common';
 
-context ai.db {
+context aisaas.db {
 
       type KeyFact {
             fact     : String;
