@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-03-25T13:55:16.146Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="BeyDpJJBamhpeYUuCDgh" version="23.1.5" type="device" pages="3">
+<mxfile host="Electron" modified="2024-03-26T14:46:10.309Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="r4zP12Jobjpo2V7qliL_" version="23.1.5" type="device" pages="3">
   <diagram name="Multitenant Target" id="Z8zozv96SBSyOqwHAhSR">
     <mxGraphModel dx="1570" dy="-1311" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -498,7 +498,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="Horizon Multitenant Target" id="Ln0QaMTsAl3LmJou-cL3">
-    <mxGraphModel dx="2855" dy="-471" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1427" dy="-1404" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="3jrN2DtlBmjG7xO06O2q-0" />
         <mxCell id="3jrN2DtlBmjG7xO06O2q-1" parent="3jrN2DtlBmjG7xO06O2q-0" />
@@ -1007,8 +1007,8 @@
         <mxCell id="0L6g5DZpiV1xgCV0iahN-0" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F6F7;align=center;verticalAlign=middle;strokeColor=#475E75;fontColor=default;strokeWidth=1;arcSize=8;fontStyle=1;spacingTop=0;spacingLeft=0;spacing=8;labelBackgroundColor=#ffffff;" parent="3jrN2DtlBmjG7xO06O2q-1" vertex="1">
           <mxGeometry x="3093" y="3075" width="127" height="178" as="geometry" />
         </mxCell>
-        <mxCell id="0L6g5DZpiV1xgCV0iahN-1" value="&lt;font style=&quot;&quot;&gt;&lt;b&gt;&lt;font color=&quot;#354a5f&quot; style=&quot;font-size: 23px;&quot;&gt;Target Architecture&lt;br&gt;(Single-tenant SaaS application)&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="3jrN2DtlBmjG7xO06O2q-1" vertex="1">
-          <mxGeometry x="1956.24" y="2501" width="369" height="67" as="geometry" />
+        <mxCell id="0L6g5DZpiV1xgCV0iahN-1" value="&lt;font style=&quot;&quot;&gt;&lt;b&gt;&lt;font color=&quot;#354a5f&quot; style=&quot;font-size: 23px;&quot;&gt;Target Architecture&lt;br&gt;(Single-tenant application)&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="3jrN2DtlBmjG7xO06O2q-1" vertex="1">
+          <mxGeometry x="1956.24" y="2501" width="307" height="67" as="geometry" />
         </mxCell>
         <mxCell id="0L6g5DZpiV1xgCV0iahN-2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF8FF;align=center;verticalAlign=middle;strokeColor=#0070F2;fontColor=default;strokeWidth=1;arcSize=2;fontStyle=1;spacingTop=0;spacingLeft=0;spacing=8;" parent="3jrN2DtlBmjG7xO06O2q-1" vertex="1">
           <mxGeometry x="1958" y="2583" width="1029" height="686" as="geometry" />
@@ -1139,8 +1139,8 @@
         <mxCell id="0L6g5DZpiV1xgCV0iahN-67" value="&lt;b&gt;&lt;font color=&quot;#354a5f&quot;&gt;UI5 Web Components&lt;/font&gt;&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="0L6g5DZpiV1xgCV0iahN-65" vertex="1">
           <mxGeometry x="32.464025434091425" y="2" width="142" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="0L6g5DZpiV1xgCV0iahN-68" value="&lt;span style=&quot;font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;font color=&quot;#354a5f&quot;&gt;SaaS UI Component&lt;/font&gt;&lt;/b&gt;&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" parent="0L6g5DZpiV1xgCV0iahN-64" vertex="1">
-          <mxGeometry x="4.426510149180728" width="128.3687943262411" height="20" as="geometry" />
+        <mxCell id="0L6g5DZpiV1xgCV0iahN-68" value="&lt;span style=&quot;font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;font color=&quot;#354a5f&quot;&gt;UI Component&lt;/font&gt;&lt;/b&gt;&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" parent="0L6g5DZpiV1xgCV0iahN-64" vertex="1">
+          <mxGeometry x="5.426510149180728" width="128.3687943262411" height="20" as="geometry" />
         </mxCell>
         <mxCell id="0L6g5DZpiV1xgCV0iahN-69" value="" style="group" parent="0L6g5DZpiV1xgCV0iahN-64" vertex="1" connectable="0">
           <mxGeometry x="8.09855710442651" y="24" width="88.4000978234287" height="36" as="geometry" />

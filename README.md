@@ -9,7 +9,7 @@ We encourage you to check out our accompanying Discovery Center Mission [Develop
 </br>
 
 <p align="center">
-    <img src="./docs/architecture/multitenant-target.png" alt="Target Architecture" />
+    <img src="./docs/architecture/multitenant-architecture.png" alt="Multitenant Architecture" />
     <em>Architecture: Multitenant GenAI application with RAG on SAP BTP</em>
 </p>
 
@@ -17,7 +17,7 @@ We encourage you to check out our accompanying Discovery Center Mission [Develop
 <summary>Single Tenant Architecture</summary>
 </br>
 <p align="center">
-    <img src="./docs/architecture/singletenant-target.png" alt="Target Singletenant Architecture" />
+    <img src="./docs/architecture/singletenant-architecture.png" alt="Single-tenant Architecture" />
     <em>Architecture: Single-tenant GenAI application with RAG on SAP BTP</em>
 </p>
 </details>

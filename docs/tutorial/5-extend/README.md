@@ -1,6 +1,5 @@
 # Overview
 
-In the following steps, you will learn how to extend the AI sample application using local and hybrid development setups. 
+In the following steps, you will learn how to extend the AI sample application using hybrid development setup:
 
-- [Local development](./1-LocalDev.md)
 - [Hybrid development](./2-HybridDev.md)
