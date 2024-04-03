@@ -370,12 +370,11 @@ export default class CommonMailInsights extends ApplicationService {
         console.log("GENERATING INSIGHTS...");
         const mailsInsights = await Promise.all(
             mails.map(async (mail: IBaseMail): Promise<IProcessedMail> => {
-                const insights: z.infer<typeof schemas.MAIL_INSIGHTS_SCHEMA> = (
-                    await chain.call({
-                        subject: mail.subject,
-                        body: mail.body
-                    })
-                ).text;
+                const response = await chain.call({
+                    subject: mail.subject,
+                    body: mail.body
+                });
+                const insights: z.infer<typeof schemas.MAIL_INSIGHTS_SCHEMA> = response.text;
                 return { mail: { ...mail }, insights: { ...insights } };
             })
         );

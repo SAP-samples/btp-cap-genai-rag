@@ -8,6 +8,6 @@
     },
     "scripts": {
         "start": "node node_modules/@sap/approuter/approuter.js",
-        "start:local": "node node_modules/@sap/approuter/approuter.js --workingDir ./dev --port 5100"
+        "start:local": "node node_modules/@sap/approuter/approuter.js --workingDir ./dev --port 5000"
     }
 }

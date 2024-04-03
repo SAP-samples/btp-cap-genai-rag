@@ -147,7 +147,7 @@ export const embed = async (texts: Array<string>, EmbeddingParams: {} = {}): Pro
 export const checkDefaultResourceGroup = async (): Promise<void> => {
     try {
         // Comply with SAP AI Core Resource Group naming requirements
-        const resourceGroupId = `default-${getAppName()}`;
+        const resourceGroupId = getAppName();
 
         if (
             !(await getResourceGroups())?.find(

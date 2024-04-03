@@ -1,9 +1,4 @@
 {
-    "cdsc": {
-        "beta": {
-            "vectorType": true
-        }
-    },
     "requires": {
         "PROVIDER_AI_CORE_DESTINATION_HUB": {
             "kind": "rest",
