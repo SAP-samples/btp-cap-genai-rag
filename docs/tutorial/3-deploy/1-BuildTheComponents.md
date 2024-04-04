@@ -12,7 +12,7 @@ Depending on your target runtime, different build and deployment steps are requi
 
 In the following steps, you will build the container images for the components of this sample scenario used by helm during the installation to your SAP BTP, Kyma Runtime.
 
-> **Important** - Please make sure you have the respective tools installed in your development environment such as **helm**, **Docker** and **kubectl**. To push your Container Images, please login to your Container Registry!
+> **Important** - Please make sure you have the respective tools installed in your development environment such as **helm**, **paketo**, **Docker** and **kubectl**. To push your Container Images, please login to your Container Registry!
 
 > **Hint** - In this tutorial we assume a basic understanding of the Kyma deployment process. If you are not familiar with deployment of Kyma solutions, please refer to our [Multitenant SaaS Sample Scenario](https://github.com/SAP-samples/btp-cap-multitenant-saas/#readme) or follow the respective [SAP Developer Journey](https://learning.sap.com/learning-journey/deliver-side-by-side-extensibility-based-on-sap-btp-kyma-runtime) to learn the basics and get your setup ready.
 
