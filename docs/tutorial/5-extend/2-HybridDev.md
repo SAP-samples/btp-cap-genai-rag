@@ -85,7 +85,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    # Single-Tenant
    cf csk <Space>-ai-uaa <Space>-ai-uaa-key
    cf csk <Space>-ai-destination <Space>-ai-destination-key
-   cf csk <Space>-ai-com-hdi-container <Space>-ai-com-hdi-container-key
+   cf csk <Space>-ai-hdi-container <Space>-ai-hdi-container-key
    cf csk <Space>-ai-html5-repo-runtime <Space>-ai-html5-repo-runtime-key
 
    # Multitenant
@@ -106,7 +106,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    # Run in ./(multi/single)-tenant/code #
 
    # Single-Tenant
-   cds bind -2 <Space>-ai-destination,<Space>-ai-uaa,<Space>-ai-com-hdi-container --for hybrid
+   cds bind -2 <Space>-ai-destination,<Space>-ai-uaa,<Space>-ai-hdi-container --for hybrid
 
    # Multitenant
    cds bind -2 <Space>-aisaas-destination,<Space>-aisaas-uaa --for hybrid-app

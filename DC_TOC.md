@@ -18,5 +18,6 @@
   - [Create API Service Instance](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/2-CreateAPIService.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
   - [Push sample mails](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/3-PushSampleMails.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
   - [Test the Application](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/4-TestApplication.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
-- Extend - [Local Development](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/5-extend/1-LocalDev.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card --> - [Hybrid Development](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/5-extend/2-HybridDev.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
+- Extend
+  - [Hybrid Development](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/5-extend/2-HybridDev.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
 <!-- disco-toc-end -->
