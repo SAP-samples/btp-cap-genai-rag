@@ -5,6 +5,7 @@
   "license": "Apache License 2.0",
   "description": "AI SaaS",
   "scripts": {
+    "start": "cds-serve",
     "----------------------": "",
     "-Build Scripts-": "",
     "/--------------------/": "",
