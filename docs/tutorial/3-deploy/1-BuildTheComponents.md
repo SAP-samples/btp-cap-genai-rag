@@ -173,10 +173,12 @@ In the following steps, you will build a multi-target application which can be d
    npm i -g typescript ts-node
    ```
 
-4. Please duplicate the **free-tier.mtaext** file in the **single-tenant/deploy/cf/mtaext** directory and add the **-private** suffix before the file name extension, so that you have a second file called **free-tier-private.mtaext**.
+4. Make sure you have the Cloud MTA Build Tool (MBT) installed globally.
 
-   > **Hint** - Adding the **-private** suffix will ensure this file is not committed to GitHub.
-
+   ```sh
+   npm install -g mbt
+   ```
+   
 5. Please run the following command to build your **mtar** file.
 
    ```sh
