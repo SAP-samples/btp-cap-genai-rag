@@ -66,7 +66,7 @@
         "rimraf": "^5.0.1",
         "shx": "^0.3.4"
     },
-    "scripts": {
+    "scripts": {    
         "----------------------": "",
         "-Local/Hybrid-Testing-": "",
         "/--------------------/": "",
@@ -101,6 +101,7 @@
         "--------------------": "",
         "--------BUILD-------": "",
         "/------------------/": "",
+        "start": "cds-serve",
         "build": "npm run inst && npm run build:cds && npm run build:ui && npm run copy:common && npm run build:ts && npm run replace:paths && npm run cleanup:ts",
         "inst": "npm i && npm install --prefix ./app/aisaas-ui-ui5",
         "build:cds": "npx -p @sap/cds-dk cds build --profile production",
