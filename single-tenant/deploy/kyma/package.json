@@ -4,8 +4,7 @@
   "description": "GenAI Mail Insights",
   "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
   "license": "Apache License 2.0",
-  "scripts": {
-    "start": "cds-serve",
+  "scripts": {    
     "build": "npm run inst && npm run build:cds && npm run build:ui && npm run build:ts && npm run cleanup:ts",
     "cicd": "npm run inst && npm run build:cds && npm run build:ui && npm run build:tsnpx && npm run cleanup:ts",
     "inst": "npm i --prefix ../../code && npm install --prefix ../../code/app/ai-ui-ui5",
