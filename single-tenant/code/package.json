@@ -66,7 +66,7 @@
         "ui5": "npm run start:hybrid --prefix ./app/ai-ui-ui5",
         "cap": "cds-ts watch --profile hybrid",
         "router": "npm run start:local --prefix ./router",
-        "--------UI DEPLOYMENT-------": "",        
+        "--------UI DEPLOYMENT-------": "",
         "build": "npx -p @sap/cds-dk cds build --profile production",
         "deployer:hybrid": "cds bind --exec --profile ui-deployment npm run deployer:run",
         "deployer:run": "(cd app/html5-deployer && node ../../node_modules/@sap/html5-app-deployer/index.js)"
