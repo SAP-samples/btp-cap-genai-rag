@@ -4,7 +4,7 @@
   "repository": "https://github.com/sap-samples/btp-cap-multitenant-ai",
   "license": "Apache License 2.0",
   "description": "AI SaaS",
-  "scripts": {    
+  "scripts": {
     "----------------------": "",
     "-Build Scripts-": "",
     "/--------------------/": "",
