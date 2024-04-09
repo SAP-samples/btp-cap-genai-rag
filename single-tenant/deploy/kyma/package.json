@@ -4,7 +4,7 @@
   "description": "GenAI Mail Insights",
   "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
   "license": "Apache License 2.0",
-  "scripts": {
+  "scripts": {    
     "build": "npm run inst && npm run build:cds && npm run build:ui && npm run build:ts && npm run cleanup:ts",
     "cicd": "npm run inst && npm run build:cds && npm run build:ui && npm run build:tsnpx && npm run cleanup:ts",
     "inst": "npm i --prefix ../../code && npm install --prefix ../../code/app/ai-ui-ui5",
@@ -30,8 +30,8 @@
     "--- RUN LIKE npx --yes cross-env IMAGE_PREFIX=sap-demo npm run build:all ---": "",
     "/------------------------/": "",
     "build:all": "npm run build:srv && npm run build:db && npm run build:router && npm run build:html5-deployer",
-    "build:srv": "cross-env-shell pack build $IMAGE_PREFIX/ai-srv -p ../../code/gen/srv --buildpack gcr.io/paketo-buildpacks/nodejs --builder paketobuildpacks/builder-jammy-base",
-    "build:db": "cross-env-shell pack build $IMAGE_PREFIX/ai-db -p ../../code/gen/db --buildpack gcr.io/paketo-buildpacks/nodejs --builder paketobuildpacks/builder-jammy-base -e BP_LAUNCHPOINT=./node_modules/@sap/hdi-deploy/deploy.js",
+    "build:srv": "cross-env-shell pack build $IMAGE_PREFIX/ai-srv -p ../../code/gen/srv -B gcr.io/paketo-buildpacks/nodejs -b paketobuildpacks/builder-jammy-base -e BP_LAUNCHPOINT=./node_modules/@sap/cds/bin/cds-serve.js",
+    "build:db": "cross-env-shell pack build $IMAGE_PREFIX/ai-db -p ../../code/gen/db -B paketobuildpacks/builder:base -b paketo-buildpacks/nodejs -e BP_LAUNCHPOINT=./node_modules/@sap/hdi-deploy/deploy.js",
     "build:router": "cross-env-shell docker build -t $IMAGE_PREFIX/ai-router ../../code/router",
     "build:html5-deployer": "cross-env-shell docker build -t $IMAGE_PREFIX/ai-html5-deployer ../../code/app/html5-deployer",
     "---------------------------": "",
