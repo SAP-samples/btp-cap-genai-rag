@@ -51,7 +51,6 @@ modules:
       app-name: ai-srv-${space}
       memory: 256MB
       disk-quota: 1024MB
-      command: node ./node_modules/@sap/cds/bin/cds-serve
     properties:
       appDomain: ~{ai-approuter/app-domain}
       srvUrl: "https://${app-name}.${default-domain}"

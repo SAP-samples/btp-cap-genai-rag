@@ -60,6 +60,7 @@
         "@cap-js/cds-typer": "^0"
     },
     "scripts": {
+        "start": "cds-serve",
         "--------DEVELOPMENT-------": "",
         "watch": "npx --yes npm-run-all --npm-path npm --parallel cap router ui5",
         "ui5": "npm run start:hybrid --prefix ./app/ai-ui-ui5",
