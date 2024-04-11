@@ -1,0 +1,16 @@
+{
+    "destinations": [
+        {
+            "name": "api",
+            "url": "http://localhost:4004",
+            "forwardAuthToken": true,
+            "timeout": 40000
+        },
+        {
+            "name": "ui",
+            "url": "http://localhost:8081",
+            "forwardAuthToken": true,
+            "timeout": 40000
+        }
+    ]
+}

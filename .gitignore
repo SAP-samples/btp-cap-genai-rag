@@ -33,4 +33,7 @@ brokerpass.txt
 *.sqlite-*
 .$*
 
-!/multi-tenant/code/db.sqlite.sample
+!multi-tenant/code/router/dev/default-services.sample.json
+!multi-tenant/code/router/dev/default-env.json
+!single-tenant/code/router/dev/default-services.sample.json
+!single-tenant/code/router/dev/default-env.json
