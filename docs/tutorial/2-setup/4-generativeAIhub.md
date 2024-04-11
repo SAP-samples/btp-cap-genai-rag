@@ -41,12 +41,12 @@ Create a new destination in your Provider Subaccount using the Service Binding d
 ```html
 Name=PROVIDER_AI_CORE_DESTINATION_HUB
 Type=HTTP
-URL=<serviceurls.AI_API_URL>/v2
+URL=<serviceurls.AI_API_URL>/v2 # /v2 important!
 ProxyType=Internet
 Authentication=OAuth2ClientCredentials
 clientId=<clientid>
 clientSecret=<cliensecret>
-tokenServiceURL=<url>/oauth/token
+tokenServiceURL=<url>/oauth/token # /oauth/token important!
 tokenServiceURLType=Dedicated
 HTML5.Timeout=300000
 ```
