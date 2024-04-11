@@ -1,6 +1,6 @@
 {
   "uaa": {
-    "url": "https://aws-eu10.authentication.sap.hana.ondemand.com",
+    "url": "", # url of your uaa instance e.g., https://xyz.authentication.sap.hana.ondemand.com
     "clientid": "",
     "clientsecret": ""
   }
