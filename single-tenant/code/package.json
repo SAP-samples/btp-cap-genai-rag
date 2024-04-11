@@ -64,6 +64,7 @@
         "--------DEVELOPMENT-------": "",
         "watch": "npx --yes npm-run-all --npm-path npm --parallel cap router ui5",
         "ui5": "npm run start:hybrid --prefix ./app/ai-ui-ui5",
+        "ui5:init": "npm install --prefix ./app/ai-ui-ui5",
         "cap": "cds-ts watch --profile hybrid",
         "router": "npm run start:local --prefix ./router",
         "--------UI DEPLOYMENT-------": "",

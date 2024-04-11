@@ -196,7 +196,7 @@ After configuring your **.cdsrc-private.json** files, you can run the applicatio
 
    # App Service + API Service + HTML5 Repo Mock + UI5 App
    # Parallel start using same terminal
-   npm run hybrid
+   npm run watch
 
    # Single starts also possible
    npm run app # App Service

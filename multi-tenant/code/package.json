@@ -66,14 +66,15 @@
         "rimraf": "^5.0.1",
         "shx": "^0.3.4"
     },
-    "scripts": {    
+    "scripts": {
         "start": "cds-serve",
         "----------------------": "",
         "-Hybrid-Testing-": "",
         "/--------------------/": "",
         "test": "mocha --timeout 20000",
-        "hybrid": "npx --yes npm-run-all --npm-path npm --parallel cap router ui5",
+        "watch": "npx --yes npm-run-all --npm-path npm --parallel cap router ui5",
         "---UI5-App---": "",
+        "ui5:init": "npm install --prefix ./app/aisaas-ui-ui5",
         "ui5": "npm run start:hybrid --prefix ./app/aisaas-ui-ui5",
         "---CAP-Hybrid---": "",
         "cap": "npx --yes npm-run-all --npm-path npm --parallel app api",
