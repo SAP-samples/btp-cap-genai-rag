@@ -75,7 +75,7 @@ After succesful deployment, we can develop based on the created service instance
 4. Run `npm run watch:api` or `yarn watch:api` from project root to start CAP backend.
 5. Duplicate `api/test/requests.sample.http` to `api/test/requests.http` and enter UAA details from the Service Key of the `genaihub-vectorengine-sample-uaa` instance to execute the requests.
 
-#### if UI is attached (tbd)
+#### if UI is attached
 
 1. Duplicate `router/dev/default-services.sample.json` to `router/dev/default-services.json` and enter UAA details from the Service Key of the `genaihub-vectorengine-sample-uaa` instance.
 2. Run `npm run watch` or `yarn watch` from project root to start the Approuter and CAP backend.
