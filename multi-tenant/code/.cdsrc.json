@@ -11,13 +11,20 @@
         "toggles": true,
         "extensibility": false,
         "db": {
-            "kind": "hana",
-            "impl": "@sap/cds-hana",
-            "deploy-format": "hdbtable",
+            "kind": "hana-mt",
             "vcap": {
-                "label": "service-manager",
+                "label": false,
                 "plan": "container"
+            },
+            "pool": {
+                "acquireTimeoutMillis": 10000,
+                "min": 0,
+                "max": 10,
+                "fifo": true
             }
+        },
+        "auth": {
+            "kind": "xsuaa"
         }
     }
 }
