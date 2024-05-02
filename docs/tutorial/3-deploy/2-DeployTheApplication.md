@@ -107,23 +107,25 @@ The deployment process in Kyma requires you to use a helm-based deployment appro
 
     - parameters.oauth2-configuration.redirect-urls - Please provide your default Cluster Domain including a wildcard subdomain prefix ("\*."). Keep the **localhost** redirects for local testing purposes.
 
-          > **Hint** - If you are using a custom domain, also provide this domain in the redirect-urls. More details can be found in the respective **Expert Feature** ([click here](../../4-expert/-Kyma-/custom-domain-usage/README.md))
+        > **Hint** - If you are using a custom domain, also provide this domain in the redirect-urls. More details can be found in the respective **Expert Feature** ([click here](../../4-expert/-Kyma-/custom-domain-usage/README.md))
 
-          > **Hint** - Use the following **kubectl** command to retrieve your default Cluster domain.
+        > **Hint** - Use the following **kubectl** command to retrieve your default Cluster domain.
 
-          ```
-          kubectl get configMaps/shoot-info -n kube-system -o jsonpath='{.data.domain}'
-          ```
+          
+        `kubectl get configMaps/shoot-info -n kube-system -o jsonpath='{.data.domain}'`
+          
 
-          ```yaml
-          xsuaa:
-            parameters:
-              oauth2-configuration:
-                redirect-uris:
-                  - https://*.a1b2c3.kyma.ondemand.com/**
-                  - http://*.localhost:5000/**
-                  - http://localhost:5000/**
-          ```
+          
+        ```
+        xsuaa:
+          parameters:
+            oauth2-configuration:
+              redirect-uris:
+                - https://*.a1b2c3.kyma.ondemand.com/**
+                - http://*.localhost:5000/**
+                - http://localhost:5000/**
+        ```
+          
 
       </details>
       <br>

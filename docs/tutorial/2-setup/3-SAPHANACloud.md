@@ -1,8 +1,5 @@
 # Configure SAP HANA Cloud
 
-> [!IMPORTANT]
-> **SAP HANA Cloud's Vector Engine** is available since release QRC 1/2024 which is necessary for this architecture and use case.
-
 Depending on your landscape setup, either create a new SAP HANA Cloud instance or share an existing SAP HANA Cloud instance with your Cloud Foundry Org/Space respectively your Kyma Cluster/Namespace.
 
 - [Configure SAP HANA Cloud](#configure-sap-hana-cloud)
