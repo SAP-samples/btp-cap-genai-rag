@@ -1,6 +1,6 @@
-@xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
-@btpXsuaaClient = sb-ai-dev-sap-demo!b12345
-@btpXsuaaSecret = abcd1234abcd1234abcd1234
+@xsuaaHostname = <uaa.url>
+@btpXsuaaClient = <uaa.clientid>
+@btpXsuaaSecret = <uaa.clientsecret>
 
 
 ### GET XSUAA TOKEN
