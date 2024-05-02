@@ -36,7 +36,6 @@
         "node-jose": "^2.1",
         "openai": "~4.4.0",
         "passport": "^0.6.0",
-        "sqlite3": "^5.1.7",
         "typeorm": "^0.3.17",
         "uuid": "^9.0.1"
     },

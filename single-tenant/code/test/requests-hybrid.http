@@ -1,6 +1,6 @@
-@xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
-@btpXsuaaClient = sb-ai-dev-sap-demo!b12345
-@btpXsuaaSecret = abcd1234abcd1234abcd1234
+@xsuaaHostname = https://genai-mail-insights-2pp0d2dp.authentication.eu11.hana.ondemand.com
+@btpXsuaaClient = sb-ai-demo-genai-mail-insights-2pp0d2dp!t11013
+@btpXsuaaSecret = 09b57312-2dd1-48e6-a54b-f89c4302697b$Yn1_MNIXD9zS-mCFhvnXG1OhdGSeEtsx77TfKnCBZyQ=
 
 
 ### GET XSUAA TOKEN
@@ -130,6 +130,26 @@ Authorization: Bearer {{token}}
         "subject": "Assistance Needed for a Multi-City European Tour",
         "body": "Hello ThorTours Team, I'm planning a multi-city tour of Europe for next summer and I'm having trouble figuring out the best way to book the flights and hotels. Can you assist me in creating an itinerary that includes Rome, Paris, Berlin, and Barcelona? \nThanks in Advance,  \nTom Davis \n",
         "senderEmailAddress": "tom.davis@tttraveler.org"
+    }
+  ]
+}
+
+
+
+### ADD MAILSIII
+@token = {{getXsuaaToken.response.body.$.access_token}}
+
+# @name addMailsIII
+POST http://localhost:4004/odata/v4/mail-insights/addMails
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "mails": [
+    {
+        "subject": "Test",
+        "body": "Test, danke!",
+        "senderEmailAddress": "kay@sap.com"
     }
   ]
 }

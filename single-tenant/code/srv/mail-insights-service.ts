@@ -187,8 +187,6 @@ export default class CommonMailInsights extends ApplicationService {
             const mailBatch = await this.regenerateInsights(mails, rag);
 
             // insert mails with insights
-            console.log("UPDATE MAILS WITH INSIGHTS...");
-
             await INSERT.into(Mails).entries(mailBatch);
 
             const insertedMails = await SELECT.from(Mails, (m: any) => {
@@ -258,7 +256,6 @@ export default class CommonMailInsights extends ApplicationService {
             const potentialResponse = potentialResponses.find((res: any) => res.mail.ID === mail.ID)?.response;
             const languageMatch = languageMatches.find((res: any) => res.mail.ID === mail.ID)?.languageMatch;
             const embedding = embeddings.find((res: any) => res.mail.ID === mail.ID)?.embedding;
-
             acc.push({
                 mail,
                 insights: {
@@ -345,7 +342,7 @@ export default class CommonMailInsights extends ApplicationService {
     public extractGeneralInsights = async (mails: Array<IBaseMail>): Promise<Array<IProcessedMail>> => {
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
+        const llm = new BTPAzureOpenAIChatLLM();
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -367,7 +364,6 @@ export default class CommonMailInsights extends ApplicationService {
             outputParser: OutputFixingParser.fromLLM(llm, parser)
         });
 
-        console.log("GENERATING INSIGHTS...");
         const mailsInsights = await Promise.all(
             mails.map(async (mail: IBaseMail): Promise<IProcessedMail> => {
                 const response = await chain.call({
@@ -396,7 +392,7 @@ export default class CommonMailInsights extends ApplicationService {
     ): Promise<any> => {
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
+        const llm = new BTPAzureOpenAIChatLLM();
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -476,7 +472,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_LANGUAGE_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
+        const llm = new BTPAzureOpenAIChatLLM();
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -518,14 +514,12 @@ export default class CommonMailInsights extends ApplicationService {
      * @return {Promise} - Returns a Promise that resolves to an array of embeddings.
      */
     public createEmbeddings = async (mails: Array<IBaseMail>): Promise<any> => {
-        const embed = new BTPEmbedding(aiCore.embed);
+        const embed = new BTPEmbedding();
         const embeddings = await Promise.all(
             mails.map(async (mail: IBaseMail) => {
                 const embeddings = await embed.embedDocuments([mail.body]);
                 const embeddingOriginal = embeddings[0];
                 const embedding = array2VectorBuffer(embeddingOriginal);
-                //const embeddingTemp = Float32Array.from(embeddingOriginal);
-                //const embedding = Buffer.from(embeddingTemp.buffer);
                 return { mail, embedding };
             })
         );
@@ -542,7 +536,7 @@ export default class CommonMailInsights extends ApplicationService {
         // prepare response
         const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
         const formatInstructions = parser.getFormatInstructions();
-        const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
+        const llm = new BTPAzureOpenAIChatLLM();
 
         const systemPrompt = new PromptTemplate({
             template:
@@ -611,7 +605,7 @@ export default class CommonMailInsights extends ApplicationService {
             // prepare response
             const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA);
             const formatInstructions = parser.getFormatInstructions();
-            const llm = new BTPAzureOpenAIChatLLM(aiCore.chatCompletion);
+            const llm = new BTPAzureOpenAIChatLLM();
 
             const systemPrompt = new PromptTemplate({
                 template: `Translate the following response of the customer support into ${language}.
@@ -658,9 +652,6 @@ export default class CommonMailInsights extends ApplicationService {
             const { Mails } = this.entities;
             const mails = await SELECT.from(Mails);
             const mailBatch = await this.regenerateInsights(mails, rag);
-
-            // insert mails with insights
-            console.log("UPDATE MAILS WITH INSIGHTS...");
 
             cds.tx(async () => {
                 const { Mails } = this.entities;

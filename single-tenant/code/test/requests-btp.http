@@ -1,7 +1,7 @@
-@xsuaaHostname = https://sap-demo.authentication.eu10.hana.ondemand.com
-@btpXsuaaClient = sb-ai-dev-sap-demo!b12345
-@btpXsuaaSecret = abcd1234abcd1234abcd1234
-@btpAppHostname = https://sap-demo-dev-ai-api-srv.cfapps.eu10.hana.ondemand.com
+@xsuaaHostname = https://genai-mail-insights-2pp0d2dp.authentication.eu11.hana.ondemand.com
+@btpXsuaaClient = sb-ai-demo-genai-mail-insights-2pp0d2dp!t11013
+@btpXsuaaSecret = 09b57312-2dd1-48e6-a54b-f89c4302697b$Yn1_MNIXD9zS-mCFhvnXG1OhdGSeEtsx77TfKnCBZyQ=
+@btpAppHostname = https://genai-mail-insights-2pp0d2dp-demo-ai-srv.cfapps.eu11.hana.ondemand.com
 
 
 ### GET XSUAA TOKEN
@@ -81,11 +81,6 @@ Authorization: Bearer {{token}}
         "subject": "Request for Booking Extension - Gran Canaria Trip",
         "body": "Dear ThorTours Team,\n\nI trust this email finds you well.\n\nMy name is Cyrill and I recently booked a trip to Gran Canaria through your esteemed agency. The booking included flight tickets and accommodation for two persons. However, I am delighted to inform you that there will be an additional member joining us for this trip.\n\nWe are excited about this and would greatly appreciate if you could assist in extending our current booking to include this third person. We would need to arrange for an extra flight ticket and, if possible, an upgrade to our current hotel room to comfortably accommodate all three of us.\n\nHere are the details of the original booking for your reference:\n\nBooking ID: 546HTZ\nDestination: Gran Canaria\nDuration: 1.8.2023 - 21.8.2023\nOriginal Guests: 2\n\nI understand that there might be additional charges for these adjustments and I am prepared to cover them. Could you please provide an estimate so I can make the necessary arrangements?\n\nI would appreciate your prompt attention to this matter as we are eager to finalize our plans. You can reach me at [myemail] or call me at [myphone] for further information or to discuss any potential issues.\n\nThank you for your assistance. I have always been satisfied with the high level of service provided by ThorTours and I am confident that you will be able to help us with this request.\n\nBest Regards,\nCyrill\n",
         "senderEmailAddress": "cyrill@tttraveler.org"
-    },
-    {
-        "subject": "Inquiry about the Best Season for Traveling to Bali",
-        "body": "Dear ThorTours,\n\nI hope this email finds you well. My name is Robert, and I am writing to inquire about the best season for traveling to Bali. I am considering a trip to this beautiful destination and would like to seek your expert advice to ensure an enjoyable and memorable experience.\n\nAs my travel plans are flexible, I am looking for a time when the weather in Bali is moderate, not excessively hot and without heavy rainfall. I believe that such weather conditions would enable me to explore the island comfortably and make the most of my visit.\n\nCould you kindly provide me with information regarding the ideal time to visit Bali for these specific weather preferences? I would greatly appreciate any insights or recommendations you can offer based on your expertise in travel planning and knowledge of the region.\n\nAdditionally, if you have any special travel packages or deals that align with the suggested time to visit, please feel free to share them with me. I am open to considering various options to make my trip an extraordinary one.\n\nThank you for taking the time to assist me with this inquiry. I am eagerly looking forward to your response and your valuable guidance.\n\nPlease don't hesitate to reach out if you need any further information from me.\n\nBest regards,\nRobert\n",
-        "senderEmailAddress": "robert@tttraveler.org"
     }
   ]
 }
@@ -102,6 +97,11 @@ Authorization: Bearer {{token}}
 {
   "mails": [
     {
+        "subject": "Inquiry about the Best Season for Traveling to Bali",
+        "body": "Dear ThorTours,\n\nI hope this email finds you well. My name is Robert, and I am writing to inquire about the best season for traveling to Bali. I am considering a trip to this beautiful destination and would like to seek your expert advice to ensure an enjoyable and memorable experience.\n\nAs my travel plans are flexible, I am looking for a time when the weather in Bali is moderate, not excessively hot and without heavy rainfall. I believe that such weather conditions would enable me to explore the island comfortably and make the most of my visit.\n\nCould you kindly provide me with information regarding the ideal time to visit Bali for these specific weather preferences? I would greatly appreciate any insights or recommendations you can offer based on your expertise in travel planning and knowledge of the region.\n\nAdditionally, if you have any special travel packages or deals that align with the suggested time to visit, please feel free to share them with me. I am open to considering various options to make my trip an extraordinary one.\n\nThank you for taking the time to assist me with this inquiry. I am eagerly looking forward to your response and your valuable guidance.\n\nPlease don't hesitate to reach out if you need any further information from me.\n\nBest regards,\nRobert\n",
+        "senderEmailAddress": "robert@tttraveler.org"
+    },
+    {
         "subject": "Ideale Reisezeit f\u00fcr Mallorca",
         "body": "Sehr geehrtes ThorTours-Team,\n\nIch plane eine Reise nach Mallorca und m\u00f6chte wissen, welche Zeit f\u00fcr gem\u00e4\u00dfigtes Wetter am besten geeignet ist. K\u00f6nnen Sie mir bitte beraten?\n\nVielen Dank und mit freundlichen Gr\u00fc\u00dfen,\nAdam",
         "senderEmailAddress": "adam@tttraveler.org"
@@ -110,7 +110,20 @@ Authorization: Bearer {{token}}
         "subject": "Conseils pour une visite au Grand Canyon",
         "body": "Ch\u00e8re \u00e9quipe de ThorTours,\n\nJe pr\u00e9vois de visiter le Grand Canyon et je voudrais conna\u00eetre la meilleure p\u00e9riode pour un temps mod\u00e9r\u00e9. Vos conseils seraient grandement appr\u00e9ci\u00e9s.\n\nMerci et cordialement,\nJean",
         "senderEmailAddress": "jean@tttraveler.org"
-    },
+    }
+  ]
+}
+
+### ADD MAILS IV
+@token = {{getXsuaaToken.response.body.$.access_token}}
+
+# @name addMailsIV
+POST {{btpAppHostname}}/odata/v4/mail-insights/addMails
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "mails": [
     {
         "subject": "Anfrage zur Stornierung",
         "body": "Liebes ThorTours team,\n\nleider bin ich erkrankt und kann meine letzte Woche gebuchte Reise nach Indonesien nicht antreten. Anbei meine Krankschreibung.\n\nIch w\u00fcrde die Reise gerne stornieren und zu einem sp\u00e4teren Zeitpunkt neu buchen.\n\nK\u00f6nnen Sie mir dabei helfen?\n\nDanke\nAdelheid\n",

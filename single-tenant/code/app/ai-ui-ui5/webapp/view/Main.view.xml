@@ -186,9 +186,11 @@
                                     noDataText="{i18n>inbox.list.noData}"
                                     items="{
                                     path: 'api>/Mails',
+                                    sorter: {path: 'createdAt', descending: true},
                                     parameters: {
                                         $count: true,
-                                        $expand: 'translation'
+                                        $expand: 'translation',
+                                        $orderby: 'createdAt desc'
                                     },
                                     events: {
                                         dataReceived: '.onUpdateEmailsList'

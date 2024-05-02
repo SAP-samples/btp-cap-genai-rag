@@ -11,9 +11,8 @@
         "@sap-cloud-sdk/http-client": "^3.2.0",
         "@sap-cloud-sdk/openapi": "^3.2.0",
         "@sap/audit-logging": "^5",
-        "@sap/cds": "^7.6.1",
-        "@sap/cds-compiler": "^4.6.0",
-        "@sap/cds-hana": "^2",
+        "@sap/cds": "^7.8.2",
+        "@sap/cds-hana": "^2.0.0",
         "@sap/cds-odata-v2-adapter-proxy": "^1",
         "@sap/xsenv": "^4.0.0",
         "@sap/xssec": "^3.3.4",
@@ -34,12 +33,11 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.22.15",
+        "@cap-js/cds-typer": "^0",
         "@prettier/plugin-xml": "^3.2.1",
         "@sap/approuter": "^14.3.4",
-        "@sap/cds": "^7.8.0",
-        "@sap/cds-dk": "^7.8.0",
-        "@sap/cds-compiler": "^4.8.0",
         "@sap/cds-common-content": "1.0.1",
+        "@sap/cds-dk": "^7.8.0",
         "@sap/html5-app-deployer": "^5.0.0",
         "@sap/html5-repo-mock": "^2.1.1",
         "@sap/ux-specification": "^1.96.4",
@@ -56,8 +54,7 @@
         "npm-run-all": "^4.1.5",
         "prettier": "3.0.3",
         "rimraf": "^5.0.1",
-        "shx": "^0.3.4",
-        "@cap-js/cds-typer": "^0"
+        "shx": "^0.3.4"
     },
     "scripts": {
         "start": "cds-serve",

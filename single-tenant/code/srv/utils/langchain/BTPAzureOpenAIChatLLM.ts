@@ -1,55 +1,100 @@
-import { ChatOpenAI, ChatOpenAICallOptions } from "langchain/chat_models/openai";
-import { OpenAICoreRequestOptions } from "langchain/dist/types/openai-types";
+import { ChatOpenAICallOptions } from "langchain/chat_models/openai";
 import { type OpenAI as OpenAIClient } from "openai";
+
+import { SimpleChatModel } from "langchain/chat_models/base";
+import { BaseMessage } from "langchain/schema";
+import { CallbackManagerForLLMRun } from "langchain/callbacks";
+import cds from "@sap/cds";
+import * as aiCore from "../ai-core";
+
+interface BTPChatOpenAICallOptions extends ChatOpenAICallOptions {
+    max_tokens?: number;
+    temperature?: number;
+    frequency_penalty?: number;
+    presence_penalty?: number;
+}
 
 /**
  * A wrapper for SAP AI Core to handle interactions with the Azure OpenAI Chat API
- * @extends ChatOpenAI
+ * @extends SimpleChatModel
  */
-export default class BTPAzureOpenAIChatLLM extends ChatOpenAI<ChatOpenAICallOptions> {
-    private chatCompletion: (
-        request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming
-    ) => Promise<OpenAIClient.Chat.Completions.ChatCompletion>;
+export default class BTPAzureBaseChatLLM extends SimpleChatModel<ChatOpenAICallOptions> {
+    private params: BTPChatOpenAICallOptions = {
+        max_tokens: 2000,
+        temperature: 0.0,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        stop: ["null"]
+    };
+    private config: aiCore.GenerativeAIHubConfig = <aiCore.GenerativeAIHubConfig>{};
 
     /**
      * Constructs a new instance of BTPAzureOpenAIChatLLM
-     * @param {Function} chatCompletion - A function to generate chat completions
-     * @param {ChatOpenAICallOptions} params - Additional parameters for the OpenAI API
+     * @param {BTPIds} config - resourceGroupId, deploymentId and destination
+     * @param {BTPChatOpenAICallOptions} params - Additional parameters for the OpenAI API
      */
-    constructor(
-        chatCompletion: (
-            request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming
-        ) => Promise<OpenAIClient.Chat.Completions.ChatCompletion>,
-        tenant: string = "main",
-        params: ChatOpenAICallOptions = {}
-    ) {
+    constructor({
+        config = {},
+        params = <BTPChatOpenAICallOptions>{}
+    }: {
+        config?: aiCore.GenerativeAIHubConfig;
+        params?: BTPChatOpenAICallOptions;
+    } = {}) {
         super({
-            ...params,
-            openAIApiKey: "dummy-key",
-            streaming: false
+            ...params
         });
-        this.chatCompletion = chatCompletion;
+        this.config = { ...this.config, ...config };
+        this.params = { ...this.params, ...params };
     }
 
     /**
-     * Returns the type of this LLM instance
-     * @returns {string} The type of the LLM
+     * Handles call() function, handles interaction with OpenAI
+     * @param {BaseMessage[]} messages - Prompt for GPT
+     * @param {this} options - ?
+     * @param {CallbackManagerForLLMRun} runManager - ?
+     *
+     * @return {string} - Response from OpenAI
      */
+    async _call(
+        messages: BaseMessage[],
+        _options?: this["ParsedCallOptions"],
+        _runManager?: CallbackManagerForLLMRun
+    ): Promise<string> {
+        const resourceGroupId = this.config?.resourceGroupId || aiCore.getAppName();
+        const deploymentId =
+            this.config?.deploymentId || (await aiCore.getDeploymentId(resourceGroupId, aiCore.Tasks.CHAT));
+        if (deploymentId) {
+            const aiCoreService = await cds.connect.to(this.config?.destination || aiCore.AI_CORE_DESTINATION);
+            const payload: any = {
+                messages: [
+                    {
+                        role: "system",
+                        content: messages[0].content
+                    },
+                    {
+                        role: "user",
+                        content: messages[1].content
+                    }
+                ],
+                ...this.params
+            };
+            const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+            const response: OpenAIClient.Chat.Completions.ChatCompletion = await aiCoreService.send({
+                // @ts-ignore
+                query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=${aiCore.API_VERSION}`,
+                data: payload,
+                headers: headers
+            });
+            return response?.choices[0].message?.content || "";
+        } else {
+            // @ts-ignore
+            return null;
+        }
+    }
+
     _llmType(): string {
         return "SAP BTP Azure OpenAI Chat LLM Wrapper";
     }
 
-    /**
-     * Provides chat completions with retry functionality
-     * @param {OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming} request - The chat completion request
-     * @param {OpenAICoreRequestOptions} options - Additional options for the request
-     * @returns {Promise<OpenAIClient.Chat.Completions.ChatCompletion>} A promise that resolves to the chat completion
-     */
-    // @ts-ignore
-    async completionWithRetry(
-        request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
-        options?: OpenAICoreRequestOptions
-    ): Promise<OpenAIClient.Chat.Completions.ChatCompletion> {
-        return await this.chatCompletion(request);
-    }
+    _combineLLMOutput(): any {}
 }
