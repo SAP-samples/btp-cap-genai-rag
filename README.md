@@ -47,7 +47,7 @@ In this scenario, we provide a practical demonstration using a minimal amount of
 > Make sure [TypeScript support is enabled](https://cap.cloud.sap/docs/node.js/typescript), otherwise run `npm i -g typescript ts-node`
 
 1. Run `npm install` or `yarn install` in `api` directory to install project specific dependencies.
-2. Dupliate `api/.cdsrc.sample.json` to `api/.cdsrc.json` and enter the Deployment IDs for the created ChatCompletion and Embedding model from the preparation steps above. Adjust the Resource Group if necessary.
+2. Duplicate `api/.cdsrc.sample.json` to `api/.cdsrc.json` and enter the Deployment IDs for the created ChatCompletion and Embedding model from the preparation steps above. Adjust the Resource Group if necessary.
 3. Run `npm run build` or `yarn build` on CLI to build the MTA.
 4. Login to your subaccount with [Cloud Foundry CLI](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html), running `cf login`.
 5. Run `npm run deploy` or `yarn deploy` on CLI to deploy the API to your Subaccount.
