@@ -4,13 +4,13 @@
             "name": "api",
             "url": "http://localhost:4004",
             "forwardAuthToken": true,
-            "timeout": 40000
+            "timeout": 300000
         },
         {
             "name": "ui",
             "url": "http://localhost:8081",
             "forwardAuthToken": true,
-            "timeout": 40000
+            "timeout": 30000
         }
     ]
 }

@@ -42,9 +42,6 @@ export default class MailInsightsService extends CommonMailInsights {
             const mails = await SELECT.from(Mails);
             const mailBatch = await this.regenerateInsights(mails, rag);
 
-            // insert mails with insights
-            console.log("UPDATE MAILS WITH INSIGHTS...");
-
             cds.tx(async () => {
                 const { Mails } = this.entities;
                 await UPSERT.into(Mails).entries(mailBatch);

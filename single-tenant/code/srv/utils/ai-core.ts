@@ -1,9 +1,7 @@
-import cds from "@sap/cds";
 import xsenv from "@sap/xsenv";
 import { HttpResponse } from "@sap-cloud-sdk/http-client";
 import { executeHttpRequest } from "@sap-cloud-sdk/http-client";
 import { decodeJwt } from "@sap-cloud-sdk/connectivity";
-import { OpenAI as OpenAIClient } from "openai";
 import { Service, Destination, DestinationSelectionStrategies } from "@sap-cloud-sdk/connectivity";
 
 import { DeploymentApi, ResourceGroupApi, ConfigurationApi, ConfigurationBaseData } from "../vendor/AI_CORE_API";
@@ -14,10 +12,10 @@ interface AICoreApiHeaders extends Record<string, string> {
 }
 
 // SAP AI Core Destination to be used
-const AI_CORE_DESTINATION = process.env["AI_CORE_DESTINATION"] || "PROVIDER_AI_CORE_DESTINATION_HUB";
+export const AI_CORE_DESTINATION = process.env["AI_CORE_DESTINATION"] || "PROVIDER_AI_CORE_DESTINATION_HUB";
 
 // Azure OpenAI API version being used
-const API_VERSION = process.env["AI_CORE_API_VERSION"] || "2023-05-15";
+export const API_VERSION = process.env["AI_CORE_API_VERSION"] || "2023-05-15";
 
 // SAP AI Core Artifact Details deployed in Resource Group
 const SCENARIO_ID = process.env["AI_CORE_SCENARIO_ID"] || "foundation-models";
@@ -55,88 +53,17 @@ const CONFIGURATIONS = process.env["AI_CORE_CONFIGURATIONS"]
       ];
 
 // SAP AI Core Configurations to be used for different Tasks
-enum Tasks {
+export enum Tasks {
     CHAT = "gpt-4-config",
     COMPLETION = "gpt-4-config",
     EMBEDDING = "text-embedding-ada-002-config"
 }
 
-// ***********************************************************************************************
-// COMPLETION & EMBED HANDLING
-// ***********************************************************************************************
-
-/**
- * Use the chat completion api from Azure OpenAI services to make a completion call
- * @param {OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming} request - The messages for the chat completion
- * @param {Object} [LLMParams={}] - Additional parameters
- * @returns {Promise<OpenAIClient.Chat.Completions.ChatCompletion>} - The text completion
- */
-export const chatCompletion = async (
-    request: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming,
-    LLMParams: {} = {}
-): Promise<OpenAIClient.Chat.Completions.ChatCompletion> => {
-    const resourceGroupId = getAppName();
-    const deploymentId = await getDeploymentId(resourceGroupId, Tasks.CHAT);
-    if (deploymentId) {
-        const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
-        const payload: any = {
-            messages: request.messages,
-            max_tokens: 2000,
-            temperature: 0.0,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-            stop: "null",
-            ...LLMParams
-        };
-        const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-        const response: OpenAIClient.Chat.Completions.ChatCompletion = await aiCoreService.send({
-            // @ts-ignore
-            query: `POST /inference/deployments/${deploymentId}/chat/completions?api-version=${API_VERSION}`,
-            data: payload,
-            headers: headers
-        });
-
-        return response;
-    } else {
-        // @ts-ignore
-        return null;
-    }
-};
-
-/**
- * Use the embedding api from Azure OpenAI services to generate embeddings
- * @param {Array<string>} texts - The texts to embed
- * @param {Object} [EmbeddingParams={}] - Additional parameters
- * @returns {Promise<number[][]>} - The embeddings
- */
-export const embed = async (texts: Array<string>, EmbeddingParams: {} = {}): Promise<number[][]> => {
-    const resourceGroupId = getAppName();
-    const deploymentId = await getDeploymentId(resourceGroupId, Tasks.EMBEDDING);
-    if (deploymentId) {
-        const aiCoreService = await cds.connect.to(AI_CORE_DESTINATION);
-
-        const embeddings = await Promise.all(
-            texts.map(async (text: string) => {
-                const payload: any = {
-                    input: text,
-                    ...EmbeddingParams
-                };
-                const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-                const response: any = await aiCoreService.send({
-                    // @ts-ignore
-                    query: `POST /inference/deployments/${deploymentId}/embeddings?api-version=${API_VERSION}`,
-                    data: payload,
-                    headers: headers
-                });
-
-                return response["data"][0]?.embedding;
-            })
-        );
-        return embeddings;
-    } else {
-        return [];
-    }
-};
+export interface GenerativeAIHubConfig {
+    resourceGroupId?: string;
+    deploymentId?: string;
+    destination?: string;
+}
 
 /**
  * Checks and creates a default resource group if it doesn't exist.

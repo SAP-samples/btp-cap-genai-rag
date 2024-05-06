@@ -133,3 +133,23 @@ Authorization: Bearer {{token}}
     }
   ]
 }
+
+
+
+### ADD MAILSIII
+@token = {{getXsuaaToken.response.body.$.access_token}}
+
+# @name addMailsIII
+POST http://localhost:4004/odata/v4/mail-insights/addMails
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "mails": [
+    {
+        "subject": "Test",
+        "body": "Test, danke!",
+        "senderEmailAddress": "kay@sap.com"
+    }
+  ]
+}

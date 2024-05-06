@@ -1,4 +1,7 @@
 import { Embeddings, EmbeddingsParams } from "langchain/embeddings/base";
+import cds from "@sap/cds";
+
+import * as aiCore from "../ai-core";
 
 /**
  * A wrapper for SAP AI Core to handle interactions with the Embedding Models
@@ -6,20 +9,12 @@ import { Embeddings, EmbeddingsParams } from "langchain/embeddings/base";
  */
 export default class BTPEmbedding extends Embeddings {
     /**
-     * The embed function that transforms documents into embeddings.
-     * @private
-     */
-    private embed: (documents: string[], EmbeddingParams?: {}) => Promise<number[][]>;
-    /**
-     * The tenant to be used for the embedding.
-     * @private
-     */
-    private tenant: string;
-    /**
      * The parameters to be passed to the embed function.
      * @private
      */
     private EmbeddingParams: {};
+
+    private config: aiCore.GenerativeAIHubConfig = <aiCore.GenerativeAIHubConfig>{};
 
     /**
      * Creates an instance of BTPEmbedding.
@@ -28,15 +23,13 @@ export default class BTPEmbedding extends Embeddings {
      * @param {Object} EmbeddingParams - The parameters to be passed to the embed function. Defaults to an empty object.
      * @param {EmbeddingsParams} params - The parameters for the super class. Defaults to an empty object.
      */
-    constructor(
-        embed: (documents: string[]) => Promise<number[][]>,
-        tenant: string = "main",
-        EmbeddingParams: {} = {},
-        params: EmbeddingsParams = {}
-    ) {
+    constructor({
+        config = {},
+        params = {}
+    }: { config?: aiCore.GenerativeAIHubConfig; params?: EmbeddingsParams } = {}) {
         super(params);
-        this.embed = embed;
-        this.EmbeddingParams = EmbeddingParams;
+        this.config = { ...this.config, ...config };
+        this.EmbeddingParams = { ...this.EmbeddingParams, ...params };
     }
 
     /**
@@ -45,8 +38,32 @@ export default class BTPEmbedding extends Embeddings {
      * @returns {Promise<number[][]>} The embeddings of the documents.
      */
     async embedDocuments(documents: string[]): Promise<number[][]> {
-        const embeddings = await this.embed(documents, this.EmbeddingParams);
-        return embeddings;
+        const resourceGroupId = this.config?.resourceGroupId || aiCore.getAppName();
+        const deploymentId =
+            this.config?.deploymentId || (await aiCore.getDeploymentId(resourceGroupId, aiCore.Tasks.EMBEDDING));
+        if (deploymentId) {
+            const aiCoreService = await cds.connect.to(this.config?.destination || aiCore.AI_CORE_DESTINATION);
+            const embeddings = await Promise.all(
+                documents.map(async (text: string) => {
+                    const payload: any = {
+                        input: text,
+                        ...this.EmbeddingParams
+                    };
+                    const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
+                    const response: any = await aiCoreService.send({
+                        // @ts-ignore
+                        query: `POST /inference/deployments/${deploymentId}/embeddings?api-version=${aiCore.API_VERSION}`,
+                        data: payload,
+                        headers: headers
+                    });
+
+                    return response["data"][0]?.embedding;
+                })
+            );
+            return embeddings;
+        } else {
+            return [];
+        }
     }
 
     /**
