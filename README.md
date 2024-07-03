@@ -16,14 +16,11 @@ For a more lightweight, basic backend-only sample of this Reference Architecture
     <em>Architecture: Multitenant GenAI application with RAG on SAP BTP</em>
 </p>
 
-<details>
-<summary>Single Tenant Architecture</summary>
 </br>
 <p align="center">
     <img src="./docs/architecture/singletenant-architecture.png" alt="Single-tenant Architecture" />
     <em>Architecture: Single-tenant GenAI application with RAG on SAP BTP</em>
 </p>
-</details>
 
 ## Business Use Case of the Reference Application
 
