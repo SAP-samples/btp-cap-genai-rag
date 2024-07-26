@@ -146,26 +146,19 @@ export const getAppName = (): string => {
 export const getDeploymentId = async (resourceGroupId: string, task: Tasks = Tasks.COMPLETION): Promise<any> => {
     try {
         const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
-        const responseConfigurationQuery = await ConfigurationApi.configurationQuery()
-            .skipCsrfTokenFetching()
-            .addCustomHeaders(headers)
-            .execute({ destinationName: AI_CORE_DESTINATION });
-
-        const configuration = responseConfigurationQuery.resources?.find(
-            (configuration: any) => configuration.name === task
-        );
 
         const responseDeploymentQuery = await DeploymentApi.deploymentQuery({
-            scenarioId: configuration.scenarioId,
-            status: "RUNNING",
-            configurationId: configuration.id,
-            $top: 1
+            executableIds: [EXECUTABLE_ID],
+            scenarioId: SCENARIO_ID,
+            status: "RUNNING"
         })
             .skipCsrfTokenFetching()
             .addCustomHeaders(headers)
             .execute({ destinationName: AI_CORE_DESTINATION });
 
-        return responseDeploymentQuery.count > 0 ? responseDeploymentQuery.resources[0].id : null;
+        if (responseDeploymentQuery.count === 0) return null;
+        // Found a running deployment for the task
+        return responseDeploymentQuery.resources.filter((resrc: any) => resrc.configurationName === task)[0].id;
     } catch (e: any) {
         console.error(`Error: ${e?.message}`);
     }
