@@ -65,8 +65,10 @@ export default class BTPAzureBaseChatLLM extends SimpleChatModel<ChatOpenAICallO
             this.config?.deploymentId || (await aiCore.getDeploymentId(resourceGroupId, aiCore.Tasks.CHAT));
         if (deploymentId) {
             const aiCoreService = await cds.connect.to(this.config?.destination || aiCore.AI_CORE_DESTINATION);
-            const payload: any = {
-                messages: [
+
+            let messagesIn;
+            if (messages.length === 2) {
+                messagesIn = [
                     {
                         role: "system",
                         content: messages[0].content
@@ -75,7 +77,19 @@ export default class BTPAzureBaseChatLLM extends SimpleChatModel<ChatOpenAICallO
                         role: "user",
                         content: messages[1].content
                     }
-                ],
+                ];
+            } else if (messages.length === 1) {
+                // on retry (OutputFixingParser) there is only one message
+                messagesIn = [
+                    {
+                        role: "user",
+                        content: messages[0].content
+                    }
+                ];
+            }
+
+            const payload: any = {
+                messages: messagesIn,
                 ...this.params
             };
             const headers = { "Content-Type": "application/json", "AI-Resource-Group": resourceGroupId };
