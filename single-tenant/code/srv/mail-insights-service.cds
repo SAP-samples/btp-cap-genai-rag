@@ -33,10 +33,8 @@ service MailInsightsService @(
     action   addMails(mails : array of db.BaseMail, rag : Boolean null)                             returns array of Mails;
     // Regenerate a single response
     action   regenerateResponse(id : UUID, rag : Boolean null, additionalInformation : String null) returns Mails;
-    // Regenerate insights of all mails
-    action   regenerateInsights(rag : Boolean null)                                                 returns Boolean;
     // Submits response in working language
     action   submitResponse(id : UUID, response : String)                                           returns Boolean;
     // Revoke answered status
     action   revokeResponse(id : UUID)                                                              returns Boolean;
-}; 
+};

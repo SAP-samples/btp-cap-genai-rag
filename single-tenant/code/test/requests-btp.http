@@ -1,7 +1,7 @@
-@xsuaaHostname = <uaa.url>
-@btpXsuaaClient = <uaa.clientid>
-@btpXsuaaSecret = <uaa.clientsecret>
-@btpAppHostname = <apiUrl>
+@xsuaaHostname = https://genai-mail-insights-backup-a740ik26.authentication.eu10.hana.ondemand.com
+@btpXsuaaClient = sb-ai-dev-PAA_DEMO_genai-mail-insights-backup-a740ik26!t469813
+@btpXsuaaSecret = fabb63b0-84bc-4ed9-b0f1-a6bef3f8007e$7HzOboPwpTWM-fpZJycBtZFAJPGjsslc32B9UYmbPPc=
+@btpAppHostname = https://paa-demo-genai-mail-insights-backup-a740ik26-dev-ai-srv.cfapps.eu10-004.hana.ondemand.com
 
 
 ### GET XSUAA TOKEN
