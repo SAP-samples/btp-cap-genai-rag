@@ -1,14 +1,16 @@
-import cds, { ApplicationService, Request } from "@sap/cds";
+import cds from "@sap/cds";
 import { AzureOpenAiChatClient, AzureOpenAiEmbeddingClient } from "@sap-ai-sdk/langchain";
+
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
+import { OutputFixingParser } from "langchain/output_parsers";
 
-import { getAppName, checkOrPrepareDeployments } from "./utils/ai-core";
-import { IBaseMail, IProcessedMail, IStoredMail, IAction, MailWithSimilarity } from "./types";
-import * as schemas from "./schemas";
-import { ACTIONS } from "./constants";
+import { getAppName, checkOrPrepareDeployments } from "./utils/ai-core.js";
+import { IBaseMail, IProcessedMail, IStoredMail, IAction, MailWithSimilarity } from "./types.js";
+import * as schemas from "./schemas.js";
+import { ACTIONS } from "./constants.js";
 
 import { Mail, Translation } from "#cds-models/MailInsightsService";
 
@@ -16,7 +18,7 @@ import { Mail, Translation } from "#cds-models/MailInsightsService";
  * Class representing MailInsights
  * @extends ApplicationService
  */
-export default class MailInsights extends ApplicationService {
+export default class MailInsights extends cds.ApplicationService {
     private resourceGroupId: string;
 
     /**
@@ -44,10 +46,10 @@ export default class MailInsights extends ApplicationService {
      * @param {Request} req
      * @returns {Promise<any>}
      */
-    private onGetMails = async (req: Request): Promise<IBaseMail | Error> => {
+    private onGetMails = async (req: cds.Request): Promise<IBaseMail | Error> => {
         try {
             const { Mails } = this.entities;
-            const mails = await SELECT.from(Mails).columns((m: Mail) => {
+            const mails = await SELECT.from(Mails).columns((m: any) => {
                 m.ID;
                 m.subject;
                 m.body;
@@ -67,7 +69,7 @@ export default class MailInsights extends ApplicationService {
      * @param {Request} req
      * @returns {Promise<any>}
      */
-    private onGetMail = async (req: Request): Promise<any | Error> => {
+    private onGetMail = async (req: cds.Request): Promise<any | Error> => {
         try {
             const { id } = req.data;
             const { Mails } = this.entities;
@@ -124,10 +126,12 @@ export default class MailInsights extends ApplicationService {
                     : [];
 
             // merge similarity mails with actual mails
-            const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map((mail: Mail) => {
-                const matchingMail: MailWithSimilarity = closestMailsIndex[mail.ID];
-                return { similarity: matchingMail.similarity, mail };
-            });
+            const closestMailsWithSimilarity: { similarity: number; mail: any } = closestMails.map(
+                (mail: IBaseMail) => {
+                    const matchingMail: MailWithSimilarity = closestMailsIndex[mail.ID];
+                    return { similarity: matchingMail.similarity, mail };
+                }
+            );
 
             return { mail, closestMails: closestMailsWithSimilarity };
         } catch (error: any) {
@@ -141,7 +145,7 @@ export default class MailInsights extends ApplicationService {
      * @param {Request} req
      * @returns {Promise<any>}
      */
-    private onAddMails = async (req: Request): Promise<Array<IBaseMail> | Error> => {
+    private onAddMails = async (req: cds.Request): Promise<Array<IBaseMail> | Error> => {
         try {
             const { Mails } = this.entities;
             const { mails, rag } = req.data;
@@ -150,7 +154,7 @@ export default class MailInsights extends ApplicationService {
             // insert mails with insights
             await INSERT.into(Mails).entries(mailBatch);
 
-            const insertedMails = await SELECT.from(Mails, (m: Mail) => {
+            const insertedMails = await SELECT.from(Mails, (m: any) => {
                 //@ts-ignore
                 m`.*`;
                 //@ts-ignore
@@ -185,7 +189,7 @@ export default class MailInsights extends ApplicationService {
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onGenerateResponse = async (req: Request): Promise<boolean | any> => {
+    private onGenerateResponse = async (req: cds.Request): Promise<boolean | any> => {
         try {
             const { id, rag, additionalInformation } = req.data;
             const { Mails } = this.entities;
@@ -204,7 +208,7 @@ export default class MailInsights extends ApplicationService {
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onSubmitResponse = async (req: Request): Promise<boolean | any> => {
+    private onSubmitResponse = async (req: cds.Request): Promise<boolean | any> => {
         try {
             const { id, response } = req.data;
             const { Mails } = this.entities;
@@ -241,7 +245,7 @@ export default class MailInsights extends ApplicationService {
      * @param {Request} req - Request object
      * @returns {Promise<boolean|*>}
      */
-    private onRevokeResponse = async (req: Request): Promise<boolean | any> => {
+    private onRevokeResponse = async (req: cds.Request): Promise<boolean | any> => {
         try {
             const { id } = req.data;
             const { Mails } = this.entities;
@@ -258,7 +262,7 @@ export default class MailInsights extends ApplicationService {
      * @param {Request} req
      * @returns {Promise<any>}
      */
-    private onDeleteMail = async (req: Request): Promise<any> => {
+    private onDeleteMail = async (req: cds.Request): Promise<any> => {
         try {
             const { id } = req.data;
             const { Mails } = this.entities;

@@ -61,6 +61,7 @@ modules:
       - name: ai-hdi-container
       - name: ai-html5-repo-runtime
       - name: ai-destination
+      - name: generative-ai-hub
       - name: ai-approuter
         parameters:
           config:
@@ -238,7 +239,7 @@ resources:
       service-name: ${space}-ai-html5-repo-runtime
       service: html5-apps-repo
 
-  # ------------.----- AI DB HDI CONTAINER ---------------------
+  # ------------------ AI DB HDI CONTAINER ---------------------
   - name: ai-hdi-container
     # ------------------------------------------------------------
     type: com.sap.xs.hdi-container
@@ -246,3 +247,11 @@ resources:
       service-name: ${space}-ai-hdi-container
     properties:
       com-container-name: "${service-name}"
+  # ------------------ GENERATIVE AI HUB ---------------------
+  - name: generative-ai-hub
+    # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-name: ${space}-generative-ai-hub
+      service-plan: extended
+      service: aicore

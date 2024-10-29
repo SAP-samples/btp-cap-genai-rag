@@ -4,10 +4,14 @@
   "description": "GenAI Mail Insights",
   "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
   "license": "Apache License 2.0",
+  "engine": {
+    "node": "20"
+  },
   "scripts": {
     "---BUILD---": "",
-    "build": "npm run setup && npm run build:cds && npm run build:ui && npm run build:ts && npm run cleanup:ts",
-    "setup": "npm i --prefix ../../code && npm i --prefix ../../code/app/ai-ui-ui5",
+    "build": "npm run setup && npm run build:cds && npm run build:ui && npm run build:ts",
+    "setup": "npm i --prefix ../../code/app/ai-ui-ui5",
+    "-- //npm i --prefix ../../code && --  && npm run cleanup:ts": "",
     "build:ts": "tsc -p ../../code",
     "build:cds": "npm run build --prefix ../../code",
     "build:ui": "npm run build --prefix ../../code/app/ai-ui-ui5/ && npm run copy --prefix ../../code/app/ai-ui-ui5/",
