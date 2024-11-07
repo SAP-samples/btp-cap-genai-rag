@@ -12,7 +12,7 @@ For a more lightweight, basic backend-only sample of this Reference Architecture
 </br>
 
 <p align="center">
-    <img src="./docs/architecture/singletenant-architecture.png" alt="Single-tenant Architecture" />
+    <img src="./docs/architecture/reference-architecture-generative-ai.svg" alt="Single-tenant Architecture" />
     <em>Architecture: GenAI application with RAG on SAP BTP</em>
 </p>
 </details>
