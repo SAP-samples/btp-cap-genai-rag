@@ -10,12 +10,10 @@ We encourage you to check out our accompanying Discovery Center Mission [Develop
 For a more lightweight, basic backend-only sample of this Reference Architecture including _CAP_, _generative AI hub_ and _SAP HANA Cloud's Vector Engine_, please check out the separate branch specifically dedicated to the basic boilerplate sample: [cap-genaihub-vectorengine-sample](https://github.com/SAP-samples/btp-cap-genai-rag/tree/cap-genaihub-vectorengine-sample).
 
 </br>
-
 <p align="center">
     <img src="./docs/architecture/reference-architecture-generative-ai.svg" alt="Single-tenant Architecture" />
     <em>Architecture: GenAI application with RAG on SAP BTP</em>
 </p>
-</details>
 
 ## Business Use Case of the Reference Application
 
