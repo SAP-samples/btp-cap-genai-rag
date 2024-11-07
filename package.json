@@ -1,14 +1,14 @@
 {
-    "name": "btp-cap-genai-rag",
-    "version": "0.0.1",
-    "repository": "https://github.com/sap-samples/btp-cap-genai-rag",
-    "license": "Apache License 2.0",
-    "description": "GenAI Mail Insights",
-    "engines": {
-      "node": "^18.x"
-    },
-    "scripts": {
-      "kyma-build-single-tenant": "npm --prefix ./single-tenant/deploy/kyma run cicd",
-      "kyma-build-multi-tenant": "npm --prefix ./multi-tenant/deploy/kyma run cicd"
-    }
+  "name": "btp-cap-genai-rag",
+  "version": "0.0.1",
+  "repository": "https://github.com/sap-samples/btp-cap-genai-rag",
+  "license": "Apache License 2.0",
+  "description": "GenAI Mail Insights",
+  "engines": {
+    "node": "^20"
+  },
+  "scripts": {
+    "kyma-build-single-tenant": "npm --prefix ./single-tenant/deploy/kyma run cicd",
+    "kyma-build-multi-tenant": "npm --prefix ./multi-tenant/deploy/kyma run cicd"
   }
+}

@@ -1,0 +1,20 @@
+{
+	"welcomeFile": "/index.html",
+	"logout": {
+		"logoutEndpoint": "/logout"
+	},
+	"routes": [
+		{
+			"source": "^/api/odata/v4/mail-insights/(.*)$",
+			"target": "/odata/v4/mail-insights/$1",
+			"destination": "genai-mail-insights-api",
+			"authenticationType": "xsuaa"
+		},
+		{
+			"source": "^(.*)$",
+			"target": "$1",
+			"service": "html5-apps-repo-rt",
+			"authenticationType": "xsuaa"
+		}
+	]
+}

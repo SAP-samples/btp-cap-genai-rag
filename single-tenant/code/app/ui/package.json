@@ -1,0 +1,42 @@
+{
+	"name": "genai-mail-insights-ui",
+	"version": "1.0.0",
+	"description": "UI of GenAI Mail Insights",
+	"author": "kay-schmitteckert",
+	"license": "Apache-2.0",
+	"scripts": {
+		"clean": "rimraf dist coverage",
+		"build": "ui5 build --clean-dest",
+		"build:opt": "ui5 build self-contained --clean-dest --all",
+		"copy": "npx shx mkdir -p ../html5-deployer/resources/ && npx shx cp -rf ./dist/*.zip ../html5-deployer/resources/",
+		"start": "ui5 serve --port 8081 -o index.html",
+		"start-cdn": "ui5 serve --port 8081 -o index-cdn.html",
+		"start:hybrid": "ui5 serve --port 8081",
+		"start:dist": "npm start -- --config ui5-dist.yaml",
+		"start:dist-cdn": "npm run start-cdn -- --config ui5-dist.yaml",
+		"ts-typecheck": "tsc --noEmit",
+		"lint": "eslint webapp",
+		"karma": "karma start",
+		"karma-ci": "karma start karma-ci.conf.js",
+		"karma-ci-cov": "karma start karma-ci-cov.conf.js",
+		"test": "npm run lint && npm run karma-ci-cov"
+	},
+	"devDependencies": {
+		"@sapui5/types": "1.117.1",
+		"@typescript-eslint/eslint-plugin": "^6.2.0",
+		"@typescript-eslint/parser": "^6.2.0",
+		"@ui5/cli": "^3.3.4",
+		"eslint": "^8.46.0",
+		"karma": "^6.4.2",
+		"karma-chrome-launcher": "^3.2.0",
+		"karma-coverage": "^2.2.1",
+		"karma-ui5": "^3.0.3",
+		"karma-ui5-transpile": "^3.0.0",
+		"rimraf": "^5.0.1",
+		"typescript": "^5.1.6",
+		"ui5-middleware-livereload": "^3.0.0",
+		"ui5-middleware-simpleproxy": "^3.0.0",
+		"ui5-tooling-transpile": "^3.0.0",
+		"ui5-task-zipper": "^3.0.1"
+	}
+}

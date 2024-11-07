@@ -1,5 +1,5 @@
 {
-    "xsappname": "ai-kay-StrategicCustomerEngagementPoC",
+    "xsappname": "ai-dev-PAA_DEMO_genai-mail-insights-backup-a740ik26",
     "scopes": [
         {
             "name": "$XSAPPNAME.Member",
@@ -24,5 +24,13 @@
             "scope-references": ["$XSAPPNAME.Admin"],
             "attribute-references": []
         }
-    ]
+    ],
+    "oauth2-configuration": {
+        "token-validity": 3600,
+        "redirect-uris": [
+            "https://*.hana.ondemand.com/**",
+            "https://*.applicationstudio.cloud.sap/**",
+            "http://localhost:5000/**"
+        ]
+    }
 }

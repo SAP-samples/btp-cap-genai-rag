@@ -1,24 +1,21 @@
 {
-  "compilerOptions": {
-    "target": "es2017",
-    "lib": ["es2017", "dom"],
-    "module": "commonjs",
-    "outDir": "./gen/srv/srv",
-    "rootDir": "./srv",
-    "baseUrl": "./",
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "preserveConstEnums": true,
-    "sourceMap": false,
-    "allowJs": true,
-    "strict": true,
-    "strictNullChecks": false,
-    "strictPropertyInitialization": false,
-    "esModuleInterop": true,
-    "resolveJsonModule": true
-  },
-  "ts-node": {
-    "swc": true
-  },
-  "include": ["./srv/**/*"]
+    "compilerOptions": {
+        "target": "ES2023",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "outDir": "./gen/srv/srv",
+        "skipLibCheck": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "allowJs": true,
+        "strict": true,
+        "strictNullChecks": false,
+        "strictPropertyInitialization": false,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "paths": {
+            "#cds-models/*": ["./@cds-models/*/index.ts"]
+        }
+    },
+    "include": ["./srv/**/*"]
 }
