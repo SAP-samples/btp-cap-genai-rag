@@ -5,7 +5,7 @@
 - Intro
   - [Scenario](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/1-intro/1-Scenario.md)<!-- dc-card: {"label": ["Basics"]} dc-card -->
 - Setup
-- [Quick Account Setup](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/2-setup/0-QuickAccountSetup.md)<!-- dc-card: {"label": ["Quick Account Setup"]} dc-card -->
+  - [Quick Account Setup](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/2-setup/0-QuickAccountSetup.md)<!-- dc-card: {"label": ["Quick Account Setup"]} dc-card -->
   - [Subaccount Setup](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/2-setup/1-SubaccountSetup.md)<!-- dc-card: {"label": ["Hands-On"]} dc-card -->
   - [Assign Entitlements](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/2-setup/2-AssignEntitlements.md)<!-- dc-card: {"label": ["Hands-On"]} dc-card -->
   - [Configure SAP HANA Cloud](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/2-setup/3-SAPHANACloud.md)<!-- dc-card: {"label": ["Hands-On"]} dc-card -->
