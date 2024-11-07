@@ -17,7 +17,6 @@ interface ResourceGroupHeader {
 
 /**
  * Checks and creates a default resource group if it doesn't exist.
- * e.g., default-ai-dev-sap-demo (Cloud Foundry) or default-ai-default-a1b2c3 (Kyma)
  * Default resource groups are required for local and hybrid testing scenarios
  * @returns {Promise<void>}
  */

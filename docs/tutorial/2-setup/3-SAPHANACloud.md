@@ -1,6 +1,6 @@
 # Configure SAP HANA Cloud
 
-Depending on your landscape setup, either create a new SAP HANA Cloud instance or share an existing SAP HANA Cloud instance with your Cloud Foundry Org/Space respectively your Kyma Cluster/Namespace.
+Depending on your landscape setup, either create a new SAP HANA Cloud instance or share an existing SAP HANA Cloud instance with your Cloud Foundry Org/Space.
 
 - [Configure SAP HANA Cloud](#configure-sap-hana-cloud)
   - [Setup your preferred SAP BTP Runtime](#setup-your-preferred-sap-btp-runtime)
@@ -41,7 +41,7 @@ Create a Subscription of the SAP HANA Cloud Tools, assign the role collections t
 
 ## Share/Map an existing SAP HANA Cloud Instance
 
-Switch to the SAP BTP Subaccount hosting your SAP HANA Cloud instance and use the SAP HANA Cloud Tools, to share the instance with your new Cloud Foundry Org/Space respectively your Kyma Cluster/Namespace. Click [here](https://help.sap.com/docs/hana-cloud/sap-hana-cloud-administration-guide/map-sap-hana-database-to-another-environment-context) for more details on how to setup the respective mapping.
+Switch to the SAP BTP Subaccount hosting your SAP HANA Cloud instance and use the SAP HANA Cloud Tools, to share the instance with your new Cloud Foundry Org/Space. Click [here](https://help.sap.com/docs/hana-cloud/sap-hana-cloud-administration-guide/map-sap-hana-database-to-another-environment-context) for more details on how to setup the respective mapping.
 
 [<img src="./images/HC_MapInstance01.png" height="200"/>](./images/HC_MapInstance01.png?raw=true)
 [<img src="./images/HC_MapInstance02.png" height="200"/>](./images/HC_MapInstance02.png?raw=true)

@@ -1,6 +1,6 @@
 # Undeploy the Application
 
-If you want to undeploy the (multitenant) application and all related services and resources from your **Cloud Foundry** environment, please follow the steps below.
+If you want to undeploy the application and all related services and resources from your **Cloud Foundry** environment, please perform the following steps:
 
 ```md
 $ cf login -a https://api.cf.<<region>>.hana.ondemand.com
