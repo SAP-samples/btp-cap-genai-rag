@@ -18,4 +18,5 @@
   - [Test the Application](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/4-test/2-TestApplication.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
 - Extend
   - [Hybrid Development](https://github.com/SAP-samples/btp-cap-genai-rag/blob/main/docs/tutorial/5-extend/2-HybridDev.md)<!-- dc-card: {"label":  ["Hands-On"]} dc-card -->
+
 <!-- disco-toc-end -->
