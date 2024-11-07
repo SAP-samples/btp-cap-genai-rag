@@ -1,11 +1,11 @@
 # Subaccount Setup
 
-Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider Subaccount. Please consider the following infos before creating a subaccount in any SAP BTP region.
+Create a new Subaccount in your SAP BTP Cockpit. Please consider the following infos before creating a subaccount in any SAP BTP region.
 
 - [Subaccount Setup](#subaccount-setup)
-  - [SAP BTP, Cloud Foundry Runtime](#sap-btp-cloud-foundry-runtime)
-  - [SAP HANA Cloud](#sap-hana-cloud)
-  - [SAP AI Core](#sap-ai-core)
+- [SAP BTP, Cloud Foundry Runxtime](#sap-btp-cloud-foundry-runtime)
+- [SAP HANA Cloud](#sap-hana-cloud)
+- [SAP AI Core](#sap-ai-core)
 
 > **Important** - This mission can not be deployed to **Trial** environments, as some of the services are not available in **Trial** landscapes.
 
@@ -17,8 +17,6 @@ Create a new Subaccount in your SAP BTP Cockpit, which will act as SaaS Provider
 
 - **free** plan **not** available in eu10
 
-## SAP AI Core
+## Generative AI Hub by SAP AI Core
 
-- Only available in **AWS** landscapes
-
-If you are targeting a setup using **Free Tier** service plans for the majority of the services, we suggest to setup the sample scenario in the AWS **us10** region.
+- **not** available as **Free Tier**

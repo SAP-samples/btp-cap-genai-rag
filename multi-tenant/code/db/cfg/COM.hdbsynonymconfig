@@ -1,8 +1,0 @@
-{
-    "AISAAS_COMMON_SHARED": {
-        "target": {
-            "object": "AISAAS_COMMON_SHARED",
-            "schema.configure": "com-hdi-container/schema"
-        }
-    }
-}

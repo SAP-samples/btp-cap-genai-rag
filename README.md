@@ -1,10 +1,10 @@
-# GenAI Mail Insights - Develop a CAP-based (multitenant) application using GenAI and RAG on SAP BTP
+# GenAI Mail Insights - Develop a CAP-based application using GenAI and RAG on SAP BTP
 
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/btp-cap-genai-rag)](https://api.reuse.software/info/github.com/SAP-samples/btp-cap-genai-rag)
 
-Welcome to our dedicated GitHub repository, designed to provide valuable support to developers, partners and customers aiming to create advanced **GenAI** solutions on **SAP Business Technology Platform (SAP BTP)** following the **Reference Architecture**. Inside, you'll find a carefully crafted example that follows SAP BTP's respected Golden Path development approach. We've covered both **single-tenant and multitenant (Software as a Service, SaaS) versions** to suit different needs. Discover how to smoothly integrate different **Large Language Models (LLMs)** via SAP AI Core (**generative AI hub**), make the most of LangChain in CAP and use advanced techniques like output parsing according a custom schema or **Retrieval Augmented Generation (RAG)** through embeddings and **SAP HANA Cloud's Vector Engine** to achieve even higher value for your use case. Notably, our repository supports two runtimes, Cloud Foundry and Kyma, offering flexibility in your journey to harness GenAI on SAP BTP.
+Welcome to our dedicated GitHub repository, designed to provide valuable support to developers, partners and customers aiming to create advanced **GenAI** solutions on **SAP Business Technology Platform (SAP BTP)** following the **Reference Architecture**. Inside, you'll find a carefully crafted example that follows SAP BTP's respected Golden Path development approach. Discover how to smoothly integrate different **Foundation Models** and **Large Language Models (LLMs)** via **Generative AI Hub** by SAP AI Core, make the most of LangChain in CAP and use advanced techniques like output parsing according a custom schema or **Retrieval Augmented Generation (RAG)** through embeddings and **SAP HANA Cloud's Vector Engine** to achieve even higher value for your use case.
 
-We encourage you to check out our accompanying Discovery Center Mission [Develop a CAP-based (multitenant) application using GenAI and RAG](https://discovery-center.cloud.sap/missiondetail/4371/) along with the corresponding reference architecture guidance for [Retrieval Augmented Generation with GenAI on SAP BTP](https://discovery-center.cloud.sap/refArchDetail/ref-arch-open-ai). To learn more about Generative AI at SAP, we highly recommend to visit [this openSAP course](https://open.sap.com/courses/genai1).
+We encourage you to check out our accompanying Discovery Center Mission [Develop a CAP-based application using GenAI and RAG](https://discovery-center.cloud.sap/missiondetail/4371/) along with the corresponding reference architecture guidance for [Retrieval Augmented Generation with GenAI on SAP BTP](https://discovery-center.cloud.sap/refArchDetail/ref-arch-open-ai). To learn more about Generative AI at SAP, we highly recommend to visit [this openSAP course](https://open.sap.com/courses/genai1).
 
 **Basic Sample**:
 For a more lightweight, basic backend-only sample of this Reference Architecture including _CAP_, _generative AI hub_ and _SAP HANA Cloud's Vector Engine_, please check out the separate branch specifically dedicated to the basic boilerplate sample: [cap-genaihub-vectorengine-sample](https://github.com/SAP-samples/btp-cap-genai-rag/tree/cap-genaihub-vectorengine-sample).
@@ -12,22 +12,14 @@ For a more lightweight, basic backend-only sample of this Reference Architecture
 </br>
 
 <p align="center">
-    <img src="./docs/architecture/multitenant-architecture.png" alt="Multitenant Architecture" />
-    <em>Architecture: Multitenant GenAI application with RAG on SAP BTP</em>
-</p>
-
-<details>
-<summary>Single Tenant Architecture</summary>
-</br>
-<p align="center">
     <img src="./docs/architecture/singletenant-architecture.png" alt="Single-tenant Architecture" />
-    <em>Architecture: Single-tenant GenAI application with RAG on SAP BTP</em>
+    <em>Architecture: GenAI application with RAG on SAP BTP</em>
 </p>
 </details>
 
 ## Business Use Case of the Reference Application
 
-The [provided code sample](./multi-tenant) presents a multitenant application crafted by a potential SAP partner or customer, tailored for SAP Business Technology Platform (SAP BTP). This scenario presents a comprehensive SaaS solution for enhancing customer support within a travel agency, utilizing advanced email insights and automation. The system analyzes incoming emails using Large Language Models (LLMs) to offer core insights such as categorization, sentiment analysis and urgency assessment. It goes beyond basic analysis by extracting key facts and customizable fields like location, managed through a dedicated configuration page.
+The [provided code sample](./single-tenant) presents a application crafted by a potential SAP partner or customer, tailored for SAP Business Technology Platform (SAP BTP). This scenario presents a comprehensive solution for enhancing customer support within a travel agency, utilizing advanced email insights and automation. The system analyzes incoming emails using Large Language Models (LLMs) to offer core insights such as categorization, sentiment analysis and urgency assessment. It goes beyond basic analysis by extracting key facts and customizable fields like location, managed through a dedicated configuration page.
 
 One innovative feature involves utilizing email embeddings to identify similar historical emails, aiding in understanding how similar requests were handled previously. This fosters consistent and efficient customer service. The code also demonstrates the capabilities of summarizing and translating both email subject and body, enabling streamlined comprehension across languages.
 
@@ -35,7 +27,9 @@ Furthermore, the system takes automation to the next level by generating potenti
 
 Though initially tailored for a travel agency, the code can be adapted to suit various industries, making it a versatile solution for augmenting customer support with data-driven insights and automation.
 
-The business scenario is also available as [single-tenant version](./single-tenant) in the respective directory of this repository.
+The business scenario can also be enhanced to become a multitenant SaaS solution.
+
+> **Insight:** If the concept of multitenancy in SAP BTP is new to you, we strongly suggest perusing the following GitHub repository to gain a deeper understanding of deploying a CAP-based multitenant application in the SAP BTP, Kyma Runtime, as well as the SAP BTP, Cloud Foundry Runtime. <br>[Explore the development of a multitenant Software as a Service application in SAP BTP using CAP](https://github.com/SAP-samples/btp-cap-multitenant-saas)
 
 ## Impressions of the Reference Application
 
@@ -69,8 +63,6 @@ This sample scenario comes with a step-by-step tutorial for a deployment in your
 3. [Scenario Deployment](./docs/tutorial/3-deploy/README.md)
 4. [Application Testing](./docs/tutorial/4-test/README.md)
 5. [Extend the solution](./docs/tutorial/5-extend/README.md)
-
-Depending on your scenario (single- vs multitenant), please ensure to skip steps which are only relevant for multitenant setups. This will be mentioned in the documentation accordingly.
 
 ## How to obtain support
 

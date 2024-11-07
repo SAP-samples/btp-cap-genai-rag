@@ -15,18 +15,17 @@ To do so, please follow the respective SAP HANA Academy tutorial and official SA
 
 ## Setup your preferred SAP BTP Runtime
 
-Before you setup a SAP HANA Cloud instance or map an existing instance, please ensure you have setup your preferred runtime. For this sample scenario, you can choose between the SAP BTP, Cloud Foundry or SAP BTP, Kyma Runtime. If you follow the Cloud Foundry path, please make sure to also create a **Space** after setting up the runtime. The Kyma Runtime comes with a **default** namespace.
+Before you setup a SAP HANA Cloud instance or map an existing instance, please ensure you have setup your preferred runtime. For this sample scenario, please choose SAP BTP, Cloud Foundry and make sure to also create a **Space** after setting up the runtime.
 
 > **Important** - In a Free Tier scenario, please ensure to select the **free** service plan!
 
 [<img src="./images/BTP_Runtime01.png" height="200"/>](./images/BTP_Runtime01.png?raw=true)
 [<img src="./images/BTP_Runtime02.png" height="200"/>](./images/BTP_Runtime02.png?raw=true)
 [<img src="./images/BTP_Runtime03.png" height="200"/>](./images/BTP_Runtime03.png?raw=true)
-[<img src="./images/BTP_Runtime04.png" height="200"/>](./images/BTP_Runtime04.png?raw=true)
 
 ## Create a new SAP HANA Cloud Instance
 
-Create a Subscription of the SAP HANA Cloud Tools, assign the role collections to your user and create a new SAP HANA Cloud instance using the Subscription interface. After creating the SAP HANA Cloud instance, please continue with the next step to share / map it to your SAP BTP, Cloud Foundry or SAP BTP, Kyma Runtime.
+Create a Subscription of the SAP HANA Cloud Tools, assign the role collections to your user and create a new SAP HANA Cloud instance using the Subscription interface. After creating the SAP HANA Cloud instance, please continue with the next step to share / map it to your space of the SAP BTP, Cloud Foundry Runtime.
 
 [<img src="./images/HC_CreateInstance01.png" height="200"/>](./images/HC_CreateInstance01.png?raw=true)
 [<img src="./images/HC_CreateInstance02.png" height="200"/>](./images/HC_CreateInstance02.png?raw=true)
@@ -50,6 +49,3 @@ Switch to the SAP BTP Subaccount hosting your SAP HANA Cloud instance and use th
 [<img src="./images/HC_MapInstance04.png" height="200"/>](./images/HC_MapInstance04.png?raw=true)
 [<img src="./images/HC_MapInstance05.png" height="200"/>](./images/HC_MapInstance05.png?raw=true)
 [<img src="./images/HC_MapInstance06.png" height="200"/>](./images/HC_MapInstance06.png?raw=true)
-[<img src="./images/HC_MapInstance07.png" height="200"/>](./images/HC_MapInstance07.png?raw=true)
-[<img src="./images/HC_MapInstance08.png" height="200"/>](./images/HC_MapInstance08.png?raw=true)
-[<img src="./images/HC_MapInstance09.png" height="200"/>](./images/HC_MapInstance09.png?raw=true)
