@@ -1,5 +1,5 @@
 {
-    "name": "aisaas-approuter",
+    "name": "genai-mail-insights-approuter",
     "dependencies": {
         "@sap/approuter": "^14.3.4"
     },

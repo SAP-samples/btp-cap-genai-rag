@@ -2,7 +2,7 @@
     "name": "ai-html5-app-deployer",
     "version": "1.0.0",
     "dependencies": {
-        "@sap/html5-app-deployer": "^5.0.0",
+        "@sap/html5-app-deployer": "^6.0.0",
         "ai": "file:.."
     },
     "scripts": {
