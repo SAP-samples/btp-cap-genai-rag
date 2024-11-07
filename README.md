@@ -51,9 +51,6 @@ The business scenario can also be enhanced to become a multitenant SaaS solution
 [<img src="./docs/images/App_Impressions07.png" width="300"/>](./docs/images/App_Impressions07.png?raw=true)
 [<img src="./docs/images/App_Impressions09.png" width="300"/>](./docs/images/App_Impressions09.png?raw=true)
 
-[<img src="./docs/images/App_Impressions10.png" width="300"/>](./docs/images/App_Impressions10.png?raw=true)
-[<img src="./docs/images/App_Impressions11.png" width="300"/>](./docs/images/App_Impressions11.png?raw=true)
-
 ## Getting started
 
 This sample scenario comes with a step-by-step tutorial for a deployment in your own SAP BTP landscape. Check the following chapters and setup the scenario step-by-step in your own environment. The guide covers the deployment of the single-tenant as well as the multitenant version of the application.

@@ -1,6 +1,6 @@
 specVersion: "3.0"
 metadata:
-  name: aiui
+  name: genai-mail-insights-ui
 type: application
 resources:
   configuration:

@@ -1,5 +1,5 @@
 {
-    "welcomeFile": "/aiui/",
+    "welcomeFile": "/ui/",
     "authenticationMethod": "route",
     "logout": {
         "logoutEndpoint": "/do/logout"

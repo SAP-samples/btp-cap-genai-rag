@@ -7,7 +7,7 @@
 		{
 			"source": "^/api/odata/v4/mail-insights/(.*)$",
 			"target": "/odata/v4/mail-insights/$1",
-			"destination": "ai-srv-api",
+			"destination": "genai-mail-insights-api",
 			"authenticationType": "xsuaa"
 		},
 		{

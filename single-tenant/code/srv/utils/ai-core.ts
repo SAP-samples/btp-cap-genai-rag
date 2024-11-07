@@ -31,9 +31,11 @@ export const checkOrPrepareDeployments = async (resourceGroupId: string): Promis
             // Create AI Core Default Resource Group
             console.log(`Info: SAP AI Core Default Resource Group ${resourceGroupId} will be created`);
             await createResourceGroup(resourceGroupId);
+            await delay(10000);
 
             const header: ResourceGroupHeader = { "AI-Resource-Group": resourceGroupId };
             const configurations: Array<AiConfigurationCreationResponse> = await createConfigurations(header);
+            await delay(10000);
             const deployments = await createDeployments(configurations, header);
 
             console.log(
@@ -170,3 +172,11 @@ const createDeployments = async (
         throw new Error(`Deployment creation failed: ${apiError.message}`);
     }
 };
+
+/**
+ * Pauses the execution for a specified time.
+ *
+ * @param {number} ms - The amount of time to delay in milliseconds.
+ * @returns {Promise<void>} A promise that resolves after the specified delay.
+ */
+const delay = (ms: number): Promise<void> => new Promise((res: any) => setTimeout(res, ms));

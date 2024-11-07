@@ -1,5 +1,5 @@
 _schema-version: "3.2"
-ID: ai
+ID: genai-mail-insights
 version: 0.0.1
 
 parameters:
@@ -14,7 +14,7 @@ build-parameters:
 
 modules:
   # --------------------- APPROUTER MODULE ---------------------
-  - name: ai
+  - name: genai-mail-insights
     # ------------------------------------------------------------
     type: approuter.nodejs
     path: ../../code/router
@@ -22,25 +22,25 @@ modules:
       builder: npm
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
     parameters:
-      app-name: ai-${space}
+      app-name: genai-mail-insights-${space}
       disk-quota: 256MB
       memory: 128MB
       app-domain: ${app-name}.${default-domain}
       keep-existing-routes: true
     requires:
-      - name: ai-destination
-      - name: ai-uaa
-      - name: ai-srv-api
-      - name: ai-html5-repo-runtime
+      - name: genai-mail-insights-destination
+      - name: genai-mail-insights-uaa
+      - name: genai-mail-insights-api
+      - name: genai-mail-insights-html5-repo-runtime
     provides:
-      - name: ai-approuter
+      - name: genai-mail-insights-approuter
         properties:
           app-url: ${default-url}
           application: ${app-name}
           app-domain: ${app-domain}
 
   # --------------------- SERVER MODULE ------------------------
-  - name: ai-srv
+  - name: genai-mail-insights-api
     # ------------------------------------------------------------
     type: nodejs
     path: ../../code/gen/srv
@@ -48,21 +48,25 @@ modules:
       builder: npm
       ignore: [".DS_Store", "manifest*.yml", "node_modules/"]
     parameters:
-      app-name: ai-srv-${space}
+      app-name: genai-mail-insights-api-${space}
       memory: 256MB
       disk-quota: 1024MB
     properties:
-      appDomain: ~{ai-approuter/app-domain}
+      appDomain: ~{genai-mail-insights-approuter/app-domain}
       srvUrl: "https://${app-name}.${default-domain}"
-      approuterUrl: ~{ai-approuter/app-url}
-      appName: ~{ai-approuter/application}
+      approuterUrl: ~{genai-mail-insights-approuter/app-url}
+      appName: ~{genai-mail-insights-approuter/application}
+    provides:
+      - name: genai-mail-insights-api-props
+        properties:
+          srv-url: ${default-url}
     requires:
-      - name: ai-uaa
-      - name: ai-hdi-container
-      - name: ai-html5-repo-runtime
-      - name: ai-destination
+      - name: genai-mail-insights-uaa
+      - name: genai-mail-insights-hdi-container
+      - name: genai-mail-insights-html5-repo-runtime
+      - name: genai-mail-insights-destination
       - name: generative-ai-hub
-      - name: ai-approuter
+      - name: genai-mail-insights-approuter
         parameters:
           config:
             instance_min_count: 1
@@ -92,54 +96,49 @@ modules:
                   "operator": "<",
                   "adjustment": "-1",
                 }
-    provides:
-      - name: ai-srv-api
-        properties:
-          srv-url: ${default-url}
 
   # --------------------- UI MODULE ----------------------------
-  - name: ai-ui
+  - name: genai-mail-insights-ui
     # ------------------------------------------------------------
     type: html5
-    path: ../../code/app/ai-ui-ui5
+    path: ../../code/app/ui
     build-parameters:
       build-result: dist
       builder: custom
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
       commands:
-        #- npm run build
         - npm run copy
       supported-platforms: []
 
   # ------------------- HTML5 APP DEPLOYER ---------------------
-  - name: ai-app-deployer
+  - name: genai-mail-insights-app-deployer
     # ------------------------------------------------------------
     type: com.sap.html5.application-content
     path: ../../code/app/html5-deployer
     parameters:
-      app-name: ai-app-deployer-${space}
+      app-name: genai-mail-insights-app-deployer-${space}
     build-parameters:
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
     requires:
-      - name: ai-html5-repo-host
+      - name: genai-mail-insights-html5-repo-host
 
   # --------------------- DB MODULE --------------------------
-  - name: ai-db-deployer
+  - name: genai-mail-insights-db-deployer
     # ------------------------------------------------------------
     type: hdb
     path: ../../code/gen/db
     build-parameters:
       ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
     parameters:
-      app-name: ai-db-deployer-${space}
+      app-name: genai-mail-insights-db-deployer-${space}
       memory: 256MB
       disk-quota: 1024MB
     requires:
-      - name: ai-hdi-container
+      - name: genai-mail-insights-hdi-container
 
 resources:
   # ----------------------- UAA SERVICE ------------------------
-  - name: ai-uaa
+  - name: genai-mail-insights-uaa
     # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     properties:
@@ -147,9 +146,9 @@ resources:
       XSAPPNAME: ${xsuaa-app}
     parameters:
       service: xsuaa
-      service-name: ${space}-ai-uaa
+      service-name: ${space}-genai-mail-insights-uaa
       service-plan: application
-      xsuaa-app: ai-${space}-${org}
+      xsuaa-app: genai-mail-insights-${space}-${org}
       config:
         xsappname: ${xsuaa-app}
         tenant-mode: dedicated
@@ -193,14 +192,14 @@ resources:
             - x509
 
   # ----------------- DESTINATION SERVICE ----------------------
-  - name: ai-destination
+  - name: genai-mail-insights-destination
     # ------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     requires:
-      - name: ai-srv-api
+      - name: genai-mail-insights-api-props
     parameters:
       service-plan: lite
-      service-name: ${space}-ai-destination
+      service-name: ${space}-genai-mail-insights-destination
       service: destination
       config:
         HTML5Runtime_enabled: true
@@ -209,9 +208,9 @@ resources:
           instance:
             existing_destinations_policy: update
             destinations:
-              - Name: ai-srv-api
+              - Name: genai-mail-insights-api
                 Description: GenAI Mail Insights Service API
-                URL: ~{ai-srv-api/srv-url}
+                URL: ~{genai-mail-insights-api-props/srv-url}
                 Type: HTTP
                 ProxyType: Internet
                 Authentication: NoAuthentication
@@ -220,31 +219,31 @@ resources:
                 forwardAuthToken: true
 
   # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------
-  - name: ai-html5-repo-host
+  - name: genai-mail-insights-html5-repo-host
     # -----------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service-plan: app-host
-      service-name: ${space}-ai-html5-repo-host
+      service-name: ${space}-genai-mail-insights-html5-repo-host
       service: html5-apps-repo
       config:
         sizeLimit: 2
 
   # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
-  - name: ai-html5-repo-runtime
+  - name: genai-mail-insights-html5-repo-runtime
     # ------------------------------------------------------------------
     type: org.cloudfoundry.managed-service
     parameters:
       service-plan: app-runtime
-      service-name: ${space}-ai-html5-repo-runtime
+      service-name: ${space}-genai-mail-insights-html5-repo-runtime
       service: html5-apps-repo
 
   # ------------------ AI DB HDI CONTAINER ---------------------
-  - name: ai-hdi-container
+  - name: genai-mail-insights-hdi-container
     # ------------------------------------------------------------
     type: com.sap.xs.hdi-container
     parameters:
-      service-name: ${space}-ai-hdi-container
+      service-name: ${space}-genai-mail-insights-hdi-container
     properties:
       com-container-name: "${service-name}"
   # ------------------ GENERATIVE AI HUB ---------------------

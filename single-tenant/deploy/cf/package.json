@@ -10,15 +10,15 @@
   "scripts": {
     "---BUILD---": "",
     "build": "npm run setup && npm run build:cds && npm run build:ui && npm run build:ts",
-    "setup": "npm i --prefix ../../code/app/ai-ui-ui5",
+    "setup": "npm i --prefix ../../code/app/ui",
     "-- //npm i --prefix ../../code && --  && npm run cleanup:ts": "",
     "build:ts": "tsc -p ../../code",
     "build:cds": "npm run build --prefix ../../code",
-    "build:ui": "npm run build --prefix ../../code/app/ai-ui-ui5/ && npm run copy --prefix ../../code/app/ai-ui-ui5/",
+    "build:ui": "npm run build --prefix ../../code/app/ui/ && npm run copy --prefix ../../code/app/ui/",
     "cleanup:ts": "npx shx rm -r \"../../code/gen/**/*.{ts,tsconfig}\"",
     "---DEPLOY---": "",
     "build:mbt": "mbt build",
-    "deploy": "cf deploy mta_archives/ai_0.0.1.mtar",
+    "deploy": "cf deploy mta_archives/genai-mail-insights_0.0.1.mtar",
     "build:deploy": "npm run build:mbt && npm run deploy"
   }
 }

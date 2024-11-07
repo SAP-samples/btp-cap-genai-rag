@@ -10,24 +10,10 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
 2. Once the application is installed and all Service Instances are created please run the following commands, to create the essential Service Keys in Cloud Foundry and the respective **.cdsrc-private.json** files required for hybrid testing. In contrast to Kyma, we are not using the existing Service Bindings but need to create dedicated Service Keys for the hybrid testing setup.
 
-   > **Hint** - If you already executed the local development chapter, some of the service keys might already exist. Just ignore the respective system message.
-
    **Service Keys**
 
    ```sh
-   # Single-Tenant
-   cf csk <Space>-ai-uaa <Space>-ai-uaa-key
-   cf csk <Space>-ai-destination <Space>-ai-destination-key
-   cf csk <Space>-ai-hdi-container <Space>-ai-hdi-container-key
-   ```
-
-   **App Service**
-
-   ```sh
-   # Run in ./single-tenant/code #
-
-   # Single-Tenant
-   cds bind -2 <Space>-ai-destination,<Space>-ai-uaa,<Space>-ai-hdi-container --for hybrid
+   cds bind -2 <Space>-ai-hdi-container,<Space>-genai-mail-insights-uaa,<Space>-generative-ai-hub
    ```
 
    **Application Router**
@@ -43,16 +29,6 @@ While the chapter appears to be quite comprehensive, please consider this is a o
          "clientsecret": "<YOUR-SECRET>"
       }
    }
-   ```
-
-   **HTML5 Deployer**
-
-   ```sh
-   # Run in ./single-tenant/code #
-
-   # Single-Tenant
-   cf csk <Space>-ai-html5-repo-host <Space>-ai-html5-repo-host-key
-   cds bind html5-apps-repo -2 <Space>-ai-html5-repo-host --kind html5-apps-repo --for hybrid-html5
    ```
 
 3. After configuring your **.cdsrc-private.json** files, you can run the application in hybrid mode, by executing the below commands.

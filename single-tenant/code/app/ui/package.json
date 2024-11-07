@@ -1,7 +1,7 @@
 {
-	"name": "aiui",
+	"name": "genai-mail-insights-ui",
 	"version": "1.0.0",
-	"description": "UI5 Application: aiui",
+	"description": "UI of GenAI Mail Insights",
 	"author": "kay-schmitteckert",
 	"license": "Apache-2.0",
 	"scripts": {
