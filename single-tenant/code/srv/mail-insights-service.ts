@@ -27,7 +27,6 @@ export default class MailInsights extends cds.ApplicationService {
      */
     async init(): Promise<void> {
         await super.init();
-
         // Functions & Actions
         this.on("getMails", this.onGetMails);
         this.on("getMail", this.onGetMail);
