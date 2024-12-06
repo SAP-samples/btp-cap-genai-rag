@@ -8,7 +8,7 @@ In this part of the tutorial, you will learn how to test the GenAI Mail Insights
 
 2. In a **single-tenant** scenario, you can just open the default Cloud Foundry Route or API Rule of your GenAI Mail Insights Application Router.
 
-   > **Hint** - Ideally, you also used the **addMails** endpoint of your CAP service to upload and process our sample mails as described in the previous chapter ([click here](./3-PushSampleMails.md)). Otherwise you will not see any processed mails and need to add them manually using the respective button.
+   > **Hint** - Ideally, you also used the **addMails** endpoint of your CAP service to upload and process our sample mails as described in the previous chapter ([click here](./1-PushSampleMails.md)). Otherwise you will not see any processed mails and need to add them manually using the respective button.
 
    [<img src="./images/PGExt_OpenUrl.png" width="300"/>](./images/PGExt_OpenUrl.png?raw=true)
 
