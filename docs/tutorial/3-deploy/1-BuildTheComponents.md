@@ -17,7 +17,7 @@ In the following steps, you will build a multi-target application which can be d
 3. Make sure you have the required TypeScript dependencies installed globally.
 
    ```sh
-   npm i -g typescript ts-node
+   npm i -g typescript ts-node tsx
    ```
 
 4. Make sure you have the Cloud MTA Build Tool (MBT) installed globally.
