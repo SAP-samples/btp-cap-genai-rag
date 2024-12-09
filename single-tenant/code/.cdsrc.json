@@ -1,11 +1,1 @@
-{
-    "requires": {
-        "PROVIDER_AI_CORE_DESTINATION_HUB": {
-            "kind": "rest",
-            "credentials": {
-                "destination": "PROVIDER_AI_CORE_DESTINATION_HUB",
-                "requestTimeout": "300000"
-            }
-        }
-    }
-}
+{}
