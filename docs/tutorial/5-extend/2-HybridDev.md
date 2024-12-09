@@ -9,7 +9,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
    **Binding Service Instances**
 
    ```sh
-   cds bind -2 <Space>-ai-hdi-container,<Space>-genai-mail-insights-uaa,<Space>-generative-ai-hub
+   cds bind -2 <Space>-genai-mail-insights-hdi-container,<Space>-genai-mail-insights-uaa,<Space>-generative-ai-hub
    ```
 
    **Application Router**
