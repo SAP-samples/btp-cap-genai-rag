@@ -1,0 +1,38 @@
+specVersion: "4.0"
+metadata:
+  name: genai-mail-insights-ui
+type: application
+framework:
+  name: SAPUI5
+  version: "1.120.25"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.f
+    - name: sap.uxap
+    - name: sap.ui.comp
+    - name: sap.ui.layout
+    - name: sap.ui.unified
+    - name: themelib_sap_horizon
+builder:
+  customTasks:
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+    - name: ui5-task-zipper
+      afterTask: generateCachebusterInfo
+      configuration:
+        onlyZip: true
+        archiveName: ui
+        additionalFiles:
+          "xs-app.json": "xs-app.json"
+server:
+  customMiddleware:
+    - name: ui5-tooling-transpile-middleware
+      afterMiddleware: compression
+    - name: ui5-middleware-livereload
+      afterMiddleware: compression
+    - name: ui5-middleware-simpleproxy
+      afterMiddleware: compression
+      mountPath: /api
+      configuration:
+        baseUri: "http://localhost:4004"

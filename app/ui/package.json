@@ -1,0 +1,32 @@
+{
+	"name": "genai-mail-insights-ui",
+	"version": "1.0.0",
+	"description": "UI of GenAI Mail Insights",
+	"author": "kay-schmitteckert",
+	"license": "Apache-2.0",
+	"scripts": {
+		"build": "ui5 build --clean-dest",
+		"build:opt": "ui5 build self-contained --clean-dest --all",
+		"copy": "npx shx mkdir -p ../html5-deployer/resources/ && npx shx cp -rf ./dist/*.zip ../html5-deployer/resources/",
+		"start": "ui5 serve --port 8081 -o index.html",
+		"start-cdn": "ui5 serve --port 8081 -o index-cdn.html",
+		"start:hybrid": "ui5 serve --port 8081",
+		"start:dist": "npm start -- --config ui5-dist.yaml",
+		"start:dist-cdn": "npm run start-cdn -- --config ui5-dist.yaml",
+		"ts-typecheck": "tsc --noEmit",
+		"lint": "eslint webapp",
+		"test": "npm run lint"
+	},
+	"devDependencies": {
+		"@sapui5/types": "1.120.25",
+		"ui5-middleware-livereload": "^3.1.0",
+		"ui5-middleware-simpleproxy": "^3.4.0",
+		"ui5-task-zipper": "^3.4.0",
+		"ui5-tooling-transpile": "^3.7.1",
+		"wdio-qunit-service": "^1.3.0"
+	},
+	"peerDependencies": {
+		"@ui5/cli": "^4",
+		"typescript": "^5"
+	}
+}

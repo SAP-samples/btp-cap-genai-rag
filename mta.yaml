@@ -1,0 +1,261 @@
+_schema-version: "3.3"
+ID: genai-mail-insights
+version: 0.0.1
+
+parameters:
+  enable-parallel-deployments: true
+  autoscalerMinInstance: 1
+  autoscalerMaxInstance: 2
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm run build
+        #- npm run build:fast
+
+modules:
+  # --------------------- APPROUTER MODULE ---------------------
+  - name: genai-mail-insights
+    # ------------------------------------------------------------
+    type: approuter.nodejs
+    path: ./router
+    build-parameters:
+      builder: npm
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    parameters:
+      buildpack: nodejs_buildpack
+      app-name: genai-mail-insights-${space}
+      disk-quota: 256MB
+      memory: 128MB
+      app-domain: ${app-name}.${default-domain}
+      keep-existing-routes: true
+    requires:
+      - name: genai-mail-insights-destination
+      - name: genai-mail-insights-uaa
+      - name: genai-mail-insights-api
+      - name: genai-mail-insights-html5-repo-runtime
+    provides:
+      - name: genai-mail-insights-approuter
+        properties:
+          app-url: ${default-url}
+          application: ${app-name}
+          app-domain: ${app-domain}
+
+  # --------------------- SERVER MODULE ------------------------
+  - name: genai-mail-insights-api
+    # ------------------------------------------------------------
+    type: nodejs
+    path: ./gen/srv
+    build-parameters:
+      builder: npm
+      ignore: [".DS_Store", "manifest*.yml", "node_modules/"]
+    parameters:
+      buildpack: nodejs_buildpack
+      app-name: genai-mail-insights-api-${space}
+      memory: 256MB
+      disk-quota: 1024MB
+    properties:
+      appDomain: ~{genai-mail-insights-approuter/app-domain}
+      srvUrl: "https://${app-name}.${default-domain}"
+      approuterUrl: ~{genai-mail-insights-approuter/app-url}
+      appName: ~{genai-mail-insights-approuter/application}
+    provides:
+      - name: genai-mail-insights-api-props
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: genai-mail-insights-uaa
+      - name: genai-mail-insights-hdi-container
+      - name: genai-mail-insights-html5-repo-runtime
+      - name: genai-mail-insights-destination
+      - name: generative-ai-hub
+      - name: genai-mail-insights-approuter
+        parameters:
+          config:
+            instance_min_count: 1
+            instance_max_count: 2
+            scaling_rules:
+              - {
+                  "metric_type": "memoryutil",
+                  "threshold": 80,
+                  "operator": ">=",
+                  "adjustment": "+1",
+                }
+              - {
+                  "metric_type": "memoryutil",
+                  "threshold": 60,
+                  "operator": "<",
+                  "adjustment": "-1",
+                }
+              - {
+                  "metric_type": "cpu",
+                  "threshold": 80,
+                  "operator": ">=",
+                  "adjustment": "+1",
+                }
+              - {
+                  "metric_type": "cpu",
+                  "threshold": 30,
+                  "operator": "<",
+                  "adjustment": "-1",
+                }
+
+  # --------------------- UI MODULE ----------------------------
+  - name: genai-mail-insights-ui
+    # ------------------------------------------------------------
+    type: html5
+    path: ./app/ui
+    build-parameters:
+      build-result: dist
+      builder: custom
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+      commands:
+        - npm run copy
+      supported-platforms: []
+
+  # ------------------- HTML5 APP DEPLOYER ---------------------
+  - name: genai-mail-insights-app-deployer
+    # ------------------------------------------------------------
+    type: com.sap.html5.application-content
+    path: ./app/html5-deployer
+    parameters:
+      buildpack: nodejs_buildpack
+      app-name: genai-mail-insights-app-deployer-${space}
+    build-parameters:
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    requires:
+      - name: genai-mail-insights-html5-repo-host
+
+  # --------------------- DB MODULE --------------------------
+  - name: genai-mail-insights-db-deployer
+    # ------------------------------------------------------------
+    type: hdb
+    path: ./gen/db
+    build-parameters:
+      ignore: [".DS_Store", "node_modules/", "manifest*.yml"]
+    parameters:
+      buildpack: nodejs_buildpack
+      app-name: genai-mail-insights-db-deployer-${space}
+      memory: 256MB
+      disk-quota: 1024MB
+    requires:
+      - name: genai-mail-insights-hdi-container
+
+resources:
+  # ----------------------- UAA SERVICE ------------------------
+  - name: genai-mail-insights-uaa
+    # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    properties:
+      xsuaa-app: ${xsuaa-app}
+      XSAPPNAME: ${xsuaa-app}
+    parameters:
+      service: xsuaa
+      service-name: ${space}-genai-mail-insights-uaa
+      service-plan: application
+      xsuaa-app: genai-mail-insights-${space}-${org}
+      config:
+        xsappname: ${xsuaa-app}
+        tenant-mode: dedicated
+        role-collections:
+          - name: GenAI Mail Insights Member (${space})
+            description: Member Access
+            role-template-references:
+              - "$XSAPPNAME.Member"
+              - "$XSAPPNAME.Token_Exchange"
+          - name: GenAI Mail Insights Administrator (${space})
+            description: Administrator Access
+            role-template-references:
+              - "$XSAPPNAME.Admin"
+              - "$XSAPPNAME.Token_Exchange"
+        scopes:
+          - name: uaa.user
+            description: UAA
+          - name: "$XSAPPNAME.Member"
+            description: Member
+          - name: "$XSAPPNAME.Admin"
+            description: Administrator
+        attributes: []
+        role-templates:
+          - name: Token_Exchange
+            description: UAA Token Exchange
+            scope-references: ["uaa.user"]
+          - name: Member
+            description: Member
+            scope-references: ["$XSAPPNAME.Member"]
+          - name: Admin
+            description: Administrator
+            scope-references: ["$XSAPPNAME.Admin"]
+        oauth2-configuration:
+          token-validity: 900
+          redirect-uris:
+            - http*://*.cfapps.*.hana.ondemand.com/**
+            - http://*.localhost:5000/**
+            - http://localhost:5000/**
+          credential-types:
+            - binding-secret
+            - x509
+
+  # ----------------- DESTINATION SERVICE ----------------------
+  - name: genai-mail-insights-destination
+    # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: genai-mail-insights-api-props
+    parameters:
+      service-plan: lite
+      service-name: ${space}-genai-mail-insights-destination
+      service: destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: genai-mail-insights-api
+                Description: GenAI Mail Insights Service API
+                URL: ~{genai-mail-insights-api-props/srv-url}
+                Type: HTTP
+                ProxyType: Internet
+                Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                HTML5.Timeout: 300000
+                forwardAuthToken: true
+
+  # ----------------- HTML REPO HOST SERVICE (Be Used by UI) ---------
+  - name: genai-mail-insights-html5-repo-host
+    # -----------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-host
+      service-name: ${space}-genai-mail-insights-html5-repo-host
+      service: html5-apps-repo
+      config:
+        sizeLimit: 2
+
+  # ----------------- HTML REPO RUNTIME SERVICE(Be Used by UI) -------
+  - name: genai-mail-insights-html5-repo-runtime
+    # ------------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-runtime
+      service-name: ${space}-genai-mail-insights-html5-repo-runtime
+      service: html5-apps-repo
+
+  # ------------------ AI DB HDI CONTAINER ---------------------
+  - name: genai-mail-insights-hdi-container
+    # ------------------------------------------------------------
+    type: com.sap.xs.hdi-container
+    parameters:
+      service-name: ${space}-genai-mail-insights-hdi-container
+    properties:
+      com-container-name: "${service-name}"
+  # ------------------ GENERATIVE AI HUB ---------------------
+  - name: generative-ai-hub
+    # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-name: ${space}-generative-ai-hub
+      service-plan: extended
+      service: aicore

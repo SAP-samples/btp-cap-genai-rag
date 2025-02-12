@@ -1,0 +1,13 @@
+{
+    "name": "genai-mail-insights-approuter",
+    "dependencies": {
+        "@sap/approuter": "^19.0.0"
+    },
+    "scripts": {
+        "start": "node node_modules/@sap/approuter/approuter.js",
+        "start:local": "node node_modules/@sap/approuter/approuter.js --workingDir ./dev --port 5000"
+    },
+    "engines": {
+        "node": ">=20"
+    }
+}
