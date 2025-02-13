@@ -1,10 +1,10 @@
 using {ai.db as db} from '../db/data-model';
 
-/* @(requires: [
+@(requires: [
     'Member',
     'Admin',
     'system-user'
-]) */
+])
 service MailInsightsService @(
     path    : 'mail-insights',
     protocol: 'odata-v4'
