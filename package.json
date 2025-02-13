@@ -1,70 +1,67 @@
 {
-  "name": "genai-mail-insights",
-  "version": "1.0.0",
-  "description": "GenAI Mail Insights",
-  "repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
-  "license": "Apache License 2.0",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "@cap-js/hana": "^1.6.1",
-    "@langchain/community": "^0.3.30",
-    "@langchain/core": "0.3.36",
-    "@sap-ai-sdk/ai-api": "^1.7.0",
-    "@sap-ai-sdk/langchain": "1.7.0",
-    "@sap-cloud-sdk/connectivity": "^3.26.0",
-    "@sap-cloud-sdk/http-client": "^3.26.0",
-    "@sap-cloud-sdk/openapi": "^3.26.0",
-    "@sap/cds": "^8.7.1",
-    "@sap/xsenv": "^5.4.0",
-    "express": "^4.21.2",
-    "langchain": "^0.3.15",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@cap-js/cds-typer": "^0.33.0",
-    "@cap-js/cds-types": "^0.9.0",
-    "@cap-js/sqlite": "^1.8.0",
-    "@sap/cds-dk": "^8.7.1",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.17.17",
-    "@types/sap__xsenv": "^3.3.2",
-    "eslint": "^9.20.1",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^3.5.0",
-    "typescript": "^5.7.3"
-  },
-  "scripts": {
-    "start": "cds-serve",
-    "--------DEVELOPMENT-------": "",
-    "watch": "npx --yes npm-run-all --npm-path npm --parallel cap router ui5",
-    "ui5": "npm run start:hybrid --prefix ./app/ui",
-    "cap": "cds-tsx watch --profile hybrid",
-    "router": "npm run start:local --prefix ./router",
-    "lint": "eslint --cache",
-    "---BUILD---": "",
-    "build": "npm run build:cds && npm run build:ui && npm run build:ts",
-    "build:ts": "tsc",
-    "build:cds": "cds-ts build --profile production",
-    "build:ui": "npm run build --prefix ./app/ui/ && npm run copy --prefix ./app/ui/",
-    "cleanup:ts": "npx shx rm -r \"./gen/**/*.{ts,tsconfig}\"",
-    "---DEPLOY---": "",
-    "build:mbt": "mbt build",
-    "deploy": "cf deploy mta_archives/genai-mail-insights_0.0.1.mtar --retries 1",
-    "undeploy": "cf undeploy genai-mail-insights --delete-services --delete-service-keys --delete-service-brokers"
-  },
-  "prettier": {
-    "arrowParens": "always",
-    "tabWidth": 4,
-    "semi": true,
-    "singleQuote": false,
-    "trailingComma": "none",
-    "printWidth": 120
-  },
-  "imports": {
-    "#cds-models/*": "./srv/@cds-models/*/index.js"
-  },
-  "engines": {
-    "node": ">=20"
-  }
+	"name": "genai-mail-insights",
+	"version": "1.0.0",
+	"description": "GenAI Mail Insights",
+	"repository": "https://github.com/SAP-samples/btp-cap-genai-rag",
+	"license": "Apache License 2.0",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@cap-js/hana": "^1.6.1",
+		"@langchain/community": "^0.3.30",
+		"@langchain/core": "0.3.36",
+		"@sap-ai-sdk/ai-api": "^1.7.0",
+		"@sap-ai-sdk/langchain": "1.7.0",
+		"@sap-cloud-sdk/connectivity": "^3.26.0",
+		"@sap-cloud-sdk/http-client": "^3.26.0",
+		"@sap-cloud-sdk/openapi": "^3.26.0",
+		"@sap/cds": "^8.7.1",
+		"@sap/xsenv": "^5.4.0",
+		"express": "^4.21.2",
+		"langchain": "^0.3.15",
+		"zod": "^3.24.2"
+	},
+	"devDependencies": {
+		"@cap-js/cds-typer": "^0.33.0",
+		"@cap-js/cds-types": "^0.9.0",
+		"@cap-js/sqlite": "^1.8.0",
+		"@sap/cds-dk": "^8.7.1",
+		"@types/express": "^4.17.21",
+		"@types/node": "^20.17.17",
+		"@types/sap__xsenv": "^3.3.2",
+		"eslint": "^9.20.1",
+		"npm-run-all": "^4.1.5",
+		"prettier": "^3.5.0",
+		"typescript": "^5.7.3"
+	},
+	"scripts": {
+		"start": "cds-serve",
+		"--------DEVELOPMENT-------": "",
+		"watch": "npx --yes npm-run-all --npm-path npm --parallel cap router ui5",
+		"ui5": "npm run start:hybrid --prefix ./app/ui",
+		"cap": "cds-tsx watch --profile hybrid",
+		"router": "npm run start:local --prefix ./router",
+		"lint": "eslint . --cache && prettier . --check --cache",
+		"---BUILD---": "",
+		"build": "npm run build:cds && npm run build:ui && npm run build:ts",
+		"build:ts": "tsc",
+		"build:cds": "cds-ts build --profile production",
+		"build:ui": "npm run build --prefix ./app/ui/ && npm run copy --prefix ./app/ui/",
+		"cleanup:ts": "npx shx rm -r \"./gen/**/*.{ts,tsconfig}\"",
+		"---DEPLOY---": "",
+		"build:mbt": "mbt build",
+		"deploy": "cf deploy mta_archives/genai-mail-insights_0.0.1.mtar --retries 1",
+		"undeploy": "cf undeploy genai-mail-insights --delete-services --delete-service-keys --delete-service-brokers"
+	},
+	"prettier": {
+		"singleQuote": false,
+		"trailingComma": "none",
+		"printWidth": 120
+	},
+	"imports": {
+		"#cds-models/*": "./srv/@cds-models/*/index.js"
+	},
+	"engines": {
+		"node": ">=20"
+	}
 }

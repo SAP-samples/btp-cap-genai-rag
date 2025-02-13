@@ -8,29 +8,23 @@ In the following steps, you will build a multi-target application which can be d
    git clone https://github.com/SAP-samples/btp-cap-genai-rag
    ```
 
-2. Please switch to the _single-tenant/deploy/cf_ directory.
-
-   ```sh
-   cd single-tenant/deploy/cf
-   ```
-
-3. Make sure you have the required TypeScript dependencies installed globally.
+2. Make sure you have the required TypeScript dependencies installed globally.
 
    ```sh
    npm i -g typescript ts-node tsx
    ```
 
-4. Make sure you have the Cloud MTA Build Tool (MBT) installed globally.
+3. Make sure you have the Cloud MTA Build Tool (MBT) installed globally.
 
    ```sh
-   npm install -g mbt
+   npm i -g mbt
    ```
 
-5. Please run the following command to build your **mtar** file.
+4. Please run the following command to build your **mtar** file.
 
    ```sh
-   # Run in ./single-tenant/deploy/cf #
+   # Run in project's root folder #
    npm run build:mbt
    ```
 
-6. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).
+5. Once your Multi-Target Application Archive is built successfully, you can continue deploying your application ([click here](../3-deploy/2-DeployTheApplication.md)).

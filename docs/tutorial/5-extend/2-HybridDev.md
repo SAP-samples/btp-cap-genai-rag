@@ -14,7 +14,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 
    **Application Router**
 
-   Duplicate the file `default-services.sample.json` in `./single-tenant/code/router/dev/` and rename it to `default-services.json`. Enter the respective credentials of your UAA service (`<Space>-ai-uaa` or `<Space>-aisaas-uaa` depending on the setup).
+   Duplicate the file `default-services.sample.json` in `./router/dev/` and rename it to `default-services.json`. Enter the respective credentials of your UAA service (`<Space>-ai-uaa` or `<Space>-aisaas-uaa` depending on the setup).
 
    ```sh
    # default-services.json
@@ -30,7 +30,7 @@ While the chapter appears to be quite comprehensive, please consider this is a o
 2. After the **.cdsrc-private.json** has been created, you can run the application in hybrid mode, by executing the below commands:
 
    ```sh
-   # Run in ./single-tenant/code #
+   # Run in project's root folder #
 
    npm run watch
 

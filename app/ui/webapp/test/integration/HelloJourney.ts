@@ -15,32 +15,13 @@ opaTest("Should open the Hello dialog", function () {
 	});
 
 	// Actions
-	onTheMainPage.iPressTheSayHelloWithDialogButton();
+	onTheMainPage.iPressTheAddMailButton();
 
 	// Assertions
 	onTheMainPage.iShouldSeeTheHelloDialog();
 
 	// Actions
-	onTheMainPage.iPressTheOkButtonInTheDialog();
-
-	// Assertions
-	onTheMainPage.iShouldNotSeeTheHelloDialog();
-
-	// Cleanup
-	onTheMainPage.iTeardownMyApp();
-});
-
-opaTest("Should close the Hello dialog", function () {
-	// Arrangements
-	onTheMainPage.iStartMyUIComponent({
-		componentConfig: {
-			name: "ai.ui"
-		}
-	});
-
-	// Actions
-	onTheMainPage.iPressTheSayHelloWithDialogButton();
-	onTheMainPage.iPressTheOkButtonInTheDialog();
+	onTheMainPage.iPressTheCloseButtonInTheDialog();
 
 	// Assertions
 	onTheMainPage.iShouldNotSeeTheHelloDialog();

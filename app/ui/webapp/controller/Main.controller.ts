@@ -255,8 +255,7 @@ export default class Main extends BaseController {
 			activeCategories.map((id: string) =>
 				orFilter.push(
 					this.getKeywordFilter(
-						filtersModel.getProperty("/categories").find((category: FilterItem) => category.id === id)
-							.label,
+						filtersModel.getProperty("/categories").find((category: FilterItem) => category.id === id).label,
 						this.EMAIL_CATEGORY_PATH
 					)
 				)
@@ -284,17 +283,13 @@ export default class Main extends BaseController {
 			orFilter.push(
 				this.getKeywordFilter(
 					keyword,
-					localModel.getProperty("/translationOn")
-						? this.EMAIL_TRANSLATED_SENDER_PATH
-						: this.EMAIL_SENDER_PATH
+					localModel.getProperty("/translationOn") ? this.EMAIL_TRANSLATED_SENDER_PATH : this.EMAIL_SENDER_PATH
 				)
 			);
 			orFilter.push(
 				this.getKeywordFilter(
 					keyword,
-					localModel.getProperty("/translationOn")
-						? this.EMAIL_TRANSLATED_SUBJECT_PATH
-						: this.EMAIL_SUBJECT_PATH
+					localModel.getProperty("/translationOn") ? this.EMAIL_TRANSLATED_SUBJECT_PATH : this.EMAIL_SUBJECT_PATH
 				)
 			);
 			orFilter.push(

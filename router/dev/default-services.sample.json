@@ -1,7 +1,7 @@
 {
-    "uaa": {
-        "url": "",
-        "clientid": "",
-        "clientsecret": ""
-    }
+	"uaa": {
+		"url": "",
+		"clientid": "",
+		"clientsecret": ""
+	}
 }

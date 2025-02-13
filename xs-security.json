@@ -1,62 +1,62 @@
 {
-    "xsappname": "ai-dev-PAA_DEMO_genai-mail-insights-backup",
-    "tenant-mode": "dedicated",
-    "scopes": [
-        {
-            "name": "$XSAPPNAME.Member",
-            "description": "Member"
-        },
-        {
-            "name": "$XSAPPNAME.Admin",
-            "description": "Administrator"
-        },
-        {
-            "name": "uaa.user",
-            "description": "UAA"
-        }
-    ],
-    "attributes": [],
-    "role-templates": [
-        {
-            "name": "Member",
-            "description": "Member",
-            "scope-references": ["$XSAPPNAME.Member"],
-            "attribute-references": []
-        },
-        {
-            "name": "Admin",
-            "description": "Administrator",
-            "scope-references": ["$XSAPPNAME.Admin"],
-            "attribute-references": []
-        },
-        {
-            "name": "Token_Exchange",
-            "description": "UAA Token Exchange",
-            "scope-references": ["$uaa.user"],
-            "attribute-references": []
-        }
-    ],
-    "role-collections": [
-        {
-            "name": "GenAI Mail Insights Member (${space})",
-            "description": "Member Access",
-            "role-template-references": ["$XSAPPNAME.Member", "$XSAPPNAME.Token_Exchange"]
-        },
-        {
-            "name": "GenAI Mail Insights Administrator (${space})",
-            "description": "Administrator Access",
-            "role-template-references": ["$XSAPPNAME.Admin", "$XSAPPNAME.Token_Exchange"]
-        }
-    ],
-    "oauth2-configuration": {
-        "token-validity": 900,
-        "redirect-uris": [
-            "https://*.hana.ondemand.com/**",
-            "https://*.applicationstudio.cloud.sap/**",
-            "http*://*.cfapps.*.hana.ondemand.com/**",
-            "http://*.localhost:5000/**",
-            "http://localhost:5000/**"
-        ],
-        "credential-types": ["binding-secret", "x509"]
-    }
+	"xsappname": "genai-mail-insights-uaa-ref",
+	"tenant-mode": "dedicated",
+	"scopes": [
+		{
+			"name": "$XSAPPNAME.Member",
+			"description": "Member"
+		},
+		{
+			"name": "$XSAPPNAME.Admin",
+			"description": "Administrator"
+		},
+		{
+			"name": "uaa.user",
+			"description": "UAA"
+		}
+	],
+	"attributes": [],
+	"role-templates": [
+		{
+			"name": "Member",
+			"description": "Member",
+			"scope-references": ["$XSAPPNAME.Member"],
+			"attribute-references": []
+		},
+		{
+			"name": "Admin",
+			"description": "Administrator",
+			"scope-references": ["$XSAPPNAME.Admin"],
+			"attribute-references": []
+		},
+		{
+			"name": "Token_Exchange",
+			"description": "UAA Token Exchange",
+			"scope-references": ["$uaa.user"],
+			"attribute-references": []
+		}
+	],
+	"role-collections": [
+		{
+			"name": "GenAI Mail Insights Member (${space})",
+			"description": "Member Access",
+			"role-template-references": ["$XSAPPNAME.Member", "$XSAPPNAME.Token_Exchange"]
+		},
+		{
+			"name": "GenAI Mail Insights Administrator (${space})",
+			"description": "Administrator Access",
+			"role-template-references": ["$XSAPPNAME.Admin", "$XSAPPNAME.Token_Exchange"]
+		}
+	],
+	"oauth2-configuration": {
+		"token-validity": 900,
+		"redirect-uris": [
+			"https://*.hana.ondemand.com/**",
+			"https://*.applicationstudio.cloud.sap/**",
+			"http*://*.cfapps.*.hana.ondemand.com/**",
+			"http://*.localhost:5000/**",
+			"http://localhost:5000/**"
+		],
+		"credential-types": ["binding-secret", "x509"]
+	}
 }

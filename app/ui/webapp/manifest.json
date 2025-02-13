@@ -1,5 +1,5 @@
 {
-	"_version": "1.12.0",
+	"_version": "1.60.0",
 
 	"sap.app": {
 		"id": "ui",
@@ -43,7 +43,7 @@
 		},
 
 		"dependencies": {
-			"minUI5Version": "1.117.1",
+			"minUI5Version": "1.120.0",
 			"libs": {
 				"sap.m": {},
 				"sap.ui.core": {},
@@ -107,6 +107,9 @@
 					"viewName": "Main"
 				}
 			}
+		},
+		"sap.platform.cf": {
+			"ui5VersionNumber": "1.120.25"
 		}
 	}
 }

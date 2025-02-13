@@ -1,15 +1,12 @@
 {
+	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"target": "es2022",
-		"module": "es2022",
+		"target": "ES2023",
+		"module": "ES2022",
 		"moduleResolution": "node",
-		"skipLibCheck": true,
-		"allowJs": true,
-		"strict": true,
-		"strictNullChecks": false,
-		"strictPropertyInitialization": false,
 		"rootDir": "./webapp",
 		"outDir": "./dist",
+		"lib": ["ES2023", "DOM"],
 		"types": ["@sapui5/types", "@types/qunit"],
 		"paths": {
 			"ui/*": ["./webapp/*"],
@@ -17,5 +14,5 @@
 			"integration/*": ["./webapp/test/integration/*"]
 		}
 	},
-	"include": ["./webapp/**/*"]
+	"include": ["./webapp"]
 }

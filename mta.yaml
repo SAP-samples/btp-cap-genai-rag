@@ -11,7 +11,6 @@ build-parameters:
     - builder: custom
       commands:
         - npm run build
-        #- npm run build:fast
 
 modules:
   # --------------------- APPROUTER MODULE ---------------------
@@ -75,30 +74,10 @@ modules:
             instance_min_count: 1
             instance_max_count: 2
             scaling_rules:
-              - {
-                  "metric_type": "memoryutil",
-                  "threshold": 80,
-                  "operator": ">=",
-                  "adjustment": "+1",
-                }
-              - {
-                  "metric_type": "memoryutil",
-                  "threshold": 60,
-                  "operator": "<",
-                  "adjustment": "-1",
-                }
-              - {
-                  "metric_type": "cpu",
-                  "threshold": 80,
-                  "operator": ">=",
-                  "adjustment": "+1",
-                }
-              - {
-                  "metric_type": "cpu",
-                  "threshold": 30,
-                  "operator": "<",
-                  "adjustment": "-1",
-                }
+              - { "metric_type": "memoryutil", "threshold": 80, "operator": ">=", "adjustment": "+1" }
+              - { "metric_type": "memoryutil", "threshold": 60, "operator": "<", "adjustment": "-1" }
+              - { "metric_type": "cpu", "threshold": 80, "operator": ">=", "adjustment": "+1" }
+              - { "metric_type": "cpu", "threshold": 30, "operator": "<", "adjustment": "-1" }
 
   # --------------------- UI MODULE ----------------------------
   - name: genai-mail-insights-ui

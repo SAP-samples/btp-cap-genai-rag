@@ -1,26 +1,31 @@
 import Opa5 from "sap/ui/test/Opa5";
 import Press from "sap/ui/test/actions/Press";
+import I18NText from "sap/ui/test/matchers/I18NText";
 
 const viewName = "ai.ui.view.Main";
 
 export default class MainPage extends Opa5 {
 	// Actions
-	iPressTheSayHelloWithDialogButton() {
+	iPressTheAddMailButton() {
 		this.waitFor({
-			id: "helloButton",
-			viewName,
+			id: "addMail",
+			viewName: "ai.ui.view.App",
 			actions: new Press(),
 			errorMessage: "Did not find the 'Say Hello With Dialog' button on the Main view"
 		});
 	}
 
-	iPressTheOkButtonInTheDialog() {
+	iPressTheCloseButtonInTheDialog() {
 		this.waitFor({
 			controlType: "sap.m.Button",
 			searchOpenDialogs: true,
 			viewName,
+			matchers: new I18NText({
+				propertyName: "text",
+				key: "buttons.close"
+			}),
 			actions: new Press(),
-			errorMessage: "Did not find the 'OK' button in the Dialog"
+			errorMessage: "Did not find the 'Close' button in the Dialog"
 		});
 	}
 

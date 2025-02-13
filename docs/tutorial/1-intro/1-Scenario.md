@@ -28,7 +28,7 @@ While initially designed for a travel agency, this code can be adapted to suit v
 
    - Insights such as the urgency, a mail summary, the tone, key facts as well as potential actions are being extracted
    - A preliminary response is being generated in the original mail language and the user's working language
-   - The features of zod (https://github.com/colinhacks/zod) are used to simplify the structured prompt response (6)
+   - The features of zod (https://www.npmjs.com/package/zod) are used to simplify the structured prompt response (6)
    - An embedding vector is created from the incoming mail, which can be used for similarity search (7)
    - Embeddings and insights are stored in a SAP HANA Cloud Database leveraging the built-in Vector Engine
    - The results of the processing process are returned back to the user or API caller (8)

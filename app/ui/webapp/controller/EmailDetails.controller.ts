@@ -48,9 +48,7 @@ export default class EmailDetails extends BaseController {
 		similarEmailsList.removeSelections(true);
 		similarEmailsList
 			.getItems()
-			.map((listItem: ListItemBase) =>
-				((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false)
-			);
+			.map((listItem: ListItemBase) => ((listItem as CustomListItem).getContent()[0] as Panel).setExpanded(false));
 	}
 
 	public createEmailHeaderContent(mail: Mail): void {

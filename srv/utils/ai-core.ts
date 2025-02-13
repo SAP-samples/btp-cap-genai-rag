@@ -1,18 +1,18 @@
 import xsenv from "@sap/xsenv";
 
 import {
-    ConfigurationApi,
-    AiConfigurationCreationResponse,
-    AiConfigurationBaseData,
-    ResourceGroupApi,
-    AiApiError,
-    DeploymentApi,
-    AiDeploymentCreationRequest,
-    AiDeploymentCreationResponse
+	ConfigurationApi,
+	AiConfigurationCreationResponse,
+	AiConfigurationBaseData,
+	ResourceGroupApi,
+	AiApiError,
+	DeploymentApi,
+	AiDeploymentCreationRequest,
+	AiDeploymentCreationResponse
 } from "@sap-ai-sdk/ai-api";
 
 interface ResourceGroupHeader {
-    "AI-Resource-Group": string;
+	"AI-Resource-Group": string;
 }
 
 /**
@@ -21,30 +21,30 @@ interface ResourceGroupHeader {
  * @returns {Promise<void>}
  */
 export const checkOrPrepareDeployments = async (resourceGroupId: string): Promise<void> => {
-    try {
-        const resourceGroups = await getResourceGroups();
-        if (!resourceGroups.find((resourceGroup: any) => resourceGroup.resourceGroupId === resourceGroupId)) {
-            // Create SAP AI Core Default Resource Group artifacts
-            console.log("Info: SAP AI Core Default Resource Group artifacts will be created");
+	try {
+		const resourceGroups = await getResourceGroups();
+		if (!resourceGroups.find((resourceGroup: any) => resourceGroup.resourceGroupId === resourceGroupId)) {
+			// Create SAP AI Core Default Resource Group artifacts
+			console.log("Info: SAP AI Core Default Resource Group artifacts will be created");
 
-            // Create AI Core Default Resource Group
-            console.log(`Info: SAP AI Core Default Resource Group ${resourceGroupId} will be created`);
-            await createResourceGroup(resourceGroupId);
-            await delay(10000);
+			// Create AI Core Default Resource Group
+			console.log(`Info: SAP AI Core Default Resource Group ${resourceGroupId} will be created`);
+			await createResourceGroup(resourceGroupId);
+			await delay(10000);
 
-            const header: ResourceGroupHeader = { "AI-Resource-Group": resourceGroupId };
-            const configurations: Array<AiConfigurationCreationResponse> = await createConfigurations(header);
-            await delay(10000);
-            const deployments = await createDeployments(configurations, header);
+			const header: ResourceGroupHeader = { "AI-Resource-Group": resourceGroupId };
+			const configurations: Array<AiConfigurationCreationResponse> = await createConfigurations(header);
+			await delay(10000);
+			const deployments = await createDeployments(configurations, header);
 
-            console.log(
-                "Resource Group and Configurations created successfully. Models deployments have been started:",
-                deployments
-            );
-        }
-    } catch (e: any) {
-        console.log("Error: " + e?.message);
-    }
+			console.log(
+				"Resource Group and Configurations created successfully. Models deployments have been started:",
+				deployments
+			);
+		}
+	} catch (e: any) {
+		console.log("Error: " + e?.message);
+	}
 };
 
 /**
@@ -52,14 +52,14 @@ export const checkOrPrepareDeployments = async (resourceGroupId: string): Promis
  * @returns {string} - The application identifier
  */
 export const getAppName = (): string => {
-    const xsuaaService = xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa as any;
-    const appName = xsuaaService?.xsappname?.split("!t")[0];
+	const xsuaaService = xsenv.getServices({ xsuaa: { tag: "xsuaa" } }).xsuaa as any;
+	const appName = xsuaaService?.xsappname?.split("!t")[0];
 
-    // Comply with SAP AI Core Resource Group naming requirements (only a-z and 0-9 and "-")
-    return appName
-        ?.toLowerCase()
-        .replace(/[^a-z0-9-]/g, "")
-        .replace(/^(-*)|(-*)$/g, "");
+	// Comply with SAP AI Core Resource Group naming requirements (only a-z and 0-9 and "-")
+	return appName
+		?.toLowerCase()
+		.replace(/[^a-z0-9-]/g, "")
+		.replace(/^(-*)|(-*)$/g, "");
 };
 
 /**
@@ -69,15 +69,15 @@ export const getAppName = (): string => {
  * @throws {Error} If an error occurs during creation
  */
 const createResourceGroup = async (resourceGroupId: string): Promise<any> => {
-    try {
-        const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsCreate({
-            resourceGroupId: resourceGroupId
-        }).execute();
-        //@ts-ignore
-        return response;
-    } catch (e: any) {
-        console.error(`Error: ${e?.message}`);
-    }
+	try {
+		const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsCreate({
+			resourceGroupId: resourceGroupId
+		}).execute();
+		//@ts-ignore
+		return response;
+	} catch (e: any) {
+		console.error(`Error: ${e?.message}`);
+	}
 };
 
 /**
@@ -86,90 +86,90 @@ const createResourceGroup = async (resourceGroupId: string): Promise<any> => {
  * @throws {Error} If an error occurs during fetching
  */
 const getResourceGroups = async (): Promise<Array<any>> => {
-    try {
-        const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll().execute();
-        return response.resources;
-    } catch (e: any) {
-        console.error(`Error: ${e?.message}`);
-        return [];
-    }
+	try {
+		const response = await ResourceGroupApi.kubesubmitV4ResourcegroupsGetAll().execute();
+		return response.resources;
+	} catch (e: any) {
+		console.error(`Error: ${e?.message}`);
+		return [];
+	}
 };
 
 const createConfigurations = async (header: ResourceGroupHeader): Promise<Array<AiConfigurationCreationResponse>> => {
-    try {
-        // Create gpt-4o Configuration
-        const requestBodyChatModel: AiConfigurationBaseData = {
-            name: "gpt-4o",
-            executableId: "azure-openai",
-            scenarioId: "foundation-models",
-            parameterBindings: [
-                {
-                    key: "modelName",
-                    value: "gpt-4o"
-                },
-                {
-                    key: "modelVersion",
-                    value: "latest"
-                }
-            ],
-            inputArtifactBindings: []
-        };
+	try {
+		// Create gpt-4o Configuration
+		const requestBodyChatModel: AiConfigurationBaseData = {
+			name: "gpt-4o",
+			executableId: "azure-openai",
+			scenarioId: "foundation-models",
+			parameterBindings: [
+				{
+					key: "modelName",
+					value: "gpt-4o"
+				},
+				{
+					key: "modelVersion",
+					value: "latest"
+				}
+			],
+			inputArtifactBindings: []
+		};
 
-        const responseDataChatModel = ConfigurationApi.configurationCreate(requestBodyChatModel, header).execute();
+		const responseDataChatModel = ConfigurationApi.configurationCreate(requestBodyChatModel, header).execute();
 
-        // Create text-embedding-3-small Configuration
-        const requestBodyEmbeddingModel: AiConfigurationBaseData = {
-            name: "text-embedding-3-small",
-            executableId: "azure-openai",
-            scenarioId: "foundation-models",
-            parameterBindings: [
-                {
-                    key: "modelName",
-                    value: "text-embedding-3-small"
-                },
-                {
-                    key: "modelVersion",
-                    value: "latest"
-                }
-            ],
-            inputArtifactBindings: []
-        };
+		// Create text-embedding-3-small Configuration
+		const requestBodyEmbeddingModel: AiConfigurationBaseData = {
+			name: "text-embedding-3-small",
+			executableId: "azure-openai",
+			scenarioId: "foundation-models",
+			parameterBindings: [
+				{
+					key: "modelName",
+					value: "text-embedding-3-small"
+				},
+				{
+					key: "modelVersion",
+					value: "latest"
+				}
+			],
+			inputArtifactBindings: []
+		};
 
-        const responseDataEmbeddingModel = ConfigurationApi.configurationCreate(
-            requestBodyEmbeddingModel,
-            header
-        ).execute();
+		const responseDataEmbeddingModel = ConfigurationApi.configurationCreate(
+			requestBodyEmbeddingModel,
+			header
+		).execute();
 
-        const configurationResponses: Array<AiConfigurationCreationResponse> = await Promise.all([
-            responseDataChatModel,
-            responseDataEmbeddingModel
-        ]);
-        return configurationResponses;
-    } catch (errorData) {
-        const apiError = (errorData as any).response.data.error as AiApiError;
-        console.error("Status code:", (errorData as any).response.status);
-        throw new Error(`Configuration creation failed: ${apiError.message}`);
-    }
+		const configurationResponses: Array<AiConfigurationCreationResponse> = await Promise.all([
+			responseDataChatModel,
+			responseDataEmbeddingModel
+		]);
+		return configurationResponses;
+	} catch (errorData) {
+		const apiError = (errorData as any).response.data.error as AiApiError;
+		console.error("Status code:", (errorData as any).response.status);
+		throw new Error(`Configuration creation failed: ${apiError.message}`);
+	}
 };
 
 const createDeployments = async (
-    configurations: Array<AiConfigurationCreationResponse>,
-    header: ResourceGroupHeader
+	configurations: Array<AiConfigurationCreationResponse>,
+	header: ResourceGroupHeader
 ): Promise<Array<AiDeploymentCreationResponse>> => {
-    try {
-        return await Promise.all(
-            configurations.map((configuration: AiConfigurationCreationResponse) => {
-                const requestBody: AiDeploymentCreationRequest = {
-                    configurationId: configuration.id
-                };
-                return DeploymentApi.deploymentCreate(requestBody, header).execute();
-            })
-        );
-    } catch (errorData) {
-        const apiError = (errorData as any).response.data.error as AiApiError;
-        console.error("Status code:", (errorData as any).response.status);
-        throw new Error(`Deployment creation failed: ${apiError.message}`);
-    }
+	try {
+		return await Promise.all(
+			configurations.map((configuration: AiConfigurationCreationResponse) => {
+				const requestBody: AiDeploymentCreationRequest = {
+					configurationId: configuration.id
+				};
+				return DeploymentApi.deploymentCreate(requestBody, header).execute();
+			})
+		);
+	} catch (errorData) {
+		const apiError = (errorData as any).response.data.error as AiApiError;
+		console.error("Status code:", (errorData as any).response.status);
+		throw new Error(`Deployment creation failed: ${apiError.message}`);
+	}
 };
 
 /**
