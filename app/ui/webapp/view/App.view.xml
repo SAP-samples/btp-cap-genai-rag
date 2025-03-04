@@ -1,0 +1,22 @@
+<mvc:View
+    controllerName="ai.ui.controller.App"
+    displayBlock="true"
+    xmlns="sap.f"
+    xmlns:m="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:mvc="sap.ui.core.mvc"
+>
+    <l:FixFlex>
+        <l:fixContent>
+            <ShellBar title="{i18n>appTitle}" homeIcon="images/sap-logo.svg">
+                <additionalContent>
+                    <m:OverflowToolbarButton id="addMail" tooltip="Add Mail" icon="sap-icon://create-form"
+                        press="openAddMailDialog" />
+                </additionalContent>
+            </ShellBar>
+        </l:fixContent>
+        <l:flexContent>
+            <m:App id="app" />
+        </l:flexContent>
+    </l:FixFlex>
+</mvc:View>

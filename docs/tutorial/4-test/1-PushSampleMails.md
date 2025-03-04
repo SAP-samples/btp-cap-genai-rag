@@ -2,7 +2,7 @@
 
 In this chapter you will learn, how to push sample mails to GenAI Mail Insights.
 
-1. Find the provided **http** sample file [**requests-btp.http**](../../../single-tenant/code/test/requests-btp.http), containing a few test mails for processing.
+1. Find the provided **http** sample file [**requests-btp.http**](../../../test/requests-btp.http), containing a few test mails for processing.
 
    > **Hint** - You might need to install the **REST Client** extension in your development environment. You can find respective extensions for popular editors such as Visual Studio Code.
 

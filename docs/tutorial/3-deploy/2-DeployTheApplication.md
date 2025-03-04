@@ -25,7 +25,7 @@ cf install-plugin multiapps
 3. Start the deployment to Cloud Foundry, by running the following command.
 
    ```sh
-   # Run in ./single-tenant/deploy/cf #
+   # Run in project's root folder #
    npm run deploy
    ```
 

@@ -1,3 +1,7 @@
+.terraform/
+.terraform.*
+terraform.tfstate*
+
 mta_archives/
 node_modules/
 @cds-models/
@@ -33,7 +37,20 @@ brokerpass.txt
 *.sqlite-*
 .$*
 
-!multi-tenant/code/router/dev/default-services.sample.json
-!multi-tenant/code/router/dev/default-env.json
-!single-tenant/code/router/dev/default-services.sample.json
-!single-tenant/code/router/dev/default-env.json
+!router/dev/default-services.sample.json
+!router/dev/default-env.json
+
+# build results
+dist
+coverage
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.cdsrc-private.json
+.eslintcache
+.package-lock.json

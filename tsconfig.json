@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "ES2023",
+		"module": "NodeNext",
+		"moduleResolution": "nodenext",
+		"outDir": "./gen/srv/srv",
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"allowJs": true,
+		"strict": true,
+		"strictNullChecks": false,
+		"strictPropertyInitialization": false,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"paths": {
+			"#cds-models/*": ["./@cds-models/*/index.ts"]
+		}
+	},
+	"include": ["./srv"]
+}
