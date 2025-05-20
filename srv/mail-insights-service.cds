@@ -32,7 +32,7 @@ service MailInsightsService @(
     // Add new mails
     action   addMails(mails : array of db.BaseMail, rag : Boolean null)                             returns array of Mails;
     // Regenerate a single response
-    action   regenerateResponse(id : UUID, rag : Boolean null, additionalInformation : String null) returns Mails;
+    action   regenerateResponse(id : UUID, rag : Boolean null, additionalInformation : String null, piiEntities: String) returns Mails;
     // Submits response in working language
     action   submitResponse(id : UUID, response : String)                                           returns Boolean;
     // Revoke answered status

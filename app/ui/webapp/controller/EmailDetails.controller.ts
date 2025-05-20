@@ -21,13 +21,14 @@ import PageSection from "sap/uxap/ObjectPageSection";
 import Fragment from "sap/ui/core/Fragment";
 import Dialog from "sap/m/Dialog";
 
-import { Mail, KeyFact, Action } from "../model/entities";
+import { Mail, KeyFact, Action, ClosestMail } from "../model/entities";
 import Formatter from "../model/formatter";
 
 const MAIL_ANSWERED_FRAGMENT_NAME = "ai.ui.view.MailAnsweredDialog";
 const ID_MAIL_ANSWERED_DIALOG = "mailAnsweredDialog";
 const ID_TEXTAREA_OL = "areaOL";
 const ID_TEXTAREA_WL = "areaWL";
+var activeEmail: Mail;
 
 export default class EmailDetails extends BaseController {
 	private mailAnsweredDialog: Dialog;
@@ -167,6 +168,86 @@ export default class EmailDetails extends BaseController {
 		}
 	}
 
+	public setEmailObj(mail: Mail): void {
+		activeEmail = mail;
+	}
+
+	public async gov_generation(event: Event): Promise<void> {
+		const evaluationSource = (event.getSource() as Button).getCustomData()[0].getValue();
+		const isInputEvaluation: Boolean = evaluationSource === "input"; 
+		//const oDataModel = this.getModel("api") as ODataModel;
+		const localModel: JSONModel = this.getModel() as JSONModel;
+	
+
+		const contextEmails = localModel.getData().similarEmails.map((mail: ClosestMail) =>  mail.mail.responseBody);
+			const govResponseSection = this.byId(isInputEvaluation ? "govResponseSectionInput" : "govResponseSectionOutput") as PageSection;
+			govResponseSection.setBusy(true);
+		
+		try {
+			const responseWorkingLanguage = localModel.getProperty("/responseBody") as string;
+			let raw;
+			if(isInputEvaluation) {
+				raw = JSON.stringify({
+					"question": activeEmail.subject + " " + activeEmail.body,
+					"context1": contextEmails[0],
+					"context2": contextEmails[1],
+					"context3": contextEmails[2]
+				});
+			} else {
+				raw = JSON.stringify({
+					"question": activeEmail.subject + " " + activeEmail.body,
+					"generated_text" : responseWorkingLanguage,
+					"context1": contextEmails[0],
+					"context2": contextEmails[1],
+					"context3": contextEmails[2]
+				});
+			}
+	
+			const response = await fetch('https://<sap gov evaluation cfapps hostname>/evaluate', {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"access-control-allow-origin": "*"
+				},
+				body: raw
+			});
+	
+			if (response.ok) {
+				const result = await response.json();
+				const pii_input_entities = result.entity.values.pii_input_entities;
+				const pii_entities = result.entity.values.pii_entities;
+
+				//this.onPressRegenerate();
+				if(isInputEvaluation) {
+					const inputEval = {
+						"pii_input_entities": pii_input_entities
+					}
+					localModel.setProperty("/watsonxgovresponseinput", JSON.stringify(inputEval));
+				} else {
+					const outputEval = {
+						"pii_entities": pii_entities,
+						"answer_relevance": result.entity.values.answer_relevance,
+						"context_relevance": result.entity.values.context_relevance,
+						"context_relevances": {
+							[result.entity.values.context_relevances.context_columns[0]]: result.entity.values.context_relevances.context_relevances[0],
+							[result.entity.values.context_relevances.context_columns[1]]: result.entity.values.context_relevances.context_relevances[1],
+							[result.entity.values.context_relevances.context_columns[2]]: result.entity.values.context_relevances.context_relevances[2]
+						}
+					}
+					localModel.setProperty("/watsonxgovresponseoutput", JSON.stringify(outputEval));
+				}
+				MessageToast.show(this.getText("email.texts.generateResponseMessage"));
+			} else {
+				console.error("Failed to fetch response:", response.status, response.statusText);
+			}
+		} catch (error) {
+			console.error("Error in gov_generation:", error);
+		} finally {
+			localModel.setProperty("/busy", false);
+			govResponseSection.setBusy(false);
+		}
+	}
+
 	public async onPressRegenerate(): Promise<void> {
 		const oDataModel = this.getModel("api") as ODataModel;
 		const localModel: JSONModel = this.getModel() as JSONModel;
@@ -176,18 +257,25 @@ export default class EmailDetails extends BaseController {
 		const httpHeaders: any = oDataModel.getHttpHeaders();
 
 		try {
+			const piiEntities = localModel.getProperty("/watsonxgovresponseinput") as string;
+			const requestBody = {
+				id: localModel.getData().activeEmailId,
+				rag: localModel.getProperty("/submittedResponsesIncluded"),
+				additionalInformation: localModel.getProperty("/additionalInfo"),
+				piiEntities : piiEntities
+			  };
+  
+			console.log('Request Body:', JSON.stringify(requestBody));
 			const response = await fetch(`${CAP_BASE_URL}/regenerateResponse`, {
 				method: "POST",
 				headers: {
 					"X-CSRF-Token": httpHeaders["X-CSRF-Token"],
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({
-					id: localModel.getProperty("/activeEmailId"),
-					rag: localModel.getProperty("/submittedResponsesIncluded"),
-					additionalInformation: localModel.getProperty("/additionalInfo")
-				})
+				body: JSON.stringify(requestBody)
 			});
+			console.log(response);
+			
 			if (response.ok) {
 				const result = (await response.json()) as Mail;
 				localModel.setProperty("/responseBody", result.responseBody);

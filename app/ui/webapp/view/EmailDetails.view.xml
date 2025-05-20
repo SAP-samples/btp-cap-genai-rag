@@ -91,6 +91,42 @@
                     </ux:ObjectPageSubSection>
                 </ux:subSections>
             </ux:ObjectPageSection>
+
+            <!--Watsonx Gov Section Input-->
+            <ux:ObjectPageSection
+                id="govResponseSectionInput"
+                titleUppercase="false"
+                title="Watsonx Governance Response"
+                busyIndicatorDelay="300"
+            >
+            <ux:subSections>
+                <ux:ObjectPageSubSection
+                    title="Gov Evaluation of Email"
+                >
+                  <VBox class="sapUiTinyMargin">
+                    <HBox justifyContent="End">
+                        <Button
+                        type="Emphasized"
+                        text="Invoke Watsonx Gov"
+                        press="gov_generation">
+                        <customData>
+                            <core:CustomData key="evaluationSource" value="input" />
+                        </customData>    
+                        </Button>
+                     </HBox>
+                    <TextArea
+                    width="100%"
+                    growing="true"
+                    editable="false"
+                    value="{/watsonxgovresponseinput}"
+                    rows="5"
+                    wrapping="Soft"
+                    />
+                 </VBox>
+                </ux:ObjectPageSubSection>
+            </ux:subSections>
+           </ux:ObjectPageSection>
+
             <ux:ObjectPageSection
                 id="responsePreparationSection"
                 titleUppercase="false"
@@ -145,11 +181,13 @@
                             <TextArea
                                 width="100%"
                                 growing="true"
-                                editable="false"
+                                editable="true"
                                 visible="{= !${/translationOn} }"
                                 value="{/responseBody}"
                             />
                             <TextArea
+                                editable="true"
+                                id="userInputResponseTextArea"
                                 width="100%"
                                 growing="true"
                                 visible="{/translationOn}"
@@ -176,6 +214,41 @@
                 </ux:subSections>
             </ux:ObjectPageSection>
 
+            <!--Watsonx Gov Section Output-->
+            <ux:ObjectPageSection
+                id="govResponseSectionOutput"
+                titleUppercase="false"
+                title="Watsonx Governance Response"
+                busyIndicatorDelay="300"
+            >
+            <ux:subSections>
+                <ux:ObjectPageSubSection
+                    title="Gov Evaluation of Response"
+                >
+                  <VBox class="sapUiTinyMargin">
+                    <HBox justifyContent="End">
+                        <Button
+                        type="Emphasized"
+                        text="Invoke Watsonx Gov"
+                        press="gov_generation">
+                        <customData>
+                            <core:CustomData key="evaluationSource" value="output" />
+                        </customData>    
+                        </Button>
+                     </HBox>
+                    <TextArea
+                    width="100%"
+                    growing="true"
+                    editable="false"
+                    value="{/watsonxgovresponseoutput}"
+                    rows="5"
+                    wrapping="Soft"
+                    />
+                 </VBox>
+                </ux:ObjectPageSubSection>
+            </ux:subSections>
+           </ux:ObjectPageSection>
+           
             <ux:ObjectPageSection
                 titleUppercase="false"
                 title="{i18n>email.titles.similarEmails} ({/similarEmails/length})"

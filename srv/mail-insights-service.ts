@@ -11,7 +11,8 @@ import { IBaseMail, IProcessedMail, IStoredMail, IAction, MailWithSimilarity } f
 import * as schemas from "./schemas.js";
 import { ACTIONS } from "./constants.js";
 
-import type { Mail, Translation } from "#cds-models/MailInsightsService";
+import type { Mail, Mails, Translation } from "#cds-models/MailInsightsService";
+import logger from "./utils/logger.js";
 
 /**
  * Class representing MailInsights
@@ -33,7 +34,7 @@ export default class MailInsights extends cds.ApplicationService {
 		this.on("deleteMail", this.onDeleteMail);
 		this.on("submitResponse", this.onSubmitResponse);
 		this.on("revokeResponse", this.onRevokeResponse);
-		this.on("generateResponse", this.onGenerateResponse);
+		this.on("regenerateResponse", this.onGenerateResponse);
 
 		this.resourceGroupId = getAppName();
 		checkOrPrepareDeployments(this.resourceGroupId);
@@ -99,7 +100,7 @@ export default class MailInsights extends cds.ApplicationService {
 				};
 			});
 
-			const closestMailsIDs: Array<MailWithSimilarity> = await this.getClosestMailIDsWithSimilarity(id, 5);
+			const closestMailsIDs: Array<MailWithSimilarity> = await this.getClosestMailIDsWithSimilarity(id, 3);
 			const closestMailsIndex: { [key: string]: MailWithSimilarity } = closestMailsIDs.reduce(
 				(acc: { [key: string]: MailWithSimilarity }, mailWithSimilarity: MailWithSimilarity) => ({
 					...acc,
@@ -206,10 +207,12 @@ export default class MailInsights extends cds.ApplicationService {
 	 */
 	private onGenerateResponse = async (req: cds.Request): Promise<boolean | any> => {
 		try {
-			const { id, rag, additionalInformation } = req.data;
+			const { id, rag, additionalInformation, piiEntities} = req.data;
 			const { Mails } = this.entities;
 			const mail = await SELECT.one.from(Mails, id);
-			const response = await this.generateResponse(mail, rag, additionalInformation);
+			logger.info('Mail fetched from database:', mail);
+            const response = await this.generateResponse(mail, rag, additionalInformation, piiEntities);
+            console.log("generateResponse: "+response);
 			return response;
 		} catch (error: any) {
 			console.error(`Error: ${error?.message}`);
@@ -240,10 +243,12 @@ export default class MailInsights extends cds.ApplicationService {
 
 			// Implement your custom logic to send e-mail e.g. using Microsoft Graph API
 			// Send the working language response + target language translation + AI Translation Disclaimer;
+			logger.info("send: response: "+response);
+            logger.info("response translation: "+translation);
 			const submittedMail = {
 				...mail,
 				responded: true,
-				responseBody: translation,
+				responseBody: response,
 				translation: { ...mail.translation, responseBody: response }
 			};
 			const success = await UPDATE(Mails, mail.ID).set(submittedMail);
@@ -341,10 +346,11 @@ export default class MailInsights extends cds.ApplicationService {
 	private generateResponse = async (
 		mail: IStoredMail,
 		rag: boolean = false,
-		additionalInformation?: string
+		additionalInformation?: string,
+        piiEntities?: string
 	): Promise<IStoredMail> => {
 		const { Translations } = this.entities;
-		const responses = await this.preparePotentialResponses([mail], rag, additionalInformation);
+		const responses = await this.preparePotentialResponses([mail], rag, additionalInformation, piiEntities);
 		const regeneratedResponse = responses[0]?.response?.responseBody;
 
 		//@ts-ignore
@@ -421,10 +427,14 @@ export default class MailInsights extends cds.ApplicationService {
 	private preparePotentialResponses = async (
 		mails: Array<IBaseMail>,
 		rag: boolean = false,
-		additionalInformation?: string
+		additionalInformation?: string,
+        piiEntities?: string
 	): Promise<any> => {
 		// langchain wrapper for language model
 		const llm = getChatModel(this.resourceGroupId);
+		logger.info("******************************preparePotentialResponses******************************");
+        logger.info("resourceGroupId: " + this.resourceGroupId);
+        logger.info("LLM - chat model name: " + llm.getName());
 		// parser
 		const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_SCHEMA);
 		const formatInstructions = parser.getFormatInstructions();
@@ -435,11 +445,16 @@ export default class MailInsights extends cds.ApplicationService {
                                 Prefer the context when generating your answer to any prior knowledge.
                                 Also consider given additional information if available to enhance the response.`;
 		const systemPrompt = "Formulate a response to the original mail using given additional information.";
-
+		
+		let additionalPrompt;
+        if(piiEntities && piiEntities.length > 0) {
+            additionalPrompt = `Please ensure that the response excludes any personally identifiable information (PII). 
+                                      Do not include any PII such as {piiEntities}, or any other sensitive personal details.`
+        }
 		const promptTemplate = await ChatPromptTemplate.fromMessages([
 			[
 				"system",
-				(rag ? ragSystemPrompt : systemPrompt) +
+				(rag ? ragSystemPrompt : systemPrompt) + additionalPrompt +
 					`Address the sender appropriately.
                     {formatInstructions}
                     Make sure to escape special characters by double slashes except '\n'.`
@@ -447,6 +462,8 @@ export default class MailInsights extends cds.ApplicationService {
 			["user", "{subject}\n{body}"]
 		]).partial({ formatInstructions });
 
+		logger.info("piiEntities: ", piiEntities);
+        logger.info("prompt: ", promptTemplate.promptMessages)
 		// chain together template, client, and parser
 		const llmChain = promptTemplate.pipe(llm).pipe(parserWithFix);
 
@@ -457,13 +474,23 @@ export default class MailInsights extends cds.ApplicationService {
 					closestResponses = await this.getClosestResponses(mail.ID);
 				}
 
+				console.log("Build Engineering logs");
+                console.log("Sender" + mail.senderEmailAddress);
+                console.log("Subject" + mail.subject);
+                console.log("Body" + mail.body);
+                //console.log("Sender" + mail.senderEmailAddress);
+                console.log("Context" + closestResponses);
+
 				const response: z.infer<typeof schemas.MAIL_RESPONSE_SCHEMA> = await llmChain.invoke({
 					sender: mail.senderEmailAddress,
 					subject: mail.subject,
 					body: mail.body,
 					additionalInformation: additionalInformation || "",
-					context: closestResponses
+					context: closestResponses,
+                    piiEntities: piiEntities
 				});
+
+				console.log("Response_AG:"+response);
 
 				return { mail, response };
 			})
@@ -605,6 +632,10 @@ export default class MailInsights extends cds.ApplicationService {
 		try {
 			// langchain wrapper for language model
 			const llm = getChatModel(this.resourceGroupId);
+			logger.info("**********************TRANSLATE******************************");
+            logger.info("resourceGroupId: " + this.resourceGroupId);
+            logger.info("LLM - chat model name: " + llm.getName());
+
 			// parser
 			const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
 			const formatInstructions = parser.getFormatInstructions();
@@ -636,12 +667,12 @@ export default class MailInsights extends cds.ApplicationService {
 	};
 
 	/**
-	 * Get responses of 5 closest Mails.
+	 * Get responses of 3 closest Mails.
 	 * @param {string} id - ID of the mail for which the closest responses need to be fetched.
 	 * @return {Promise<Array<[TypeORMVectorStoreDocument]>>} - Returns a Promise that resolves to an array of closest responses.
 	 */
 	private getClosestResponses = async (id: string): Promise<Array<string>> => {
-		const closestMails = await this.getClosestMailIDsWithSimilarity(id, 5, true);
+		const closestMails = await this.getClosestMailIDsWithSimilarity(id, 3, true);
 		if (closestMails.length === 0) {
 			return [];
 		}
@@ -672,7 +703,7 @@ export default class MailInsights extends cds.ApplicationService {
 	 */
 	private getClosestMailIDsWithSimilarity = async (
 		id: string,
-		k: number = 5,
+		k: number = 3,
 		responded: boolean = false
 	): Promise<Array<MailWithSimilarity>> => {
 		const mailsWithSimilarity: Array<MailWithSimilarity> = await cds.run(

@@ -142,6 +142,7 @@ export default class Main extends BaseController {
 
 		this.emailController.createEmailHeaderContent(emailObject.mail);
 		this.emailController.createSuggestedActions(emailObject.mail.suggestedActions);
+		this.emailController.setEmailObj(emailObject.mail);
 		localModel.setProperty("/additionalInfo", null);
 		localModel.setProperty("/submittedResponsesIncluded", true);
 		localModel.setProperty("/responseBody", emailObject.mail.responseBody);
