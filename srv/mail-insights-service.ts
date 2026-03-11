@@ -380,6 +380,7 @@ export default class MailInsights extends cds.ApplicationService {
 		// langchain wrapper for language model
 		const llm = getChatModel(this.resourceGroupId);
 		// parser
+		// @ts-ignore - Zod schema causes deep type instantiation
 		const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_SCHEMA);
 		const formatInstructions = parser.getFormatInstructions();
 		const parserWithFix = OutputFixingParser.fromLLM(llm, parser);
@@ -426,6 +427,7 @@ export default class MailInsights extends cds.ApplicationService {
 		// langchain wrapper for language model
 		const llm = getChatModel(this.resourceGroupId);
 		// parser
+		// @ts-ignore - Zod schema causes deep type instantiation
 		const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_SCHEMA);
 		const formatInstructions = parser.getFormatInstructions();
 		const parserWithFix = OutputFixingParser.fromLLM(llm, parser);
@@ -481,6 +483,7 @@ export default class MailInsights extends cds.ApplicationService {
 		// langchain wrapper for language model
 		const llm = getChatModel(this.resourceGroupId);
 		// parser
+		// @ts-ignore - Zod schema causes deep type instantiation
 		const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_LANGUAGE_SCHEMA);
 		const formatInstructions = parser.getFormatInstructions();
 		const parserWithFix = OutputFixingParser.fromLLM(llm, parser);
@@ -537,6 +540,7 @@ export default class MailInsights extends cds.ApplicationService {
 		// langchain wrapper for language model
 		const llm = getChatModel(this.resourceGroupId);
 		// parser
+		// @ts-ignore - Zod schema causes deep type instantiation
 		const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
 		const formatInstructions = parser.getFormatInstructions();
 		const parserWithFix = OutputFixingParser.fromLLM(llm, parser);
@@ -606,6 +610,7 @@ export default class MailInsights extends cds.ApplicationService {
 			// langchain wrapper for language model
 			const llm = getChatModel(this.resourceGroupId);
 			// parser
+			// @ts-ignore - Zod schema causes deep type instantiation
 			const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
 			const formatInstructions = parser.getFormatInstructions();
 			const parserWithFix = OutputFixingParser.fromLLM(llm, parser);
