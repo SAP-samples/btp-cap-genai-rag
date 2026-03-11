@@ -33,6 +33,7 @@ export default class Main extends BaseController {
 	protected readonly EMAIL_TRANSLATED_BODY_PATH: string = "translation/body";
 	protected readonly EMAIL_RESPONDED_PATH: string = "responded";
 	protected readonly EMAIL_MODIFIED_AT_PATH: string = "modifiedAt";
+	protected readonly EMAIL_CREATED_AT_PATH: string = "createdAt";
 	protected readonly EMAIL_ENTITY_PATH: string = "api>/getMail";
 	protected readonly UPDATE_GROUP: string = "UPDATE_GROUP_" + Math.random().toString(36).substring(2);
 	protected emailView: View = null;
@@ -69,6 +70,7 @@ export default class Main extends BaseController {
 
 		this.emailView = this.byId("emailDetails") as View;
 		this.emailController = this.emailView.getController() as EmailController;
+		this.onSortEmailsList();
 		this.applyFilter();
 	}
 
@@ -341,7 +343,7 @@ export default class Main extends BaseController {
 				: this.getText("inbox.link.newest")
 		);
 
-		const sorter = new Sorter(this.EMAIL_MODIFIED_AT_PATH, localModel.getProperty("/sortDescending"));
+		const sorter = new Sorter(this.EMAIL_CREATED_AT_PATH, localModel.getProperty("/sortDescending"));
 		const binding: ODataListBinding = (this.byId("emailsList") as List).getBinding("items") as ODataListBinding;
 		binding.sort(sorter);
 	}

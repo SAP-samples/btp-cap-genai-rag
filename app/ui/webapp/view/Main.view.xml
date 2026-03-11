@@ -22,16 +22,16 @@
                             <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
                                 <Panel class="sapUiNoContentPadding">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin"
+                                        <Title class="sapUiTinyMarginBegin"
                                             text="{i18n>filters.titles.settings}" />
                                     </Toolbar>
-                                    <CheckBox text="{i18n>filters.texts.workIn}"
+                                    <CheckBox class="sapUiTinyMarginBegin" text="{i18n>filters.texts.workIn}"
                                         selected="{/translationOn}" />
                                 </Panel>
                                 <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
                                         <Title
-                                            class="sapUiSmallMarginBegin"
+                                            class="sapUiTinyMarginBegin"
                                             text="{i18n>filters.titles.requestState}"
                                         />
                                         <ToolbarSpacer />
@@ -59,7 +59,7 @@
                                 </Panel>
                                 <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin"
+                                        <Title class="sapUiTinyMarginBegin"
                                             text="{i18n>filters.titles.requestType}" />
                                         <ToolbarSpacer />
                                         <Link
@@ -86,7 +86,7 @@
                                 </Panel>
                                 <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin"
+                                        <Title class="sapUiTinyMarginBegin"
                                             text="{i18n>filters.titles.urgency}" />
                                         <ToolbarSpacer />
                                         <Link
@@ -113,7 +113,7 @@
                                 </Panel>
                                 <Panel class="sapUiNoContentPadding sapUiSmallMarginTop">
                                     <Toolbar>
-                                        <Title class="sapUiSmallMarginBegin"
+                                        <Title class="sapUiTinyMarginBegin"
                                             text="{i18n>filters.titles.sentiment}" />
                                         <ToolbarSpacer />
                                         <Link
@@ -182,6 +182,7 @@
                             <VBox class="sapUiTinyMarginEnd">
                                 <List
                                     id="emailsList"
+                                    class="sapUiTinyMarginBottom"
                                     mode="SingleSelectMaster"
                                     noDataText="{i18n>inbox.list.noData}"
                                     items="{
