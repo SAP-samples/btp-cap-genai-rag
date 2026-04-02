@@ -33,7 +33,7 @@ export default class MailInsights extends cds.ApplicationService {
 		this.on("deleteMail", this.onDeleteMail);
 		this.on("submitResponse", this.onSubmitResponse);
 		this.on("revokeResponse", this.onRevokeResponse);
-		this.on("generateResponse", this.onGenerateResponse);
+		this.on("regenerateResponse", this.onGenerateResponse);
 
 		this.resourceGroupId = getAppName();
 		checkOrPrepareDeployments(this.resourceGroupId);
@@ -431,11 +431,12 @@ export default class MailInsights extends cds.ApplicationService {
 		const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_RESPONSE_SCHEMA);
 		const formatInstructions = parser.getFormatInstructions();
 		const parserWithFix = OutputFixingParser.fromLLM(llm, parser);
-		const ragSystemPrompt = `Context information based on similar mail responses is given below. 
+		const ragSystemPrompt = `Context information based on similar mail responses is given below.
                                     Context:{context}
                                 Formulate a response to the original mail given this context information.
                                 Prefer the context when generating your answer to any prior knowledge.
-                                Also consider given additional information if available to enhance the response.`;
+                                Also consider given additional information if available to enhance the response.
+                                IMPORTANT: The context responses may be in a different language, but you MUST formulate your response in the same language as the original mail (language: {mailLanguage}).`;
 		const systemPrompt = "Formulate a response to the original mail using given additional information.";
 
 		const promptTemplate = await ChatPromptTemplate.fromMessages([
@@ -453,7 +454,7 @@ export default class MailInsights extends cds.ApplicationService {
 		const llmChain = promptTemplate.pipe(llm).pipe(parserWithFix);
 
 		const potentialResponses = await Promise.all(
-			mails.map(async (mail: IBaseMail) => {
+			mails.map(async (mail: IBaseMail): Promise<IProcessedMail> => {
 				let closestResponses: Array<string> = [];
 				if (rag) {
 					closestResponses = await this.getClosestResponses(mail.ID);
@@ -464,7 +465,8 @@ export default class MailInsights extends cds.ApplicationService {
 					subject: mail.subject,
 					body: mail.body,
 					additionalInformation: additionalInformation || "",
-					context: closestResponses
+					context: closestResponses,
+					mailLanguage: mail.languageNameDetermined || "the original mail"
 				});
 
 				return { mail, response };
