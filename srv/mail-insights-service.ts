@@ -454,7 +454,7 @@ export default class MailInsights extends cds.ApplicationService {
 		const llmChain = promptTemplate.pipe(llm).pipe(parserWithFix);
 
 		const potentialResponses = await Promise.all(
-			mails.map(async (mail: IBaseMail): Promise<IProcessedMail> => {
+			mails.map(async (mail: IBaseMail) => {
 				let closestResponses: Array<string> = [];
 				if (rag) {
 					closestResponses = await this.getClosestResponses(mail.ID);
@@ -466,7 +466,7 @@ export default class MailInsights extends cds.ApplicationService {
 					body: mail.body,
 					additionalInformation: additionalInformation || "",
 					context: closestResponses,
-					mailLanguage: mail.languageNameDetermined || "the original mail"
+					mailLanguage: (mail as IStoredMail).languageNameDetermined || "the original mail"
 				});
 
 				return { mail, response };
