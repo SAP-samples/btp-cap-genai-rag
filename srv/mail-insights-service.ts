@@ -155,7 +155,7 @@ export default class MailInsights extends cds.ApplicationService {
 			const mailBatch = await this.generateInsights(mails, rag);
 
 			// insert mails with insights
-			await INSERT.into(Mails).entries(mailBatch);
+			await INSERT.into('ai.db.Mails').entries(mailBatch);
 
 			const insertedMails = await SELECT.from(Mails, (m: any) => {
 				//@ts-ignore
