@@ -1,6 +1,5 @@
 <core:FragmentDefinition
     xmlns="sap.m"
-    xmlns:tnt="sap.tnt"
     xmlns:core="sap.ui.core"
     core:require="{ formatter: 'ai/ui/model/formatter' }"
 >
@@ -21,7 +20,7 @@
             </HBox>
             <HBox class="sapUiTinyMarginTop" justifyContent="SpaceBetween">
                 <VBox width="calc(100% - 2rem)">
-                    <tnt:InfoLabel displayOnly="true" text="{api>category}" />
+                    <ObjectStatus inverted="true" state="Information" text="{api>category}" />
                     <Title
                         class="sapUiTinyMarginTop"
                         text="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"

@@ -61,8 +61,7 @@ export default {
 	},
 
 	getSimilarity: (mail: ClosestMail) => {
-		const maxSimilarity = 100;
-		const minSimilarity = 50;
-		return Math.round(((mail.similarity * 100 - minSimilarity) / (maxSimilarity - minSimilarity)) * 100) + "%";
+		const normalizedSimilarity = Math.max(0, mail.similarity);
+		return Math.round(normalizedSimilarity * 100) + "%";
 	}
 };
