@@ -611,31 +611,52 @@ export default class MailInsights extends cds.ApplicationService {
 		try {
 			// langchain wrapper for language model
 			const llm = getChatModel(this.resourceGroupId);
-			// parser
-			// @ts-ignore - Zod schema causes deep type instantiation
-			const parser = StructuredOutputParser.fromZodSchema(schemas.MAIL_INSIGHTS_TRANSLATION_SCHEMA);
-			const formatInstructions = parser.getFormatInstructions();
-			const parserWithFix = OutputFixingParser.fromLLM(llm, parser);
 
-			// prompt template
+			// Direct translation without output parser
 			const promptTemplate = await ChatPromptTemplate.fromMessages([
 				[
 					"system",
-					`Translate the following response of the customer support into ${language}.
-                        {formatInstructions}
-                        Make sure to escape special characters by double slashes.`
+					`You are a professional translator. Your ONLY task is to translate the given English text into {language}.
+
+					CRITICAL REQUIREMENTS:
+					1. You MUST translate into {language} language using {language} script/alphabet/characters
+					2. Translate EVERY word, sentence, and paragraph - do not skip anything
+					3. Preserve all line breaks (\\n), formatting, numbering, and structure
+					4. Do NOT paraphrase, summarize, or keep any English words
+					5. Return ONLY a valid JSON object with this exact format: {{"responseBody": "your {language} translation here"}}`
 				],
-				["user", "{response}"]
-			]).partial({ formatInstructions });
-			// chain together template, client, and parser
-			const llmChain = promptTemplate.pipe(llm).pipe(parserWithFix);
-			// invoke the chain
-			const translation: z.infer<typeof schemas.MAIL_RESPONSE_TRANSLATION_SCHEMA> = await llmChain.invoke({
+				["user", `Translate the following complete English text into {language}. Remember: output must be in {language} characters, not English:\n\n{response}`]
+			]);
+
+			// Invoke with proper parameters
+			const result = await promptTemplate.pipe(llm).invoke({
+				language: language,
 				response: response
 			});
-			return translation;
+
+			// Parse the JSON response manually
+			let translatedResponse = response;
+			try {
+				const content = typeof result.content === 'string' ? result.content : JSON.stringify(result.content);
+
+				// extract JSON from the response
+				const jsonMatch = content.match(/\{[\s\S]*"responseBody"[\s\S]*:[\s\S]*"([\s\S]*)"\}/);
+				if (jsonMatch) {
+					const parsed = JSON.parse(jsonMatch[0]);
+					translatedResponse = parsed.responseBody;
+				} else {
+					// parsing the whole thing as JSON
+					const parsed = JSON.parse(content);
+					translatedResponse = parsed.responseBody || response;
+				}
+			} catch (parseError) {
+				console.error("Failed to parse translation JSON:", parseError);
+			}
+
+			return { responseBody: translatedResponse };
 		} catch (error: any) {
-			console.error(`Error: ${error?.message}`);
+			console.error(`Error in translateResponse: ${error?.message}`);
+			console.error("Stack trace:", error?.stack);
 			return {
 				responseBody: response || ""
 			};
