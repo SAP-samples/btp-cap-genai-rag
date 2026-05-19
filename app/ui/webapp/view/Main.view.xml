@@ -201,7 +201,7 @@
                                 >
                                     <CustomListItem
                                         tooltip="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"
-                                        highlight="{= !${api>responded} ? 'Information' : 'None' }"
+                                        highlight="{= ${path: 'api>responded', targetType: 'any'} ? 'None' : 'Information' }"
                                         selected="{= ${path: 'api>ID', targetType: 'any'} === ${/activeEmailId} }"
                                     >
                                         <core:Fragment fragmentName="ai.ui.view.EmailListItem"
