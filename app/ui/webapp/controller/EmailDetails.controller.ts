@@ -305,6 +305,9 @@ export default class EmailDetails extends BaseController {
 			});
 			if (response.ok) {
 				MessageToast.show(this.getText("email.texts.deleted"));
+				localModel.setProperty("/activeEmailId", null);
+				this.getView().unbindElement("api");
+				this.navTo("Home");
 				this.getModel("api").refresh();
 			} else {
 				MessageToast.show(this.getText("email.texts.genericErrorMessage"));
