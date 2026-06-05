@@ -1,10 +1,10 @@
 import cds from "@sap/cds";
-import { AzureOpenAiChatClient, AzureOpenAiEmbeddingClient } from "@sap-ai-sdk/langchain";
+import { OrchestrationClient, AzureOpenAiEmbeddingClient } from "@sap-ai-sdk/langchain";
 
 import { z } from "zod";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
-import { OutputFixingParser } from "langchain/output_parsers";
+import { OutputFixingParser } from "@langchain/classic/output_parsers";
 
 import { getAppName, checkOrPrepareDeployments } from "./utils/ai-core.js";
 import { IBaseMail, IProcessedMail, IStoredMail, IAction, MailWithSimilarity } from "./types.js";
@@ -728,11 +728,13 @@ export default class MailInsights extends cds.ApplicationService {
 }
 
 const getChatModel = (resourceGroupId: string) => {
-	return new AzureOpenAiChatClient({
-		modelName: "gpt-4o",
-		modelVersion: "latest",
-		resourceGroup: resourceGroupId
-	});
+	return new OrchestrationClient({
+		promptTemplating: {
+			model: {
+				name: "gpt-4o"
+			}
+		}
+	}, {}, { resourceGroup: resourceGroupId });
 };
 
 const getEmbeddingModel = (resourceGroupId: string) => {
