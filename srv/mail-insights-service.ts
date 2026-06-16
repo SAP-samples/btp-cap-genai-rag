@@ -732,7 +732,7 @@ const getChatModel = (resourceGroupId: string) => {
 	return new OrchestrationClient({
 		promptTemplating: {
 			model: {
-				name: "gpt-4o"
+				name: "gpt-5.4-nano"
 			}
 		}
 	}, {}, { resourceGroup: resourceGroupId });
