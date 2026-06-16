@@ -99,9 +99,9 @@ export const MAIL_INSIGHTS_SCHEMA = z.object({
 // Custom Schema for Mail Insights Translation
 export const MAIL_INSIGHTS_TRANSLATION_SCHEMA = z.object({
 	subject: z.string(),
-	body: z.string(),
+	body: z.string().transform(normalizeNewlines),
 	sender: z.string(),
-	summary: z.string(),
+	summary: z.string().transform(normalizeNewlines),
 	keyFacts: z.array(
 		z.object({
 			fact: z.string().optional(),

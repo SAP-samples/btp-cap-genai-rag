@@ -567,9 +567,9 @@ export default class MailInsights extends cds.ApplicationService {
 						translation: [
 							{
 								subject: mail.mail?.subject || "",
-								body: mail.mail?.body || "",
+								body: normalizeNewlines(String(mail.mail?.body || "")),
 								sender: mail.insights?.sender || "",
-								summary: mail.insights?.summary || "",
+								summary: normalizeNewlines(String(mail.insights?.summary || "")),
 								keyFacts: mail.insights?.keyFacts || "",
 								requestedServices: mail.insights?.requestedServices || "",
 								responseBody: normalizeNewlines(String(mail.insights?.responseBody || ""))
