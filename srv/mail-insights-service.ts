@@ -9,6 +9,7 @@ import { OutputFixingParser } from "@langchain/classic/output_parsers";
 import { getAppName, checkOrPrepareDeployments } from "./utils/ai-core.js";
 import { IBaseMail, IProcessedMail, IStoredMail, IAction, MailWithSimilarity } from "./types.js";
 import * as schemas from "./schemas.js";
+import { normalizeNewlines } from "./schemas.js";
 import { ACTIONS } from "./constants.js";
 
 import type { Mail, Translation } from "#cds-models/MailInsightsService";
@@ -571,7 +572,7 @@ export default class MailInsights extends cds.ApplicationService {
 								summary: mail.insights?.summary || "",
 								keyFacts: mail.insights?.keyFacts || "",
 								requestedServices: mail.insights?.requestedServices || "",
-								responseBody: mail.insights?.responseBody || ""
+								responseBody: normalizeNewlines(String(mail.insights?.responseBody || ""))
 							}
 						]
 					};
@@ -653,12 +654,12 @@ export default class MailInsights extends cds.ApplicationService {
 				console.error("Failed to parse translation JSON:", parseError);
 			}
 
-			return { responseBody: translatedResponse };
+			return { responseBody: normalizeNewlines(translatedResponse) };
 		} catch (error: any) {
 			console.error(`Error in translateResponse: ${error?.message}`);
 			console.error("Stack trace:", error?.stack);
 			return {
-				responseBody: response || ""
+				responseBody: normalizeNewlines(response || "")
 			};
 		}
 	};
