@@ -21,8 +21,8 @@ While initially designed for a travel agency, this code can be adapted to suit v
    - The API endpoint allows the processing of multiple mails in parallel
    - The in-app feature only allows users to add one mail at a time.
 
-     [<img src="./images/FL_PushAPI.png" height="150"/>](./images/FL_PushAPI.png?raw=true)
-     [<img src="./images/FL_InAppAdd.png" height="150"/>](./images/FL_InAppAdd.png?raw=true)
+     <img src="./images/FL_PushAPI.png" height="150"/>
+     <img src="./images/FL_InAppAdd.png" height="150"/>
 
 2. The mails are being pre-processed using the capabilities of a Large Language Model (1-6):
 
@@ -33,14 +33,14 @@ While initially designed for a travel agency, this code can be adapted to suit v
    - Embeddings and insights are stored in a SAP HANA Cloud Database leveraging the built-in Vector Engine
    - The results of the processing process are returned back to the user or API caller (8)
 
-     [<img src="./images/FL_AddMail01.png" height="150"/>](./images/FL_AddMail01.png?raw=true)
-     [<img src="./images/FL_AddMail02.png" height="150"/>](./images/FL_AddMail02.png?raw=true)
+     <img src="./images/FL_AddMail01.png" height="150"/>
+     <img src="./images/FL_AddMail02.png" height="150"/>
 
-     [<img src="./images/FL_AddMail03.png" height="150"/>](./images/FL_AddMail03.png?raw=true)
-     [<img src="./images/FL_AddMail04.png" height="150"/>](./images/FL_AddMail04.png?raw=true)
+     <img src="./images/FL_AddMail03.png" height="150"/>
+     <img src="./images/FL_AddMail04.png" height="150"/>
 
-     [<img src="./images/FL_AddMail05.png" height="150"/>](./images/FL_AddMail05.png?raw=true)
-     [<img src="./images/FL_AddMail07.png" height="150"/>](./images/FL_AddMail07.png?raw=true)
+     <img src="./images/FL_AddMail05.png" height="150"/>
+     <img src="./images/FL_AddMail07.png" height="150"/>
 
 3. The user can now review the latest mails in the UI using the following features (1-8):
 
@@ -50,13 +50,13 @@ While initially designed for a travel agency, this code can be adapted to suit v
    - Validating potential actions after checking the extracted details
    - Reviewing similar mail enquiries listed for each processed mail
 
-     [<img src="./images/FL_App01.png" height="150"/>](./images/FL_App01.png?raw=true)
-     [<img src="./images/FL_App02.png" height="150"/>](./images/FL_App02.png?raw=true)
+     <img src="./images/FL_App01.png" height="150"/>
+     <img src="./images/FL_App02.png" height="150"/>
 
-     [<img src="./images/FL_App03.png" height="150"/>](./images/FL_App03.png?raw=true)
-     [<img src="./images/FL_App04.png" height="150"/>](./images/FL_App04.png?raw=true)
+     <img src="./images/FL_App03.png" height="150"/>
+     <img src="./images/FL_App04.png" height="150"/>
 
-     [<img src="./images/FL_App05.png" height="150"/>](./images/FL_App05.png?raw=true)
+     <img src="./images/FL_App05.png" height="150"/>
 
 4. Once the user has understood the customer's problem, the answer can be finalized (1-4):
 
@@ -64,11 +64,11 @@ While initially designed for a travel agency, this code can be adapted to suit v
    - Alternatively, the user can re-generate an answer by adding additional context
    - If similar enquiries exist, the user can leverage them to auto-generate a new response
 
-     [<img src="./images/FL_App06.png" height="150"/>](./images/FL_App06.png?raw=true)
-     [<img src="./images/FL_App07.png" height="150"/>](./images/FL_App07.png?raw=true)
+     <img src="./images/FL_App06.png" height="150"/>
+     <img src="./images/FL_App07.png" height="150"/>
 
-     [<img src="./images/FL_App08.png" height="150"/>](./images/FL_App08.png?raw=true)
-     [<img src="./images/FL_App09.png" height="150"/>](./images/FL_App09.png?raw=true)
+     <img src="./images/FL_App08.png" height="150"/>
+     <img src="./images/FL_App09.png" height="150"/>
 
 5. Being satisfied with a potential response, the user can submit the response to the customer
 
@@ -77,9 +77,9 @@ While initially designed for a travel agency, this code can be adapted to suit v
    - The answer will be stored in the backend together with the translated response
    - For future mails, the answer can be considered for similarity search to create new responses
 
-     [<img src="./images/FL_Answer01.png" height="150"/>](./images/FL_Answer01.png?raw=true)
-     [<img src="./images/FL_Answer02.png" height="150"/>](./images/FL_Answer02.png?raw=true)
-     [<img src="./images/FL_Answer04.png" height="150"/>](./images/FL_Answer04.png?raw=true)
+     <img src="./images/FL_Answer01.png" height="150"/>
+     <img src="./images/FL_Answer02.png" height="150"/>
+     <img src="./images/FL_Answer04.png" height="150"/>
 
 ## Technical Highlights
 

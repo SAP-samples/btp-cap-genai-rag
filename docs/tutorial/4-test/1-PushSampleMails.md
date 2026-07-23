@@ -8,19 +8,19 @@ In this chapter you will learn, how to push sample mails to GenAI Mail Insights.
 
 2. Duplicate and rename the file to **requests-btp-private.http** to ensure that your credentials are not accidentally being committed to GitHub.
 
-   [<img src="./images/TEST_PrivateFile.png" width="300"/>](./images/TEST_PrivateFile.png?raw=true)
+   <img src="./images/TEST_PrivateFile.png" width="300"/>
 
 3. Update the variables in the very beginning of the **http** test file using the existing **xsuaa** Service Instance and **route** created for your CAP Application as _btpAppHostname_ value.
 
    Service Key of XSUAA Service Instance
 
-   [<img src="./images/ST_CFDetails03.png" height="150"/>](./images/ST_CFDetails03.png?raw=true)
-   [<img src="./images/ST_CFDetails04.png" height="150"/>](./images/ST_CFDetails04.png?raw=true)
-   [<img src="./images/ST_CFDetails05.png" height="150"/>](./images/ST_CFDetails05.png?raw=true)
+   <img src="./images/ST_CFDetails03.png" height="150"/>
+   <img src="./images/ST_CFDetails04.png" height="150"/>
+   <img src="./images/ST_CFDetails05.png" height="150"/>
 
    Route of CAP Application
 
-   [<img src="./images/ST_CFDetails06.png" height="150"/>](./images/ST_CFDetails06.png?raw=true)
+   <img src="./images/ST_CFDetails06.png" height="150"/>
 
    ```md
    @xsuaaHostname = <uaa.url>

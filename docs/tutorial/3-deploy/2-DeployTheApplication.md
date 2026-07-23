@@ -31,4 +31,4 @@ cf install-plugin multiapps
 
 4. The deployment process will take a while. Wait for the process to finish successfully and also check in the **SAP BTP Cockpit** if all service instances have been created successfully.
 
-   [<img src="./images/DEP_CfSuccess.png" width="400"/>](./images/DEP_CfSuccess.png?raw=true)
+   <img src="./images/DEP_CfSuccess.png" width="400"/>
