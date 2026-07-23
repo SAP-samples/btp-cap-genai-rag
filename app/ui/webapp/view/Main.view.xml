@@ -201,8 +201,8 @@
                                 >
                                     <CustomListItem
                                         tooltip="{= !${/translationOn} ? ${api>subject} : ${api>translation/subject} }"
-                                        highlight="{= !${path: 'api>responded', targetType: 'sap.ui.model.odata.type.Boolean'} ? 'Information' : 'None' }"
-                                        selected="{= ${path: 'api>ID', targetType: 'sap.ui.model.odata.type.String'} === ${/activeEmailId} }"
+                                        highlight="{= ${path: 'api>responded', targetType: 'any'} ? 'None' : 'Information' }"
+                                        selected="{= ${path: 'api>ID', targetType: 'any'} === ${/activeEmailId} }"
                                     >
                                         <core:Fragment fragmentName="ai.ui.view.EmailListItem"
                                             type="XML" />

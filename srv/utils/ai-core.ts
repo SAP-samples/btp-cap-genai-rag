@@ -97,15 +97,15 @@ const getResourceGroups = async (): Promise<Array<any>> => {
 
 const createConfigurations = async (header: ResourceGroupHeader): Promise<Array<AiConfigurationCreationResponse>> => {
 	try {
-		// Create gpt-4o Configuration
+		// Create gpt-5.4-nano Configuration
 		const requestBodyChatModel: AiConfigurationBaseData = {
-			name: "gpt-4o",
+			name: "gpt-5.4-nano",
 			executableId: "azure-openai",
 			scenarioId: "foundation-models",
 			parameterBindings: [
 				{
 					key: "modelName",
-					value: "gpt-4o"
+					value: "gpt-5.4-nano"
 				},
 				{
 					key: "modelVersion",

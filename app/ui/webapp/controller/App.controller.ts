@@ -55,9 +55,11 @@ export default class App extends BaseController {
 		try {
 			const model = this.getModel("api") as ODataModel;
 			const httpHeaders = model.getHttpHeaders();
+			// Convert literal \n to actual newlines
+			const normalizedBody = emailBody.replace(/\\n/g, "\n");
 			// endpoint addMails expects always an array of mails
 			const body = {
-				mails: [{ senderEmailAddress: senderAddress, subject: subject, body: emailBody }]
+				mails: [{ senderEmailAddress: senderAddress, subject: subject, body: normalizedBody }]
 			};
 			this.addMailDialog.setBusy(true);
 			const response = await fetch(`${CAP_BASE_URL}/addMails`, {
