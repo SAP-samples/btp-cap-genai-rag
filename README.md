@@ -34,20 +34,15 @@ The business scenario can also be enhanced to become a multitenant SaaS solution
 - [Blog post about GenAI Mail Insights by Martin Frick](https://blogs.sap.com/2023/11/15/genai-mail-insights-leveraging-the-generative-ai-hub-in-sap-ai-core-to-improve-customer-support/)
 - [Video about GenAI Mail Insights by Adi Pleyer](https://sapvideo.cfapps.eu10-004.hana.ondemand.com/?entry_id=1_uq2ma82t)
 
-<img src="./docs/images/App_Impressions00.png" width="300"/>
-<img src="./docs/images/App_Impressions01.png" width="300"/>
+<img src="./docs/images/App_Impressions00.png" width="300"/> <img src="./docs/images/App_Impressions01.png" width="300"/>
 
-<img src="./docs/images/App_Impressions12.png" width="300"/>
-<img src="./docs/images/App_Impressions02.png" width="300"/>
+<img src="./docs/images/App_Impressions12.png" width="300"/> <img src="./docs/images/App_Impressions02.png" width="300"/>
 
-<img src="./docs/images/App_Impressions03.png" width="300"/>
-<img src="./docs/images/App_Impressions04.png" width="300"/>
+<img src="./docs/images/App_Impressions03.png" width="300"/> <img src="./docs/images/App_Impressions04.png" width="300"/>
 
-<img src="./docs/images/App_Impressions05.png" width="300"/>
-<img src="./docs/images/App_Impressions06.png" width="300"/>
+<img src="./docs/images/App_Impressions05.png" width="300"/> <img src="./docs/images/App_Impressions06.png" width="300"/>
 
-<img src="./docs/images/App_Impressions07.png" width="300"/>
-<img src="./docs/images/App_Impressions09.png" width="300"/>
+<img src="./docs/images/App_Impressions07.png" width="300"/> <img src="./docs/images/App_Impressions09.png" width="300"/>
 
 ## Getting started
 
